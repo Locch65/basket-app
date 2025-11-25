@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Statistiche Basket</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Intestazione -->
+  <div id="header">
+    <div id="teamNames">
+      <input id="teamA" class="squadra-input" value="Squadra A" onchange="aggiornaTitoli(); aggiornaScoreboard()">
+      <input id="teamB" class="squadra-input" value="Squadra B" onchange="aggiornaTitoli(); aggiornaScoreboard()">
+    </div>
+    <div id="scoreboard">0 - 0</div>
+  </div>
+
+  <div id="contenuto">
+    <!-- Ordinamenti + Squadra B in alto -->
+    <div id="topControls">
+      <div id="ordinamenti">
+        <button onclick="ordinaGiocatori('numero')">Ordina per Numero</button>
+        <button onclick="ordinaGiocatori('cognome')">Ordina per Cognome</button>
+        <button onclick="ordinaGiocatori('punteggio')">Ordina per Punteggio</button>
+      </div>
+      <div id="squadraB">
+        <h1 id="titoloB">Squadra B</h1>
+        <div class="squadraB-row">
+          <span id="punti_squadraB" class="punteggio">0</span>
+          <button class="tiro" onclick="aggiungiPuntiSquadraB(1)">➕1</button>
+          <button class="tiro" onclick="aggiungiPuntiSquadraB(2)">➕2</button>
+          <button class="tiro" onclick="aggiungiPuntiSquadraB(3)">➕3</button>
+          <button class="undo" onclick="undoSquadraB()">↩️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Giocatori Squadra A -->
+    <div id="giocatori">
+      <h1 id="titoloA">Squadra A</h1>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

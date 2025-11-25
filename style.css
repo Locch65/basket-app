@@ -1,0 +1,183 @@
+body { 
+  font-family: Arial, sans-serif; 
+  margin: 10px; 
+  display: flex; 
+  flex-direction: column; 
+  font-size: 22px;
+}
+
+h1 { 
+  color: #2c3e50; 
+  font-size: 28px; 
+}
+
+#header { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  margin-bottom: 20px; 
+  gap: 20px;
+}
+
+#teamNames {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+.squadra-input {
+  font-size: 34px;
+  font-weight: bold;
+  border: 2px solid #666;
+  border-radius: 8px;
+  padding: 12px 18px;
+  width: 260px;
+  text-align: center;
+}
+
+#scoreboard { 
+  font-size: 64px; 
+  font-weight: bold; 
+  margin-top: 10px; 
+}
+
+#contenuto { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 25px; 
+}
+
+#topControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 2px solid #ccc;
+}
+
+#ordinamenti {
+  display: flex;
+  gap: 10px;
+}
+
+#ordinamenti button {
+  padding: 8px 14px;
+  font-size: 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#squadraB {
+  text-align: right;
+}
+
+.squadraB-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.squadraB-row .punteggio {
+  font-size: 28px;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.giocatore { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 8px; 
+  padding: 12px; 
+  border: 2px solid #ccc; 
+  border-radius: 8px; 
+  font-size: 22px;
+}
+
+.giocatore.in { 
+  background-color: #c8e6c9; 
+  border: 2px solid #2e7d32; 
+  box-shadow: 0 0 8px rgba(46, 125, 50, 0.6);
+}
+
+.giocatore.out { 
+  background-color: #ffe0e0;   
+  border: 2px solid #c62828;   
+  box-shadow: 0 0 8px rgba(198, 40, 40, 0.4); 
+}
+
+.nome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.numero {
+  font-weight: bold;
+  color: #2c3e50;
+  min-width: 50px;
+  text-align: center;
+  font-size: 26px;
+}
+
+.cognome {
+  font-size: 28px;
+  font-weight: bold;
+  min-width: 240px;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stato-btn {
+  padding: 6px 12px;
+  font-size: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 60px;
+  text-align: center;
+  margin-right: 12px;
+}
+
+.stato-in {
+  background-color: #c8e6c9;
+  font-weight: bold;
+}
+
+.stato-out {
+  background-color: #ffcdd2;
+  font-weight: bold;
+}
+
+.tiro {
+  margin: 0 2px;
+  padding: 14px 22px;
+  font-size: 24px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.undo {
+  margin: 0 4px;
+  padding: 10px 16px;
+  font-size: 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: red;
+  font-weight: bold;
+}
+
+.punteggio .totale {
+  font-size: 28px;
+  font-weight: bold;
+  color: #000;
+}
+
+.punteggio .dettagli {
+  font-size: 24px;
+  color: #555;
+  margin-left: 6px;
+}
