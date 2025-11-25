@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.1";  // aggiorna ad ogni release
+const SW_VERSION = "1.0.3";  // aggiorna questo numero ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 const FILES_TO_CACHE = [
@@ -29,9 +29,14 @@ self.addEventListener("activate", (event) => {
   self.clients.claim(); // aggiorna subito le pagine aperte
 });
 
-// Fetch: sempre rete prima, cache fallback
+// Fetch: strategia network-first
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request).then((response) => {
+      // aggiorna la cache con la nuova versione
+      const clone = response.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+      return response;
+    }).catch(() => caches.match(event.request)) // fallback offline
   );
 });
