@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Statistiche Basket</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2c3e50">
+</head>
+<body>
+  <!-- Intestazione -->
+  <div id="header">
+    <div id="teamNames">
+      <input id="teamA" class="squadra-input" value="Squadra A">
+      <input id="teamB" class="squadra-input" value="Squadra B">
+    </div>
+    <div id="scoreboard">0 - 0</div>
+  </div>
+
+  <div id="contenuto">
+    <div id="topControls">
+      <div id="ordinamenti">
+        <button>Ordina per Numero</button>
+        <button>Ordina per Cognome</button>
+        <button>Ordina per Punteggio</button>
+      </div>
+      <div id="squadraB">
+        <h1 id="titoloB">Squadra B</h1>
+        <div class="squadraB-row">
+          <span id="punti_squadraB" class="punteggio">0</span>
+          <button class="tiro">➕1</button>
+          <button class="tiro">➕2</button>
+          <button class="tiro">➕3</button>
+          <button class="undo">↩️</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="giocatori">
+      <h1 id="titoloA">Squadra A</h1>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js")
+        .then(() => console.log("Service Worker registrato"))
+        .catch(err => console.error("Errore SW:", err));
+    }
+  </script>
+</body>
+</html>
