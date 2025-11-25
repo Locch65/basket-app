@@ -2,12 +2,12 @@
 // DATI INIZIALI
 // =====================
 const giocatoriA = [
-  "Mario Rossi","Luca Bianchi","Giovanni Verdi","Paolo Neri",
-  "Andrea Gallo","Francesco Costa","Stefano Romano","Davide Greco",
-  "Alessandro Serra","Giorgio Fontana","Simone Riva","Matteo Conti"
+  "E. Carfora","K. Popa","G. Giacco","H. Taylor",
+  "C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
+  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo"
 ];
 
-const numeriMaglia = ["10","11","12","13","14","15","16","17","18","19","20","21"];
+const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9"];
 
 let puntiSquadraB = 0;
 let historyB = [];
@@ -161,7 +161,7 @@ function ordinaGiocatori(criterio) {
 
   lista.sort((a,b) => {
     if (a.stato !== b.stato) return a.stato === "In" ? -1 : 1;
-    if (criterio === "numero") return a.numero - b.numero;
+	if (criterio === "numero") return parseInt(a.numero) - parseInt(b.numero);
     if (criterio === "cognome") return a.cognome.localeCompare(b.cognome);
     if (criterio === "punteggio") return b.punteggio - a.punteggio;
     return 0;
