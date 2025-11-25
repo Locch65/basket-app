@@ -1,4 +1,21 @@
 // =====================
+// VERSIONE SCRIPT
+// =====================
+const SCRIPT_VERSION = "1.0.0";  // Aggiorna questo numero ad ogni modifica
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Mostra la versione nello UI
+  const versionDiv = document.getElementById("scriptVersion");
+  if (versionDiv) {
+    versionDiv.textContent = "Script v" + SCRIPT_VERSION;
+  }
+
+  console.log("Script.js versione:", SCRIPT_VERSION);
+
+  // ... resto del tuo codice init() e funzioni
+});
+
+// =====================
 // DATI INIZIALI
 // =====================
 const giocatoriA = [
@@ -215,3 +232,4 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
