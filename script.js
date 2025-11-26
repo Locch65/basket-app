@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.4";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.5";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -116,6 +116,8 @@ function aggiornaUIGiocatore(g) {
   const span = document.getElementById("punti_" + g.id);
   span.innerHTML = `<span class="totale">${g.punteggio}</span> 
                     <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>`;
+  span.classList.add("flash");
+  setTimeout(() => span.classList.remove("flash"), 500);
 }
 
 // =====================
@@ -126,6 +128,7 @@ function aggiungiPuntiGiocatore(id, punti) {
   aggiornaPunteggio(g, punti);
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
+  salvaSuGoogleSheets(g, punti);
 }
 
 function undoGiocatore(id) {
@@ -185,6 +188,25 @@ function ordinaGiocatori(criterio) {
   });
 
   renderGiocatori(lista);
+}
+
+function salvaSuGoogleSheets(g, punti) {
+  const payload = {
+    squadra: document.getElementById("teamA").value,
+    giocatore: g.displayName,
+    numero: g.numero,
+    punti: punti,
+    dettagli: g.contatori
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbzEEpGSCFECUhyGAdnI7YJtsJgClY6hFTcbBx0CK0OCW1OEgLOK0HrzN70O_wgMn190bw/exec", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {"Content-Type": "application/json"}
+  })
+  .then(res => res.json())
+  .then(data => console.log("Salvato su Google Sheets:", data))
+  .catch(err => console.error("Errore salvataggio:", err));
 }
 
 // =====================
