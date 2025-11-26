@@ -24,6 +24,11 @@ h1 {
   flex-direction: row;
   gap: 15px;
 }
+#matchId {
+  font-size: 1.2rem;   /* ingrandisce il testo */
+  padding: 6px 10px;   /* aumenta lo spazio interno */
+  margin-right: 10px;  /* distanzia dal resto della UI */
+}
 
 .squadra-input {
   font-size: 34px;
@@ -189,3 +194,4 @@ h1 {
   from { background-color: yellow; }
   to { background-color: transparent; }
 }
+
