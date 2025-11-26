@@ -191,23 +191,21 @@ function ordinaGiocatori(criterio) {
 }
 
 function salvaSuGoogleSheets(g, punti) {
-  const payload = {
-    squadra: document.getElementById("teamA").value,
-    giocatore: g.displayName,
-    numero: g.numero,
-    punti: punti,
-    dettagli: g.contatori
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycbzEEpGSCFECUhyGAdnI7YJtsJgClY6hFTcbBx0CK0OCW1OEgLOK0HrzN70O_wgMn190bw/exec", {
+  const formData = new FormData();
+  formData.append("squadra", document.getElementById("teamA").value);
+  formData.append("giocatore", g.displayName);
+  formData.append("numero", g.numero);
+  formData.append("punti", punti);
+  formData.append("dettagli", JSON.stringify(g.contatori));
+  fetch("https://script.google.com/macros/s/AKfycbx-K_5UNHA7NlOeDazU1EnO1VHYVWonVras-iMdFvBElxXcUXlmPvsHV6eOUce_qMOsng/exec", {
     method: "POST",
-    body: JSON.stringify(payload),
-    headers: {"Content-Type": "application/json"}
+    body: formData
   })
   .then(res => res.json())
   .then(data => console.log("Salvato su Google Sheets:", data))
   .catch(err => console.error("Errore salvataggio:", err));
 }
+
 
 // =====================
 // TITOLI
