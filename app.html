@@ -10,6 +10,15 @@
 <body>
   <!-- Intestazione -->
   <div id="header">
+	  <!-- Dropdown partita -->
+	  <div id="matchSelector">
+		<label for="matchId">Partita:</label>
+		<select id="matchId">
+		  <option value="1">Partita 1</option>
+		  <option value="2">Partita 2</option>
+		  <option value="3">Partita 3</option>
+		</select>
+	  </div>
     <div id="teamNames">
       <input id="teamA" class="squadra-input" value="Squadra A">
       <input id="teamB" class="squadra-input" value="Squadra B">
@@ -43,7 +52,7 @@
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.5"></script>
+  <script src="script.js?v=1.0.6"></script>
   <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((reg) => {
