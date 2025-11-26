@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.5";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.6";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -30,6 +30,8 @@ let puntiSquadraB = 0;
 let historyB = [];
 let contatoriB = {1:0,2:0,3:0};
 let ultimoOrdinamento = "numero";
+
+let matchId = document.getElementById("matchId").value;
 
 const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
   const [nome, cognome] = nomeCompleto.split(" ");
@@ -129,6 +131,7 @@ function aggiungiPuntiGiocatore(id, punti) {
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
   salvaSuGoogleSheets(g, punti);
+  console.log("Salvato punti:", punti)
 }
 
 function undoGiocatore(id) {
@@ -192,12 +195,13 @@ function ordinaGiocatori(criterio) {
 
 function salvaSuGoogleSheets(g, punti) {
   const formData = new FormData();
+  formData.append("matchId", matchId);
   formData.append("squadra", document.getElementById("teamA").value);
   formData.append("giocatore", g.displayName);
   formData.append("numero", g.numero);
   formData.append("punti", punti);
   formData.append("dettagli", JSON.stringify(g.contatori));
-  fetch("https://script.google.com/macros/s/AKfycbx-K_5UNHA7NlOeDazU1EnO1VHYVWonVras-iMdFvBElxXcUXlmPvsHV6eOUce_qMOsng/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbyl7iL5OubB9_tua8Ijz0ob8AUUlTRQ0Suini3D_sPWeQRoHoSy5FjhDIt9V-N3KtmY2w/exec", {
     method: "POST",
     body: formData
   })
@@ -215,10 +219,59 @@ function aggiornaTitoli() {
   document.getElementById("titoloB").textContent = document.getElementById("teamB").value;
 }
 
+
+function caricaDatiPartita(matchId) {
+  fetch("https://script.google.com/macros/s/AKfycbyl7iL5OubB9_tua8Ijz0ob8AUUlTRQ0Suini3D_sPWeQRoHoSy5FjhDIt9V-N3KtmY2w/exec?matchId=" + matchId)
+    .then(res => res.json())
+    .then(rows => {
+      console.log("Dati caricati:", rows);
+
+      // Reset punteggi
+      giocatoriObj.forEach(g => {
+        g.punteggio = 0;
+        g.contatori = {1:0,2:0,3:0};
+        g.history = [];
+      });
+      puntiSquadraB = 0;
+      contatoriB = {1:0,2:0,3:0};
+      historyB = [];
+
+      // Ricostruisci punteggi dai dati
+      rows.forEach(r => {
+        if (r.squadra === document.getElementById("teamA").value) {
+          const g = giocatoriObj.find(x => x.displayName === r.giocatore);
+          if (g) {
+            g.punteggio += parseInt(r.punti);
+            const dettagli = JSON.parse(r.dettagli);
+            g.contatori = dettagli;
+          }
+        } else {
+          puntiSquadraB += parseInt(r.punti);
+          const dettagli = JSON.parse(r.dettagli);
+          contatoriB = dettagli;
+        }
+      });
+
+      // Aggiorna UI
+      ordinaGiocatori(ultimoOrdinamento);
+      aggiornaScoreboard();
+    })
+    .catch(err => console.error("Errore caricamento:", err));
+}
+
+
 // =====================
 // INIZIALIZZAZIONE
 // =====================
 function init() {
+	
+  // Listener sul dropdown
+  document.getElementById("matchId").addEventListener("change", (e) => {
+  matchId = e.target.value;
+  caricaDatiPartita(matchId);
+  console.log("Partita selezionata:", matchId);
+  });
+
   // Bottoni ordinamento
   document.querySelector("#ordinamenti button:nth-child(1)")
     .addEventListener("click", () => ordinaGiocatori("numero"));
