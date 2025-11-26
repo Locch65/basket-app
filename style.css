@@ -181,3 +181,11 @@ h1 {
   color: #555;
   margin-left: 6px;
 }
+
+.punteggio.flash {
+  animation: flash 0.5s;
+}
+@keyframes flash {
+  from { background-color: yellow; }
+  to { background-color: transparent; }
+}
