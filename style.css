@@ -40,11 +40,30 @@ h1 {
   text-align: center;
 }
 
-#scoreboard { 
-  font-size: 64px; 
-  font-weight: bold; 
-  margin-top: 10px; 
+//#scoreboard { 
+//  font-size: 64px; 
+//  font-weight: bold; 
+//  margin-top: 10px; 
+//  transition: color 0.5s ease, transform 0.3s ease; // Aggiunta
+//}
+//
+//#scoreboard.flash {
+//  color: #27ae60;   /* verde evidenziato */
+//  transform: scale(1.2);
+//}
+
+#scoreboard {
+  font-size: 64px;
+  color: #000;              /* colore normale */
+  transform: scale(1);      /* stato normale */
+  transition: color 0.5s ease, transform 0.3s ease;
 }
+
+#scoreboard.flash {
+  color: #27ae60;           /* verde evidenziato */
+  transform: scale(1.2);    /* leggermente più grande */
+}
+
 
 #contenuto { 
   display: flex; 
@@ -219,4 +238,10 @@ h1 {
   0% { opacity: 1; }
   50% { opacity: 0.4; }
   100% { opacity: 1; }
+}
+
+.flash {
+  transition: color 0.5s ease, transform 0.3s ease;
+  color: #27ae60; /* verde evidenziato */
+  transform: scale(1.2);
 }
