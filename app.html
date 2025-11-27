@@ -10,20 +10,22 @@
 <body>
   <!-- Intestazione -->
   <div id="header">
-	  <!-- Dropdown partita -->
-	  <div id="matchSelector">
-		<label for="matchId">Partita:</label>
-		<select id="matchId">
-		  <option value="1">Partita 1</option>
-		  <option value="2">Partita 2</option>
-		  <option value="3">Partita 3</option>
-		</select>
-	  </div>
+    <!-- Dropdown partita -->
+    <div id="matchSelector">
+      <label for="matchId">Partita:</label>
+      <select id="matchId">
+        <option value="1">Partita 1</option>
+        <option value="2">Partita 2</option>
+        <option value="3">Partita 3</option>
+      </select>
+    </div>
     <div id="teamNames">
       <input id="teamA" class="squadra-input" value="Squadra A">
       <input id="teamB" class="squadra-input" value="Squadra B">
     </div>
-    <div id="scoreboard">0 - 0</div>
+    <div id="scoreboard">
+      <div class="loading">Caricamento scoreboard...</div>
+    </div>
   </div>
 
   <div id="contenuto">
@@ -47,12 +49,13 @@
 
     <div id="giocatori">
       <h1 id="titoloA">Squadra A</h1>
+      <div class="loading">Caricamento giocatori...</div>
     </div>
     <!-- Mostra la versione dello script -->
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.6"></script>
+  <script src="script.js?v=1.0.7"></script>
   <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((reg) => {
@@ -61,7 +64,6 @@
 
     // Quando un nuovo SW prende controllo, ricarica la pagina automaticamente
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      // Evita loop di reload
       if (!window.__reloadedOnce) {
         window.__reloadedOnce = true;
         window.location.reload();
@@ -72,9 +74,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
