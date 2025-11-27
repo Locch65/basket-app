@@ -98,6 +98,7 @@ h1 {
   border: 2px solid #ccc; 
   border-radius: 8px; 
   font-size: 22px;
+  transition: all 0.3s ease;
 }
 
 .giocatore.in { 
@@ -194,4 +195,28 @@ h1 {
   from { background-color: yellow; }
   to { background-color: transparent; }
 }
+@keyframes scaleUp {
+  from { transform: scale(1); }
+  to { transform: scale(1.2); }
 
+
+.loading {
+  color: #555;
+  font-style: italic;
+  text-align: center;
+  padding: 10px;
+  animation: blink 1.2s infinite;
+}
+
+.error {
+  color: #b00020;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
