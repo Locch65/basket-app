@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.8";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.9";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -48,6 +48,18 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
   };
 });
 
+
+function addPoints(points) {
+  if (!isAdmin) return; // blocco minimo lato client
+  score += points;
+  document.getElementById("score").textContent = score;
+
+  // Effetto flash già previsto nel tuo CSS
+  const sb = document.getElementById("scoreboard");
+  sb.classList.add("flash");
+  setTimeout(() => sb.classList.remove("flash"), 500);
+}
+
 // =====================
 // FUNZIONI GENERICHE
 // =====================
@@ -65,16 +77,65 @@ function undoPunteggio(target) {
 }
 
 // =====================
+// FUNZIONI LOGIN
+// =====================
+let score = 0;
+let scoreB = 0;
+let isAdmin = false;
+let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
+
+function login() {
+  const pwd = document.getElementById("password").value;
+  if (pwd === "basket2025") {   // password hardcoded
+    isAdmin = true;
+    document.getElementById("login").classList.add("hidden");
+	document.getElementById("squadraB").classList.remove("hidden");
+    aggiornaTitoli();
+	initSquadraBControls(); // collega gli eventi ai bottoni
+    // eventualmente puoi ricaricare la lista giocatori per mostrare i bottoni
+    renderGiocatori(listaGiocatoriCorrente);
+  } else {
+    alert("Password errata. Accesso negato.");
+  }
+}
+
+function initSquadraBControls() {
+  if (!isAdmin) return;
+
+  const controlsContainer = document.getElementById("controlsB");
+  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
+  //controlsContainer.classList.remove("hidden");
+
+  // Creo dinamicamente i bottoni +1, +2, +3
+  [1, 2, 3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "tiro";
+    btn.textContent = `➕${p}`;
+    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
+    controlsContainer.appendChild(btn);
+  });
+
+  // Bottone undo
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "undo";
+  undoBtn.textContent = "↩️";
+  undoBtn.addEventListener("click", undoSquadraB);
+  controlsContainer.appendChild(undoBtn);
+}
+
+// =====================
 // RENDERING UI
 // =====================
 function renderGiocatori(lista) {
+  console.log(" ***** renderGiocatori ******");
+  listaGiocatoriCorrente = lista; // salvo la lista corrente
   const container = document.getElementById("giocatori");
   container.innerHTML = `<h1 id="titoloA">${document.getElementById("teamA").value}</h1>`;
   
   lista.forEach((g) => {
     const div = document.createElement("div");
     div.className = `giocatore ${g.stato.toLowerCase()}`;
-	div.setAttribute("data-id", g.id);
+    div.setAttribute("data-id", g.id);
     
     let statoBtn = document.createElement("button");
     statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
@@ -93,34 +154,29 @@ function renderGiocatori(lista) {
         </span>
       </div>`;
     
-    // Bottoni punteggio
-    const controls = document.createElement("div");
-    [1,2,3].forEach(p => {
-      const btn = document.createElement("button");
-      btn.className = "tiro";
-      btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
-      btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
-      controls.appendChild(btn);
-    });
+    // Bottoni punteggio: SOLO se admin
+    if (isAdmin) {
+      const controls = document.createElement("div");
+      [1,2,3].forEach(p => {
+        const btn = document.createElement("button");
+        btn.className = "tiro";
+        btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
+        btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
+        controls.appendChild(btn);
+      });
 
-    const undoBtn = document.createElement("button");
-    undoBtn.className = "undo";
-    undoBtn.textContent = "↩️";
-    undoBtn.addEventListener("click", () => undoGiocatore(g.id));
-    controls.appendChild(undoBtn);
+      const undoBtn = document.createElement("button");
+      undoBtn.className = "undo";
+      undoBtn.textContent = "↩️";
+      undoBtn.addEventListener("click", () => undoGiocatore(g.id));
+      controls.appendChild(undoBtn);
+
+      div.appendChild(controls);
+    }
 
     div.querySelector(".nome").appendChild(statoBtn);
-    div.appendChild(controls);
     container.appendChild(div);
   });
-}
-
-function OLDaggiornaUIGiocatore(g) {
-  const span = document.getElementById("punti_" + g.id);
-  span.innerHTML = `<span class="totale">${g.punteggio}</span> 
-                    <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>`;
-  span.classList.add("flash");
-  setTimeout(() => span.classList.remove("flash"), 500);
 }
 
 function aggiornaUIGiocatore(g) {
@@ -190,50 +246,12 @@ function aggiornaScoreboard() {
     setTimeout(() => scoreboard.classList.remove("flash"), 500);
   }
 
-  document.getElementById("punti_squadraB").textContent =
-    `[${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
-}
-
-function OLDaggiornaScoreboard() {
-  let puntiA = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
-  document.getElementById("scoreboard").textContent = `${puntiA} - ${puntiSquadraB}`;
-  document.getElementById("punti_squadraB").textContent =
-    `[${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
-}
-
-function Old3aggiornaScoreboard() {
-  const puntiA = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
-  const scoreboard = document.getElementById("scoreboard");
-  const nuovoTesto = `${puntiA} - ${puntiSquadraB}`;
-
-  if (scoreboard.textContent !== nuovoTesto) {
-    scoreboard.textContent = nuovoTesto;
-
-    // Rimuovi e riapplica la classe per forzare la transizione
-    scoreboard.classList.remove("flash");
-    void scoreboard.offsetWidth; // forza reflow
-    scoreboard.classList.add("flash");
+  if (isAdmin) {
+    document.getElementById("punti_squadraB").textContent =
+      `[${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
   }
-
-  document.getElementById("punti_squadraB").textContent =
-    `[${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
 }
 
-function Old2aggiornaScoreboard() {
-  const puntiA = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
-  const scoreboard = document.getElementById("scoreboard");
-  const nuovoTesto = `${puntiA} - ${puntiSquadraB}`;
-
-  // Se il punteggio è cambiato, aggiorna con transizione
-  if (scoreboard.textContent !== nuovoTesto) {
-    scoreboard.textContent = nuovoTesto;
-    scoreboard.classList.add("flash");
-    setTimeout(() => scoreboard.classList.remove("flash"), 500);
-  }
-
-  document.getElementById("punti_squadraB").textContent =
-    `[${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
-}
 
 // =====================
 // STATO & ORDINAMENTI
@@ -295,11 +313,6 @@ function caricaDatiPartita(matchId) {
   const url = "https://script.google.com/macros/s/AKfycbzKOgXFcCuwOhrfMb3R7ou5Vk79JcWZalqBRSJ2HhuTVBWD07nvTWkzwsPGsz_E7AlnIw/exec?matchId=" 
               + encodeURIComponent(matchId);
 
-  // Mostra un piccolo stato di aggiornamento nello scoreboard (senza cancellare tutto)
-  //const scoreboard = document.getElementById("scoreboard");
-  //scoreboard.classList.add("loading");
-  //scoreboard.textContent = "Aggiornamento...";
-
   fetch(url)
     .then(res => res.json())
     .then(rows => {
@@ -314,6 +327,9 @@ function caricaDatiPartita(matchId) {
       puntiSquadraB = 0;
       contatoriB = {1:0,2:0,3:0};
       historyB = [];
+
+      // 🔧 Aggiorna subito la UI di tutti i giocatori (anche se rows è vuoto)
+      giocatoriObj.forEach(g => aggiornaUIGiocatore(g));
 
       // Aggiorna i dati dai valori cumulativi
       rows.forEach(r => {
@@ -325,83 +341,24 @@ function caricaDatiPartita(matchId) {
         if (g && r.squadra === document.getElementById("teamA").value) {
           g.punteggio = punti;
           g.contatori = dettagli;
-          aggiornaUIGiocatore(g); // 🔧 aggiorna solo il punteggio del giocatore
+          aggiornaUIGiocatore(g);
         } else {
           puntiSquadraB = punti;
           contatoriB = dettagli;
         }
       });
 
-      // Aggiorna solo scoreboard
+      // Aggiorna scoreboard
       aggiornaScoreboard();
-      scoreboard.classList.remove("loading");
     })
     .catch(err => {
       console.error("Errore caricamento:", err);
+      const scoreboard = document.getElementById("scoreboard");
       scoreboard.textContent = "Errore nel caricamento";
       scoreboard.classList.add("error");
     });
 }
 
-
-
-function OLDcaricaDatiPartita(matchId) {
-  const url = "https://script.google.com/macros/s/AKfycbzKOgXFcCuwOhrfMb3R7ou5Vk79JcWZalqBRSJ2HhuTVBWD07nvTWkzwsPGsz_E7AlnIw/exec?matchId=" 
-              + encodeURIComponent(matchId);
-
-  // Mostra placeholder di caricamento
-  document.getElementById("giocatori").innerHTML = 
-    "<h1 id='titoloA'>" + document.getElementById("teamA").value + "</h1>" +
-    "<div class='loading'>Caricamento giocatori...</div>";
-
-  document.getElementById("scoreboard").innerHTML = 
-    "<div class='loading'>Caricamento scoreboard...</div>";
-
-  fetch(url)
-    .then(res => res.json())
-    .then(rows => {
-      console.log("Dati caricati:", rows);
-
-      // Reset stato locale
-      giocatoriObj.forEach(g => {
-        g.punteggio = 0;
-        g.contatori = {1:0,2:0,3:0};
-        g.history = [];
-      });
-      puntiSquadraB = 0;
-      contatoriB = {1:0,2:0,3:0};
-      historyB = [];
-
-      // Aggiorna i dati dai valori cumulativi
-      rows.forEach(r => {
-        const punti = parseInt(r.punti, 10) || 0;
-        let dettagli = {1:0,2:0,3:0};
-        try {
-          dettagli = JSON.parse(r.dettagli);
-        } catch (e) {}
-
-        const g = giocatoriObj.find(x => x.displayName === r.giocatore);
-        if (g && r.squadra === document.getElementById("teamA").value) {
-          g.punteggio = punti;
-          g.contatori = dettagli;
-        } else {
-          puntiSquadraB = punti;
-          contatoriB = dettagli;
-        }
-      });
-
-      // Ridisegna UI con dati aggiornati
-      ordinaGiocatori(ultimoOrdinamento);
-      aggiornaScoreboard();
-    })
-    .catch(err => {
-      console.error("Errore caricamento:", err);
-      document.getElementById("giocatori").innerHTML = 
-        "<div class='error'>Errore nel caricamento giocatori</div>";
-      document.getElementById("scoreboard").innerHTML = 
-        "<div class='error'>Errore nel caricamento scoreboard</div>";
-    });
-}
 
 // =====================
 // AGGIORNAMENTO AUTOMATICO
@@ -424,70 +381,14 @@ function avviaAggiornamentoAutomatico() {
 // =====================
 // INIZIALIZZAZIONE
 // =====================
-//function init() {
-//	
-//  // Listener sul dropdown
-//  document.getElementById("matchId").addEventListener("change", (e) => {
-//  matchId = e.target.value;
-//  caricaDatiPartita(matchId);
-//  console.log("Partita selezionata:", matchId);
-//  });
-//
-//  // Bottoni ordinamento
-//  document.querySelector("#ordinamenti button:nth-child(1)")
-//    .addEventListener("click", () => ordinaGiocatori("numero"));
-//  document.querySelector("#ordinamenti button:nth-child(2)")
-//    .addEventListener("click", () => ordinaGiocatori("cognome"));
-//  document.querySelector("#ordinamenti button:nth-child(3)")
-//    .addEventListener("click", () => ordinaGiocatori("punteggio"));
-//
-//  // Bottoni squadra B
-//  document.querySelector("#squadraB .tiro:nth-child(2)")
-//    .addEventListener("click", () => aggiungiPuntiSquadraB(1));
-//  document.querySelector("#squadraB .tiro:nth-child(3)")
-//    .addEventListener("click", () => aggiungiPuntiSquadraB(2));
-//  document.querySelector("#squadraB .tiro:nth-child(4)")
-//    .addEventListener("click", () => aggiungiPuntiSquadraB(3));
-//  document.querySelector("#squadraB .undo")
-//    .addEventListener("click", undoSquadraB);
-//
-//  // Input nomi squadre
-//  document.getElementById("teamA").addEventListener("change", () => {
-//    aggiornaTitoli(); aggiornaScoreboard();
-//  });
-//  document.getElementById("teamB").addEventListener("change", () => {
-//    aggiornaTitoli(); aggiornaScoreboard();
-//  });
-//
-//  // Rendering iniziale
-//  renderGiocatori(giocatoriObj);
-//  aggiornaTitoli();
-//  aggiornaScoreboard();
-//}
-//
-//// document.addEventListener("DOMContentLoaded", init);
-//
-//// Inizializzazione con polling e refresh immediato
-//document.addEventListener("DOMContentLoaded", () => {
-//  const matchSelector = document.getElementById("matchId");
-//
-//  // Avvia polling automatico
-//  avviaAggiornamentoAutomatico();
-//
-//  // Refresh immediato al cambio di partita
-//  matchSelector.addEventListener("change", () => {
-//    const matchId = matchSelector.value;
-//    caricaDatiPartita(matchId);
-//    console.log("Partita selezionata:", matchId);
-//  });
-//});
-
-// =====================
-// INIZIALIZZAZIONE
-// =====================
 function init() {
   // Listener sul dropdown
   document.getElementById("matchId").addEventListener("change", (e) => {
+	  
+    // Mostra subito messaggio di aggiornamento
+    document.getElementById("scoreboard").innerHTML = "<div class='loading'>Aggiornamento...</div>";
+    //document.getElementById("giocatori").innerHTML = "";
+	
     matchId = e.target.value;
     caricaDatiPartita(matchId); // refresh immediato al cambio partita
     console.log("Partita selezionata:", matchId);
@@ -501,16 +402,6 @@ function init() {
   document.querySelector("#ordinamenti button:nth-child(3)")
     .addEventListener("click", () => ordinaGiocatori("punteggio"));
 
-  // Bottoni squadra B
-  document.querySelector("#squadraB .tiro:nth-child(2)")
-    .addEventListener("click", () => aggiungiPuntiSquadraB(1));
-  document.querySelector("#squadraB .tiro:nth-child(3)")
-    .addEventListener("click", () => aggiungiPuntiSquadraB(2));
-  document.querySelector("#squadraB .tiro:nth-child(4)")
-    .addEventListener("click", () => aggiungiPuntiSquadraB(3));
-  document.querySelector("#squadraB .undo")
-    .addEventListener("click", undoSquadraB);
-
   // Input nomi squadre
   document.getElementById("teamA").addEventListener("change", () => {
     aggiornaTitoli(); aggiornaScoreboard();
@@ -521,7 +412,7 @@ function init() {
 
   // ✅ Rendering iniziale UNA SOLA VOLTA
   renderGiocatori(giocatoriObj);
-  aggiornaTitoli();
+  //aggiornaTitoli();
   aggiornaScoreboard();
 
   // ✅ Avvio polling automatico
@@ -529,3 +420,4 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
