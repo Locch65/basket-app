@@ -217,6 +217,9 @@ function undoGiocatore(id) {
   undoPunteggio(g);
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
+  console.log("undoGiocatore: ",g.punteggio );	
+  salvaSuGoogleSheets(g, g.punteggio);
+
 }
 
 // =====================
