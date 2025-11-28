@@ -134,14 +134,14 @@ h1 {
   color: #2c3e50;
   min-width: 50px;
   text-align: center;
-  font-size: 26px;
+  font-size: 32px;
 }
 
 .cognome {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: bold;
-  min-width: 240px;
-  max-width: 240px;
+  min-width: 260px;
+  max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -149,7 +149,7 @@ h1 {
 
 .stato-btn {
   padding: 6px 12px;
-  font-size: 24px;
+  font-size: 32px;
   border-radius: 6px;
   cursor: pointer;
   min-width: 60px;
@@ -186,7 +186,7 @@ h1 {
 }
 
 .punteggio .totale {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: bold;
   color: #000;
 }
