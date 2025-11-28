@@ -10,6 +10,11 @@
 <body>
   <!-- Intestazione -->
   <div id="header">
+	  <div id="login" class="giocatore">
+	    <input type="password" id="password" placeholder="Password admin">
+	    <button class="stato-btn stato-in" onclick="login()">Login</button>
+      </div>
+
     <!-- Dropdown partita -->
     <div id="matchSelector">
       <label for="matchId">Partita:</label>
@@ -35,14 +40,17 @@
         <button>Ordina per Cognome</button>
         <button>Ordina per Punteggio</button>
       </div>
-      <div id="squadraB">
-        <h1 id="titoloB">Squadra B</h1>
+      <div id="squadraB" class="hidden">
+        <h1 id="titoloB"></h1>
         <div class="squadraB-row">
-          <span id="punti_squadraB" class="punteggio">0</span>
-          <button class="tiro">➕1</button>
-          <button class="tiro">➕2</button>
-          <button class="tiro">➕3</button>
-          <button class="undo">↩️</button>
+          <span id="punti_squadraB" class="punteggio"></span>
+		  <!-- Bottoni punteggio: nascosti di default -->
+          <div id="controlsB">
+          <!--  <button class="tiro">➕1</button> -->
+          <!--  <button class="tiro">➕2</button> -->
+          <!--  <button class="tiro">➕3</button> -->
+          <!--  <button class="undo">↩️</button> -->
+          </div>
         </div>
       </div>
     </div>
@@ -55,7 +63,7 @@
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.8"></script>
+  <script src="script.js?v=1.0.9"></script>
   <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((reg) => {
