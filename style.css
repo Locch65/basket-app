@@ -40,17 +40,6 @@ h1 {
   text-align: center;
 }
 
-//#scoreboard { 
-//  font-size: 64px; 
-//  font-weight: bold; 
-//  margin-top: 10px; 
-//  transition: color 0.5s ease, transform 0.3s ease; // Aggiunta
-//}
-//
-//#scoreboard.flash {
-//  color: #27ae60;   /* verde evidenziato */
-//  transform: scale(1.2);
-//}
 
 #scoreboard {
   font-size: 64px;
@@ -218,7 +207,7 @@ h1 {
 @keyframes scaleUp {
   from { transform: scale(1); }
   to { transform: scale(1.2); }
-
+}
 
 .loading {
   color: #555;
@@ -249,3 +238,25 @@ h1 {
 .hidden {
   display: none;
 }
+
+/* Contenitori separati */
+##giocatori-in {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#giocatori-out {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* massimo 2 colonne */
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  #giocatori-out {
+    grid-template-columns: 1fr; /* su schermi piccoli: una colonna */
+  }
+}
+
+
+
