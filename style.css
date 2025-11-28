@@ -127,10 +127,11 @@ h1 {
 }
 
 .giocatore.out { 
-  background-color: #ffe0e0;   
-  border: 2px solid #c62828;   
-  box-shadow: 0 0 8px rgba(198, 40, 40, 0.4); 
+  background-color: #ffffff;
+  border: 2px solid #999999;
+  box-shadow: 0 0 8px rgba(153, 153, 153, 0.4);
 }
+
 
 .nome {
   display: flex;
