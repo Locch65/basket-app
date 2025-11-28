@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.11";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.12";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   console.log("Script.js versione:", SCRIPT_VERSION);
 
-  // ... resto del tuo codice init() e funzioni
 });
 
 // =====================
@@ -83,7 +82,6 @@ function undoPunteggio(target) {
 // =====================
 // FUNZIONI LOGIN
 // =====================
-
 function login() {
   const pwd = document.getElementById("password").value;
   if (pwd === "basket2025") {   // password hardcoded
@@ -129,7 +127,80 @@ function initSquadraBControls() {
 // RENDERING UI
 // =====================
 function renderGiocatori(lista) {
-  //console.log(" ***** renderGiocatori ******");
+  listaGiocatoriCorrente = lista;
+  const container = document.getElementById("giocatori");
+  container.innerHTML = `
+    <h1 id="titoloA">${document.getElementById("teamA").value}</h1>
+    <div id="giocatori-in"></div>
+    <div id="giocatori-out"></div>
+  `;
+
+  const inContainer = document.getElementById("giocatori-in");
+  const outContainer = document.getElementById("giocatori-out");
+
+  // Ordina: prima In, poi Out
+  lista.sort((a, b) => {
+    if (a.stato === b.stato) return 0;
+    return a.stato === "In" ? -1 : 1;
+  });
+
+console.log("Sono nella renderGiocatori");
+
+  lista.forEach((g) => {
+    const div = document.createElement("div");
+    div.className = `giocatore ${g.stato.toLowerCase()}`;
+    div.setAttribute("data-id", g.id);
+
+    div.innerHTML = `
+      <div class="nome">
+        <span class="numero">${g.numero}</span>
+        <span class="cognome">${g.displayName}</span>
+      </div>
+      <div>
+        <span id="punti_${g.id}" class="punteggio">
+          <span class="totale">${g.punteggio}</span> 
+          <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>
+        </span>
+      </div>
+    `;
+
+    // Bottoni punteggio: solo se admin e giocatore In
+    if (isAdmin) {
+      if (g.stato === "In") {
+        const controls = document.createElement("div");
+        [1,2,3].forEach(p => {
+          const btn = document.createElement("button");
+          btn.className = "tiro";
+          btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
+          btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
+          controls.appendChild(btn);
+        });
+        const undoBtn = document.createElement("button");
+        undoBtn.className = "undo";
+        undoBtn.textContent = "↩️";
+        undoBtn.addEventListener("click", () => undoGiocatore(g.id));
+        controls.appendChild(undoBtn);
+        div.appendChild(controls);
+      }
+
+      // Bottone stato
+      let statoBtn = document.createElement("button");
+      statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
+      statoBtn.textContent = g.stato === "In" ? "Out" : "In";
+      statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
+      div.querySelector(".nome").appendChild(statoBtn);
+    }
+
+    // Append nel contenitore giusto
+    if (g.stato === "In") {
+      inContainer.appendChild(div);
+    } else {
+      outContainer.appendChild(div);
+    }
+  });
+}
+
+function OLDrenderGiocatori(lista) {
   listaGiocatoriCorrente = lista; // salvo la lista corrente
   const container = document.getElementById("giocatori");
   container.innerHTML = `<h1 id="titoloA">${document.getElementById("teamA").value}</h1>`;
@@ -139,11 +210,6 @@ function renderGiocatori(lista) {
     div.className = `giocatore ${g.stato.toLowerCase()}`;
     div.setAttribute("data-id", g.id);
     
-    //let statoBtn = document.createElement("button");
-    //statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
-    //statoBtn.textContent = g.stato === "In" ? "Out" : "In";
-    //statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
-
     div.innerHTML = `
       <div class="nome">
         <span class="numero">${g.numero}</span>
@@ -156,33 +222,35 @@ function renderGiocatori(lista) {
         </span>
       </div>`;
     
-    // Bottoni punteggio: SOLO se admin
-    if (isAdmin) {
-      const controls = document.createElement("div");
-      [1,2,3].forEach(p => {
-        const btn = document.createElement("button");
-        btn.className = "tiro";
-        btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
-        btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
-        controls.appendChild(btn);
-      });
+	// Bottoni punteggio: SOLO se admin e giocatore "In"
+	if (isAdmin) {
+	  if (g.stato === "In") {
+		const controls = document.createElement("div");
+		[1,2,3].forEach(p => {
+		  const btn = document.createElement("button");
+		  btn.className = "tiro";
+		  btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
+		  btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
+		  controls.appendChild(btn);
+		});
 
-      const undoBtn = document.createElement("button");
-      undoBtn.className = "undo";
-      undoBtn.textContent = "↩️";
-      undoBtn.addEventListener("click", () => undoGiocatore(g.id));
-      controls.appendChild(undoBtn);
+		const undoBtn = document.createElement("button");
+		undoBtn.className = "undo";
+		undoBtn.textContent = "↩️";
+		undoBtn.addEventListener("click", () => undoGiocatore(g.id));
+		controls.appendChild(undoBtn);
 
-      div.appendChild(controls);
+		div.appendChild(controls);
+	  }
 
-      // --- Bottone stato (In/Out) ---
-      let statoBtn = document.createElement("button");
-      statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
-      statoBtn.textContent = g.stato === "In" ? "Out" : "In";
-      statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
-  
-      div.querySelector(".nome").appendChild(statoBtn);
-    }
+	  // --- Bottone stato (In/Out) ---
+	  let statoBtn = document.createElement("button");
+	  statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
+	  statoBtn.textContent = g.stato === "In" ? "Out" : "In";
+	  statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
+
+	  div.querySelector(".nome").appendChild(statoBtn);
+	}
     container.appendChild(div);
   });
 }
@@ -247,7 +315,6 @@ function undoSquadraB() {
 // =====================
 // SCOREBOARD
 // =====================
-
 function aggiornaScoreboard() {
   const puntiA = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
   const scoreboard = document.getElementById("scoreboard");
@@ -312,9 +379,6 @@ function aggiornaTitoli() {
   document.getElementById("titoloB").textContent = document.getElementById("teamB").value;
 }
 
-//OK; let url = "https://script.google.com/macros/s/AKfycbxpx-sFVbOWyBHa9gsde4oJcvdWfRQ1OXazirvE_fcHFffgmMGtceDGYw3FQslht5N6og/exec"
-//let url = "https://script.google.com/macros/s/AKfycbxJ8WwXyywG_jE2c41-6JG_BPePfm05K6vTVFNKg89_kanGI-auNv_lkvxcaTPGWwfIcw/exec?sheet=Statistiche/exec"
-//let url = "https://script.google.com/macros/s/AKfycbxJ8WwXyywG_jE2c41-6JG_BPePfm05K6vTVFNKg89_kanGI-auNv_lkvxcaTPGWwfIcw/exec"
 let url = "https://script.google.com/macros/s/AKfycby70h1YpTpRednAyZY_6RahrkYbjgDxjb1E28YTe2ZYeeCIclPMsolP74Pdioe8mP-l5Q/exec"
 
 function salvaSuGoogleSheets(g) {
@@ -357,12 +421,10 @@ function salvaSquadraB() {
 }
 
 function caricaListaPartite() {
-  //const url = "https://script.google.com/macros/s/AKfycbz.../exec"; // URL del tuo WebApp
   const url_1 = url + "?sheet=Partite";
   const matchSelector = document.getElementById("matchId");
 
   matchSelector.innerHTML = `<option>Caricamento...</option>`;
-  // console.log("**** URL: ", url_1);
   fetch(url_1)
     .then(res => res.json())
     .then(partite => {
@@ -386,7 +448,7 @@ function caricaDatiPartita(matchId) {
   const matchSelector = document.getElementById("matchId");
   const selectedOption = matchSelector.options[matchSelector.selectedIndex];
 
-  // 🔹 La stringa è "SquadraA vs SquadraB"
+  // La stringa è "SquadraA vs SquadraB"
   const [nomeA, nomeB] = selectedOption.textContent.split(" vs ");
 
   // Aggiorna i campi TeamA e TeamB
@@ -394,7 +456,6 @@ function caricaDatiPartita(matchId) {
   document.getElementById("teamB").value = nomeB;
 
   const url_1 = url + "?matchId=" + encodeURIComponent(matchId);
-  // console.log("URL: ", url_1);
   fetch(url_1)
     .then(res => res.json())
     .then(rows => {
@@ -410,7 +471,7 @@ function caricaDatiPartita(matchId) {
       contatoriB = {1:0,2:0,3:0};
       historyB = [];
 
-      // 🔧 Aggiorna subito la UI di tutti i giocatori (anche se rows è vuoto)
+      // Aggiorna subito la UI di tutti i giocatori (anche se rows è vuoto)
       giocatoriObj.forEach(g => aggiornaUIGiocatore(g));
 
       // Aggiorna i dati dai valori cumulativi
@@ -444,7 +505,6 @@ function caricaDatiPartita(matchId) {
       scoreboard.classList.add("error");
     });
 }
-
 
 // =====================
 // AGGIORNAMENTO AUTOMATICO
@@ -507,16 +567,12 @@ function init() {
 
   caricaListaPartite();
 
-  // ✅ Rendering iniziale UNA SOLA VOLTA
+  // Rendering iniziale UNA SOLA VOLTA
   renderGiocatori(giocatoriObj);
-  //aggiornaTitoli();
   aggiornaScoreboard();
 
-  // ✅ Avvio polling automatico
+  // Avvio polling automatico
   avviaAggiornamentoAutomatico();
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-
-
