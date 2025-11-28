@@ -245,3 +245,6 @@ h1 {
   color: #27ae60; /* verde evidenziato */
   transform: scale(1.2);
 }
+.hidden {
+  display: none;
+}
