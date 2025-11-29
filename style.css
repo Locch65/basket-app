@@ -258,5 +258,58 @@ h1 {
   }
 }
 
+#adminButtonContainer {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
 
+.popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center;
+}
+
+.popup.hidden { display: none; }
+
+.popup-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Bottone Admin */
+#adminBtn {
+  font-size: 1.4rem;   /* testo grande */
+  padding: 12px 20px;  /* più spazio */
+  border-radius: 8px;
+}
+
+/* Popup */
+.popup-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.3rem;   /* testo grande per tutto il contenuto */
+}
+
+/* Input password nel popup */
+#adminPassword {
+  font-size: 1.2rem;
+  padding: 10px;
+  margin: 15px 0;
+  width: 80%;
+}
+
+/* Bottoni nel popup */
+#adminOkBtn, #adminCancelBtn {
+  font-size: 1.2rem;
+  padding: 10px 18px;
+  margin: 8px;
+  border-radius: 6px;
+}
 
