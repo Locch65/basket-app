@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.15";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.16";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -82,13 +82,13 @@ function undoPunteggio(target) {
 // =====================
 // FUNZIONI LOGIN
 // =====================
-function login() {
-  const pwd = document.getElementById("password").value;
+function login(pwd) {
   if (pwd === "007") {   // password hardcoded
     isAdmin = true;
 	interrompiAggiornamentoAutomatico();
 	
-    document.getElementById("login").classList.add("hidden");
+    // Nascondi elementi non necessari e mostra strumenti admin
+    const loginDiv = document.getElementById("login");
 	document.getElementById("squadraB").classList.remove("hidden");
 	
     aggiornaTitoli();
@@ -99,6 +99,46 @@ function login() {
     alert("Password errata. Accesso negato.");
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const adminBtn = document.getElementById("adminBtn");
+  const popup = document.getElementById("adminPopup");
+  const okBtn = document.getElementById("adminOkBtn");
+  const cancelBtn = document.getElementById("adminCancelBtn");
+  const pwdInput = document.getElementById("adminPassword");
+
+  adminBtn.addEventListener("click", () => {
+    popup.classList.remove("hidden");
+    pwdInput.value = "";
+    pwdInput.focus();
+  });
+
+  okBtn.addEventListener("click", () => {
+    login(pwdInput.value.trim());
+    // Chiudi solo se login riuscito
+    if (isAdmin) popup.classList.add("hidden");
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    popup.classList.add("hidden");
+  });
+
+  // Invio con Enter
+  pwdInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      okBtn.click();
+    } else if (e.key === "Escape") {
+      popup.classList.add("hidden");
+    }
+  });
+
+  // Chiudi cliccando fuori dalla finestra
+  popup.addEventListener("click", (e) => {
+    if (e.target === popup) popup.classList.add("hidden");
+  });
+});
+
+
 
 function initSquadraBControls() {
   if (!isAdmin) return;
@@ -199,62 +239,6 @@ console.log("Sono nella renderGiocatori");
     }
   });
 }
-
-function OLDrenderGiocatori(lista) {
-  listaGiocatoriCorrente = lista; // salvo la lista corrente
-  const container = document.getElementById("giocatori");
-  container.innerHTML = `<h1 id="titoloA">${document.getElementById("teamA").value}</h1>`;
-  
-  lista.forEach((g) => {
-    const div = document.createElement("div");
-    div.className = `giocatore ${g.stato.toLowerCase()}`;
-    div.setAttribute("data-id", g.id);
-    
-    div.innerHTML = `
-      <div class="nome">
-        <span class="numero">${g.numero}</span>
-        <span class="cognome">${g.displayName}</span>
-      </div>
-      <div>
-        <span id="punti_${g.id}" class="punteggio">
-          <span class="totale">${g.punteggio}</span> 
-          <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>
-        </span>
-      </div>`;
-    
-	// Bottoni punteggio: SOLO se admin e giocatore "In"
-	if (isAdmin) {
-	  if (g.stato === "In") {
-		const controls = document.createElement("div");
-		[1,2,3].forEach(p => {
-		  const btn = document.createElement("button");
-		  btn.className = "tiro";
-		  btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
-		  btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
-		  controls.appendChild(btn);
-		});
-
-		const undoBtn = document.createElement("button");
-		undoBtn.className = "undo";
-		undoBtn.textContent = "↩️";
-		undoBtn.addEventListener("click", () => undoGiocatore(g.id));
-		controls.appendChild(undoBtn);
-
-		div.appendChild(controls);
-	  }
-
-	  // --- Bottone stato (In/Out) ---
-	  let statoBtn = document.createElement("button");
-	  statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
-	  statoBtn.textContent = g.stato === "In" ? "Out" : "In";
-	  statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
-
-	  div.querySelector(".nome").appendChild(statoBtn);
-	}
-    container.appendChild(div);
-  });
-}
-
 
 function aggiornaUIGiocatore(g) {
   const span = document.getElementById("punti_" + g.id);
