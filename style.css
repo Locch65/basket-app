@@ -283,33 +283,34 @@ h1 {
 
 /* Bottone Admin */
 #adminBtn {
-  font-size: 1.4rem;   /* testo grande */
-  padding: 12px 20px;  /* più spazio */
-  border-radius: 8px;
+  font-size: 1.6rem;      /* testo molto grande */
+  padding: 14px 24px;     /* più spazio */
+  border-radius: 10px;
 }
 
 /* Popup */
 .popup-content {
   background: #fff;
-  padding: 25px;
-  border-radius: 10px;
+  padding: 35px;          /* più spazio interno */
+  border-radius: 12px;
   text-align: center;
-  font-size: 1.3rem;   /* testo grande per tutto il contenuto */
+  font-size: 1.5rem;      /* testo più grande */
+  width: 90%;             /* quasi tutta la larghezza dello schermo */
+  max-width: 500px;       /* limite massimo su desktop */
 }
 
 /* Input password nel popup */
 #adminPassword {
-  font-size: 1.2rem;
-  padding: 10px;
-  margin: 15px 0;
-  width: 80%;
+  font-size: 1.4rem;
+  padding: 12px;
+  margin: 20px 0;
+  width: 85%;
 }
 
 /* Bottoni nel popup */
 #adminOkBtn, #adminCancelBtn {
-  font-size: 1.2rem;
-  padding: 10px 18px;
-  margin: 8px;
-  border-radius: 6px;
+  font-size: 1.4rem;
+  padding: 12px 22px;
+  margin: 10px;
+  border-radius: 8px;
 }
-
