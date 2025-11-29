@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.16";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.17";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -167,6 +167,174 @@ function initSquadraBControls() {
 // RENDERING UI
 // =====================
 function renderGiocatori(lista) {
+  listaGiocatoriCorrente = lista;
+  const container = document.getElementById("giocatori");
+  container.innerHTML = `
+    <h1 id="titoloA">${document.getElementById("teamA").value}</h1>
+    <div id="giocatori-in"></div>
+    <div id="giocatori-out" class="out-grid">
+      <div id="out-col1"></div>
+      <div id="out-col2"></div>
+    </div>
+  `;
+
+  const inContainer = document.getElementById("giocatori-in");
+  const outCol1 = document.getElementById("out-col1");
+  const outCol2 = document.getElementById("out-col2");
+
+  // Ordina: prima In, poi Out
+  lista.sort((a, b) => {
+    if (a.stato === b.stato) return 0;
+    return a.stato === "In" ? -1 : 1;
+  });
+
+  // Dividi giocatori Out in due colonne
+  const outPlayers = lista.filter(g => g.stato === "Out");
+  const metà = Math.ceil(outPlayers.length / 2);
+
+  lista.forEach((g) => {
+    const div = document.createElement("div");
+    div.className = `giocatore ${g.stato.toLowerCase()}`;
+    div.setAttribute("data-id", g.id);
+
+    div.innerHTML = `
+      <div class="nome">
+        <span class="numero">${g.numero}</span>
+        <span class="cognome">${g.displayName}</span>
+      </div>
+      <div>
+        <span id="punti_${g.id}" class="punteggio">
+          <span class="totale">${g.punteggio}</span> 
+          <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>
+        </span>
+      </div>
+    `;
+
+    // Bottoni punteggio: solo se admin e giocatore In
+    if (isAdmin && g.stato === "In") {
+      const controls = document.createElement("div");
+      [1,2,3].forEach(p => {
+        const btn = document.createElement("button");
+        btn.className = "tiro";
+        btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
+        btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
+        controls.appendChild(btn);
+      });
+      const undoBtn = document.createElement("button");
+      undoBtn.className = "undo";
+      undoBtn.textContent = "↩️";
+      undoBtn.addEventListener("click", () => undoGiocatore(g.id));
+      controls.appendChild(undoBtn);
+      div.appendChild(controls);
+    }
+
+    // Bottone stato: sempre se admin
+    if (isAdmin) {
+      let statoBtn = document.createElement("button");
+      statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
+      statoBtn.textContent = g.stato === "In" ? "Out" : "In";
+      statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
+      div.querySelector(".nome").appendChild(statoBtn);
+    }
+
+    // Append nel contenitore giusto
+    if (g.stato === "In") {
+      inContainer.appendChild(div);
+    } else {
+      const idx = outPlayers.indexOf(g);
+      if (idx < metà) {
+        outCol1.appendChild(div);
+      } else {
+        outCol2.appendChild(div);
+      }
+    }
+  });
+}
+
+function OLD2renderGiocatori(lista) {
+  listaGiocatoriCorrente = lista;
+  const container = document.getElementById("giocatori");
+  container.innerHTML = `
+    <h1 id="titoloA">${document.getElementById("teamA").value}</h1>
+    <div id="giocatori-in"></div>
+    <div id="giocatori-out" class="out-grid">
+      <div id="out-col1"></div>
+      <div id="out-col2"></div>
+    </div>
+  `;
+
+  const inContainer = document.getElementById("giocatori-in");
+  const outCol1 = document.getElementById("out-col1");
+  const outCol2 = document.getElementById("out-col2");
+
+  // Ordina: prima In, poi Out
+  lista.sort((a, b) => {
+    if (a.stato === b.stato) return 0;
+    return a.stato === "In" ? -1 : 1;
+  });
+
+  // Dividi giocatori Out in due colonne
+  const outPlayers = lista.filter(g => g.stato === "Out");
+  const metà = Math.ceil(outPlayers.length / 2);
+
+  lista.forEach((g) => {
+    const div = document.createElement("div");
+    div.className = `giocatore ${g.stato.toLowerCase()}`;
+    div.setAttribute("data-id", g.id);
+
+    div.innerHTML = `
+      <div class="nome">
+        <span class="numero">${g.numero}</span>
+        <span class="cognome">${g.displayName}</span>
+      </div>
+      <div>
+        <span id="punti_${g.id}" class="punteggio">
+          <span class="totale">${g.punteggio}</span> 
+          <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>
+        </span>
+      </div>
+    `;
+
+    // Bottoni punteggio: solo se admin e giocatore In
+    if (isAdmin && g.stato === "In") {
+      const controls = document.createElement("div");
+      [1,2,3].forEach(p => {
+        const btn = document.createElement("button");
+        btn.className = "tiro";
+        btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
+        btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
+        controls.appendChild(btn);
+      });
+      const undoBtn = document.createElement("button");
+      undoBtn.className = "undo";
+      undoBtn.textContent = "↩️";
+      undoBtn.addEventListener("click", () => undoGiocatore(g.id));
+      controls.appendChild(undoBtn);
+      div.appendChild(controls);
+
+      // Bottone stato
+      let statoBtn = document.createElement("button");
+      statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
+      statoBtn.textContent = g.stato === "In" ? "Out" : "In";
+      statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
+      div.querySelector(".nome").appendChild(statoBtn);
+    }
+
+    // Append nel contenitore giusto
+    if (g.stato === "In") {
+      inContainer.appendChild(div);
+    } else {
+      const idx = outPlayers.indexOf(g);
+      if (idx < metà) {
+        outCol1.appendChild(div);
+      } else {
+        outCol2.appendChild(div);
+      }
+    }
+  });
+}
+
+function OLDrenderGiocatori(lista) {
   listaGiocatoriCorrente = lista;
   const container = document.getElementById("giocatori");
   container.innerHTML = `
