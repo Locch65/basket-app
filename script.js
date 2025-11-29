@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.13";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.14";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -576,4 +576,5 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
 
