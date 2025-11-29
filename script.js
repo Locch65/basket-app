@@ -84,7 +84,7 @@ function undoPunteggio(target) {
 // =====================
 function login() {
   const pwd = document.getElementById("password").value;
-  if (pwd === "basket2025") {   // password hardcoded
+  if (pwd === "007") {   // password hardcoded
     isAdmin = true;
 	interrompiAggiornamentoAutomatico();
 	
@@ -576,5 +576,6 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
 
 
