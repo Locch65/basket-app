@@ -10,10 +10,20 @@
 <body>
   <!-- Intestazione -->
   <div id="header">
-	  <div id="login" class="giocatore">
-	    <input type="password" id="password" placeholder="Password admin">
-	    <button class="stato-btn stato-in" onclick="login()">Login</button>
-      </div>
+	<!-- Bottone Admin -->
+	<div id="adminButtonContainer">
+	  <button id="adminBtn">Admin</button>
+	</div>
+
+	<!-- Popup Admin -->
+	<div id="adminPopup" class="hidden popup">
+	  <div class="popup-content">
+		<h2>Accesso Admin</h2>
+		<input type="password" id="adminPassword" placeholder="Password admin">
+		<button id="adminOkBtn">Ok</button>
+		<button id="adminCancelBtn">Annulla</button>
+	  </div>
+	</div>
 
     <!-- Dropdown partita -->
     <div id="matchSelector">
@@ -63,7 +73,7 @@
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.15"></script>
+  <script src="script.js?v=1.0.16"></script>
   <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((reg) => {
