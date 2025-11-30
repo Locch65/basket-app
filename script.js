@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.17";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.18";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -251,164 +251,137 @@ function renderGiocatori(lista) {
   });
 }
 
-function OLD2renderGiocatori(lista) {
-  listaGiocatoriCorrente = lista;
-  const container = document.getElementById("giocatori");
-  container.innerHTML = `
-    <h1 id="titoloA">${document.getElementById("teamA").value}</h1>
-    <div id="giocatori-in"></div>
-    <div id="giocatori-out" class="out-grid">
-      <div id="out-col1"></div>
-      <div id="out-col2"></div>
-    </div>
-  `;
+function aggiungiPuntiGiocatore(id, punti) {
+  const g = giocatoriObj.find(x => x.id === id);
+  aggiornaPunteggio(g, punti);
+  aggiornaScoreboard();
 
-  const inContainer = document.getElementById("giocatori-in");
-  const outCol1 = document.getElementById("out-col1");
-  const outCol2 = document.getElementById("out-col2");
+  if (ultimoOrdinamento === "punteggio") {
+    // Re-render perché la posizione può cambiare
+    ordinaGiocatori(ultimoOrdinamento);
 
-  // Ordina: prima In, poi Out
-  lista.sort((a, b) => {
-    if (a.stato === b.stato) return 0;
-    return a.stato === "In" ? -1 : 1;
-  });
-
-  // Dividi giocatori Out in due colonne
-  const outPlayers = lista.filter(g => g.stato === "Out");
-  const metà = Math.ceil(outPlayers.length / 2);
-
-  lista.forEach((g) => {
-    const div = document.createElement("div");
-    div.className = `giocatore ${g.stato.toLowerCase()}`;
-    div.setAttribute("data-id", g.id);
-
-    div.innerHTML = `
-      <div class="nome">
-        <span class="numero">${g.numero}</span>
-        <span class="cognome">${g.displayName}</span>
-      </div>
-      <div>
-        <span id="punti_${g.id}" class="punteggio">
-          <span class="totale">${g.punteggio}</span> 
-          <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>
-        </span>
-      </div>
-    `;
-
-    // Bottoni punteggio: solo se admin e giocatore In
-    if (isAdmin && g.stato === "In") {
-      const controls = document.createElement("div");
-      [1,2,3].forEach(p => {
-        const btn = document.createElement("button");
-        btn.className = "tiro";
-        btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
-        btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
-        controls.appendChild(btn);
-      });
-      const undoBtn = document.createElement("button");
-      undoBtn.className = "undo";
-      undoBtn.textContent = "↩️";
-      undoBtn.addEventListener("click", () => undoGiocatore(g.id));
-      controls.appendChild(undoBtn);
-      div.appendChild(controls);
-
-      // Bottone stato
-      let statoBtn = document.createElement("button");
-      statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
-      statoBtn.textContent = g.stato === "In" ? "Out" : "In";
-      statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
-      div.querySelector(".nome").appendChild(statoBtn);
-    }
-
-    // Append nel contenitore giusto
-    if (g.stato === "In") {
-      inContainer.appendChild(div);
-    } else {
-      const idx = outPlayers.indexOf(g);
-      if (idx < metà) {
-        outCol1.appendChild(div);
-      } else {
-        outCol2.appendChild(div);
+    // Dopo il re-render, applica flash + shake al nuovo nodo
+    requestAnimationFrame(() => {
+      const span = document.getElementById("punti_" + g.id);
+      if (span) {
+        // flash punteggio
+        span.classList.remove("pulse");
+        void span.offsetWidth;
+        span.classList.add("pulse");
+        setTimeout(() => span.classList.remove("pulse"), 500);
       }
-    }
-  });
-}
+      // shake container
+      applyShake(g.id);
+    });
+  } else {
+    // Niente re-render: aggiorna in place e anima subito
+    aggiornaUIGiocatore(g);
+    applyShake(g.id);
+  }
 
-function OLDrenderGiocatori(lista) {
-  listaGiocatoriCorrente = lista;
-  const container = document.getElementById("giocatori");
-  container.innerHTML = `
-    <h1 id="titoloA">${document.getElementById("teamA").value}</h1>
-    <div id="giocatori-in"></div>
-    <div id="giocatori-out"></div>
-  `;
-
-  const inContainer = document.getElementById("giocatori-in");
-  const outContainer = document.getElementById("giocatori-out");
-
-  // Ordina: prima In, poi Out
-  lista.sort((a, b) => {
-    if (a.stato === b.stato) return 0;
-    return a.stato === "In" ? -1 : 1;
-  });
-
-console.log("Sono nella renderGiocatori");
-
-  lista.forEach((g) => {
-    const div = document.createElement("div");
-    div.className = `giocatore ${g.stato.toLowerCase()}`;
-    div.setAttribute("data-id", g.id);
-
-    div.innerHTML = `
-      <div class="nome">
-        <span class="numero">${g.numero}</span>
-        <span class="cognome">${g.displayName}</span>
-      </div>
-      <div>
-        <span id="punti_${g.id}" class="punteggio">
-          <span class="totale">${g.punteggio}</span> 
-          <span class="dettagli">[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]</span>
-        </span>
-      </div>
-    `;
-
-    // Bottoni punteggio: solo se admin e giocatore In
-    if (isAdmin) {
-      if (g.stato === "In") {
-        const controls = document.createElement("div");
-        [1,2,3].forEach(p => {
-          const btn = document.createElement("button");
-          btn.className = "tiro";
-          btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
-          btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
-          controls.appendChild(btn);
-        });
-        const undoBtn = document.createElement("button");
-        undoBtn.className = "undo";
-        undoBtn.textContent = "↩️";
-        undoBtn.addEventListener("click", () => undoGiocatore(g.id));
-        controls.appendChild(undoBtn);
-        div.appendChild(controls);
-      }
-
-      // Bottone stato
-      let statoBtn = document.createElement("button");
-      statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
-      statoBtn.textContent = g.stato === "In" ? "Out" : "In";
-      statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
-      div.querySelector(".nome").appendChild(statoBtn);
-    }
-
-    // Append nel contenitore giusto
-    if (g.stato === "In") {
-      inContainer.appendChild(div);
-    } else {
-      outContainer.appendChild(div);
-    }
-  });
+  salvaSuGoogleSheets(g);
+  console.log("Salvato punti:", punti);
 }
 
 function aggiornaUIGiocatore(g) {
+  const span = document.getElementById("punti_" + g.id);
+  if (span) {
+    span.querySelector(".totale").textContent = g.punteggio;
+    span.querySelector(".dettagli").textContent =
+      `[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]`;
+
+    // Flash sul punteggio
+    span.classList.remove("pulse");
+    void span.offsetWidth;
+    span.classList.add("pulse");
+    setTimeout(() => span.classList.remove("pulse"), 500);
+
+    // Shake sul container del giocatore
+    const container = document.querySelector(`.giocatore[data-id="${g.id}"]`);
+    if (container) {
+      container.classList.remove("shake");
+      void container.offsetWidth; // forza reflow
+      container.classList.add("shake");
+      setTimeout(() => container.classList.remove("shake"), 400);
+    }
+  }
+}
+
+function applyShake(id) {
+  const container = document.querySelector(`.giocatore[data-id="${id}"]`);
+  if (!container) return;
+
+  // Riavvio affidabile dell'animazione, anche se clicchi più volte
+  container.classList.remove("shake");
+  void container.offsetWidth; // reflow
+  container.classList.add("shake");
+  setTimeout(() => container.classList.remove("shake"), 400);
+}
+
+function OLDaggiungiPuntiGiocatore(id, punti) {
+  const g = giocatoriObj.find(x => x.id === id);
+  aggiornaPunteggio(g, punti);
+  aggiornaScoreboard();
+
+  if (ultimoOrdinamento === "punteggio") {
+    // re-render perché l’ordine può cambiare
+    ordinaGiocatori(ultimoOrdinamento);
+
+    // anima il nuovo nodo dopo il re-render
+    requestAnimationFrame(() => {
+      const span = document.getElementById("punti_" + g.id);
+      if (span) {
+        animatePunteggio(span); // WAAPI fallback + classe
+      }
+    });
+  } else {
+    // niente re-render: aggiorna in place e anima subito
+    aggiornaUIGiocatore(g);
+  }
+
+  salvaSuGoogleSheets(g);
+  console.log("Salvato punti:", punti);
+}
+
+
+// Animazione affidabile: Web Animations API + classe 'pulse'
+function animatePunteggio(span) {
+  // Rimuovi eventuale classe e forzare reflow per compatibilità CSS
+  span.classList.remove("pulse");
+  void span.offsetWidth;
+  span.classList.add("pulse");
+  setTimeout(() => span.classList.remove("pulse"), 500);
+
+  // WAAPI: ignoriamo lo stato delle classi, parte sempre
+  if (span.animate) {
+    span.animate(
+      [
+        { backgroundColor: 'yellow', offset: 0 },
+        { backgroundColor: 'transparent', offset: 1 }
+      ],
+      { duration: 500, easing: 'ease-out' }
+    );
+  }
+}
+
+
+function OLD2aggiornaUIGiocatore(g) {
+  const span = document.getElementById("punti_" + g.id);
+  if (span) {
+    span.querySelector(".totale").textContent = g.punteggio;
+    span.querySelector(".dettagli").textContent =
+      `[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]`;
+
+    // reset + reflow per riattivare l'animazione
+    span.classList.remove("flash");
+    void span.offsetWidth; // forza reflow
+    span.classList.add("flash");
+
+    setTimeout(() => span.classList.remove("flash"), 500);
+  }
+}
+
+function OLDaggiornaUIGiocatore(g) {
   const span = document.getElementById("punti_" + g.id);
   if (span) {
     span.querySelector(".totale").textContent = g.punteggio;
@@ -425,7 +398,7 @@ function aggiungiPuntiGiocatore(id, punti) {
   aggiornaPunteggio(g, punti);
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
-  ordinaGiocatori(ultimoOrdinamento)
+  //ordinaGiocatori(ultimoOrdinamento)
 
   salvaSuGoogleSheets(g, punti);
   console.log("Salvato punti:", punti)
@@ -674,8 +647,10 @@ function avviaAggiornamentoAutomatico() {
   const matchSelector = document.getElementById("matchId");
 
   // Ricarica subito la partita selezionata
-  caricaDatiPartita(matchSelector.value);
-
+  if (!document.hidden) {
+    caricaDatiPartita(matchSelector.value);
+  }
+  
   // Ogni 5 secondi ricarica i dati
   if (!isAdmin) {
 	  refreshTimer = setInterval(() => {
