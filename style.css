@@ -106,7 +106,8 @@ h1 {
   border: 2px solid #ccc; 
   border-radius: 8px; 
   font-size: 22px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform; /* hint per performance */
 }
 
 .giocatore.in { 
@@ -121,6 +122,19 @@ h1 {
   box-shadow: 0 0 8px rgba(153, 153, 153, 0.4);
 }
 
+/* Animazione shake */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+
+.giocatore.shake {
+  animation: shake 0.4s;
+}
 
 .nome {
   display: flex;
@@ -197,7 +211,17 @@ h1 {
   margin-left: 6px;
 }
 
-.punteggio.flash {
+/* punteggio giocatore: nuova classe dedicata */
+.punteggio.pulse {
+  animation: pulse 0.5s;
+}
+
+@keyframes pulse {
+  from { background-color: yellow; }
+  to   { background-color: transparent; }
+}
+
+.punteggio.flashOLD {
   animation: flash 0.5s;
 }
 @keyframes flash {
@@ -282,15 +306,20 @@ h1 {
   width: 100%; height: 100%;
   background: rgba(0,0,0,0.5);
   display: flex; justify-content: center; align-items: center;
+  z-index: 9999; /* 👈 porta il popup sopra tutto */
 }
 
 .popup.hidden { display: none; }
 
 .popup-content {
   background: #fff;
-  padding: 20px;
-  border-radius: 8px;
+  padding: 35px;
+  border-radius: 12px;
   text-align: center;
+  font-size: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  z-index: 10000; /* 👈 opzionale, per sicurezza */
 }
 
 /* Bottone Admin */
