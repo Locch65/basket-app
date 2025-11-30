@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Seleziona Partita</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Lista Partite</h1>
+  <div id="listaPartite" class="loading">Caricamento partite...</div>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycby70h1YpTpRednAyZY_6RahrkYbjgDxjb1E28YTe2ZYeeCIclPMsolP74Pdioe8mP-l5Q/exec";
+
+    function caricaListaPartite() {
+      fetch(url + "?sheet=Partite")
+        .then(res => res.json())
+        .then(partite => {
+          const container = document.getElementById("listaPartite");
+          container.innerHTML = "";
+          partite.forEach(p => {
+            const btn = document.createElement("button");
+            btn.textContent = p.nome; // "Squadra A vs Squadra B"
+            btn.style.display = "block";
+            btn.style.margin = "10px 0";
+            btn.addEventListener("click", () => {
+              // Salva partita scelta e torna ad app.html
+              localStorage.setItem("matchId", p.matchId);
+              window.location.href = "app.html";
+            });
+            container.appendChild(btn);
+          });
+        })
+        .catch(err => {
+          document.getElementById("listaPartite").textContent = "Errore caricamento partite";
+          console.error(err);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", caricaListaPartite);
+  </script>
+</body>
+</html>
