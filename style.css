@@ -368,66 +368,6 @@ h1 {
   border-radius: 8px;
 }
 
-/* Intestazione tabellare (solo desktop) */
-.match-header {
-  display: grid;
-  grid-template-columns: 160px 36px 120px 80px 1fr 1fr; 
-  /* ID largo, icona minima, Data più ampia, Orario compatto, Luogo elastico, Squadre */
-  gap: 10px;
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: bold;
-  background-color: #ddd;
-  border-radius: 6px;
-  margin-bottom: 12px;
-}
-
-/* Card */
-.match-card {
-  width: 100%;
-  margin: 12px 0;
-  padding: 16px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.match-card:hover {
-  background-color: #efefef;
-}
-
-/* Riga superiore: info partita */
-.match-top {
-  display: grid;
-  grid-template-columns: 160px 36px 120px 80px 1fr; 
-  gap: 10px;
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 8px;
-}
-
-.match-top .casa {
-  text-align: center;
-  font-size: 18px;   /* icona leggibile */
-}
-
-/* Riga inferiore: squadre */
-.match-bottom {
-  display: flex;
-  justify-content: center;
-  align-items: baseline;
-  gap: 12px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.match-bottom .vs {
-  color: #c00;
-  font-size: 24px;
-}
-
 /* 🌙 Dark Mode manuale */
 body.dark-mode {
   background-color: #121212;
@@ -465,34 +405,85 @@ body.dark-mode .match-bottom .vs {
   background-color: #ddd;
 }
 
-* 📱 Smartphone / schermi piccoli */
+
+/* Card */
+.match-card {
+  width: 100%;
+  margin: 12px 0;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  /* 👇 aggiunte anti-scrollbar */
+  box-sizing: border-box;   /* include padding nel calcolo della larghezza */
+  overflow-x: hidden;       /* nasconde eventuali sforamenti */
+}
+
+.match-card:hover {
+  background-color: #efefef;
+}
+
+/* Riga 1: info principali */
+.match-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.match-top .casa {
+  text-align: center;
+  font-size: 18px;
+}
+
+/* Riga 2: luogo al centro */
+.match-middle {
+  display: flex;
+  justify-content: center;   /* 👈 centrato invece che a destra */
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+
+  /* anti-scrollbar */
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Riga 3: squadre */
+.match-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.match-bottom .vs {
+  color: #c00;
+  font-size: 24px;
+}
+
+/* 📱 Smartphone */
 @media (max-width: 1200px), (max-device-width: 1440px) {
-  .match-card {
-    padding: 24px;                /* più spazio touch */
-  }
-
   .match-top {
-    grid-template-columns: 1fr 40px 1fr 1fr; /* semplifica: ID, icona, Data, Orario */
-    row-gap: 10px;
-    column-gap: 14px;
-    font-size: 26px;              /* info molto più grandi */
+    font-size: 14px;
   }
-
-  .match-top .luogo {
-    grid-column: 1 / -1;          /* Luogo su tutta la larghezza */
-    font-size: 26px;
+  .match-middle {
+    font-size: 14px;
   }
-
   .match-bottom {
-    font-size: 40px;              /* squadre enormi */
-    gap: 16px;
+    font-size: 22px;
   }
-
   .match-bottom .vs {
-    font-size: 44px;              /* evidenzia “vs” */
-  }
-
-  .match-header {
-    display: none;                /* nasconde intestazione su mobile */
+    font-size: 22px;
   }
 }
