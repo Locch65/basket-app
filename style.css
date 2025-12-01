@@ -411,7 +411,7 @@ h1 {
 .vs   { color: #c00; font-size: 22px; margin: 0 8px; }
 
 /* 📱 Layout per smartphone con sfondo scuro */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   body {
     background-color: #121212;   /* sfondo scuro per tutta la pagina */
     color: #f0f0f0;              /* testo chiaro */
@@ -442,3 +442,4 @@ h1 {
     color: #ff5555;              /* rosso acceso sullo sfondo scuro */
   }
 }
+
