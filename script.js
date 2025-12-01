@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.19";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.20";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -34,7 +34,8 @@ let scoreB = 0;
 let isAdmin = false;
 let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
 let matchId = null;
-//let matchId = document.getElementById("matchId").value;
+let teamA = "";
+let teamB = "";
 let refreshTimer = null; // variabile globale per l'ID del timer
 
 const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
@@ -319,32 +320,6 @@ function applyShake(id) {
   setTimeout(() => container.classList.remove("shake"), 400);
 }
 
-function OLDaggiungiPuntiGiocatore(id, punti) {
-  const g = giocatoriObj.find(x => x.id === id);
-  aggiornaPunteggio(g, punti);
-  aggiornaScoreboard();
-
-  if (ultimoOrdinamento === "punteggio") {
-    // re-render perché l’ordine può cambiare
-    ordinaGiocatori(ultimoOrdinamento);
-
-    // anima il nuovo nodo dopo il re-render
-    requestAnimationFrame(() => {
-      const span = document.getElementById("punti_" + g.id);
-      if (span) {
-        animatePunteggio(span); // WAAPI fallback + classe
-      }
-    });
-  } else {
-    // niente re-render: aggiorna in place e anima subito
-    aggiornaUIGiocatore(g);
-  }
-
-  salvaSuGoogleSheets(g);
-  console.log("Salvato punti:", punti);
-}
-
-
 // Animazione affidabile: Web Animations API + classe 'pulse'
 function animatePunteggio(span) {
   // Rimuovi eventuale classe e forzare reflow per compatibilità CSS
@@ -362,32 +337,6 @@ function animatePunteggio(span) {
       ],
       { duration: 500, easing: 'ease-out' }
     );
-  }
-}
-
-
-function OLD2aggiornaUIGiocatore(g) {
-  const span = document.getElementById("punti_" + g.id);
-  if (span) {
-    span.querySelector(".totale").textContent = g.punteggio;
-    span.querySelector(".dettagli").textContent =
-      `[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]`;
-
-    // reset + reflow per riattivare l'animazione
-    span.classList.remove("flash");
-    void span.offsetWidth; // forza reflow
-    span.classList.add("flash");
-
-    setTimeout(() => span.classList.remove("flash"), 500);
-  }
-}
-
-function OLDaggiornaUIGiocatore(g) {
-  const span = document.getElementById("punti_" + g.id);
-  if (span) {
-    span.querySelector(".totale").textContent = g.punteggio;
-    span.querySelector(".dettagli").textContent =
-      `[${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]`;
   }
 }
 
@@ -501,12 +450,8 @@ function ordinaGiocatori(criterio) {
 // TITOLI
 // =====================
 function aggiornaTitoli() {
-  document.getElementById("titoloA").textContent = document.getElementById("teamA").textContent;
-  document.getElementById("titoloB").textContent = document.getElementById("teamB").textContent;
-}
-function OLDaggiornaTitoli() {
-  document.getElementById("titoloA").textContent = document.getElementById("teamA").value;
-  document.getElementById("titoloB").textContent = document.getElementById("teamB").value;
+  document.getElementById("teamA").textContent = teamA
+  document.getElementById("teamB").textContent = teamB
 }
 
 let url = "https://script.google.com/macros/s/AKfycby70h1YpTpRednAyZY_6RahrkYbjgDxjb1E28YTe2ZYeeCIclPMsolP74Pdioe8mP-l5Q/exec"
@@ -574,18 +519,19 @@ function caricaListaPartite() {
 
 function caricaDatiPartita(matchId) {
   const url_1 = url + "?matchId=" + encodeURIComponent(matchId);
+  console.log("URL: " + url_1)
   fetch(url_1)
     .then(res => res.json())
     .then(rows => {
       console.log("Dati caricati:", rows);
 
-      // Se la prima riga contiene i nomi delle squadre, li assegni
-      if (rows[0]?.teamA) {
-        document.getElementById("teamA").textContent = rows[0].teamA;
-      }
-      if (rows[0]?.teamB) {
-        document.getElementById("teamB").textContent = rows[0].teamB;
-      }
+      //// Se la prima riga contiene i nomi delle squadre, li assegni
+      //if (rows[0]?.teamA) {
+      //  document.getElementById("teamA").textContent = rows[0].teamA;
+      //}
+      //if (rows[0]?.teamB) {
+      //  document.getElementById("teamB").textContent = rows[0].teamB;
+      //}
       aggiornaTitoli();
 
       // … poi aggiorni i giocatori
@@ -607,160 +553,6 @@ function caricaDatiPartita(matchId) {
     });
 }
 
-
-function OLD3caricaDatiPartita(matchId) {
-  const url_1 = url + "?matchId=" + encodeURIComponent(matchId);
-  fetch(url_1)
-    .then(res => res.json())
-    .then(rows => {
-      console.log("Dati caricati:", rows);
-
-      // reset locale
-      giocatoriObj.forEach(g => {
-        g.punteggio = 0;
-        g.contatori = {1:0,2:0,3:0};
-        g.history = [];
-      });
-      puntiSquadraB = 0;
-      contatoriB = {1:0,2:0,3:0};
-      historyB = [];
-
-      // aggiorna UI
-      giocatoriObj.forEach(g => aggiornaUIGiocatore(g));
-
-      rows.forEach(r => {
-        const punti = parseInt(r.punti, 10) || 0;
-        let dettagli = {1:0,2:0,3:0};
-        try { dettagli = JSON.parse(r.dettagli); } catch (e) {}
-        const g = giocatoriObj.find(x => x.displayName === r.giocatore);
-        if (g && r.squadra === document.getElementById("teamA").value) {
-          g.punteggio = punti;
-          g.contatori = dettagli;
-          g.stato = r.statoGiocatore;
-          aggiornaUIGiocatore(g);
-        } else {
-          puntiSquadraB = punti;
-          contatoriB = dettagli;
-        }
-      });
-
-      aggiornaScoreboard();
-      ordinaGiocatori(ultimoOrdinamento);
-    })
-    .catch(err => {
-      console.error("Errore caricamento:", err);
-      document.getElementById("scoreboard").textContent = "Errore nel caricamento";
-    });
-}
-
-function OLD2caricaDatiPartita(matchId) {
-  const url_1 = url + "?matchId=" + encodeURIComponent(matchId);
-  fetch(url_1)
-    .then(res => res.json())
-    .then(rows => {
-      console.log("Dati caricati:", rows);
-
-      // reset locale
-      giocatoriObj.forEach(g => {
-        g.punteggio = 0;
-        g.contatori = {1:0,2:0,3:0};
-        g.history = [];
-      });
-      puntiSquadraB = 0;
-      contatoriB = {1:0,2:0,3:0};
-      historyB = [];
-
-      // aggiorna UI
-      giocatoriObj.forEach(g => aggiornaUIGiocatore(g));
-
-      rows.forEach(r => {
-        const punti = parseInt(r.punti, 10) || 0;
-        let dettagli = {1:0,2:0,3:0};
-        try { dettagli = JSON.parse(r.dettagli); } catch (e) {}
-        const g = giocatoriObj.find(x => x.displayName === r.giocatore);
-        if (g && r.squadra === document.getElementById("teamA").value) {
-          g.punteggio = punti;
-          g.contatori = dettagli;
-          g.stato = r.statoGiocatore;
-          aggiornaUIGiocatore(g);
-        } else {
-          puntiSquadraB = punti;
-          contatoriB = dettagli;
-        }
-      });
-
-      aggiornaScoreboard();
-      ordinaGiocatori(ultimoOrdinamento);
-    })
-    .catch(err => {
-      console.error("Errore caricamento:", err);
-      document.getElementById("scoreboard").textContent = "Errore nel caricamento";
-    });
-}
-
-
-function OLDcaricaDatiPartita(matchId) {
-
-  const matchSelector = document.getElementById("matchId");
-  const selectedOption = matchSelector.options[matchSelector.selectedIndex];
-
-  // La stringa è "SquadraA vs SquadraB"
-  const [nomeA, nomeB] = selectedOption.textContent.split(" vs ");
-
-  // Aggiorna i campi TeamA e TeamB
-  document.getElementById("teamA").value = nomeA;
-  document.getElementById("teamB").value = nomeB;
-
-  const url_1 = url + "?matchId=" + encodeURIComponent(matchId);
-  fetch(url_1)
-    .then(res => res.json())
-    .then(rows => {
-      console.log("Dati caricati:", rows);
-
-      // Reset stato locale
-      giocatoriObj.forEach(g => {
-        g.punteggio = 0;
-        g.contatori = {1:0,2:0,3:0};
-        g.history = [];
-      });
-      puntiSquadraB = 0;
-      contatoriB = {1:0,2:0,3:0};
-      historyB = [];
-
-      // Aggiorna subito la UI di tutti i giocatori (anche se rows è vuoto)
-      giocatoriObj.forEach(g => aggiornaUIGiocatore(g));
-
-      // Aggiorna i dati dai valori cumulativi
-      rows.forEach(r => {
-        const punti = parseInt(r.punti, 10) || 0;
-        let dettagli = {1:0,2:0,3:0};
-        try { dettagli = JSON.parse(r.dettagli); } catch (e) {}
-        const g = giocatoriObj.find(x => x.displayName === r.giocatore);
-        if (g && r.squadra === document.getElementById("teamA").value) {
-  		  let stato = r.statoGiocatore;
-          // console.log("Giocatore Stato = ", r.giocatore, stato);
-          g.punteggio = punti;
-          g.contatori = dettagli;
-		  g.stato = stato;
-          aggiornaUIGiocatore(g);
-        } else {
-          puntiSquadraB = punti;
-          contatoriB = dettagli;
-        }
-      });
-
-      // Aggiorna scoreboard
-      aggiornaScoreboard();
-      ordinaGiocatori(ultimoOrdinamento)
-
-    })
-    .catch(err => {
-      console.error("Errore caricamento:", err);
-      const scoreboard = document.getElementById("scoreboard");
-      scoreboard.textContent = "Errore nel caricamento";
-      scoreboard.classList.add("error");
-    });
-}
 
 // =====================
 // AGGIORNAMENTO AUTOMATICO
@@ -796,6 +588,8 @@ function avviaAggiornamentoAutomatico() {
 // INIZIALIZZAZIONE
 // =====================
 function init() {
+  teamA = localStorage.getItem("teamA");
+  teamB = localStorage.getItem("teamB");
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
     matchId = savedMatchId;
@@ -831,133 +625,6 @@ function init() {
 
   renderGiocatori(giocatoriObj);
   aggiornaScoreboard();
-  avviaAggiornamentoAutomatico();
-}
-
-
-function OLD3init() {
-  // Leggi da localStorage
-  const savedMatchId = localStorage.getItem("matchId");
-  if (savedMatchId && savedMatchId !== "undefined") {
-    matchId = savedMatchId;
-    console.log("Partita caricata da localStorage:", matchId);
-    caricaDatiPartita(matchId);
-  } else {
-    console.log("Nessun matchId salvato");
-  }
-
-  // Bottoni ordinamento
-  document.querySelector("#ordinamenti button:nth-child(1)")
-    .addEventListener("click", () => ordinaGiocatori("numero"));
-  document.querySelector("#ordinamenti button:nth-child(2)")
-    .addEventListener("click", () => ordinaGiocatori("cognome"));
-  document.querySelector("#ordinamenti button:nth-child(3)")
-    .addEventListener("click", () => ordinaGiocatori("punteggio"));
-
-  // Input nomi squadre
-  document.getElementById("teamA").addEventListener("change", () => {
-    aggiornaTitoli(); aggiornaScoreboard();
-  });
-  document.getElementById("teamB").addEventListener("change", () => {
-    aggiornaTitoli(); aggiornaScoreboard();
-  });
-
-  // Listener hamburger
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  if (hamburgerBtn) {
-    hamburgerBtn.addEventListener("click", () => {
-      window.location.href = "./partite.html";
-    });
-  }
-
-  // Rendering iniziale
-  renderGiocatori(giocatoriObj);
-  aggiornaScoreboard();
-  avviaAggiornamentoAutomatico();
-}
-
-function OLD2init() {
-  // Se c’è un matchId salvato, usalo
-  const savedMatchId = localStorage.getItem("matchId");
-  if (savedMatchId) {
-    matchId = savedMatchId;
-    caricaDatiPartita(matchId);
-    console.log("Partita caricata da localStorage:", matchId);
-  }
-
-  // Listener sul dropdown
-  //document.getElementById("matchId").addEventListener("change", (e) => {
-  //  matchId = e.target.value;
-  //  caricaDatiPartita(matchId);
-  //  localStorage.setItem("matchId", matchId); // aggiorna scelta
-  //});
-
-  // Bottoni ordinamento
-  document.querySelector("#ordinamenti button:nth-child(1)")
-    .addEventListener("click", () => ordinaGiocatori("numero"));
-  document.querySelector("#ordinamenti button:nth-child(2)")
-    .addEventListener("click", () => ordinaGiocatori("cognome"));
-  document.querySelector("#ordinamenti button:nth-child(3)")
-    .addEventListener("click", () => ordinaGiocatori("punteggio"));
-
-  // Input nomi squadre
-  document.getElementById("teamA").addEventListener("change", () => {
-    aggiornaTitoli(); aggiornaScoreboard();
-  });
-  document.getElementById("teamB").addEventListener("change", () => {
-    aggiornaTitoli(); aggiornaScoreboard();
-  });
-
-  // 👉 Listener hamburger: diretto, senza DOMContentLoaded annidato
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  if (hamburgerBtn) {
-    hamburgerBtn.addEventListener("click", () => {
-      window.location.href = "./partite.html";
-    });
-  }
-
-  caricaListaPartite();
-  renderGiocatori(giocatoriObj);
-  aggiornaScoreboard();
-  avviaAggiornamentoAutomatico();
-}
-
-function OLDinit() {
-  // Listener sul dropdown
-  document.getElementById("matchId").addEventListener("change", (e) => {
-	  
-    // Mostra subito messaggio di aggiornamento
-    document.getElementById("scoreboard").innerHTML = "<div class='loading'>Aggiornamento...</div>";
-    //document.getElementById("giocatori").innerHTML = "";
-	
-    matchId = e.target.value;
-    caricaDatiPartita(matchId); // refresh immediato al cambio partita
-    console.log("Partita selezionata:", matchId);
-  });
-
-  // Bottoni ordinamento
-  document.querySelector("#ordinamenti button:nth-child(1)")
-    .addEventListener("click", () => ordinaGiocatori("numero"));
-  document.querySelector("#ordinamenti button:nth-child(2)")
-    .addEventListener("click", () => ordinaGiocatori("cognome"));
-  document.querySelector("#ordinamenti button:nth-child(3)")
-    .addEventListener("click", () => ordinaGiocatori("punteggio"));
-
-  // Input nomi squadre
-  document.getElementById("teamA").addEventListener("change", () => {
-    aggiornaTitoli(); aggiornaScoreboard();
-  });
-  document.getElementById("teamB").addEventListener("change", () => {
-    aggiornaTitoli(); aggiornaScoreboard();
-  });
-
-  caricaListaPartite();
-
-  // Rendering iniziale UNA SOLA VOLTA
-  renderGiocatori(giocatoriObj);
-  aggiornaScoreboard();
-
-  // Avvio polling automatico
   avviaAggiornamentoAutomatico();
 }
 
