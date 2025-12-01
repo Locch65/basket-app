@@ -6,69 +6,99 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Lista Partite</h1>
-  <div id="listaPartite" class="loading">Caricamento partite...</div>
+  <h1>Calendario Partite</h1>
+  <button id="toggleTheme">🌙 Dark Mode</button>
+  <div class="match-header">
+    <div>Turno</div>
+    <div>Dove</div>
+    <div>Data</div>
+    <div>Ora</div>
+    <div>Luogo</div>
+    <div>Squadre</div>
+  </div>
+  <div id="listaPartite" class="loading">Caricamento Calendario...</div>
 
   <script>
-    const url = "https://script.google.com/macros/s/AKfycby70h1YpTpRednAyZY_6RahrkYbjgDxjb1E28YTe2ZYeeCIclPMsolP74Pdioe8mP-l5Q/exec";
+    const url = 
+	"https://script.google.com/macros/s/AKfycbyueecXxPq_JgfFb-Y2gKgj7agZ1ZXAvfMPrMXoXo3kRciQATa7GdkRyC4Qm0p1-47QDw/exec"
+    function caricaListaPartite() {
+      const container = document.getElementById("listaPartite");
+      container.textContent = "Sto caricando il Calendario...";
 
-function caricaListaPartite() {
-  const container = document.getElementById("listaPartite");
+      fetch(url + "?sheet=Partite")
+        .then(res => res.json())
+        .then(data => {
+          container.classList.remove("loading");
+          const partite = Array.isArray(data) ? data : data.data;
 
-  // Mostra messaggio iniziale
-  container.textContent = "Sto caricando le partite...";
+          if (!Array.isArray(partite) || partite.length === 0) {
+            container.textContent = "Nessuna partita disponibile";
+            return;
+          }
 
-  fetch(url + "?sheet=Partite")
-    .then(res => res.json())
-    .then(data => {
-      // Rimuove eventuale classe di loading
-      container.classList.remove("loading");
+          const frag = document.createDocumentFragment();
 
-      // Se la risposta è un array diretto
-      const partite = Array.isArray(data) ? data : data.data;
+          partite.forEach(p => {
+            const card = document.createElement("div");
+            card.classList.add("match-card");
+          
+            const casaIcon = "🏠";
+            const trasfertaIcon = "🚌";
+            const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
+          
+            card.innerHTML = `
+              <div class="match-top">
+                <span class="match-id">${p.matchId}</span>
+                <span class="casa">${icona}</span>
+                <span class="data">${p.data}</span>
+                <span class="orario">${p.orario}</span>
+                <span class="luogo">${p.luogo}</span>
+              </div>
+              <div class="match-bottom">
+                <span class="teamA">${p.squadraA}</span>
+                <span class="vs">vs</span>
+                <span class="teamB">${p.squadraB}</span>
+              </div>
+            `;
+          
+            card.addEventListener("click", () => {
+              localStorage.setItem("matchId", p.matchId);
+              localStorage.setItem("teamA", p.squadraA);
+              localStorage.setItem("teamB", p.squadraB);
+              window.location.href = "app.html";
+            });
+          
+            frag.appendChild(card);
+          });
 
-      if (!Array.isArray(partite) || partite.length === 0) {
-        container.textContent = "Nessuna partita disponibile";
-        return;
+
+          container.replaceChildren(frag);
+        })
+        .catch(err => {
+          container.classList.remove("loading");
+          container.textContent = "Errore caricamento partite: " + err.message;
+          console.error(err);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      caricaListaPartite();
+
+      // 🔧 Ripristina tema salvato
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+        document.getElementById("toggleTheme").textContent = "☀️ Light Mode";
       }
 
-      // Usa DocumentFragment per evitare flicker
-      const frag = document.createDocumentFragment();
-
-      partite.forEach(p => {
-        const card = document.createElement("div");
-        card.classList.add("match-card");
-
-        card.innerHTML = `
-          <div class="match-id">Match ID: ${p.matchId}</div>
-          <div class="teams">
-            <span class="team">${p.squadraA}</span>
-            <span class="vs">vs</span>
-            <span class="team">${p.squadraB}</span>
-          </div>
-        `;
-
-        card.addEventListener("click", () => {
-          localStorage.setItem("matchId", p.matchId);
-          localStorage.setItem("teamA", p.squadraA);
-          localStorage.setItem("teamB", p.squadraB);
-          window.location.href = "app.html";
-        });
-
-        frag.appendChild(card);
+      // Toggle Dark Mode con salvataggio
+      document.getElementById("toggleTheme").addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+        const isDark = document.body.classList.contains("dark-mode");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        document.getElementById("toggleTheme").textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
       });
-
-      // Sostituisce il contenuto in un colpo solo
-      container.replaceChildren(frag);
-    })
-    .catch(err => {
-      container.classList.remove("loading");
-      container.textContent = "Errore caricamento partite: " + err.message;
-      console.error(err);
     });
-}
-
-    document.addEventListener("DOMContentLoaded", caricaListaPartite);
   </script>
 </body>
 </html>
