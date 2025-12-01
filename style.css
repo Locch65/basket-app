@@ -368,9 +368,11 @@ h1 {
   border-radius: 8px;
 }
 
+/* Intestazione tabellare (solo desktop) */
 .match-header {
   display: grid;
-  grid-template-columns: 100px 40px 80px 40px 200px 1fr;
+  grid-template-columns: 160px 36px 120px 80px 1fr 1fr; 
+  /* ID largo, icona minima, Data più ampia, Orario compatto, Luogo elastico, Squadre */
   gap: 10px;
   padding: 12px 16px;
   font-size: 14px;
@@ -380,6 +382,7 @@ h1 {
   margin-bottom: 12px;
 }
 
+/* Card */
 .match-card {
   width: 100%;
   margin: 12px 0;
@@ -395,10 +398,10 @@ h1 {
   background-color: #efefef;
 }
 
-/* Riga superiore */
+/* Riga superiore: info partita */
 .match-top {
   display: grid;
-  grid-template-columns: 100px 40px 80px 40px 200px;
+  grid-template-columns: 160px 36px 120px 80px 1fr; 
   gap: 10px;
   font-size: 14px;
   color: #555;
@@ -410,7 +413,7 @@ h1 {
   font-size: 18px;   /* icona leggibile */
 }
 
-/* Riga inferiore */
+/* Riga inferiore: squadre */
 .match-bottom {
   display: flex;
   justify-content: center;
@@ -425,42 +428,6 @@ h1 {
   font-size: 24px;
 }
 
-.match-row {
-  display: grid;
-  grid-template-columns: 100px 40px 80px 1fr 40px 1fr 200px 60px;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  font-size: 18px;
-}
-
-.cell {
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cell.vs {
-  text-align: center;
-  font-weight: bold;
-  color: #c00;
-}
-
-.teams {
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.team { margin: 0 12px; }
-.vs   { color: #c00; font-size: 22px; margin: 0 8px; }
-
-
 /* 🌙 Dark Mode manuale */
 body.dark-mode {
   background-color: #121212;
@@ -472,18 +439,19 @@ body.dark-mode .match-card {
   color: #f0f0f0;
 }
 
-body.dark-mode .match-id {
+body.dark-mode .match-top {
   color: #bbb;
 }
 
-body.dark-mode .vs {
+body.dark-mode .match-bottom .vs {
   color: #ff5555;
 }
+
 /* Bottone Dark/Light Mode */
 #toggleTheme {
-  position: absolute;   /* lo posiziona rispetto al body */
-  top: 10px;            /* distanza dal bordo superiore */
-  right: 10px;          /* distanza dal bordo destro */
+  position: absolute;
+  top: 10px;
+  right: 10px;
   font-size: 1.2rem;
   padding: 8px 14px;
   border-radius: 6px;
@@ -495,4 +463,36 @@ body.dark-mode .vs {
 
 #toggleTheme:hover {
   background-color: #ddd;
+}
+
+/* 📱 Layout per smartphone */
+@media (max-width: 800px) {
+  .match-card {
+    padding: 22px;                /* più spazio touch */
+  }
+
+  .match-top {
+    grid-template-columns: 1fr 40px 1fr 1fr; /* semplifica: ID, icona, Data, Orario */
+    row-gap: 8px;
+    column-gap: 12px;
+    font-size: 22px;              /* info più grandi */
+  }
+
+  .match-top .luogo {
+    grid-column: 1 / -1;          /* Luogo su tutta la larghezza */
+    font-size: 22px;
+  }
+
+  .match-bottom {
+    font-size: 36px;              /* squadre molto grandi */
+    gap: 14px;
+  }
+
+  .match-bottom .vs {
+    font-size: 40px;              /* evidenzia “vs” */
+  }
+
+  .match-header {
+    display: none;                /* nasconde intestazione su mobile */
+  }
 }
