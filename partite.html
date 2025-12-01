@@ -7,16 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  <h1>Calendario Partite</h1>
+  <h1>Calendario</h1>
   <button id="toggleTheme">🌙 Dark Mode</button>
-  <div class="match-header">
-    <div>Turno</div>
-    <div>Dove</div>
-    <div>Data</div>
-    <div>Ora</div>
-    <div>Luogo</div>
-    <div>Squadre</div>
-  </div>
   <div id="listaPartite" class="loading">Caricamento Calendario...</div>
 
   <script>
@@ -39,38 +31,45 @@
 
           const frag = document.createDocumentFragment();
 
-          partite.forEach(p => {
-            const card = document.createElement("div");
-            card.classList.add("match-card");
-          
-            const casaIcon = "🏠";
-            const trasfertaIcon = "🚌";
-            const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
-          
-            card.innerHTML = `
-              <div class="match-top">
-                <span class="match-id">${p.matchId}</span>
-                <span class="casa">${icona}</span>
-                <span class="data">${p.data}</span>
-                <span class="orario">${p.orario}</span>
-                <span class="luogo">${p.luogo}</span>
-              </div>
-              <div class="match-bottom">
-                <span class="teamA">${p.squadraA}</span>
-                <span class="vs">vs</span>
-                <span class="teamB">${p.squadraB}</span>
-              </div>
-            `;
-          
-            card.addEventListener("click", () => {
-              localStorage.setItem("matchId", p.matchId);
-              localStorage.setItem("teamA", p.squadraA);
-              localStorage.setItem("teamB", p.squadraB);
-              window.location.href = "app.html";
-            });
-          
-            frag.appendChild(card);
-          });
+partite.forEach(p => {
+  const card = document.createElement("div");
+  card.classList.add("match-card");
+
+  const casaIcon = "🏠";
+  const trasfertaIcon = "🚌";
+  const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
+
+  card.innerHTML = `
+    <!-- Riga 1: MatchId, Casa/Trasferta, Data, Ora -->
+    <div class="match-top">
+      <span class="match-id">${p.matchId}</span>
+      <span class="data">${p.data}</span>
+      <span class="orario">${p.orario}</span>
+    </div>
+
+    <!-- Riga 2: Luogo allineato a destra -->
+    <div class="match-middle">
+      <span class="casa">${icona}</span>
+      <span class="luogo">${p.luogo}</span>
+    </div>
+
+    <!-- Riga 3: SquadraA vs SquadraB -->
+    <div class="match-bottom">
+      <span class="teamA">${p.squadraA}</span>
+      <span class="vs">vs</span>
+      <span class="teamB">${p.squadraB}</span>
+    </div>
+  `;
+
+  card.addEventListener("click", () => {
+    localStorage.setItem("matchId", p.matchId);
+    localStorage.setItem("teamA", p.squadraA);
+    localStorage.setItem("teamB", p.squadraB);
+    window.location.href = "app.html";
+  });
+
+  frag.appendChild(card);
+});
 
 
           container.replaceChildren(frag);
