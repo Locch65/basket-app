@@ -383,6 +383,8 @@ h1 {
   /* Forzare compositing della card */
   will-change: background-color, opacity;
   backface-visibility: hidden;
+
+  -webkit-tap-highlight-color: transparent; /* Disabilitare highlight blu su mobile */
 }
 
 .match-card:hover {
@@ -391,11 +393,6 @@ h1 {
 
 .match-card:active {
   background-color: #e5e5e5;  /* niente scale su mobile */
-}
-
-/* Disabilitare highlight blu su mobile */
-.match-card {
-  -webkit-tap-highlight-color: transparent;
 }
 
 /* Preferenza utente: ridurre motion ulteriormente */
@@ -426,19 +423,49 @@ h1 {
 .team { margin: 0 12px; }
 .vs   { color: #c00; font-size: 22px; margin: 0 8px; }
 
-/* 📱 Ottimizzazione mobile */
+/* 📱 Layout per smartphone */
 @media (max-width: 600px) {
   .match-card {
+    display: block;
     padding: 32px;            /* più spazio per il dito */
+    font-size: 32px;
+    text-align: center;
+  }
+  .match-id {
+    font-size: 30px;
+    margin-bottom: 12px;
+  }
+  .teams {
+    font-size: 32px;
+    flex-direction: column;   /* squadre una sotto l’altra */
+  }
+  .vs {
+    font-size: 34px;
+    margin: 12px 0;
+  }
+}
+
+/* 💻 Layout per PC Windows / desktop */
+@media (min-width: 1024px) {
+  .match-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
     font-size: 18px;
   }
   .match-id {
-    font-size: 18px;
+    flex: 1;
+    text-align: left;
+    font-size: 16px;
   }
   .teams {
-    font-size: 22px;
+    flex: 2;
+    text-align: right;
+    font-size: 20px;
   }
   .vs {
-    font-size: 24px;
+    font-size: 22px;
+    margin: 0 8px;
   }
 }
