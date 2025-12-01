@@ -383,6 +383,18 @@ body.dark-mode .match-top {
   color: #bbb;
 }
 
+/* 🌙 Dark Mode */
+body.dark-mode .match-middle {
+  /* Variante 1: Blu tenue */
+  /* color: #64b5f6;   /* azzurro chiaro, elegante e leggibile */
+
+  /* Variante 2: Verde chiaro */
+  color: #81c784;   verde tenue, richiama il tema sportivo */
+
+  /* Variante 3: Arancione caldo */
+  /* color: #ffb74d;   arancione chiaro, energico e ben visibile */
+}
+
 body.dark-mode .match-bottom .vs {
   color: #ff5555;
 }
@@ -478,7 +490,7 @@ body.dark-mode .match-bottom .vs {
     font-size: 14px;
   }
   .match-middle {
-    font-size: 14px;
+    font-size: 12px;
   }
   .match-bottom {
     font-size: 22px;
