@@ -465,31 +465,31 @@ body.dark-mode .match-bottom .vs {
   background-color: #ddd;
 }
 
-/* 📱 Layout per smartphone */
-@media (max-width: 800px) {
+* 📱 Smartphone / schermi piccoli */
+@media (max-width: 1200px), (max-device-width: 1440px) {
   .match-card {
-    padding: 22px;                /* più spazio touch */
+    padding: 24px;                /* più spazio touch */
   }
 
   .match-top {
     grid-template-columns: 1fr 40px 1fr 1fr; /* semplifica: ID, icona, Data, Orario */
-    row-gap: 8px;
-    column-gap: 12px;
-    font-size: 22px;              /* info più grandi */
+    row-gap: 10px;
+    column-gap: 14px;
+    font-size: 26px;              /* info molto più grandi */
   }
 
   .match-top .luogo {
     grid-column: 1 / -1;          /* Luogo su tutta la larghezza */
-    font-size: 22px;
+    font-size: 26px;
   }
 
   .match-bottom {
-    font-size: 36px;              /* squadre molto grandi */
-    gap: 14px;
+    font-size: 40px;              /* squadre enormi */
+    gap: 16px;
   }
 
   .match-bottom .vs {
-    font-size: 40px;              /* evidenzia “vs” */
+    font-size: 44px;              /* evidenzia “vs” */
   }
 
   .match-header {
