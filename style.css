@@ -42,7 +42,7 @@ h1 {
   margin-right: 10px;  /* distanzia dal resto della UI */
 }
 
-.squadra-input {
+.squadra-label {
   font-size: 34px;
   font-weight: bold;
   border: 2px solid #666;
@@ -366,4 +366,79 @@ h1 {
   padding: 12px 22px;
   margin: 10px;
   border-radius: 8px;
+}
+
+.match-card {
+  width: 100%;
+  padding: 24px;
+  margin: 12px 0;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  cursor: pointer;
+
+  /* Eliminare flicker: niente scale, transizioni leggere */
+  transition: background-color 120ms ease;
+
+  /* Forzare compositing della card */
+  will-change: background-color, opacity;
+  backface-visibility: hidden;
+}
+
+.match-card:hover {
+  background-color: #efefef;  /* feedback senza transform */
+}
+
+.match-card:active {
+  background-color: #e5e5e5;  /* niente scale su mobile */
+}
+
+/* Disabilitare highlight blu su mobile */
+.match-card {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Preferenza utente: ridurre motion ulteriormente */
+@media (prefers-reduced-motion: reduce) {
+  .match-card {
+    transition: none;
+  }
+}
+
+/* Contenuti interni */
+.match-id {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.teams {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.team { margin: 0 12px; }
+.vs   { color: #c00; font-size: 22px; margin: 0 8px; }
+
+/* 📱 Ottimizzazione mobile */
+@media (max-width: 600px) {
+  .match-card {
+    padding: 32px;            /* più spazio per il dito */
+    font-size: 18px;
+  }
+  .match-id {
+    font-size: 18px;
+  }
+  .teams {
+    font-size: 22px;
+  }
+  .vs {
+    font-size: 24px;
+  }
 }
