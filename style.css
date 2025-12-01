@@ -372,37 +372,24 @@ h1 {
   width: 100%;
   padding: 24px;
   margin: 12px 0;
-  background-color: #f9f9f9;
+  background-color: #f9f9f9;   /* sfondo chiaro di default (PC) */
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   cursor: pointer;
-
-  /* Eliminare flicker: niente scale, transizioni leggere */
   transition: background-color 120ms ease;
-
-  /* Forzare compositing della card */
   will-change: background-color, opacity;
   backface-visibility: hidden;
-
-  -webkit-tap-highlight-color: transparent; /* Disabilitare highlight blu su mobile */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .match-card:hover {
-  background-color: #efefef;  /* feedback senza transform */
+  background-color: #efefef;
 }
 
 .match-card:active {
-  background-color: #e5e5e5;  /* niente scale su mobile */
+  background-color: #e5e5e5;
 }
 
-/* Preferenza utente: ridurre motion ulteriormente */
-@media (prefers-reduced-motion: reduce) {
-  .match-card {
-    transition: none;
-  }
-}
-
-/* Contenuti interni */
 .match-id {
   font-size: 16px;
   color: #555;
@@ -423,49 +410,35 @@ h1 {
 .team { margin: 0 12px; }
 .vs   { color: #c00; font-size: 22px; margin: 0 8px; }
 
-/* 📱 Layout per smartphone */
+/* 📱 Layout per smartphone con sfondo scuro */
 @media (max-width: 600px) {
+  body {
+    background-color: #121212;   /* sfondo scuro per tutta la pagina */
+    color: #f0f0f0;              /* testo chiaro */
+  }
+
   .match-card {
-    display: block;
-    padding: 32px;            /* più spazio per il dito */
+    background-color: #1e1e1e;   /* card scure */
+    color: #f0f0f0;              /* testo chiaro dentro le card */
+    padding: 32px;
     font-size: 32px;
     text-align: center;
   }
+
   .match-id {
     font-size: 30px;
     margin-bottom: 12px;
+    color: #bbb;                 /* colore più tenue per l’ID */
   }
+
   .teams {
     font-size: 32px;
-    flex-direction: column;   /* squadre una sotto l’altra */
+    flex-direction: column;      /* squadre una sotto l’altra */
   }
+
   .vs {
     font-size: 34px;
     margin: 12px 0;
-  }
-}
-
-/* 💻 Layout per PC Windows / desktop */
-@media (min-width: 1024px) {
-  .match-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    font-size: 18px;
-  }
-  .match-id {
-    flex: 1;
-    text-align: left;
-    font-size: 16px;
-  }
-  .teams {
-    flex: 2;
-    text-align: right;
-    font-size: 20px;
-  }
-  .vs {
-    font-size: 22px;
-    margin: 0 8px;
+    color: #ff5555;              /* rosso acceso sullo sfondo scuro */
   }
 }
