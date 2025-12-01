@@ -12,30 +12,61 @@
   <script>
     const url = "https://script.google.com/macros/s/AKfycby70h1YpTpRednAyZY_6RahrkYbjgDxjb1E28YTe2ZYeeCIclPMsolP74Pdioe8mP-l5Q/exec";
 
-    function caricaListaPartite() {
-      fetch(url + "?sheet=Partite")
-        .then(res => res.json())
-        .then(partite => {
-          const container = document.getElementById("listaPartite");
-          container.innerHTML = "";
-          partite.forEach(p => {
-            const btn = document.createElement("button");
-            btn.textContent = p.nome; // "Squadra A vs Squadra B"
-            btn.style.display = "block";
-            btn.style.margin = "10px 0";
-            btn.addEventListener("click", () => {
-              // Salva partita scelta e torna ad app.html
-              localStorage.setItem("matchId", p.matchId);
-              window.location.href = "app.html";
-            });
-            container.appendChild(btn);
-          });
-        })
-        .catch(err => {
-          document.getElementById("listaPartite").textContent = "Errore caricamento partite";
-          console.error(err);
+function caricaListaPartite() {
+  const container = document.getElementById("listaPartite");
+
+  // Mostra messaggio iniziale
+  container.textContent = "Sto caricando le partite...";
+
+  fetch(url + "?sheet=Partite")
+    .then(res => res.json())
+    .then(data => {
+      // Rimuove eventuale classe di loading
+      container.classList.remove("loading");
+
+      // Se la risposta è un array diretto
+      const partite = Array.isArray(data) ? data : data.data;
+
+      if (!Array.isArray(partite) || partite.length === 0) {
+        container.textContent = "Nessuna partita disponibile";
+        return;
+      }
+
+      // Usa DocumentFragment per evitare flicker
+      const frag = document.createDocumentFragment();
+
+      partite.forEach(p => {
+        const card = document.createElement("div");
+        card.classList.add("match-card");
+
+        card.innerHTML = `
+          <div class="match-id">Match ID: ${p.matchId}</div>
+          <div class="teams">
+            <span class="team">${p.squadraA}</span>
+            <span class="vs">vs</span>
+            <span class="team">${p.squadraB}</span>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          localStorage.setItem("matchId", p.matchId);
+          localStorage.setItem("teamA", p.squadraA);
+          localStorage.setItem("teamB", p.squadraB);
+          window.location.href = "app.html";
         });
-    }
+
+        frag.appendChild(card);
+      });
+
+      // Sostituisce il contenuto in un colpo solo
+      container.replaceChildren(frag);
+    })
+    .catch(err => {
+      container.classList.remove("loading");
+      container.textContent = "Errore caricamento partite: " + err.message;
+      console.error(err);
+    });
+}
 
     document.addEventListener("DOMContentLoaded", caricaListaPartite);
   </script>
