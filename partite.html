@@ -8,12 +8,20 @@
 </head>
 <body>
   <h1>Calendario</h1>
-  <button id="toggleTheme">🌙 Dark Mode</button>
+  <button id="toggleTheme">🌙</button>
   <div id="listaPartite" class="loading">Caricamento Calendario...</div>
 
   <script>
     const url = 
-	"https://script.google.com/macros/s/AKfycbyueecXxPq_JgfFb-Y2gKgj7agZ1ZXAvfMPrMXoXo3kRciQATa7GdkRyC4Qm0p1-47QDw/exec"
+     "https://script.google.com/macros/s/AKfycbxMw2S8EwK42prjk0OQCY6RLUl-Erd-d4TW5lx8mWnB5yG5-KJywz6enMqF6wmLnxBWOQ/exec";
+
+    // 🔧 Parsing data in formato dd/MM/YYYY
+    function parseItalianDate(dateStr, timeStr) {
+      const [giorno, mese, anno] = dateStr.split("/").map(Number);
+      const [ore, minuti] = timeStr.split(":").map(Number);
+      return new Date(anno, mese - 1, giorno, ore, minuti);
+    }
+
     function caricaListaPartite() {
       const container = document.getElementById("listaPartite");
       container.textContent = "Sto caricando il Calendario...";
@@ -23,54 +31,55 @@
         .then(data => {
           container.classList.remove("loading");
           const partite = Array.isArray(data) ? data : data.data;
-
+		  console.log("Caricate le partite:", partite);
           if (!Array.isArray(partite) || partite.length === 0) {
             container.textContent = "Nessuna partita disponibile";
             return;
           }
 
           const frag = document.createDocumentFragment();
+          const oggi = new Date();
 
-partite.forEach(p => {
-  const card = document.createElement("div");
-  card.classList.add("match-card");
+          partite.forEach(p => {
+            const card = document.createElement("div");
+            card.classList.add("match-card");
 
-  const casaIcon = "🏠";
-  const trasfertaIcon = "🚌";
-  const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
+            // 🔧 Controllo se la partita è nel passato
+            const dataPartita = parseItalianDate(p.data, p.orario);
+            if (dataPartita < oggi) {
+              card.classList.add("past");
+            }
 
-  card.innerHTML = `
-    <!-- Riga 1: MatchId, Casa/Trasferta, Data, Ora -->
-    <div class="match-top">
-      <span class="match-id">${p.matchId}</span>
-      <span class="data">${p.data}</span>
-      <span class="orario">${p.orario}</span>
-    </div>
+            const casaIcon = "🏠";
+            const trasfertaIcon = "🚌";
+            const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
 
-    <!-- Riga 2: Luogo allineato a destra -->
-    <div class="match-middle">
-      <span class="casa">${icona}</span>
-      <span class="luogo">${p.luogo}</span>
-    </div>
+            card.innerHTML = `
+              <div class="match-top">
+                <span class="match-id">${p.matchId}</span>
+                <span class="data">${p.data}</span>
+                <span class="orario">${p.orario}</span>
+              </div>
+              <div class="match-middle">
+                <span class="casa">${icona}</span>
+                <span class="luogo">${p.luogo}</span>
+              </div>
+              <div class="match-bottom">
+                <span class="teamA">${p.squadraA} <strong>${p.punteggioA ?? "-"}</strong></span>
+                <span class="vs">vs</span>
+                <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> ${p.squadraB}</span>
+              </div>
+            `;
 
-    <!-- Riga 3: SquadraA vs SquadraB -->
-    <div class="match-bottom">
-      <span class="teamA">${p.squadraA}</span>
-      <span class="vs">vs</span>
-      <span class="teamB">${p.squadraB}</span>
-    </div>
-  `;
+            card.addEventListener("click", () => {
+              localStorage.setItem("matchId", p.matchId);
+              localStorage.setItem("teamA", p.squadraA);
+              localStorage.setItem("teamB", p.squadraB);
+              window.location.href = "app.html";
+            });
 
-  card.addEventListener("click", () => {
-    localStorage.setItem("matchId", p.matchId);
-    localStorage.setItem("teamA", p.squadraA);
-    localStorage.setItem("teamB", p.squadraB);
-    window.location.href = "app.html";
-  });
-
-  frag.appendChild(card);
-});
-
+            frag.appendChild(card);
+          });
 
           container.replaceChildren(frag);
         })
@@ -88,7 +97,7 @@ partite.forEach(p => {
       const savedTheme = localStorage.getItem("theme");
       if (savedTheme === "dark") {
         document.body.classList.add("dark-mode");
-        document.getElementById("toggleTheme").textContent = "☀️ Light Mode";
+        document.getElementById("toggleTheme").textContent = "☀️";
       }
 
       // Toggle Dark Mode con salvataggio
@@ -96,7 +105,7 @@ partite.forEach(p => {
         document.body.classList.toggle("dark-mode");
         const isDark = document.body.classList.contains("dark-mode");
         localStorage.setItem("theme", isDark ? "dark" : "light");
-        document.getElementById("toggleTheme").textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+        document.getElementById("toggleTheme").textContent = isDark ? "☀️" : "🌙";
       });
     });
   </script>
