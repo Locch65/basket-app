@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.26";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.27";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -454,7 +454,8 @@ function aggiornaTitoli() {
   document.getElementById("teamB").textContent = teamB
 }
 
-let url = "https://script.google.com/macros/s/AKfycbyueecXxPq_JgfFb-Y2gKgj7agZ1ZXAvfMPrMXoXo3kRciQATa7GdkRyC4Qm0p1-47QDw/exec"
+//let url = "https://script.google.com/macros/s/AKfycbyueecXxPq_JgfFb-Y2gKgj7agZ1ZXAvfMPrMXoXo3kRciQATa7GdkRyC4Qm0p1-47QDw/exec"
+let url = "https://script.google.com/macros/s/AKfycbxMw2S8EwK42prjk0OQCY6RLUl-Erd-d4TW5lx8mWnB5yG5-KJywz6enMqF6wmLnxBWOQ/exec"
 function salvaSuGoogleSheets(g) {
   const formData = new FormData();
   formData.append("matchId", matchId);
@@ -628,7 +629,6 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
 
 
 
