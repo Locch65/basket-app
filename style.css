@@ -380,7 +380,7 @@ body.dark-mode .match-card {
 }
 
 body.dark-mode .match-top {
-  color: #bbb;
+  color: #81c784;
 }
 
 /* 🌙 Dark Mode */
@@ -389,7 +389,7 @@ body.dark-mode .match-middle {
   /* color: #64b5f6;   /* azzurro chiaro, elegante e leggibile */
 
   /* Variante 2: Verde chiaro */
-  color: #81c784;   verde tenue, richiama il tema sportivo */
+  color: #bbb;   verde tenue, richiama il tema sportivo */
 
   /* Variante 3: Arancione caldo */
   /* color: #ffb74d;   arancione chiaro, energico e ben visibile */
@@ -405,7 +405,7 @@ body.dark-mode .match-bottom .vs {
   top: 10px;
   right: 10px;
   font-size: 1.2rem;
-  padding: 8px 14px;
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
   background-color: #eee;
@@ -421,10 +421,11 @@ body.dark-mode .match-bottom .vs {
 /* Card */
 .match-card {
   width: 100%;
-  margin: 12px 0;
-  padding: 16px;
+  margin: 2px 0;
+  padding: 2px;
   background-color: #f9f9f9;
   border-radius: 8px;
+  border: 2px solid #27ae60;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -432,6 +433,11 @@ body.dark-mode .match-bottom .vs {
   /* 👇 aggiunte anti-scrollbar */
   box-sizing: border-box;   /* include padding nel calcolo della larghezza */
   overflow-x: hidden;       /* nasconde eventuali sforamenti */
+}
+.match-card.past {
+      background-color: #f5f5f5;   /* grigio tenue */
+      border: 1px solid #999;
+      opacity: 0.7;
 }
 
 .match-card:hover {
@@ -444,6 +450,7 @@ body.dark-mode .match-bottom .vs {
   flex-wrap: wrap;
   gap: 12px;
   font-size: 14px;
+  font-weight: bold;
   color: #555;
   margin-bottom: 6px;
 }
@@ -457,7 +464,7 @@ body.dark-mode .match-bottom .vs {
 .match-middle {
   display: flex;
   justify-content: center;   /* 👈 centrato invece che a destra */
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
   margin-bottom: 8px;
 
@@ -479,23 +486,43 @@ body.dark-mode .match-bottom .vs {
   font-weight: bold;
 }
 
+.match-bottom strong {
+  font-size: 20px;
+  color: #000;
+  margin: 0 6px;
+}
+
+.match-bottom .score {
+  font-size: 32px;     /* molto più grande */
+  font-weight: bold;
+  color: #000;         /* colore neutro */
+  margin: 0 8px;
+}
+
 .match-bottom .vs {
   color: #c00;
   font-size: 24px;
 }
 
+.teamA strong, .teamB strong {
+  color: #27ae60;   /* verde evidenziato */
+}
+
+
 /* 📱 Smartphone */
-@media (max-width: 1200px), (max-device-width: 1440px) {
-  .match-top {
-    font-size: 14px;
-  }
-  .match-middle {
-    font-size: 12px;
-  }
+@media (max-width: 600px) {
   .match-bottom {
-    font-size: 22px;
+    font-size: 16px;   /* ridotto rispetto a 22px */
+    flex-wrap: wrap;   /* 👈 consente di andare a capo se serve */
+    gap: 8px;
   }
+
+  .match-bottom .score {
+    font-size: 22px;   /* più piccolo rispetto a 32px */
+    margin: 0 4px;
+  }
+
   .match-bottom .vs {
-    font-size: 22px;
+    font-size: 18px;   /* ridotto rispetto a 24px */
   }
 }
