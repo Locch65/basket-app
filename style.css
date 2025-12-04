@@ -9,6 +9,8 @@ body {
 h1 { 
   color: #2c3e50; 
   font-size: 28px; 
+  margin-left: 60px; /* sposta il titolo a destra del bottone */
+  margin-top: 8px;
 }
 
 #header { 
@@ -245,12 +247,17 @@ h1 {
   to { transform: scale(1.2); }
 }
 
-.loading {
-  color: #555;
-  font-style: italic;
+#listaPartite.loading {
   text-align: center;
-  padding: 10px;
-  animation: blink 1.2s infinite;
+  font-weight: bold;
+  color: #27ae60; /* verde o colore a scelta */
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 .error {
@@ -373,6 +380,9 @@ body.dark-mode {
   background-color: #121212;
   color: #f0f0f0;
 }
+body.dark-mode h1 {
+  color: #27ae60;   /* verde acceso */
+}
 
 body.dark-mode .match-card {
   background-color: #1e1e1e;
@@ -423,9 +433,9 @@ body.dark-mode .match-bottom .vs {
   width: 100%;
   margin: 2px 0;
   padding: 2px;
-  background-color: #f9f9f9;
+  background-color: #f5fff5;
   border-radius: 8px;
-  border: 2px solid #27ae60;
+  border: 3px solid #27ae60;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -455,6 +465,15 @@ body.dark-mode .match-bottom .vs {
   margin-bottom: 6px;
 }
 
+
+.match-top .match-id {
+  margin-right: auto;   /* spinge il matchId tutto a sinistra */
+}
+
+.match-top .data {
+  font-size: 16px;    /* più grande rispetto al 14px di default */
+}
+
 .match-top .casa {
   text-align: center;
   font-size: 18px;
@@ -464,9 +483,9 @@ body.dark-mode .match-bottom .vs {
 .match-middle {
   display: flex;
   justify-content: center;   /* 👈 centrato invece che a destra */
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 
   /* anti-scrollbar */
   overflow-x: hidden;
@@ -525,4 +544,161 @@ body.dark-mode .match-bottom .vs {
   .match-bottom .vs {
     font-size: 18px;   /* ridotto rispetto a 24px */
   }
+}
+
+#hamburgerMenu1 {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+#hamburgerBtn1 {
+  font-size: 1.4rem;   /* ridotto */
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#menu1 {
+  background-color: #f9f9f9;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 1000;
+}
+
+#menu1 ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#menu1 li {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+#menu1 li:hover {
+  background-color: #eee;
+}
+
+.has-submenu {
+  position: relative;
+}
+
+.submenu {
+  list-style: none;
+  padding: 6px 10px;
+  margin-top: 6px;
+  border-left: 2px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.submenu li {
+  padding: 4px 8px;
+}
+
+.submenu li:hover {
+  background-color: #ddd;
+}
+
+.hidden {
+  display: none;
+}
+
+.campionato-item {
+  padding: 8px 12px;
+  border: 2px solid #27ae60;   /* bordo verde */
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.campionato-item:hover {
+  background-color: #e0f2f1;
+  transform: scale(1.05);
+}
+
+/* 🌙 Dark Mode per il menu */
+body.dark-mode #menu1 {
+  background-color: #1e1e1e;
+  border: 2px solid #444;
+  color: #f0f0f0;
+}
+
+body.dark-mode #menu1 li {
+  color: #f0f0f0;
+}
+
+body.dark-mode #menu1 li:hover {
+  background-color: #333;
+}
+
+/* Dark Mode */
+body.dark-mode .campionato-item {
+  border: 2px solid #81c784;
+  background-color: #2a2a2a;
+  color: #f0f0f0;
+}
+
+body.dark-mode .campionato-item:hover {
+  background-color: #388e3c;
+}
+
+#toggleTheme1 {
+  font-size: 1.2rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  transition: background-color 0.3s ease;
+}
+
+#toggleTheme1:hover {
+  background-color: #ddd;
+}
+
+body.dark-mode #toggleTheme1 {
+  background-color: #333;
+  border: 1px solid #555;
+  color: #f0f0f0;
+}
+
+body.dark-mode #toggleTheme1:hover {
+  background-color: #444;
+}
+.campionato {
+  font-size: 1.2rem;      /* più grande */
+  font-weight: bold;
+  padding: 1px 3px;
+  border-radius: 4px;
+  margin-right: 5px;
+}
+
+.campionato.U14 {
+  background-color: #3498db; /* verde */
+  color: #fff;
+}
+
+.campionato.U15 {
+  background-color: #e67e22; /* arancione */
+  color: #fff;
+}
+
+/* Dark Mode */
+body.dark-mode .campionato.U14 {
+  background-color: #3498db;
+  color: #000;
+}
+
+body.dark-mode .campionato.U15 {
+  background-color: #e67e22;
+  color: #000;
 }
