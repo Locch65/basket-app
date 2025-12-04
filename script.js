@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.28";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.29";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -20,10 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
 const giocatoriA = [
   "E. Carfora","K. Popa","G. Giacco","H. Taylor",
   "C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
-  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo"
+  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "C. Gallo", "A. Tusa"
 ];
 
-const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9"];
+const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "41", "29"];
 
 let puntiSquadraB = 0;
 let historyB = [];
