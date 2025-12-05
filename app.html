@@ -5,6 +5,7 @@
   <title>Statistiche Basket</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <meta name="theme-color" content="#2c3e50">
 </head>
 <body>
@@ -41,11 +42,11 @@
 
   <div id="contenuto">
     <div id="topControls">
-      <div id="ordinamenti">
-        <button>Ordina per Numero</button>
-        <button>Ordina per Cognome</button>
-        <button>Ordina per Punteggio</button>
-      </div>
+    <div id="ordinamenti">
+      <button><i class="fas fa-arrow-up"></i> Numero</button>
+      <button><i class="fas fa-arrow-up"></i> Cognome</button>
+      <button><i class="fas fa-arrow-up"></i> Punteggio</button>
+    </div>
       <div id="squadraB" class="hidden">
         <h1 id="titoloB"></h1>
         <div class="squadraB-row">
@@ -62,14 +63,13 @@
     </div>
 
     <div id="giocatori">
-      <h1 id="titoloA">Squadra A</h1>
       <div class="loading">Caricamento giocatori...</div>
     </div>
     <!-- Mostra la versione dello script -->
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.30"></script>
+  <script src="script.js?v=1.0.31"></script>
   <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((reg) => {
