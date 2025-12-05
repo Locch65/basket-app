@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.31";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.32";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -25,6 +25,7 @@ const giocatoriA = [
 
 const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "41", "29"];
 
+let puntiSquadraA = 0;
 let puntiSquadraB = 0;
 let historyB = [];
 let contatoriB = {1:0,2:0,3:0};
@@ -401,6 +402,7 @@ function aggiornaScoreboard() {
   else
   {
     nuovoTesto = (teamA === "Polismile A") ? `${puntiA} - ${puntiSquadraB}` : `${puntiSquadraB} - ${puntiA}`;
+	puntiSquadraA = puntiA;
   }
 
   if (scoreboard.textContent !== nuovoTesto) {
@@ -462,7 +464,9 @@ function aggiornaTitoli() {
   document.getElementById("teamB").textContent = teamB
 }
 
-let url = "https://script.google.com/macros/s/AKfycbxMw2S8EwK42prjk0OQCY6RLUl-Erd-d4TW5lx8mWnB5yG5-KJywz6enMqF6wmLnxBWOQ/exec"
+//let url = "https://script.google.com/macros/s/AKfycbxMw2S8EwK42prjk0OQCY6RLUl-Erd-d4TW5lx8mWnB5yG5-KJywz6enMqF6wmLnxBWOQ/exec"
+let url = "https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec"
+
 function salvaSuGoogleSheets(g) {
   const formData = new FormData();
   formData.append("matchId", matchId);
