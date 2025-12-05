@@ -69,8 +69,42 @@
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.31"></script>
+  <script src="script.js?v=1.0.32"></script>
   <script>
+  function SalvaPunteggi() {
+    //const punteggioA = document.getElementById("punti_squadraA")?.textContent || "0";
+    //const punteggioB = document.getElementById("punti_squadraB")?.textContent || "0";
+    //const matchId = localStorage.getItem("matchId"); // 🔧 recupera l'ID partita
+  
+    if (!matchId) {
+      console.warn("Nessun matchId trovato, non salvo");
+      return;
+    }
+  
+    // Costruisci payload
+    const payload = {
+      matchId: matchId,
+      punteggioA: puntiSquadraA,
+      punteggioB: puntiSquadraB
+    };
+  
+    // Invia al tuo Google Apps Script
+    navigator.sendBeacon(
+	  "https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec",
+      JSON.stringify(payload)
+    );
+  }
+  window.addEventListener("beforeunload", function (event) {
+    // Mostra la finestra di conferma
+	if (isAdmin) {
+	  SalvaPunteggi();
+      event.preventDefault();
+      event.returnValue = "Vuoi salvare i dati prima di uscire o ricaricare?";
+      // ⚠️ Nota: il messaggio personalizzato non sempre viene mostrato,
+      // ma la finestra di conferma appare comunque.
+	}
+  });
+  
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((reg) => {
       console.log("Service Worker registrato");
