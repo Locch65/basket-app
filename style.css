@@ -89,10 +89,18 @@ h1 {
 }
 
 #ordinamenti button {
-  padding: 8px 14px;
-  font-size: 18px;
-  border-radius: 6px;
+  font-size: 1.2rem;      /* testo più grande */
+  padding: 10px 18px;     /* più spazio interno */
+  border-radius: 6px;     /* angoli arrotondati */
+  margin: 6px;            /* spazio tra i bottoni */
   cursor: pointer;
+  background-color: #eee; /* colore di sfondo */
+  border: 1px solid #ccc;
+  transition: background-color 0.3s ease;
+}
+
+#ordinamenti button:hover {
+  background-color: #ddd; /* effetto hover */
 }
 
 #squadraB {
