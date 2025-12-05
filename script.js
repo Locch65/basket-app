@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.29";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.30";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -172,7 +172,7 @@ function renderGiocatori(lista) {
   listaGiocatoriCorrente = lista;
   const container = document.getElementById("giocatori");
   container.innerHTML = `
-    <h1 id="titoloA">${document.getElementById("teamA").value}</h1>
+    <h1 id="titoloA">${teamA}</h1>
     <div id="giocatori-in"></div>
     <div id="giocatori-out" class="out-grid">
       <div id="out-col1"></div>
@@ -393,7 +393,8 @@ function undoSquadraB() {
 function aggiornaScoreboard() {
   const puntiA = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
   const scoreboard = document.getElementById("scoreboard");
-  const nuovoTesto = `${puntiA} - ${puntiSquadraB}`;
+  const nuovoTesto = (teamA === "Polismile A") ? `${puntiA} - ${puntiSquadraB}` : `${puntiSquadraB} - ${puntiA}`;
+  
 
   if (scoreboard.textContent !== nuovoTesto) {
     scoreboard.textContent = nuovoTesto;
@@ -623,6 +624,7 @@ function init() {
     });
   }
 
+  aggiornaTitoli();
   renderGiocatori(giocatoriObj);
   aggiornaScoreboard();
   avviaAggiornamentoAutomatico();
