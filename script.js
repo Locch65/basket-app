@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.30";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.31";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -172,7 +172,6 @@ function renderGiocatori(lista) {
   listaGiocatoriCorrente = lista;
   const container = document.getElementById("giocatori");
   container.innerHTML = `
-    <h1 id="titoloA">${teamA}</h1>
     <div id="giocatori-in"></div>
     <div id="giocatori-out" class="out-grid">
       <div id="out-col1"></div>
@@ -348,7 +347,6 @@ function aggiungiPuntiGiocatore(id, punti) {
   aggiornaPunteggio(g, punti);
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
-  //ordinaGiocatori(ultimoOrdinamento)
 
   salvaSuGoogleSheets(g, punti);
   console.log("Salvato punti:", punti)
@@ -392,9 +390,18 @@ function undoSquadraB() {
 // =====================
 function aggiornaScoreboard() {
   const puntiA = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
-  const scoreboard = document.getElementById("scoreboard");
-  const nuovoTesto = (teamA === "Polismile A") ? `${puntiA} - ${puntiSquadraB}` : `${puntiSquadraB} - ${puntiA}`;
+  const puntiASalvati = localStorage.getItem("puntiSquadraA");
+  const puntiBSalvati = localStorage.getItem("puntiSquadraB");
   
+  const scoreboard = document.getElementById("scoreboard");
+  let nuovoTesto = "";
+  if (puntiA != parseInt(puntiASalvati, 10) && !isAdmin) {
+    nuovoTesto = `${puntiASalvati} - ${puntiBSalvati}`;
+  }
+  else
+  {
+    nuovoTesto = (teamA === "Polismile A") ? `${puntiA} - ${puntiSquadraB}` : `${puntiSquadraB} - ${puntiA}`;
+  }
 
   if (scoreboard.textContent !== nuovoTesto) {
     scoreboard.textContent = nuovoTesto;
@@ -455,7 +462,6 @@ function aggiornaTitoli() {
   document.getElementById("teamB").textContent = teamB
 }
 
-//let url = "https://script.google.com/macros/s/AKfycbyueecXxPq_JgfFb-Y2gKgj7agZ1ZXAvfMPrMXoXo3kRciQATa7GdkRyC4Qm0p1-47QDw/exec"
 let url = "https://script.google.com/macros/s/AKfycbxMw2S8EwK42prjk0OQCY6RLUl-Erd-d4TW5lx8mWnB5yG5-KJywz6enMqF6wmLnxBWOQ/exec"
 function salvaSuGoogleSheets(g) {
   const formData = new FormData();
@@ -496,28 +502,6 @@ function salvaSquadraB() {
   .catch(err => console.error("Errore salvataggio Squadra B:", err));
 }
 
-function caricaListaPartite() {
-  const url_1 = url + "?sheet=Partite";
-  const matchSelector = document.getElementById("matchId");
-
-  matchSelector.innerHTML = `<option>Caricamento...</option>`;
-  fetch(url_1)
-    .then(res => res.json())
-    .then(partite => {
-      matchSelector.innerHTML = ""; // svuota
-      partite.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.matchId;       // usa MatchId come value
-        opt.textContent = p.nome;    // "Squadra A vs Squadra B"
-        matchSelector.appendChild(opt);
-      });
-    })
-    .catch(err => {
-      console.error("Errore caricamento partite:", err);
-      matchSelector.innerHTML = `<option>Errore</option>`;
-    });
-}
-
 function caricaDatiPartita(matchId) {
   const url_1 = url + "?matchId=" + encodeURIComponent(matchId);
   console.log("URL: " + url_1)
@@ -526,13 +510,6 @@ function caricaDatiPartita(matchId) {
     .then(rows => {
       console.log("Dati caricati:", rows);
 
-      //// Se la prima riga contiene i nomi delle squadre, li assegni
-      //if (rows[0]?.teamA) {
-      //  document.getElementById("teamA").textContent = rows[0].teamA;
-      //}
-      //if (rows[0]?.teamB) {
-      //  document.getElementById("teamB").textContent = rows[0].teamB;
-      //}
       aggiornaTitoli();
 
       // … poi aggiorni i giocatori
@@ -547,7 +524,6 @@ function caricaDatiPartita(matchId) {
           contatoriB = JSON.parse(r.dettagli || "{}");
         }
       });
-
       renderGiocatori(giocatoriObj);
       aggiornaScoreboard();
       ordinaGiocatori(ultimoOrdinamento);
@@ -572,7 +548,6 @@ function avviaAggiornamentoAutomatico() {
 
   // Ricarica subito la partita selezionata
   if (!document.hidden) {
-//    caricaDatiPartita(matchSelector.value);
     caricaDatiPartita(matchId);
   }
   
