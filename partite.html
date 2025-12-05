@@ -139,11 +139,17 @@
                 <span class="luogo">${p.luogo}</span>
               </div>
               <div class="match-bottom">
-                <span class="teamA">${p.squadraA} <strong>${p.punteggioA ?? "-"}</strong></span>
+                <span class="teamA"><span class="team-name">${p.squadraA}</span> <strong>${p.punteggioA ?? "-"}</strong></span>
                 <span class="vs">vs</span>
-                <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> ${p.squadraB}</span>
+                <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
               </div>
             `;
+            
+            if (p.casaTrasferta === "Casa") {
+              card.querySelector(".teamA .team-name").classList.add("highlight");
+            } else if (p.casaTrasferta === "Trasferta") {
+              card.querySelector(".teamB .team-name").classList.add("highlight");
+            }
 
             card.addEventListener("click", () => {
               localStorage.setItem("matchId", p.matchId);
