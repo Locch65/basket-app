@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.32";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.33";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -464,7 +464,6 @@ function aggiornaTitoli() {
   document.getElementById("teamB").textContent = teamB
 }
 
-//let url = "https://script.google.com/macros/s/AKfycbxMw2S8EwK42prjk0OQCY6RLUl-Erd-d4TW5lx8mWnB5yG5-KJywz6enMqF6wmLnxBWOQ/exec"
 let url = "https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec"
 
 function salvaSuGoogleSheets(g) {
