@@ -77,13 +77,20 @@
     
           // 🔧 Escludi partite passate se toggle attivo
           const excludePast = document.getElementById("togglePast").checked;
+          const oggi = new Date();
           if (excludePast) {
-            const oggi = new Date();
+            // Normalizza "oggi" a mezzanotte
+            oggi.setHours(0, 0, 0, 0);
+          
             partiteFiltrate = partiteFiltrate.filter(p => {
               const dataPartita = parseItalianDate(p.data, p.orario);
+              // Normalizza anche la data della partita
+              dataPartita.setHours(0, 0, 0, 0);
+          
               return dataPartita >= oggi;
             });
           }
+
 
           // 🔧 Ordina per data crescente
           partiteFiltrate.sort((a, b) => {
@@ -92,7 +99,7 @@
             return dataA - dataB;
           });
           const frag = document.createDocumentFragment();
-          const oggi = new Date();
+          //const oggi = new Date();
 
           partiteFiltrate.forEach(p => {
             let campionato = "";
