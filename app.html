@@ -89,9 +89,15 @@
     };
     const formData = new FormData();
     formData.append("matchId", matchId);
-    formData.append("punteggioA", puntiSquadraA);
-    formData.append("punteggioB", puntiSquadraB);
-  
+	if (teamA === "Polismile A") {
+      formData.append("punteggioA", puntiSquadraA);
+      formData.append("punteggioB", puntiSquadraB);
+	}
+    else {
+      formData.append("punteggioA", puntiSquadraB);
+      formData.append("punteggioB", puntiSquadraA);
+	
+    }	
     // Invia al tuo Google Apps Script
     fetch("https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec", {
       method: "POST",
