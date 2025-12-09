@@ -57,11 +57,13 @@
       </div>
     </div>
 
-      <div id="ordinamenti">
+    <div id="ordinamenti">
+      <div class="ordinamenti-left">
         <button><i class="fas fa-arrow-up"></i> Numero</button>
         <button><i class="fas fa-arrow-up"></i> Cognome</button>
         <button><i class="fas fa-arrow-up"></i> Punteggio</button>
       </div>
+    </div>
 
     <div id="giocatori">
       <div class="loading">Caricamento giocatori...</div>
@@ -70,45 +72,8 @@
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.34"></script>
+  <script src="script.js?v=1.0.35"></script>
   <script>
-  function SalvaPunteggi() {
-  
-    if (!matchId) {
-      console.warn("Nessun matchId trovato, non salvo");
-      return;
-    }
-  
-    // Costruisci payload
-    const payload = {
-      matchId: matchId,
-      punteggioA: puntiSquadraA,
-      punteggioB: puntiSquadraB
-    };
-    const formData = new FormData();
-    formData.append("matchId", matchId);
-	if (teamA === "Polismile A") {
-      formData.append("punteggioA", puntiSquadraA);
-      formData.append("punteggioB", puntiSquadraB);
-	}
-    else {
-      formData.append("punteggioA", puntiSquadraB);
-      formData.append("punteggioB", puntiSquadraA);
-	
-    }	
-    // Invia al tuo Google Apps Script
-    fetch("https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec", {
-      method: "POST",
-      body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Risposta dal server:", data);
-    })
-    .catch(error => {
-      console.error("Errore nel salvataggio:", error);
-    });
-  }
   
   window.addEventListener("beforeunload", function (event) {
     // Mostra la finestra di conferma
