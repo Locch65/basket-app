@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.34";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.35";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -82,6 +82,266 @@ function undoPunteggio(target) {
   target.contatori[last]--;
 }
 
+function apriConvocazioni() {
+  const giocatori = giocatoriA;
+  const numeri = numeriMaglia;
+
+  // Se il popup esiste già, lo rimuovo
+  const existingPopup = document.getElementById("convocazioniPopup");
+  if (existingPopup) existingPopup.remove();
+
+  // Overlay
+  const popup = document.createElement("div");
+  popup.id = "convocazioniPopup";
+  popup.className = "convocazioniPopup-overlay";
+
+  // Contenuto
+  const content = document.createElement("div");
+  content.className = "convocazioniPopup-content";
+
+  const title = document.createElement("h2");
+  title.textContent = "Convocazioni";
+  content.appendChild(title);
+
+  // Lista giocatori
+  const list = document.createElement("ul");
+  list.className = "convocazioniPopup-list";
+
+  giocatori.forEach((nomeCompleto, index) => {
+    const li = document.createElement("li");
+    li.className = "convocazioniPopup-item";
+
+    // Split nome e cognome
+    const parts = nomeCompleto.trim().split(" ");
+    let visuale = nomeCompleto; // fallback
+    if (parts.length >= 2) {
+      const nome = parts[0];
+      const cognome = parts.slice(1).join(" "); // gestisce anche doppi cognomi
+      visuale = `${cognome} ${nome}`;
+    }
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `conv_${index}`;
+    checkbox.value = nomeCompleto; // mantieni il valore originale
+
+    const label = document.createElement("label");
+    label.htmlFor = `conv_${index}`;
+    label.textContent = `${numeri[index]} - ${visuale}`; // numero + cognome nome
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    list.appendChild(li);
+  });
+
+  content.appendChild(list);
+
+  // Bottoni
+  const confirmBtn = document.createElement("button");
+  confirmBtn.textContent = "Conferma";
+  confirmBtn.className = "convocazioniPopup-confirmBtn";
+  confirmBtn.addEventListener("click", () => {
+    const selezionati = [];
+    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
+      selezionati.push(cb.value);
+    });
+    alert("Giocatori convocati: " + selezionati.join(", "));
+  });
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Chiudi";
+  closeBtn.className = "convocazioniPopup-closeBtn";
+  closeBtn.addEventListener("click", () => {
+    popup.remove();
+  });
+
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "convocazioniPopup-buttons";
+  buttonsContainer.appendChild(confirmBtn);
+  buttonsContainer.appendChild(closeBtn);
+
+  content.appendChild(buttonsContainer);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+}
+
+
+function Old2apriConvocazioni() {
+  // Usa le liste già definite
+  const giocatori = giocatoriA;
+  const numeri = numeriMaglia;
+
+  // Se il popup esiste già, lo rimuovo per ricrearlo pulito
+  const existingPopup = document.getElementById("convocazioniPopup");
+  if (existingPopup) existingPopup.remove();
+
+  // Contenitore principale del popup
+  const popup = document.createElement("div");
+  popup.id = "convocazioniPopup";
+  popup.className = "convocazioniPopup-overlay";
+
+  // Contenuto del popup
+  const content = document.createElement("div");
+  content.className = "convocazioniPopup-content";
+
+  const title = document.createElement("h2");
+  title.textContent = "Convocazioni";
+  content.appendChild(title);
+
+  // Lista giocatori con checkbox + numero maglia
+  const list = document.createElement("ul");
+  list.className = "convocazioniPopup-list";
+
+  giocatori.forEach((nome, index) => {
+    const li = document.createElement("li");
+    li.className = "convocazioniPopup-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `conv_${nome}`;
+    checkbox.value = nome;
+
+    const label = document.createElement("label");
+    label.htmlFor = `conv_${nome}`;
+    label.textContent = `${numeri[index]} - ${nome}`; // numero + nome
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    list.appendChild(li);
+  });
+
+  content.appendChild(list);
+
+  // Bottone conferma
+  const confirmBtn = document.createElement("button");
+  confirmBtn.textContent = "Conferma";
+  confirmBtn.className = "convocazioniPopup-confirmBtn";
+  confirmBtn.addEventListener("click", () => {
+    const selezionati = [];
+    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
+      selezionati.push(cb.value);
+    });
+    alert("Giocatori convocati: " + selezionati.join(", "));
+  });
+
+  // Bottone chiudi
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Chiudi";
+  closeBtn.className = "convocazioniPopup-closeBtn";
+  closeBtn.addEventListener("click", () => {
+    popup.remove();
+  });
+
+  // Contenitore bottoni in orizzontale
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "convocazioniPopup-buttons";
+  buttonsContainer.appendChild(confirmBtn);
+  buttonsContainer.appendChild(closeBtn);
+
+  content.appendChild(buttonsContainer);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+}
+
+function OLDapriConvocazioni() {
+  // Usa la lista già definita
+  const giocatori = giocatoriA;  
+
+  // Se il popup esiste già, lo rimuovo per ricrearlo pulito
+  const existingPopup = document.getElementById("convocazioniPopup");
+  if (existingPopup) existingPopup.remove();
+
+  // Contenitore principale del popup
+  const popup = document.createElement("div");
+  popup.id = "convocazioniPopup";
+  popup.className = "convocazioniPopup-overlay";
+
+  // Contenuto del popup
+  const content = document.createElement("div");
+  content.className = "convocazioniPopup-content";
+
+  const title = document.createElement("h2");
+  title.textContent = "Convocazioni";
+  content.appendChild(title);
+
+  // Lista giocatori con checkbox
+  const list = document.createElement("ul");
+  list.className = "convocazioniPopup-list";
+
+  giocatori.forEach(nome => {
+    const li = document.createElement("li");
+    li.className = "convocazioniPopup-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `conv_${nome}`;
+    checkbox.value = nome;
+
+    const label = document.createElement("label");
+    label.htmlFor = `conv_${nome}`;
+    label.textContent = nome;
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    list.appendChild(li);
+  });
+
+  content.appendChild(list);
+
+  // Bottone conferma
+  const confirmBtn = document.createElement("button");
+  confirmBtn.textContent = "Conferma";
+  confirmBtn.className = "convocazioniPopup-confirmBtn";
+  confirmBtn.addEventListener("click", () => {
+    const selezionati = [];
+    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
+      selezionati.push(cb.value);
+    });
+    alert("Giocatori convocati: " + selezionati.join(", "));
+  });
+  
+  // Bottone chiudi
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Chiudi";
+  closeBtn.className = "convocazioniPopup-closeBtn";
+  closeBtn.addEventListener("click", () => {
+    popup.remove();
+  });
+  
+  // 👉 Contenitore bottoni in orizzontale
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "convocazioniPopup-buttons";
+  buttonsContainer.appendChild(confirmBtn);
+  buttonsContainer.appendChild(closeBtn);
+  
+  content.appendChild(buttonsContainer);
+
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+}
+
+
+function initOrdinamenti() {
+  const ordinamenti = document.getElementById("ordinamenti");
+
+  // Se sei Admin, aggiungi il bottone Convocazioni
+  if (isAdmin) {
+    // Evita di aggiungerlo due volte
+    if (!ordinamenti.querySelector(".convocazioni-btn")) {
+      const convocazioniBtn = document.createElement("button");
+      convocazioniBtn.className = "convocazioni-btn";
+      convocazioniBtn.textContent = "Convocazioni";
+
+      // 👉 qui puoi aggiungere l’evento click
+      convocazioniBtn.addEventListener("click", () => {
+        apriConvocazioni(); // funzione da definire
+      });
+
+      ordinamenti.appendChild(convocazioniBtn);
+    }
+  }
+}
+
 // =====================
 // FUNZIONI LOGIN
 // =====================
@@ -94,6 +354,7 @@ function login(pwd) {
     const loginDiv = document.getElementById("login");
 	document.getElementById("squadraB").classList.remove("hidden");
 	
+	initOrdinamenti();
     aggiornaTitoli();
 	initSquadraBControls(); // collega gli eventi ai bottoni
     // eventualmente puoi ricaricare la lista giocatori per mostrare i bottoni
@@ -863,6 +1124,44 @@ function avviaAggiornamentoAutomatico() {
 		caricaDatiPartita(matchId);
 	  }, 5000);
   }
+}
+
+function SalvaPunteggi() {
+  
+    if (!matchId) {
+      console.warn("Nessun matchId trovato, non salvo");
+      return;
+    }
+  
+    // Costruisci payload
+    const payload = {
+      matchId: matchId,
+      punteggioA: puntiSquadraA,
+      punteggioB: puntiSquadraB
+    };
+    const formData = new FormData();
+    formData.append("matchId", matchId);
+	if (teamA === "Polismile A") {
+      formData.append("punteggioA", puntiSquadraA);
+      formData.append("punteggioB", puntiSquadraB);
+	}
+    else {
+      formData.append("punteggioA", puntiSquadraB);
+      formData.append("punteggioB", puntiSquadraA);
+	
+    }	
+    // Invia al tuo Google Apps Script
+    fetch("https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Risposta dal server:", data);
+    })
+    .catch(error => {
+      console.error("Errore nel salvataggio:", error);
+    });
 }
 
 // =====================
