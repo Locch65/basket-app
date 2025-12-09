@@ -4,6 +4,14 @@ body {
   display: flex; 
   flex-direction: column; 
   font-size: 22px;
+
+  /* Proprietà standard per disabilitare la selezione del testo */
+  user-select: none;
+    
+  /* Prefissi per la massima compatibilità cross-browser */
+  -webkit-user-select: none; /* Per Chrome, Safari, iOS */
+  -moz-user-select: none;    /* Per Firefox */
+  -ms-user-select: none;     /* Per Edge, IE */
 }
 
 h1 { 
@@ -83,14 +91,40 @@ h1 {
   border-bottom: 2px solid #ccc;
 }
 
+/* Contenitore dei controlli */
+#controlsB {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  /*order: 2;  Di default, #controlsB è a destra del punteggio (è il secondo elemento) */
+}
+
+/* Punteggio */
+.squadraB-row .punteggio {
+  font-size: 28px;
+  font-weight: bold;
+  order: 1; /* Di default, il punteggio è a sinistra (è il primo elemento) */
+  margin-right: 12px; /* Spazio dopo il punteggio */
+  margin-left: 0;
+}
+#controlsB .punteggio {
+  font-size: 36px;   /* ingrandisce il testo */
+  font-weight: bold; /* mantiene il grassetto */
+  margin-left: 12px; /* spazio rispetto al bottone Undo */
+}
+
+#controlsB.left { margin-right: auto; }
+#controlsB.right { margin-left: auto; }
+
+/* Ordinamenti */
 #ordinamenti {
-  display: flex;
-  gap: 10px;
+  margin-bottom: 2px;      /* piccolo spazio sotto, vicino ai giocatori */
+  text-align: left;
 }
 
 #ordinamenti button {
-  font-size: 1.2rem;      /* testo più grande */
-  padding: 10px 18px;     /* più spazio interno */
+  font-size: 1.6rem;      /* testo più grande */
+  padding: 14px 22px;     /* più spazio interno */
   border-radius: 6px;     /* angoli arrotondati */
   margin: 6px;            /* spazio tra i bottoni */
   cursor: pointer;
@@ -103,31 +137,18 @@ h1 {
   background-color: #ddd; /* effetto hover */
 }
 
-#squadraB {
-  text-align: right;
-}
 
-.squadraB-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.squadraB-row .punteggio {
-  font-size: 28px;
-  font-weight: bold;
-  margin-right: 12px;
-}
 
 .giocatore { 
+  cursor: pointer;
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
   margin-bottom: 8px; 
-  padding: 12px; 
+  font-size: 26px;       /* testo più grande */
+  padding: 18px;         /* più spazio interno */
+  border-radius: 12px;   /* angoli più morbidi */
   border: 2px solid #ccc; 
-  border-radius: 8px; 
-  font-size: 22px;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   will-change: transform; /* hint per performance */
 }
@@ -168,13 +189,13 @@ h1 {
 .numero {
   font-weight: bold;
   color: #2c3e50;
-  min-width: 50px;
+  min-width: 60px;
   text-align: center;
-  font-size: 32px;
+  font-size: 36px;
 }
 
 .cognome {
-  font-size: 32px;
+  font-size: 38px;
   font-weight: bold;
   min-width: 260px;
   max-width: 260px;
@@ -205,30 +226,31 @@ h1 {
 
 .tiro {
   margin: 0 2px;
-  padding: 14px 22px;
-  font-size: 24px;
-  border-radius: 10px;
+  padding: 18px 26px;
+  font-size: 28px;
+  border-radius: 12px;
   cursor: pointer;
 }
 
 .undo {
   margin: 0 4px;
-  padding: 10px 16px;
-  font-size: 22px;
+  font-size: 28px;
+  padding: 10px 18px;
   border-radius: 6px;
   cursor: pointer;
   color: red;
   font-weight: bold;
 }
 
+
 .punteggio .totale {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: bold;
   color: #000;
 }
 
 .punteggio .dettagli {
-  font-size: 24px;
+  font-size: 28px;
   color: #555;
   margin-left: 6px;
 }
@@ -254,6 +276,96 @@ h1 {
   from { transform: scale(1); }
   to { transform: scale(1.2); }
 }
+
+#playerPopup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;   /* 👈 sposta in alto */
+  z-index: 9999;
+  overflow-y: auto;          /* utile se il contenuto è alto */
+}
+
+#playerPopup .popup-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 48px;
+  width: 100%;
+  max-width: 800px;
+  margin-top: 200px;          /* 👈 distanza dal bordo superiore */
+}
+#playerPopup .popup-content h2 {
+  font-size: 3.4rem;
+  margin-bottom: 16px;
+  white-space: nowrap;      /* evita che vada a capo */
+  overflow: hidden;
+  text-overflow: ellipsis;  /* se troppo lungo, mostra "..." */
+  max-width: 100%;          /* usa tutta la larghezza disponibile */
+}
+
+/* Se vuoi che il cognome abbia ancora più spazio rispetto al numero */
+#playerPopup .popup-content h2 .numero {
+  display: inline-block;
+  min-width: 60px;          /* spazio fisso per il numero */
+}
+#playerPopup .popup-content h2 .cognome {
+  font-size: 4.2rem;
+  width: calc(100% - 20px); /* tutto il resto della riga per il cognome */
+  text-align: left;
+}
+
+
+/* Bottoni incremento → verde */
+#playerPopup .btn-inc {
+  background-color: #4CAF50;   /* verde */
+  color: white;
+  border: none;
+}
+
+/* Bottoni decremento → rosso chiaro */
+#playerPopup .btn-dec {
+  background-color: #f28b82;   /* rosso chiaro */
+  color: white;
+  border: none;
+}
+
+/* Stile comune */
+#playerPopup .btn-inc,
+#playerPopup .btn-dec {
+  font-size: 2.2rem;
+  margin: 6px;
+  padding: 12px 0;
+  width: 100px;
+  height: 80px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+#playerPopup button {
+  font-size: 2.2rem;
+  margin: 6px;
+  padding: 12px 0;        /* spazio verticale uniforme */
+  width: 100px;            /* larghezza fissa */
+  height: 80px;           /* altezza fissa */
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Bottone chiudi: occupa tutta la larghezza */
+#playerPopup button.close-btn {
+  width: 80%;
+  height: auto;
+  padding: 14px;
+  margin-top: 60px;
+}
+
 
 
 #listaPartite.loading {
