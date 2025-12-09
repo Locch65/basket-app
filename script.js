@@ -1,18 +1,9 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.35";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.36";  // Aggiorna questo numero ad ogni modifica
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Mostra la versione nello UI
-  const versionDiv = document.getElementById("scriptVersion");
-  if (versionDiv) {
-    versionDiv.textContent = "Script v" + SCRIPT_VERSION;
-  }
 
-  console.log("Script.js versione:", SCRIPT_VERSION);
-
-});
 
 // =====================
 // DATI INIZIALI
@@ -24,6 +15,8 @@ const giocatoriA = [
 ];
 
 const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "41", "29"];
+
+let convocazioni = "";
 
 let puntiSquadraA = 0;
 let puntiSquadraB = 0;
@@ -107,6 +100,17 @@ function apriConvocazioni() {
   const list = document.createElement("ul");
   list.className = "convocazioniPopup-list";
 
+  // Converto la stringa globale convocazioni in array di numeri
+  let convocatiNum = [];
+  if (convocazioni && convocazioni.trim() !== "") {
+    try {
+      const parsed = JSON.parse(convocazioni); // es. "[10, 7, 5]"
+      convocatiNum = Array.isArray(parsed) ? parsed.map(n => Number(n)) : [];
+    } catch (e) {
+      console.warn("Formato convocazioni non valido:", convocazioni);
+    }
+  }
+
   giocatori.forEach((nomeCompleto, index) => {
     const li = document.createElement("li");
     li.className = "convocazioniPopup-item";
@@ -116,18 +120,23 @@ function apriConvocazioni() {
     let visuale = nomeCompleto; // fallback
     if (parts.length >= 2) {
       const nome = parts[0];
-      const cognome = parts.slice(1).join(" "); // gestisce anche doppi cognomi
+      const cognome = parts.slice(1).join(" ");
       visuale = `${cognome} ${nome}`;
     }
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.id = `conv_${index}`;
-    checkbox.value = nomeCompleto; // mantieni il valore originale
+    checkbox.value = index; // salvo l'indice
+
+    const numeroMaglia = Number(numeri[index]); // normalizzo a numero
+    if (convocatiNum.includes(numeroMaglia)) {
+      checkbox.checked = true;
+    }
 
     const label = document.createElement("label");
     label.htmlFor = `conv_${index}`;
-    label.textContent = `${numeri[index]} - ${visuale}`; // numero + cognome nome
+    label.textContent = `${numeri[index]} - ${visuale}`;
 
     li.appendChild(checkbox);
     li.appendChild(label);
@@ -143,9 +152,13 @@ function apriConvocazioni() {
   confirmBtn.addEventListener("click", () => {
     const selezionati = [];
     list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
-      selezionati.push(cb.value);
+      const idx = parseInt(cb.value, 10);
+      selezionati.push(Number(numeri[idx])); // salvo come numeri
     });
-    alert("Giocatori convocati: " + selezionati.join(", "));
+
+    // Memorizzo nella variabile globale come stringa "[x, y, z]"
+    convocazioni = "[" + selezionati.join(", ") + "]";
+    alert("Convocazioni salvate: " + convocazioni);
   });
 
   const closeBtn = document.createElement("button");
@@ -155,84 +168,6 @@ function apriConvocazioni() {
     popup.remove();
   });
 
-  const buttonsContainer = document.createElement("div");
-  buttonsContainer.className = "convocazioniPopup-buttons";
-  buttonsContainer.appendChild(confirmBtn);
-  buttonsContainer.appendChild(closeBtn);
-
-  content.appendChild(buttonsContainer);
-  popup.appendChild(content);
-  document.body.appendChild(popup);
-}
-
-
-function Old2apriConvocazioni() {
-  // Usa le liste già definite
-  const giocatori = giocatoriA;
-  const numeri = numeriMaglia;
-
-  // Se il popup esiste già, lo rimuovo per ricrearlo pulito
-  const existingPopup = document.getElementById("convocazioniPopup");
-  if (existingPopup) existingPopup.remove();
-
-  // Contenitore principale del popup
-  const popup = document.createElement("div");
-  popup.id = "convocazioniPopup";
-  popup.className = "convocazioniPopup-overlay";
-
-  // Contenuto del popup
-  const content = document.createElement("div");
-  content.className = "convocazioniPopup-content";
-
-  const title = document.createElement("h2");
-  title.textContent = "Convocazioni";
-  content.appendChild(title);
-
-  // Lista giocatori con checkbox + numero maglia
-  const list = document.createElement("ul");
-  list.className = "convocazioniPopup-list";
-
-  giocatori.forEach((nome, index) => {
-    const li = document.createElement("li");
-    li.className = "convocazioniPopup-item";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = `conv_${nome}`;
-    checkbox.value = nome;
-
-    const label = document.createElement("label");
-    label.htmlFor = `conv_${nome}`;
-    label.textContent = `${numeri[index]} - ${nome}`; // numero + nome
-
-    li.appendChild(checkbox);
-    li.appendChild(label);
-    list.appendChild(li);
-  });
-
-  content.appendChild(list);
-
-  // Bottone conferma
-  const confirmBtn = document.createElement("button");
-  confirmBtn.textContent = "Conferma";
-  confirmBtn.className = "convocazioniPopup-confirmBtn";
-  confirmBtn.addEventListener("click", () => {
-    const selezionati = [];
-    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
-      selezionati.push(cb.value);
-    });
-    alert("Giocatori convocati: " + selezionati.join(", "));
-  });
-
-  // Bottone chiudi
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Chiudi";
-  closeBtn.className = "convocazioniPopup-closeBtn";
-  closeBtn.addEventListener("click", () => {
-    popup.remove();
-  });
-
-  // Contenitore bottoni in orizzontale
   const buttonsContainer = document.createElement("div");
   buttonsContainer.className = "convocazioniPopup-buttons";
   buttonsContainer.appendChild(confirmBtn);
@@ -244,19 +179,19 @@ function Old2apriConvocazioni() {
 }
 
 function OLDapriConvocazioni() {
-  // Usa la lista già definita
-  const giocatori = giocatoriA;  
+  const giocatori = giocatoriA;
+  const numeri = numeriMaglia;
 
-  // Se il popup esiste già, lo rimuovo per ricrearlo pulito
+  // Se il popup esiste già, lo rimuovo
   const existingPopup = document.getElementById("convocazioniPopup");
   if (existingPopup) existingPopup.remove();
 
-  // Contenitore principale del popup
+  // Overlay
   const popup = document.createElement("div");
   popup.id = "convocazioniPopup";
   popup.className = "convocazioniPopup-overlay";
 
-  // Contenuto del popup
+  // Contenuto
   const content = document.createElement("div");
   content.className = "convocazioniPopup-content";
 
@@ -264,22 +199,31 @@ function OLDapriConvocazioni() {
   title.textContent = "Convocazioni";
   content.appendChild(title);
 
-  // Lista giocatori con checkbox
+  // Lista giocatori
   const list = document.createElement("ul");
   list.className = "convocazioniPopup-list";
 
-  giocatori.forEach(nome => {
+  giocatori.forEach((nomeCompleto, index) => {
     const li = document.createElement("li");
     li.className = "convocazioniPopup-item";
 
+    // Split nome e cognome
+    const parts = nomeCompleto.trim().split(" ");
+    let visuale = nomeCompleto; // fallback
+    if (parts.length >= 2) {
+      const nome = parts[0];
+      const cognome = parts.slice(1).join(" ");
+      visuale = `${cognome} ${nome}`;
+    }
+
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.id = `conv_${nome}`;
-    checkbox.value = nome;
+    checkbox.id = `conv_${index}`;
+    checkbox.value = index; // salvo l'indice
 
     const label = document.createElement("label");
-    label.htmlFor = `conv_${nome}`;
-    label.textContent = nome;
+    label.htmlFor = `conv_${index}`;
+    label.textContent = `${numeri[index]} - ${visuale}`;
 
     li.appendChild(checkbox);
     li.appendChild(label);
@@ -288,38 +232,39 @@ function OLDapriConvocazioni() {
 
   content.appendChild(list);
 
-  // Bottone conferma
+  // Bottoni
   const confirmBtn = document.createElement("button");
   confirmBtn.textContent = "Conferma";
   confirmBtn.className = "convocazioniPopup-confirmBtn";
   confirmBtn.addEventListener("click", () => {
     const selezionati = [];
     list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
-      selezionati.push(cb.value);
+      const idx = parseInt(cb.value, 10);
+      selezionati.push(numeri[idx]);
     });
-    alert("Giocatori convocati: " + selezionati.join(", "));
+
+    // Memorizzo nella variabile globale come stringa "[x, y, z]"
+    convocazioni = "[" + selezionati.join(", ") + "]";
+    SalvaPunteggi();
+    alert("Convocazioni salvate: " + convocazioni);
   });
-  
-  // Bottone chiudi
+
   const closeBtn = document.createElement("button");
   closeBtn.textContent = "Chiudi";
   closeBtn.className = "convocazioniPopup-closeBtn";
   closeBtn.addEventListener("click", () => {
     popup.remove();
   });
-  
-  // 👉 Contenitore bottoni in orizzontale
+
   const buttonsContainer = document.createElement("div");
   buttonsContainer.className = "convocazioniPopup-buttons";
   buttonsContainer.appendChild(confirmBtn);
   buttonsContainer.appendChild(closeBtn);
-  
-  content.appendChild(buttonsContainer);
 
+  content.appendChild(buttonsContainer);
   popup.appendChild(content);
   document.body.appendChild(popup);
 }
-
 
 function initOrdinamenti() {
   const ordinamenti = document.getElementById("ordinamenti");
@@ -1027,7 +972,9 @@ function aggiornaTitoli() {
   document.getElementById("teamB").textContent = teamB
 }
 
-let url = "https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec"
+let url = 
+"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
+
 
 function salvaSuGoogleSheets(g) {
   const formData = new FormData();
@@ -1133,25 +1080,22 @@ function SalvaPunteggi() {
       return;
     }
   
-    // Costruisci payload
-    const payload = {
-      matchId: matchId,
-      punteggioA: puntiSquadraA,
-      punteggioB: puntiSquadraB
-    };
     const formData = new FormData();
     formData.append("matchId", matchId);
-	if (teamA === "Polismile A") {
+
+    if (teamA === "Polismile A") {
       formData.append("punteggioA", puntiSquadraA);
       formData.append("punteggioB", puntiSquadraB);
-	}
-    else {
+    } else {
       formData.append("punteggioA", puntiSquadraB);
       formData.append("punteggioB", puntiSquadraA);
-	
-    }	
+    }
+
+    // Aggiungi la variabile convocazioni
+    formData.append("convocazioni", convocazioni);
+
     // Invia al tuo Google Apps Script
-    fetch("https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec", {
+    fetch(url, {
       method: "POST",
       body: formData
     })
@@ -1168,8 +1112,18 @@ function SalvaPunteggi() {
 // INIZIALIZZAZIONE
 // =====================
 function init() {
+  const versionDiv = document.getElementById("scriptVersion");
+  if (versionDiv) {
+    versionDiv.textContent = "Basket App v." + SCRIPT_VERSION;
+  }
+
+  console.log("Script.js versione:", SCRIPT_VERSION);
+
+
   teamA = localStorage.getItem("teamA");
   teamB = localStorage.getItem("teamB");
+  convocazioni = localStorage.getItem("convocazioni");
+  
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
     matchId = savedMatchId;
