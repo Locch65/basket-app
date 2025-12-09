@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.33";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.34";  // Aggiorna questo numero ad ogni modifica
 
 document.addEventListener("DOMContentLoaded", () => {
   // Mostra la versione nello UI
@@ -142,8 +142,199 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
 function initSquadraBControls() {
+  if (!isAdmin) return;
+
+  // Assicurati che la sezione Squadra B esista e sia nel DOM
+  const squadraB = document.getElementById("squadraB");
+  if (!squadraB) return;
+
+  const controlsContainer = document.getElementById("controlsB");
+  if (!controlsContainer) return;
+
+  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
+
+  // Creo dinamicamente i bottoni +1, +2, +3
+  [1, 2, 3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "tiro";
+    btn.textContent = `➕${p}`;
+    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
+    controlsContainer.appendChild(btn);
+  });
+
+  // Bottone undo
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "undo";
+  undoBtn.textContent = "↩️";
+  undoBtn.addEventListener("click", undoSquadraB);
+  controlsContainer.appendChild(undoBtn);
+
+  // Trova o crea il punteggio
+  let punti = squadraB.querySelector("#punti_squadraB");
+  if (!punti) {
+    punti = document.createElement("span");
+    punti.id = "punti_squadraB";
+    punti.className = "punteggio";
+    // opzionale: valore iniziale
+    punti.textContent = "0";
+    // inseriscilo temporaneamente nella riga per non perderlo
+    const row = squadraB.querySelector(".squadraB-row");
+    if (row) row.appendChild(punti);
+  }
+
+  // Sposta il punteggio dentro controlsB (solo se non è già lì)
+  if (punti.parentElement !== controlsContainer) {
+    controlsContainer.appendChild(punti);
+  }
+
+  // Allineamento in base a TeamA
+  const rawTeamA = document.getElementById("teamA")?.textContent || "";
+  const teamAName = rawTeamA.replace(/\s+/g, " ").trim();
+
+  controlsContainer.classList.remove("right", "left");
+  if (teamAName === "Polismile A") {
+    controlsContainer.classList.add("right");
+  } else {
+    controlsContainer.classList.add("left");
+  }
+}
+
+
+function OLD4initSquadraBControls() {
+  if (!isAdmin) return;
+
+// Assicurati che la sezione Squadra B esista e sia nel DOM
+  const squadraB = document.getElementById("squadraB");
+  if (!squadraB) return;
+  
+  const controlsContainer = document.getElementById("controlsB");
+  const row = document.querySelector(".squadraB-row"); // la riga che contiene punteggio + controlli
+
+  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
+
+  // Creo dinamicamente i bottoni +1, +2, +3
+  [1, 2, 3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "tiro";
+    btn.textContent = `➕${p}`;
+    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
+    controlsContainer.appendChild(btn);
+  });
+
+  // Bottone undo
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "undo";
+  undoBtn.textContent = "↩️";
+  undoBtn.addEventListener("click", undoSquadraB);
+  controlsContainer.appendChild(undoBtn);
+
+// Trova o crea il punteggio
+  let punti = squadraB.querySelector("#punti_squadraB");
+  if (!punti) {
+    punti = document.createElement("span");
+    punti.id = "punti_squadraB";
+    punti.className = "punteggio";
+    // opzionale: valore iniziale
+    punti.textContent = "0";
+    // inseriscilo temporaneamente nella riga per non perderlo
+    const row = squadraB.querySelector(".squadraB-row");
+    if (row) row.appendChild(punti);
+  }
+
+  // Sposta il punteggio dentro controlsB (solo se non è già lì)
+  if (punti.parentElement !== controlsContainer) {
+    controlsContainer.appendChild(punti);
+  }
+  
+  // Logica di allineamento in base a TeamA
+  const rawTeamA = document.getElementById("teamA")?.textContent || "";
+  const teamAName = rawTeamA.replace(/\s+/g, " ").trim();
+
+  // Rimuovo la variante precedente e applico quella corretta
+  controlsContainer.classList.remove("right", "left"); // Rimuovi entrambe le classi
+  
+  if (teamAName === "Polismile A") {
+    // Se TeamA è "Polismile A" -> Allinea a destra
+    controlsContainer.classList.add("right");
+  } else {
+    // Se TeamA è diverso -> Allinea a sinistra
+    controlsContainer.classList.add("left");
+  }
+}
+
+function OLD3initSquadraBControls() {
+  if (!isAdmin) return;
+
+  const controlsContainer = document.getElementById("controlsB");
+  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
+
+  // Creo dinamicamente i bottoni +1, +2, +3
+  [1, 2, 3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "tiro";
+    btn.textContent = `➕${p}`;
+    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
+    controlsContainer.appendChild(btn);
+  });
+
+  // Bottone undo
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "undo";
+  undoBtn.textContent = "↩️";
+  undoBtn.addEventListener("click", undoSquadraB);
+  controlsContainer.appendChild(undoBtn);
+
+  // 🔎 Logica di allineamento in base al nome di TeamA
+  const rawTeamA = document.getElementById("teamA")?.textContent || "";
+  const teamAName = rawTeamA.replace(/\s+/g, " ").trim();
+
+  // Rimuovo eventuali classi precedenti
+  controlsContainer.classList.remove("left", "right");
+
+  if (teamAName === "Polismile A") {
+    controlsContainer.classList.add("right");
+  } else {
+    controlsContainer.classList.add("left");
+  }
+}
+
+function OLD2initSquadraBControls() {
+  if (!isAdmin) return;
+
+  const controlsContainer = document.getElementById("controlsB");
+  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
+
+  // Creo dinamicamente i bottoni +1, +2, +3
+  [1, 2, 3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "tiro";
+    btn.textContent = `➕${p}`;
+    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
+    controlsContainer.appendChild(btn);
+  });
+
+  // Bottone undo
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "undo";
+  undoBtn.textContent = "↩️";
+  undoBtn.addEventListener("click", undoSquadraB);
+  controlsContainer.appendChild(undoBtn);
+
+  // 🔎 Logica di allineamento in base al nome di TeamA
+  const teamAName = document.getElementById("teamA").textContent.trim();
+
+  // Rimuovo eventuali classi precedenti
+  controlsContainer.classList.remove("left", "right");
+
+  if (teamAName === "Polismile A") {
+    controlsContainer.classList.add("right");
+  } else {
+    controlsContainer.classList.add("left");
+  }
+}
+
+function OLDinitSquadraBControls() {
   if (!isAdmin) return;
 
   const controlsContainer = document.getElementById("controlsB");
@@ -169,6 +360,110 @@ function initSquadraBControls() {
 // =====================
 // RENDERING UI
 // =====================
+function showPlayerPopup(g) {
+  // Rimuovi eventuale popup già aperto
+  const existing = document.getElementById("playerPopup");
+  if (existing) existing.remove();
+
+  // Contenitore overlay
+  const overlay = document.createElement("div");
+  overlay.id = "playerPopup";
+  overlay.className = "popup";
+
+  // Contenuto popup
+  const content = document.createElement("div");
+  content.className = "popup-content";
+
+  // Numero e cognome
+  const header = document.createElement("h2");
+  //header.textContent = `${g.numero} - ${g.displayName}`;
+  header.innerHTML = `<span class="numero">${g.numero}</span> <span class="cognome">${g.displayName}</span>`;
+  content.appendChild(header);
+
+  // Punteggio con dettagli
+  const scoreLine = document.createElement("p");
+  scoreLine.textContent = `Punteggio: ${g.punteggio} [${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]`;
+  content.appendChild(scoreLine);
+
+  // Bottoni incremento
+  const incContainer = document.createElement("div");
+  [1,2,3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.textContent = `+${p}`;
+	btn.className = "btn-inc";
+    btn.addEventListener("click", () => {
+      g.punteggio += p;
+      g.contatori[p]++;
+      scoreLine.textContent = `Punteggio: ${g.punteggio} [${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]`;
+      aggiornaUIGiocatore(g);
+      aggiornaScoreboard();
+      salvaSuGoogleSheets(g);
+    });
+    incContainer.appendChild(btn);
+  });
+  content.appendChild(incContainer);
+
+  // Bottoni decremento
+  const decContainer = document.createElement("div");
+  [1,2,3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.textContent = `-${p}`;
+	btn.className = "btn-dec";   // 👈 classe per decremento
+    btn.addEventListener("click", () => {
+      if (g.contatori[p] > 0) {
+        g.punteggio -= p;
+        g.contatori[p]--;
+        scoreLine.textContent = `Punteggio: ${g.punteggio} [${g.contatori[1]},${g.contatori[2]},${g.contatori[3]}]`;
+        aggiornaUIGiocatore(g);
+        aggiornaScoreboard();
+        salvaSuGoogleSheets(g);
+      }
+    });
+    decContainer.appendChild(btn);
+  });
+  content.appendChild(decContainer);
+
+  // Bottone chiudi
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Chiudi";
+  closeBtn.className = "close-btn";
+  closeBtn.addEventListener("click", () => overlay.remove());
+  content.appendChild(closeBtn);
+
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+  
+  // 👉 Chiudi cliccando fuori dal contenuto
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+    }
+  });
+}
+
+// Funzione helper per gestire il tap prolungato
+function addLongPressListener(element, callback, duration = 600) {
+  let timer;
+
+  element.addEventListener("mousedown", () => {
+    timer = setTimeout(callback, duration);
+  });
+  element.addEventListener("mouseup", () => {
+    clearTimeout(timer);
+  });
+  element.addEventListener("mouseleave", () => {
+    clearTimeout(timer);
+  });
+
+  // Supporto per smartphone (touch)
+  element.addEventListener("touchstart", () => {
+    timer = setTimeout(callback, duration);
+  });
+  element.addEventListener("touchend", () => {
+    clearTimeout(timer);
+  });
+}
+
 function renderGiocatori(lista) {
   listaGiocatoriCorrente = lista;
   const container = document.getElementById("giocatori");
@@ -190,7 +485,6 @@ function renderGiocatori(lista) {
     return a.stato === "In" ? -1 : 1;
   });
 
-  // Dividi giocatori Out in due colonne
   const outPlayers = lista.filter(g => g.stato === "Out");
   const metà = Math.ceil(outPlayers.length / 2);
 
@@ -212,13 +506,30 @@ function renderGiocatori(lista) {
       </div>
     `;
 
+    // 👉 Card cliccabile per cambiare stato
+    if (isAdmin) {
+      div.style.cursor = "pointer";
+      div.addEventListener("click", (e) => {
+        // Evita che il click sui bottoni punteggio cambi lo stato
+        if (e.target.tagName.toLowerCase() === "button") return;
+        const nuovoStato = g.stato === "In" ? "Out" : "In";
+        setStato(g.id, nuovoStato);
+      });
+	  
+	  // tap prolungato → azione speciale
+      addLongPressListener(div, () => {
+        showPlayerPopup(g);
+      });
+    }
+
     // Bottoni punteggio: solo se admin e giocatore In
     if (isAdmin && g.stato === "In") {
       const controls = document.createElement("div");
       [1,2,3].forEach(p => {
         const btn = document.createElement("button");
         btn.className = "tiro";
-        btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
+        //btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
+        btn.textContent = `➕${p}`;
         btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
         controls.appendChild(btn);
       });
@@ -230,25 +541,13 @@ function renderGiocatori(lista) {
       div.appendChild(controls);
     }
 
-    // Bottone stato: sempre se admin
-    if (isAdmin) {
-      let statoBtn = document.createElement("button");
-      statoBtn.className = g.stato === "In" ? "stato-btn stato-out" : "stato-btn stato-in";
-      statoBtn.textContent = g.stato === "In" ? "Out" : "In";
-      statoBtn.addEventListener("click", () => setStato(g.id, g.stato === "In" ? "Out" : "In"));
-      div.querySelector(".nome").appendChild(statoBtn);
-    }
-
     // Append nel contenitore giusto
     if (g.stato === "In") {
       inContainer.appendChild(div);
     } else {
       const idx = outPlayers.indexOf(g);
-      if (idx < metà) {
-        outCol1.appendChild(div);
-      } else {
-        outCol2.appendChild(div);
-      }
+      if (idx < metà) outCol1.appendChild(div);
+      else outCol2.appendChild(div);
     }
   });
 }
@@ -349,7 +648,7 @@ function aggiungiPuntiGiocatore(id, punti) {
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
 
-  salvaSuGoogleSheets(g, punti);
+  salvaSuGoogleSheets(g);
   console.log("Salvato punti:", punti)
 }
 
@@ -360,7 +659,7 @@ function undoGiocatore(id) {
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
   console.log("undoGiocatore: ",g.punteggio );	
-  salvaSuGoogleSheets(g, g.punteggio);
+  salvaSuGoogleSheets(g);
 
 }
 
@@ -427,19 +726,22 @@ function aggiornaScoreboard() {
 // =====================
 // STATO & ORDINAMENTI
 // =====================
+// =====================
+// CAMBIO STATO
+// =====================
 function setStato(id, stato) {
   const g = giocatoriObj.find(x => x.id === id);
+  if (!g) return;
   g.stato = stato;
 
-  // seleziona il div del giocatore usando data-id
   const div = document.querySelector(`.giocatore[data-id="${id}"]`);
   if (div) {
     div.className = `giocatore ${stato.toLowerCase()}`;
   }
-  salvaSuGoogleSheets(g, 0); // salva  solo lo stato
-  ordinaGiocatori(ultimoOrdinamento)
-}
 
+  salvaSuGoogleSheets(g);  
+  ordinaGiocatori(ultimoOrdinamento);
+}
 
 function ordinaGiocatori(criterio) {
   ultimoOrdinamento = criterio;
