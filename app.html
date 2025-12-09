@@ -42,15 +42,9 @@
 
   <div id="contenuto">
     <div id="topControls">
-    <div id="ordinamenti">
-      <button><i class="fas fa-arrow-up"></i> Numero</button>
-      <button><i class="fas fa-arrow-up"></i> Cognome</button>
-      <button><i class="fas fa-arrow-up"></i> Punteggio</button>
-    </div>
       <div id="squadraB" class="hidden">
         <h1 id="titoloB"></h1>
         <div class="squadraB-row">
-          <span id="punti_squadraB" class="punteggio"></span>
 		  <!-- Bottoni punteggio: nascosti di default -->
           <div id="controlsB">
           <!--  <button class="tiro">➕1</button> -->
@@ -58,9 +52,16 @@
           <!--  <button class="tiro">➕3</button> -->
           <!--  <button class="undo">↩️</button> -->
           </div>
+          <span id="punti_squadraB" class="punteggio"></span>
         </div>
       </div>
     </div>
+
+      <div id="ordinamenti">
+        <button><i class="fas fa-arrow-up"></i> Numero</button>
+        <button><i class="fas fa-arrow-up"></i> Cognome</button>
+        <button><i class="fas fa-arrow-up"></i> Punteggio</button>
+      </div>
 
     <div id="giocatori">
       <div class="loading">Caricamento giocatori...</div>
@@ -69,12 +70,9 @@
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.33"></script>
+  <script src="script.js?v=1.0.34"></script>
   <script>
   function SalvaPunteggi() {
-    //const punteggioA = document.getElementById("punti_squadraA")?.textContent || "0";
-    //const punteggioB = document.getElementById("punti_squadraB")?.textContent || "0";
-    //const matchId = localStorage.getItem("matchId"); // 🔧 recupera l'ID partita
   
     if (!matchId) {
       console.warn("Nessun matchId trovato, non salvo");
