@@ -118,8 +118,32 @@ h1 {
 
 /* Ordinamenti */
 #ordinamenti {
-  margin-bottom: 2px;      /* piccolo spazio sotto, vicino ai giocatori */
-  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* spazio tra sinistra e destra */
+  gap: 10px;
+}
+
+/* Contenitore dei tre bottoni */
+#ordinamenti .ordinamenti-left {
+  display: flex;
+  gap: 10px;
+}
+
+/* Bottone Convocazioni */
+#ordinamenti .convocazioni-btn {
+  margin-left: auto;   /* spinge il bottone a destra */
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.6rem;
+}
+
+#ordinamenti .convocazioni-btn:hover {
+  background-color: #0056b3;
 }
 
 #ordinamenti button {
@@ -837,4 +861,91 @@ body.dark-mode .campionato.U14 {
 body.dark-mode .campionato.U15 {
   background-color: #e67e22;
   color: #000;
+}
+
+/* Overlay scuro */
+.convocazioniPopup-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 10000;
+  overflow-y: auto;
+}
+
+/* Contenuto del popup */
+.convocazioniPopup-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 100px;
+}
+
+/* Titolo */
+.convocazioniPopup-content h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Lista giocatori */
+.convocazioniPopup-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.convocazioniPopup-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;              /* più spazio tra checkbox e nome */
+  padding: 12px;          /* più spazio interno */
+  margin: 6px 0;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+/* Checkbox più grandi */
+.convocazioniPopup-item input[type="checkbox"] {
+  width: 32px;            /* larghezza maggiore */
+  height: 32px;           /* altezza maggiore */
+  cursor: pointer;
+}
+
+/* Nomi giocatori più grandi */
+.convocazioniPopup-item label {
+  font-size: 32px;        /* ingrandisce il testo */
+  font-weight: 600;       /* semi-bold */
+  cursor: pointer;
+}
+
+/* Contenitore bottoni in orizzontale */
+.convocazioniPopup-buttons {
+  display: flex;
+  justify-content: center; /* centrati orizzontalmente */
+  gap: 20px;               /* spazio tra i bottoni */
+  margin-top: 20px;
+}
+/* Bottoni */
+.convocazioniPopup-confirmBtn,
+.convocazioniPopup-closeBtn {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 2.5rem;
+  min-width: 120px; /* larghezza minima per uniformità */
+}
+
+.convocazioniPopup-confirmBtn:hover,
+.convocazioniPopup-closeBtn:hover {
+  background-color: #0056b3;
 }
