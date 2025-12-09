@@ -40,7 +40,7 @@
 
   <script>
     const url = 
-	 "https://script.google.com/macros/s/AKfycbzJp7oDq1_vstaSyfY4jHVHvEH-LMUX2S5Mjg8laQSzwXYdGpWtrcxVr4pg_EM5JAACqQ/exec"
+	"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
 
     // Parsing data in formato dd/MM/YYYY
     function parseItalianDate(dateStr, timeStr) {
@@ -164,6 +164,7 @@
               localStorage.setItem("teamB", p.squadraB);
               localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
               localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
+              localStorage.setItem("convocazioni", p.convocazioni);
               window.location.href = "app.html";
             });
 
