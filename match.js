@@ -933,6 +933,9 @@ function init() {
   teamA = localStorage.getItem("teamA");
   teamB = localStorage.getItem("teamB");
   convocazioni = localStorage.getItem("convocazioni");
+  VideoId = localStorage.getItem("VideoId"); // metti null se non vuoi mostrare il bottone
+  VideoId = "7LMjqTC9DyQ"; // ATTENZIONE CANCELLARE
+  
   
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
@@ -943,6 +946,24 @@ function init() {
     console.log("Nessun matchId salvato");
   }
 
+  const videoBtn = document.getElementById("videoBtn");
+
+  // Mostra il bottone solo se VideoId è diverso da null
+  if (VideoId !== null) {
+    videoBtn.style.display = "inline-block";
+  }
+
+  videoBtn.addEventListener("click", () => {
+    if (VideoId !== null) {
+      // passa VideoId come query string
+      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(VideoId);
+    } else {
+      // fallback se VideoId è nullo
+      alert("Nessun VideoId disponibile");
+    }
+  });
+
+  
   // Bottoni ordinamento
   document.querySelector("#ordinamenti button:nth-child(1)")
     .addEventListener("click", () => ordinaGiocatori("numero"));
