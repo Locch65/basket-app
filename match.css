@@ -32,14 +32,43 @@ h1 {
   position: absolute;
   top: 10px;
   left: 10px;
+  
+  display: flex;
+  gap: 40px; /* aumenta lo spazio tra hamburger e bottone Video */
+  
+  
 }
 
 #hamburgerBtn {
+  padding: 8px 12px;
+  font-size: 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#OLDhamburgerBtn {
   font-size: 2rem;
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
 }
+
+
+#videoBtn {
+  padding: 10px 18px;
+  background-color: #e74c3c; /* rosso */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px; /* font più grande */
+  display: none; /* nascosto di default */
+}
+
+#videoBtn:hover {
+  background-color: #c0392b; /* rosso più scuro al passaggio */
+}
+
 
 #teamNames {
   display: flex;
