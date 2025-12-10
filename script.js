@@ -1,9 +1,10 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.38";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.39";  // Aggiorna questo numero ad ogni modifica
 
-
+let url = 
+"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
 
 // =====================
 // DATI INIZIALI
@@ -13,11 +14,8 @@ const giocatoriA = [
   "C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
   "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa"
 ];
-
 const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29"];
-
 let convocazioni = "";
-
 let puntiSquadraA = 0;
 let puntiSquadraB = 0;
 let historyB = [];
@@ -47,7 +45,6 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
   };
 });
 
-
 function addPoints(points) {
   if (!isAdmin) return; // blocco minimo lato client
   score += points;
@@ -59,9 +56,6 @@ function addPoints(points) {
   setTimeout(() => sb.classList.remove("flash"), 500);
 }
 
-// =====================
-// FUNZIONI GENERICHE
-// =====================
 function aggiornaPunteggio(target, punti) {
   target.punteggio += punti;
   target.contatori[punti]++;
@@ -160,7 +154,6 @@ function apriConvocazioni() {
     convocazioni = "[" + selezionati.join(", ") + "]";
     localStorage.setItem("convocazioni", convocazioni);
     renderGiocatori(giocatoriObj);
-    //alert("Convocazioni salvate: " + convocazioni);
 	popup.remove();
   });
 
@@ -202,9 +195,6 @@ function initOrdinamenti() {
   }
 }
 
-// =====================
-// FUNZIONI LOGIN
-// =====================
 function login(pwd) {
   if (pwd === "007") {   // password hardcoded
     isAdmin = true;
@@ -224,7 +214,7 @@ function login(pwd) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function createAdminLoginPopup() {
   const adminBtn = document.getElementById("adminBtn");
   const popup = document.getElementById("adminPopup");
   const okBtn = document.getElementById("adminOkBtn");
@@ -260,11 +250,83 @@ document.addEventListener("DOMContentLoaded", () => {
   popup.addEventListener("click", (e) => {
     if (e.target === popup) popup.classList.add("hidden");
   });
-});
+};
 
 function showSquadraBPopup() {
-  // esempio: apri un popup con info o azioni per Squadra B
-  alert("Popup Squadra B: gestisci impostazioni o statistiche della squadra.");
+  // Rimuovi eventuale popup già aperto
+  const existing = document.getElementById("squadraBPopup");
+  if (existing) existing.remove();
+
+  // Contenitore overlay
+  const overlay = document.createElement("div");
+  overlay.id = "squadraBPopup";
+  overlay.className = "popup";
+
+  // Contenuto popup
+  const content = document.createElement("div");
+  content.className = "popup-content";
+
+  // Header con nome squadra
+  const header = document.createElement("h2");
+  header.textContent = (teamA === "Polismile A") ? teamB : teamA;
+  content.appendChild(header);
+
+  // Riga punteggio (valore corrente)
+  const scoreLine = document.createElement("p");
+  scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
+  content.appendChild(scoreLine);
+
+  // Bottoni incremento
+  const incContainer = document.createElement("div");
+  [1,2,3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.textContent = `+${p}`;
+    btn.className = "btn-inc";
+    btn.addEventListener("click", () => {
+      aggiungiPuntiSquadraB(p); // usa la tua funzione
+      scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
+    });
+    incContainer.appendChild(btn);
+  });
+  content.appendChild(incContainer);
+
+  // Bottoni decremento
+  const decContainer = document.createElement("div");
+  [1,2,3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.textContent = `-${p}`;
+    btn.className = "btn-dec";
+    btn.addEventListener("click", () => {
+      if (contatoriB[p] > 0) {
+        // decremento manuale
+        puntiSquadraB -= p;
+        contatoriB[p]--;
+        historyB.push(-p);
+        aggiornaScoreboard();
+        salvaSquadraB();
+        scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
+      }
+    });
+    decContainer.appendChild(btn);
+  });
+  content.appendChild(decContainer);
+
+  // Bottone chiudi
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Chiudi";
+  closeBtn.className = "close-btn";
+  closeBtn.addEventListener("click", () => overlay.remove());
+  content.appendChild(closeBtn);
+
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+
+  // 👉 Chiudi cliccando fuori dal contenuto
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      overlay.remove();
+    }
+  });
 }
 
 function initSquadraBControls() {
@@ -331,68 +393,6 @@ function initSquadraBControls() {
   }
 }
 
-
-function OLDinitSquadraBControls() {
-  if (!isAdmin) return;
-
-  // Assicurati che la sezione Squadra B esista e sia nel DOM
-  const squadraB = document.getElementById("squadraB");
-  if (!squadraB) return;
-
-  const controlsContainer = document.getElementById("controlsB");
-  if (!controlsContainer) return;
-
-  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
-
-  // Creo dinamicamente i bottoni +1, +2, +3
-  [1, 2, 3].forEach(p => {
-    const btn = document.createElement("button");
-    btn.className = "tiro";
-    btn.textContent = `➕${p}`;
-    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
-    controlsContainer.appendChild(btn);
-  });
-
-  // Bottone undo
-  const undoBtn = document.createElement("button");
-  undoBtn.className = "undo";
-  undoBtn.textContent = "↩️";
-  undoBtn.addEventListener("click", undoSquadraB);
-  controlsContainer.appendChild(undoBtn);
-
-  // Trova o crea il punteggio
-  let punti = squadraB.querySelector("#punti_squadraB");
-  if (!punti) {
-    punti = document.createElement("span");
-    punti.id = "punti_squadraB";
-    punti.className = "punteggio";
-    // opzionale: valore iniziale
-    punti.textContent = "0";
-    // inseriscilo temporaneamente nella riga per non perderlo
-    const row = squadraB.querySelector(".squadraB-row");
-    if (row) row.appendChild(punti);
-  }
-
-  // Sposta il punteggio dentro controlsB (solo se non è già lì)
-  if (punti.parentElement !== controlsContainer) {
-    controlsContainer.appendChild(punti);
-  }
-
-  // Allineamento in base a TeamA
-  const rawTeamA = document.getElementById("teamA")?.textContent || "";
-  const teamAName = rawTeamA.replace(/\s+/g, " ").trim();
-
-  controlsContainer.classList.remove("right", "left");
-  if (teamAName === "Polismile A") {
-    controlsContainer.classList.add("right");
-  } else {
-    controlsContainer.classList.add("left");
-  }
-}
-
-// =====================
-// RENDERING UI
-// =====================
 function showPlayerPopup(g) {
   // Rimuovi eventuale popup già aperto
   const existing = document.getElementById("playerPopup");
@@ -474,8 +474,8 @@ function showPlayerPopup(g) {
   });
 }
 
-// Funzione helper per gestire il tap prolungato
 function addLongPressListener(element, callback, duration = 600) {
+  // Funzione helper per gestire il tap prolungato
   let timer;
 
   element.addEventListener("mousedown", () => {
@@ -598,7 +598,6 @@ function renderGiocatori(lista) {
   });
 }
 
-
 function aggiungiPuntiGiocatore(id, punti) {
   const g = giocatoriObj.find(x => x.id === id);
   aggiornaPunteggio(g, punti);
@@ -666,7 +665,6 @@ function applyShake(id) {
   setTimeout(() => container.classList.remove("shake"), 400);
 }
 
-// Animazione affidabile: Web Animations API + classe 'pulse'
 function animatePunteggio(span) {
   // Rimuovi eventuale classe e forzare reflow per compatibilità CSS
   span.classList.remove("pulse");
@@ -686,9 +684,6 @@ function animatePunteggio(span) {
   }
 }
 
-// =====================
-// FUNZIONI GIOCATORI
-// =====================
 function aggiungiPuntiGiocatore(id, punti) {
   const g = giocatoriObj.find(x => x.id === id);
   aggiornaPunteggio(g, punti);
@@ -698,7 +693,6 @@ function aggiungiPuntiGiocatore(id, punti) {
   salvaSuGoogleSheets(g);
   console.log("Salvato punti:", punti)
 }
-
 
 function undoGiocatore(id) {
   const g = giocatoriObj.find(x => x.id === id);
@@ -710,9 +704,6 @@ function undoGiocatore(id) {
 
 }
 
-// =====================
-// FUNZIONI SQUADRA B
-// =====================
 function aggiungiPuntiSquadraB(punti) {
   puntiSquadraB += punti;
   contatoriB[punti]++;
@@ -720,7 +711,6 @@ function aggiungiPuntiSquadraB(punti) {
   aggiornaScoreboard();
   salvaSquadraB();
 }
-
 
 function undoSquadraB() {
   if (historyB.length === 0) return;
@@ -732,9 +722,6 @@ function undoSquadraB() {
 
 }
 
-// =====================
-// SCOREBOARD
-// =====================
 function aggiornaScoreboard() {
   const punti = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
   const puntiASalvati = localStorage.getItem("puntiSquadraA");
@@ -770,13 +757,6 @@ function aggiornaScoreboard() {
   }
 }
 
-
-// =====================
-// STATO & ORDINAMENTI
-// =====================
-// =====================
-// CAMBIO STATO
-// =====================
 function setStato(id, stato) {
   const g = giocatoriObj.find(x => x.id === id);
   if (!g) return;
@@ -806,18 +786,11 @@ function ordinaGiocatori(criterio) {
   renderGiocatori(lista);
 }
 
-// =====================
-// TITOLI
-// =====================
 function aggiornaTitoli() {
   document.getElementById("teamA").textContent = teamA
   document.getElementById("teamB").textContent = teamB
   document.getElementById("titoloB").textContent = (teamA === "Polismile A") ? teamB : teamA
 }
-
-let url = 
-"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
-
 
 function salvaSuGoogleSheets(g) {
   const formData = new FormData();
@@ -838,8 +811,8 @@ function salvaSuGoogleSheets(g) {
   .catch(err => console.error("Errore salvataggio:", err));
 }
 
-// --- Salvataggio cumulativo Squadra B ---
 function salvaSquadraB() {
+// --- Salvataggio cumulativo Squadra B ---
 
   const formData = new FormData();
   formData.append("matchId", matchId);
@@ -886,10 +859,6 @@ function caricaDatiPartita(matchId) {
     });
 }
 
-
-// =====================
-// AGGIORNAMENTO AUTOMATICO
-// =====================
 function interrompiAggiornamentoAutomatico() {
   if (refreshTimer) {
     clearInterval(refreshTimer);
@@ -898,9 +867,8 @@ function interrompiAggiornamentoAutomatico() {
   }
 }
 
-// Avvia il polling periodico
 function avviaAggiornamentoAutomatico() {
-  //const matchSelector = document.getElementById("matchId");
+  // Avvia il polling periodico
 
   // Ricarica subito la partita selezionata
   if (!document.hidden) {
@@ -962,7 +930,6 @@ function init() {
 
   console.log("Script.js versione:", SCRIPT_VERSION);
 
-
   teamA = localStorage.getItem("teamA");
   teamB = localStorage.getItem("teamB");
   convocazioni = localStorage.getItem("convocazioni");
@@ -999,7 +966,8 @@ function init() {
       window.location.href = "./partite.html";
     });
   }
-
+  
+  createAdminLoginPopup();
   aggiornaTitoli();
   renderGiocatori(giocatoriObj);
   aggiornaScoreboard();
