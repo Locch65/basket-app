@@ -86,8 +86,7 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
-  padding: 10px 0;
+  margin-bottom: 5px;   /* riduce lo spazio sotto la sezione sopra */
   border-bottom: 2px solid #ccc;
 }
 
@@ -121,14 +120,15 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between; /* spazio tra sinistra e destra */
-  gap: 10px;
+  gap: 4px;
+  margin-top: 0px;   /* riduce lo spazio sopra */
 }
 
 /* Contenitore dei tre bottoni */
 #ordinamenti .ordinamenti-left {
-  display: flex;
-  gap: 10px;
-}
+  margin: 0;         /* elimina margini interni non necessari */
+  padding: 0;        /* elimina padding extra */
+  }
 
 /* Bottone Convocazioni */
 #ordinamenti .convocazioni-btn {
@@ -154,6 +154,7 @@ h1 {
   cursor: pointer;
   background-color: #eee; /* colore di sfondo */
   border: 1px solid #ccc;
+  margin-top: 0px;   /* riduce lo spazio sopra */
   transition: background-color 0.3s ease;
 }
 
@@ -987,3 +988,80 @@ body.dark-mode .campionato.U15 {
   color: #fff;
 }
 
+#squadraBPopup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;   /* sposta in alto */
+  z-index: 9999;
+  overflow-y: auto;          /* utile se il contenuto è alto */
+}
+
+#squadraBPopup .popup-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 48px;
+  width: 100%;
+  max-width: 800px;
+  margin-top: 200px;          /* distanza dal bordo superiore */
+}
+
+#squadraBPopup .popup-content h2 {
+  font-size: 3.4rem;
+  margin-bottom: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Bottoni incremento → verde */
+#squadraBPopup .btn-inc {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+/* Bottoni decremento → rosso chiaro */
+#squadraBPopup .btn-dec {
+  background-color: #f28b82;
+  color: white;
+  border: none;
+}
+
+/* Stile comune */
+#squadraBPopup .btn-inc,
+#squadraBPopup .btn-dec {
+  font-size: 2.2rem;
+  margin: 6px;
+  padding: 12px 0;
+  width: 100px;
+  height: 80px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+#squadraBPopup button {
+  font-size: 2.2rem;
+  margin: 6px;
+  padding: 12px 0;
+  width: 100px;
+  height: 80px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Bottone chiudi: occupa tutta la larghezza */
+#squadraBPopup button.close-btn {
+  width: 80%;
+  height: auto;
+  padding: 14px;
+  margin-top: 60px;
+}
