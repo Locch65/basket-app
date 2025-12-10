@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube HUD Demo – Fix Error 153</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- IMPORTANTE: serve HTTPS e un dominio (non file://) -->
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: #111; color: #eee; }
+    .video-container {
+      position: relative;
+      width: min(90vw, 960px);
+      aspect-ratio: 16 / 9;
+      margin: 24px auto;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.45);
+      background: #000;
+    }
+    #ytplayer { width: 100%; height: 100%; border: 0; display: block; }
+    #hud-overlay {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      display: grid; place-items: start center;
+      padding-top: 10px;
+      color: #6CFF6C;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(16px, 2.4vw, 24px);
+      text-shadow: 0 0 6px rgba(0,0,0,.9);
+    }
+    .badge {
+      pointer-events: none;
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(108,255,108,.4);
+      border-radius: 12px;
+      padding: .4rem .8rem;
+      backdrop-filter: blur(4px);
+    }
+    @keyframes pulse { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:.8} 100%{transform:scale(1);opacity:1} }
+    .pulse { animation: pulse 900ms ease; }
+    .footer {
+      max-width: min(90vw, 960px);
+      margin: 8px auto 24px;
+      font-size: 14px;
+      opacity: .8;
+    }
+    .fallback {
+      display: inline-block;
+      margin-top: 8px;
+      color: #9cf;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <iframe id="ytplayer"
+      src="https://www.youtube.com/embed/7LMjqTC9DyQ?enablejsapi=1&playsinline=1"
+      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+      title="YouTube video">
+    </iframe>
+
+    <div id="hud-overlay">
+      <div id="hud-label" class="badge">HUD pronto</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Se il player non parte, prova ad aprire direttamente su YouTube:
+    <a id="fallbackLink" class="fallback" target="_blank" rel="noopener">Apri video</a>
+  </div>
+
+  <!-- IFrame API: carica una sola volta, in global scope -->
+  <script src="https://www.youtube.com/iframe_api" async></script>
+  <script>
+    // Sostituisci con il tuo ID (es. dQw4w9WgXcQ)
+    const VIDEO_ID = "7LMjqTC9DyQ";
+    document.getElementById("fallbackLink").href = `https://www.youtube.com/watch?v=${VIDEO_ID}`;
+
+    let player;
+    const hudLabel = document.getElementById("hud-label");
+
+    // Timeline messaggi (in secondi)
+    const hudMessages = [
+      { time: 5, text: "🏀 Inizio partita!" },
+      { time: 15, text: "🔥 Tripla spettacolare!" },
+      { time: 30, text: "⏱ Timeout tecnico" },
+      { time: 45, text: "💪 Rimonta in corso!" }
+    ];
+
+    // YouTube richiede onYouTubeIframeAPIReady globale
+    window.onYouTubeIframeAPIReady = function () {
+      player = new YT.Player('ytplayer', {
+        videoId: VIDEO_ID,
+        playerVars: {
+          // Imposta l'origine per prevenire 153 (usa il tuo dominio in produzione)
+          origin: window.location.origin,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onError': onPlayerError
+        }
+      });
+    };
+
+    function onPlayerReady() {
+      hudLabel.textContent = "▶️ Riproduzione pronta";
+      tickTimeline();
+    }
+
+    function onPlayerError(e) {
+      const code = e?.data;
+      hudLabel.textContent = `⚠️ Errore player (${code ?? "sconosciuto"})`;
+      hudLabel.classList.add("pulse");
+    }
+
+    // Poll ogni 500 ms per messaggi sincronizzati
+    function tickTimeline() {
+      let lastShownAt = -1;
+      setInterval(() => {
+        if (!player || typeof player.getCurrentTime !== "function") return;
+        const t = Math.floor(player.getCurrentTime());
+        if (t === lastShownAt) return;
+        const hit = hudMessages.find(m => m.time === t);
+        if (hit) {
+          hudLabel.textContent = hit.text;
+          hudLabel.classList.add("pulse");
+          setTimeout(() => hudLabel.classList.remove("pulse"), 900);
+          lastShownAt = t;
+        }
+      }, 500);
+    }
+
+    // Sicurezza: aggiorna l'iframe src dopo che il DOM è pronto (evita race su alcuni browser)
+    document.addEventListener("DOMContentLoaded", () => {
+      const iframe = document.getElementById("ytplayer");
+      const base = `https://www.youtube.com/embed/${VIDEO_ID}`;
+      const params = new URLSearchParams({ enablejsapi: "1", playsinline: "1" });
+      iframe.src = `${base}?${params.toString()}`;
+    });
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube HUD Fix</title>
+  <style>
+    .video-container { position: relative; width: 560px; height: 315px; margin: 20px auto; }
+    #ytplayer { width: 100%; height: 100%; border: 0; }
+    #hud-overlay { position: absolute; inset: 0; display: flex; justify-content: center; align-items: flex-start;
+                   color: lime; font-family: monospace; font-size: 20px; text-shadow: 0 0 5px black; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <div id="hud-overlay">HUD pronto</div>
+    <div id="ytplayer"></div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+    const hud = document.getElementById("hud-overlay");
+
+    const hudMessages = [
+      { time: 5, text: "🏀 Inizio partita!" },
+      { time: 15, text: "🔥 Tripla spettacolare!" }
+    ];
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer', {
+        videoId: 'dQw4w9WgXcQ', // <-- sostituisci con il tuo VIDEO_ID
+        playerVars: { origin: window.location.origin, rel: 0, modestbranding: 1 },
+        events: { 'onReady': onPlayerReady }
+      });
+    }
+
+    function onPlayerReady() {
+      setInterval(() => {
+        const t = Math.floor(player.getCurrentTime());
+        const msg = hudMessages.find(m => m.time === t);
+        if (msg) hud.textContent = msg.text;
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
