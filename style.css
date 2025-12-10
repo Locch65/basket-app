@@ -949,3 +949,41 @@ body.dark-mode .campionato.U15 {
 .convocazioniPopup-closeBtn:hover {
   background-color: #0056b3;
 }
+
+.squadra-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;   /* centra verticalmente */
+  border: 2px solid #1a237e;
+  background-color: #2196f3;
+  color: #fff;
+  padding: 10px 20px;    /* più spazio interno */
+  border-radius: 8px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+.squadra-box:hover {
+  background-color: #1976d2;       /* blu più scuro al passaggio del mouse */
+}
+
+
+.squadraB-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* centra verticalmente */
+  margin-right: 30px;        /* più spazio sulla destra */
+}
+
+.squadraB-right button {
+  margin-left: 5px;
+}
+
+#titoloB {
+  font-size: 2rem;           /* titolo più grande */
+  font-weight: bold;
+  margin: 0;
+  text-align: center;        /* centrato rispetto al box */
+  color: #fff;
+}
+
