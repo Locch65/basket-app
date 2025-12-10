@@ -1,0 +1,401 @@
+body { 
+  font-family: Arial, sans-serif; 
+  margin: 10px; 
+  display: flex; 
+  flex-direction: column; 
+  font-size: 22px;
+
+  /* Proprietà standard per disabilitare la selezione del testo */
+  user-select: none;
+    
+  /* Prefissi per la massima compatibilità cross-browser */
+  -webkit-user-select: none; /* Per Chrome, Safari, iOS */
+  -moz-user-select: none;    /* Per Firefox */
+  -ms-user-select: none;     /* Per Edge, IE */
+}
+
+h1 { 
+  color: #2c3e50; 
+  font-size: 28px; 
+  margin-left: 60px; /* sposta il titolo a destra del bottone */
+  margin-top: 8px;
+}
+
+#header { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  margin-bottom: 20px; 
+  gap: 20px;
+}
+
+/* 🌙 Dark Mode manuale */
+body.dark-mode {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+body.dark-mode h1 {
+  color: #27ae60;   /* verde acceso */
+}
+
+body.dark-mode .match-card {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+
+body.dark-mode .match-top {
+  color: #81c784;
+}
+
+/* 🌙 Dark Mode */
+body.dark-mode .match-middle {
+  /* Variante 1: Blu tenue */
+  /* color: #64b5f6;   /* azzurro chiaro, elegante e leggibile */
+
+  /* Variante 2: Verde chiaro */
+  color: #bbb;   verde tenue, richiama il tema sportivo */
+
+  /* Variante 3: Arancione caldo */
+  /* color: #ffb74d;   arancione chiaro, energico e ben visibile */
+}
+
+body.dark-mode .match-bottom .vs {
+  color: #ff5555;
+}
+
+/* Bottone Dark/Light Mode */
+#toggleTheme {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.2rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  transition: background-color 0.3s ease;
+}
+
+#toggleTheme:hover {
+  background-color: #ddd;
+}
+
+
+/* Card */
+.match-card {
+  width: 100%;
+  margin: 2px 0;
+  padding: 2px;
+  background-color: #f5fff5;
+  border-radius: 8px;
+  border: 3px solid #27ae60;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  /* 👇 aggiunte anti-scrollbar */
+  box-sizing: border-box;   /* include padding nel calcolo della larghezza */
+  overflow-x: hidden;       /* nasconde eventuali sforamenti */
+}
+.match-card.past {
+      background-color: #f5f5f5;   /* grigio tenue */
+      border: 1px solid #999;
+      opacity: 0.7;
+}
+
+.match-card:hover {
+  background-color: #efefef;
+}
+
+/* Riga 1: info principali */
+.match-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+
+.match-top .match-id {
+  margin-right: auto;   /* spinge il matchId tutto a sinistra */
+}
+
+.match-top .data {
+  font-size: 16px;    /* più grande rispetto al 14px di default */
+}
+
+.match-top .casa {
+  text-align: center;
+  font-size: 18px;
+}
+
+/* Riga 2: luogo al centro */
+.match-middle {
+  display: flex;
+  justify-content: center;   /* 👈 centrato invece che a destra */
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+
+  /* anti-scrollbar */
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Riga 3: squadre */
+.match-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.match-bottom strong {
+  font-size: 20px;
+  color: #000;
+  margin: 0 6px;
+}
+
+.match-bottom .score {
+  font-size: 32px;     /* molto più grande */
+  font-weight: bold;
+  color: #000;         /* colore neutro */
+  margin: 0 8px;
+}
+
+.match-bottom .vs {
+  color: #c00;
+  font-size: 24px;
+}
+
+.teamA strong, .teamB strong {
+  color: #27ae60;   /* verde evidenziato */
+}
+
+/* Evidenziazione squadra */
+.highlight {
+  background-color: #fbc02d; /* giallo caldo */
+  color: #000;               /* testo scuro per contrasto */
+  padding: 1px 2px;
+  border-radius: 4px;
+}
+
+/* Variante per dark mode */
+body.dark-mode .highlight {
+  background-color: #fbc02d; /* giallo caldo, visibile su sfondo scuro */
+  color: #212121;            /* testo grigio scuro per non essere troppo acceso */
+}
+
+
+/* 📱 Smartphone */
+@media (max-width: 600px) {
+  .match-bottom {
+    font-size: 16px;   /* ridotto rispetto a 22px */
+    flex-wrap: wrap;   /* 👈 consente di andare a capo se serve */
+    gap: 8px;
+  }
+
+  .match-bottom .score {
+    font-size: 22px;   /* più piccolo rispetto a 32px */
+    margin: 0 4px;
+  }
+
+  .match-bottom .vs {
+    font-size: 18px;   /* ridotto rispetto a 24px */
+  }
+}
+
+#hamburgerMenu1 {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+#hamburgerBtn1 {
+  font-size: 1.4rem;   /* ridotto */
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#menu1 {
+  background-color: #f9f9f9;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 1000;
+}
+
+#menu1 ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#menu1 li {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+#menu1 li:hover {
+  background-color: #eee;
+}
+
+.has-submenu {
+  position: relative;
+}
+
+.submenu {
+  list-style: none;
+  padding: 6px 10px;
+  margin-top: 6px;
+  border-left: 2px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.submenu li {
+  padding: 4px 8px;
+}
+
+.submenu li:hover {
+  background-color: #ddd;
+}
+
+.hidden {
+  display: none;
+}
+
+.campionato-item {
+  padding: 8px 12px;
+  border: 2px solid #27ae60;   /* bordo verde */
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.campionato-item:hover {
+  background-color: #e0f2f1;
+  transform: scale(1.05);
+}
+
+/* 🌙 Dark Mode per il menu */
+body.dark-mode #menu1 {
+  background-color: #1e1e1e;
+  border: 2px solid #444;
+  color: #f0f0f0;
+}
+
+body.dark-mode #menu1 li {
+  color: #f0f0f0;
+}
+
+body.dark-mode #menu1 li:hover {
+  background-color: #333;
+}
+
+/* Dark Mode */
+body.dark-mode .campionato-item {
+  border: 2px solid #81c784;
+  background-color: #2a2a2a;
+  color: #f0f0f0;
+}
+
+body.dark-mode .campionato-item:hover {
+  background-color: #388e3c;
+}
+
+#toggleTheme1 {
+  font-size: 1.2rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  transition: background-color 0.3s ease;
+}
+
+#toggleTheme1:hover {
+  background-color: #ddd;
+}
+
+body.dark-mode #toggleTheme1 {
+  background-color: #333;
+  border: 1px solid #555;
+  color: #f0f0f0;
+}
+
+body.dark-mode #toggleTheme1:hover {
+  background-color: #444;
+}
+.campionato {
+  font-size: 1.2rem;      /* più grande */
+  font-weight: bold;
+  padding: 1px 3px;
+  border-radius: 4px;
+  margin-right: 5px;
+}
+
+.campionato.U14 {
+  background-color: #3498db; /* verde */
+  color: #fff;
+}
+
+.campionato.U15 {
+  background-color: #e67e22; /* arancione */
+  color: #fff;
+}
+
+/* Dark Mode */
+body.dark-mode .campionato.U14 {
+  background-color: #3498db;
+  color: #000;
+}
+
+body.dark-mode .campionato.U15 {
+  background-color: #e67e22;
+  color: #000;
+}
+
+
+#listaPartite.loading { /* ATTENZIONE in quale file serve */
+
+  text-align: center;
+  font-weight: bold;
+  color: #27ae60; /* verde o colore a scelta */
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.error {
+  color: #b00020;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+

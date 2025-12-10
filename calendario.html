@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Seleziona Partita</title>
+  <link rel="stylesheet" href="calendario.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <h1>Calendario</h1>
+
+  <!-- Hamburger Menu -->
+  <div id="hamburgerMenu1">
+    <button id="hamburgerBtn1">☰</button>
+    <nav id="menu1" class="hidden">
+      <ul>
+        <li class="has-submenu">
+          Campionato ▾
+          <ul class="submenu hidden">
+            <li class="campionato-item" data-campionato="U14">U14</li>
+            <li class="campionato-item" data-campionato="U15">U15</li>
+            <li class="campionato-item" data-campionato="Tutti">*Tutti*</li>
+          </ul>
+        </li>
+		<li>
+          <label>
+            <input type="checkbox" id="togglePast" />
+            Escludi giocate
+          </label>
+        </li>
+        <li>
+          <button id="toggleTheme1">🌙 Dark Mode</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Contenitore partite -->
+  <div id="listaPartite" class="loading">Caricamento Calendario...</div>
+  
+  <script src="calendario.js?v=1.0.41"></script>
+
+</body>
+</html>
