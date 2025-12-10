@@ -74,76 +74,68 @@
   </div>
 
   <!-- IFrame API: carica una sola volta, in global scope -->
-  <script src="https://www.youtube.com/iframe_api" async></script>
-  <script>
-    // Sostituisci con il tuo ID (es. dQw4w9WgXcQ)
-    const VIDEO_ID = "7LMjqTC9DyQ";
-    document.getElementById("fallbackLink").href = `https://www.youtube.com/watch?v=${VIDEO_ID}`;
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+  let player;
+  const hudLabel = document.getElementById("hud-overlay");
 
-    let player;
-    const hudLabel = document.getElementById("hud-label");
+  // Recupera VideoId dai parametri URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const VideoId = urlParams.get("videoId"); // es. index.html?videoId=dQw4w9WgXcQ
 
-    // Timeline messaggi (in secondi)
-    const hudMessages = [
-      { time: 5, text: "🏀 Inizio partita!" },
-      { time: 15, text: "🔥 Tripla spettacolare!" },
-      { time: 30, text: "⏱ Timeout tecnico" },
-      { time: 45, text: "💪 Rimonta in corso!" }
-    ];
+  // Timeline messaggi (in secondi)
+  const hudMessages = [
+    { time: 5, text: "🏀 Inizio partita!" },
+    { time: 15, text: "🔥 Tripla spettacolare!" },
+    { time: 30, text: "⏱ Timeout tecnico" },
+    { time: 45, text: "💪 Rimonta in corso!" }
+  ];
 
-    // YouTube richiede onYouTubeIframeAPIReady globale
-    window.onYouTubeIframeAPIReady = function () {
-      player = new YT.Player('ytplayer', {
-        videoId: VIDEO_ID,
-        playerVars: {
-          // Imposta l'origine per prevenire 153 (usa il tuo dominio in produzione)
-          origin: window.location.origin,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onError': onPlayerError
-        }
-      });
-    };
-
-    function onPlayerReady() {
-      hudLabel.textContent = "▶️ Riproduzione pronta";
-      tickTimeline();
+  // API YouTube
+  window.onYouTubeIframeAPIReady = function () {
+    if (!VideoId) {
+      hudLabel.textContent = "⚠️ Nessun VideoId fornito";
+      return;
     }
-
-    function onPlayerError(e) {
-      const code = e?.data;
-      hudLabel.textContent = `⚠️ Errore player (${code ?? "sconosciuto"})`;
-      hudLabel.classList.add("pulse");
-    }
-
-    // Poll ogni 500 ms per messaggi sincronizzati
-    function tickTimeline() {
-      let lastShownAt = -1;
-      setInterval(() => {
-        if (!player || typeof player.getCurrentTime !== "function") return;
-        const t = Math.floor(player.getCurrentTime());
-        if (t === lastShownAt) return;
-        const hit = hudMessages.find(m => m.time === t);
-        if (hit) {
-          hudLabel.textContent = hit.text;
-          hudLabel.classList.add("pulse");
-          setTimeout(() => hudLabel.classList.remove("pulse"), 900);
-          lastShownAt = t;
-        }
-      }, 500);
-    }
-
-    // Sicurezza: aggiorna l'iframe src dopo che il DOM è pronto (evita race su alcuni browser)
-    document.addEventListener("DOMContentLoaded", () => {
-      const iframe = document.getElementById("ytplayer");
-      const base = `https://www.youtube.com/embed/${VIDEO_ID}`;
-      const params = new URLSearchParams({ enablejsapi: "1", playsinline: "1" });
-      iframe.src = `${base}?${params.toString()}`;
+    player = new YT.Player('ytplayer', {
+      videoId: VideoId,
+      playerVars: {
+        origin: window.location.origin,
+        rel: 0,
+        modestbranding: 1,
+        playsinline: 1
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onError': onPlayerError
+      }
     });
-  </script>
+  };
+
+  function onPlayerReady() {
+    hudLabel.textContent = "▶️ Riproduzione pronta";
+    tickTimeline();
+  }
+
+  function onPlayerError(e) {
+    hudLabel.textContent = `⚠️ Errore player (${e?.data ?? "sconosciuto"})`;
+  }
+
+  function tickTimeline() {
+    let lastShownAt = -1;
+    setInterval(() => {
+      if (!player || typeof player.getCurrentTime !== "function") return;
+      const t = Math.floor(player.getCurrentTime());
+      if (t === lastShownAt) return;
+      const hit = hudMessages.find(m => m.time === t);
+      if (hit) {
+        hudLabel.textContent = hit.text;
+        hudLabel.classList.add("pulse");
+        setTimeout(() => hudLabel.classList.remove("pulse"), 900);
+        lastShownAt = t;
+      }
+    }, 500);
+  }
+</script>
 </body>
 </html>
