@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.36";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.37";  // Aggiorna questo numero ad ogni modifica
 
 
 
@@ -11,10 +11,10 @@ const SCRIPT_VERSION = "1.0.36";  // Aggiorna questo numero ad ogni modifica
 const giocatoriA = [
   "E. Carfora","K. Popa","G. Giacco","H. Taylor",
   "C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
-  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "C. Gallo", "A. Tusa"
+  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa"
 ];
 
-const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "41", "29"];
+const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29"];
 
 let convocazioni = "";
 
@@ -158,95 +158,10 @@ function apriConvocazioni() {
 
     // Memorizzo nella variabile globale come stringa "[x, y, z]"
     convocazioni = "[" + selezionati.join(", ") + "]";
-    alert("Convocazioni salvate: " + convocazioni);
-  });
-
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Chiudi";
-  closeBtn.className = "convocazioniPopup-closeBtn";
-  closeBtn.addEventListener("click", () => {
-    popup.remove();
-  });
-
-  const buttonsContainer = document.createElement("div");
-  buttonsContainer.className = "convocazioniPopup-buttons";
-  buttonsContainer.appendChild(confirmBtn);
-  buttonsContainer.appendChild(closeBtn);
-
-  content.appendChild(buttonsContainer);
-  popup.appendChild(content);
-  document.body.appendChild(popup);
-}
-
-function OLDapriConvocazioni() {
-  const giocatori = giocatoriA;
-  const numeri = numeriMaglia;
-
-  // Se il popup esiste già, lo rimuovo
-  const existingPopup = document.getElementById("convocazioniPopup");
-  if (existingPopup) existingPopup.remove();
-
-  // Overlay
-  const popup = document.createElement("div");
-  popup.id = "convocazioniPopup";
-  popup.className = "convocazioniPopup-overlay";
-
-  // Contenuto
-  const content = document.createElement("div");
-  content.className = "convocazioniPopup-content";
-
-  const title = document.createElement("h2");
-  title.textContent = "Convocazioni";
-  content.appendChild(title);
-
-  // Lista giocatori
-  const list = document.createElement("ul");
-  list.className = "convocazioniPopup-list";
-
-  giocatori.forEach((nomeCompleto, index) => {
-    const li = document.createElement("li");
-    li.className = "convocazioniPopup-item";
-
-    // Split nome e cognome
-    const parts = nomeCompleto.trim().split(" ");
-    let visuale = nomeCompleto; // fallback
-    if (parts.length >= 2) {
-      const nome = parts[0];
-      const cognome = parts.slice(1).join(" ");
-      visuale = `${cognome} ${nome}`;
-    }
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = `conv_${index}`;
-    checkbox.value = index; // salvo l'indice
-
-    const label = document.createElement("label");
-    label.htmlFor = `conv_${index}`;
-    label.textContent = `${numeri[index]} - ${visuale}`;
-
-    li.appendChild(checkbox);
-    li.appendChild(label);
-    list.appendChild(li);
-  });
-
-  content.appendChild(list);
-
-  // Bottoni
-  const confirmBtn = document.createElement("button");
-  confirmBtn.textContent = "Conferma";
-  confirmBtn.className = "convocazioniPopup-confirmBtn";
-  confirmBtn.addEventListener("click", () => {
-    const selezionati = [];
-    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
-      const idx = parseInt(cb.value, 10);
-      selezionati.push(numeri[idx]);
-    });
-
-    // Memorizzo nella variabile globale come stringa "[x, y, z]"
-    convocazioni = "[" + selezionati.join(", ") + "]";
-    SalvaPunteggi();
-    alert("Convocazioni salvate: " + convocazioni);
+    localStorage.setItem("convocazioni", convocazioni);
+    renderGiocatori(giocatoriObj);
+    //alert("Convocazioni salvate: " + convocazioni);
+	popup.remove();
   });
 
   const closeBtn = document.createElement("button");
@@ -406,163 +321,6 @@ function initSquadraBControls() {
   }
 }
 
-
-function OLD4initSquadraBControls() {
-  if (!isAdmin) return;
-
-// Assicurati che la sezione Squadra B esista e sia nel DOM
-  const squadraB = document.getElementById("squadraB");
-  if (!squadraB) return;
-  
-  const controlsContainer = document.getElementById("controlsB");
-  const row = document.querySelector(".squadraB-row"); // la riga che contiene punteggio + controlli
-
-  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
-
-  // Creo dinamicamente i bottoni +1, +2, +3
-  [1, 2, 3].forEach(p => {
-    const btn = document.createElement("button");
-    btn.className = "tiro";
-    btn.textContent = `➕${p}`;
-    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
-    controlsContainer.appendChild(btn);
-  });
-
-  // Bottone undo
-  const undoBtn = document.createElement("button");
-  undoBtn.className = "undo";
-  undoBtn.textContent = "↩️";
-  undoBtn.addEventListener("click", undoSquadraB);
-  controlsContainer.appendChild(undoBtn);
-
-// Trova o crea il punteggio
-  let punti = squadraB.querySelector("#punti_squadraB");
-  if (!punti) {
-    punti = document.createElement("span");
-    punti.id = "punti_squadraB";
-    punti.className = "punteggio";
-    // opzionale: valore iniziale
-    punti.textContent = "0";
-    // inseriscilo temporaneamente nella riga per non perderlo
-    const row = squadraB.querySelector(".squadraB-row");
-    if (row) row.appendChild(punti);
-  }
-
-  // Sposta il punteggio dentro controlsB (solo se non è già lì)
-  if (punti.parentElement !== controlsContainer) {
-    controlsContainer.appendChild(punti);
-  }
-  
-  // Logica di allineamento in base a TeamA
-  const rawTeamA = document.getElementById("teamA")?.textContent || "";
-  const teamAName = rawTeamA.replace(/\s+/g, " ").trim();
-
-  // Rimuovo la variante precedente e applico quella corretta
-  controlsContainer.classList.remove("right", "left"); // Rimuovi entrambe le classi
-  
-  if (teamAName === "Polismile A") {
-    // Se TeamA è "Polismile A" -> Allinea a destra
-    controlsContainer.classList.add("right");
-  } else {
-    // Se TeamA è diverso -> Allinea a sinistra
-    controlsContainer.classList.add("left");
-  }
-}
-
-function OLD3initSquadraBControls() {
-  if (!isAdmin) return;
-
-  const controlsContainer = document.getElementById("controlsB");
-  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
-
-  // Creo dinamicamente i bottoni +1, +2, +3
-  [1, 2, 3].forEach(p => {
-    const btn = document.createElement("button");
-    btn.className = "tiro";
-    btn.textContent = `➕${p}`;
-    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
-    controlsContainer.appendChild(btn);
-  });
-
-  // Bottone undo
-  const undoBtn = document.createElement("button");
-  undoBtn.className = "undo";
-  undoBtn.textContent = "↩️";
-  undoBtn.addEventListener("click", undoSquadraB);
-  controlsContainer.appendChild(undoBtn);
-
-  // 🔎 Logica di allineamento in base al nome di TeamA
-  const rawTeamA = document.getElementById("teamA")?.textContent || "";
-  const teamAName = rawTeamA.replace(/\s+/g, " ").trim();
-
-  // Rimuovo eventuali classi precedenti
-  controlsContainer.classList.remove("left", "right");
-
-  if (teamAName === "Polismile A") {
-    controlsContainer.classList.add("right");
-  } else {
-    controlsContainer.classList.add("left");
-  }
-}
-
-function OLD2initSquadraBControls() {
-  if (!isAdmin) return;
-
-  const controlsContainer = document.getElementById("controlsB");
-  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
-
-  // Creo dinamicamente i bottoni +1, +2, +3
-  [1, 2, 3].forEach(p => {
-    const btn = document.createElement("button");
-    btn.className = "tiro";
-    btn.textContent = `➕${p}`;
-    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
-    controlsContainer.appendChild(btn);
-  });
-
-  // Bottone undo
-  const undoBtn = document.createElement("button");
-  undoBtn.className = "undo";
-  undoBtn.textContent = "↩️";
-  undoBtn.addEventListener("click", undoSquadraB);
-  controlsContainer.appendChild(undoBtn);
-
-  // 🔎 Logica di allineamento in base al nome di TeamA
-  const teamAName = document.getElementById("teamA").textContent.trim();
-
-  // Rimuovo eventuali classi precedenti
-  controlsContainer.classList.remove("left", "right");
-
-  if (teamAName === "Polismile A") {
-    controlsContainer.classList.add("right");
-  } else {
-    controlsContainer.classList.add("left");
-  }
-}
-
-function OLDinitSquadraBControls() {
-  if (!isAdmin) return;
-
-  const controlsContainer = document.getElementById("controlsB");
-  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
-
-  // Creo dinamicamente i bottoni +1, +2, +3
-  [1, 2, 3].forEach(p => {
-    const btn = document.createElement("button");
-    btn.className = "tiro";
-    btn.textContent = `➕${p}`;
-    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
-    controlsContainer.appendChild(btn);
-  });
-
-  // Bottone undo
-  const undoBtn = document.createElement("button");
-  undoBtn.className = "undo";
-  undoBtn.textContent = "↩️";
-  undoBtn.addEventListener("click", undoSquadraB);
-  controlsContainer.appendChild(undoBtn);
-}
-
 // =====================
 // RENDERING UI
 // =====================
@@ -672,6 +430,25 @@ function addLongPressListener(element, callback, duration = 600) {
 
 function renderGiocatori(lista) {
   listaGiocatoriCorrente = lista;
+  
+  let convArray;
+  if (convocazioni.trim() === "[ALL]") {
+    convArray = ["ALL"];
+  } else {
+    try {
+      // es: "[8,29,37]" → [8,29,37] → ["8","29","37"]
+      convArray = JSON.parse(convocazioni).map(String);
+    } catch(e) {
+      convArray = [];
+    }
+  }
+  
+  // 🔎 Se l’array contiene solo "ALL", prendi tutti i giocatori
+  const convocati = (convArray.length === 1 && convArray[0] === "ALL")
+    ? lista
+    : lista.filter(g => convArray.map(String).includes(g.numero));
+
+  
   const container = document.getElementById("giocatori");
   container.innerHTML = `
     <div id="giocatori-in"></div>
@@ -686,15 +463,15 @@ function renderGiocatori(lista) {
   const outCol2 = document.getElementById("out-col2");
 
   // Ordina: prima In, poi Out
-  lista.sort((a, b) => {
+  convocati.sort((a, b) => {
     if (a.stato === b.stato) return 0;
     return a.stato === "In" ? -1 : 1;
   });
 
-  const outPlayers = lista.filter(g => g.stato === "Out");
+  const outPlayers = convocati.filter(g => g.stato === "Out");
   const metà = Math.ceil(outPlayers.length / 2);
 
-  lista.forEach((g) => {
+  convocati.forEach((g) => {
     const div = document.createElement("div");
     div.className = `giocatore ${g.stato.toLowerCase()}`;
     div.setAttribute("data-id", g.id);
@@ -712,29 +489,24 @@ function renderGiocatori(lista) {
       </div>
     `;
 
-    // 👉 Card cliccabile per cambiare stato
     if (isAdmin) {
       div.style.cursor = "pointer";
       div.addEventListener("click", (e) => {
-        // Evita che il click sui bottoni punteggio cambi lo stato
         if (e.target.tagName.toLowerCase() === "button") return;
         const nuovoStato = g.stato === "In" ? "Out" : "In";
         setStato(g.id, nuovoStato);
       });
-	  
-	  // tap prolungato → azione speciale
+
       addLongPressListener(div, () => {
         showPlayerPopup(g);
       });
     }
 
-    // Bottoni punteggio: solo se admin e giocatore In
     if (isAdmin && g.stato === "In") {
       const controls = document.createElement("div");
       [1,2,3].forEach(p => {
         const btn = document.createElement("button");
         btn.className = "tiro";
-        //btn.textContent = p === 1 ? "🏀 +1" : `➕${p}`;
         btn.textContent = `➕${p}`;
         btn.addEventListener("click", () => aggiungiPuntiGiocatore(g.id, p));
         controls.appendChild(btn);
@@ -747,7 +519,6 @@ function renderGiocatori(lista) {
       div.appendChild(controls);
     }
 
-    // Append nel contenitore giusto
     if (g.stato === "In") {
       inContainer.appendChild(div);
     } else {
@@ -757,6 +528,7 @@ function renderGiocatori(lista) {
     }
   });
 }
+
 
 function aggiungiPuntiGiocatore(id, punti) {
   const g = giocatoriObj.find(x => x.id === id);
@@ -895,19 +667,20 @@ function undoSquadraB() {
 // SCOREBOARD
 // =====================
 function aggiornaScoreboard() {
-  const puntiA = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
+  const punti = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
   const puntiASalvati = localStorage.getItem("puntiSquadraA");
   const puntiBSalvati = localStorage.getItem("puntiSquadraB");
   
   const scoreboard = document.getElementById("scoreboard");
   let nuovoTesto = "";
-  if (puntiA != parseInt(puntiASalvati, 10) && !isAdmin) {
+  let difference = (teamA === "Polismile A") ? punti != parseInt(puntiASalvati, 10) : punti != parseInt(puntiBSalvati, 10)
+  if (difference && !isAdmin) {
     nuovoTesto = `${puntiASalvati} - ${puntiBSalvati}`;
   }
   else
   {
-    nuovoTesto = (teamA === "Polismile A") ? `${puntiA} - ${puntiSquadraB}` : `${puntiSquadraB} - ${puntiA}`;
-	puntiSquadraA = puntiA;
+    nuovoTesto = (teamA === "Polismile A") ? `${punti} - ${puntiSquadraB}` : `${puntiSquadraB} - ${punti}`;
+	puntiSquadraA = punti;
   }
 
   if (scoreboard.textContent !== nuovoTesto) {
@@ -1164,8 +937,3 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-
-
-
-
