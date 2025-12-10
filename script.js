@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.37";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.38";  // Aggiorna questo numero ad ogni modifica
 
 
 
@@ -262,8 +262,77 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+function showSquadraBPopup() {
+  // esempio: apri un popup con info o azioni per Squadra B
+  alert("Popup Squadra B: gestisci impostazioni o statistiche della squadra.");
+}
 
 function initSquadraBControls() {
+  if (!isAdmin) return;
+
+  // Assicurati che la sezione Squadra B esista e sia nel DOM
+  const squadraB = document.getElementById("squadraB");
+  if (!squadraB) return;
+
+  const controlsContainer = document.getElementById("controlsB");
+  if (!controlsContainer) return;
+
+  controlsContainer.innerHTML = ""; // pulisco eventuali bottoni precedenti
+
+  // Creo dinamicamente i bottoni +1, +2, +3
+  [1, 2, 3].forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "tiro";
+    btn.textContent = `➕${p}`;
+    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
+    controlsContainer.appendChild(btn);
+  });
+
+  // Bottone undo
+  const undoBtn = document.createElement("button");
+  undoBtn.className = "undo";
+  undoBtn.textContent = "↩️";
+  undoBtn.addEventListener("click", undoSquadraB);
+  controlsContainer.appendChild(undoBtn);
+
+  // Trova o crea il punteggio
+  let punti = squadraB.querySelector("#punti_squadraB");
+  if (!punti) {
+    punti = document.createElement("span");
+    punti.id = "punti_squadraB";
+    punti.className = "punteggio";
+    punti.textContent = "0"; // valore iniziale
+    const row = squadraB.querySelector(".squadraB-row");
+    if (row) row.appendChild(punti);
+  }
+
+  // Sposta il punteggio dentro controlsB (solo se non è già lì)
+  if (punti.parentElement !== controlsContainer) {
+    controlsContainer.appendChild(punti);
+  }
+
+  // Allineamento in base a TeamA
+  const rawTeamA = document.getElementById("teamA")?.textContent || "";
+  const teamAName = rawTeamA.replace(/\s+/g, " ").trim();
+
+  controlsContainer.classList.remove("right", "left");
+  if (teamAName === "Polismile A") {
+    controlsContainer.classList.add("right");
+  } else {
+    controlsContainer.classList.add("left");
+  }
+
+  // 👉 Gestione long tap sull'intero box Squadra B
+  const squadraBBox = document.getElementById("squadraB-box") || squadraB;
+  if (squadraBBox) {
+    addLongPressListener(squadraBBox, () => {
+      showSquadraBPopup(); // funzione da definire
+    });
+  }
+}
+
+
+function OLDinitSquadraBControls() {
   if (!isAdmin) return;
 
   // Assicurati che la sezione Squadra B esista e sia nel DOM
@@ -743,6 +812,7 @@ function ordinaGiocatori(criterio) {
 function aggiornaTitoli() {
   document.getElementById("teamA").textContent = teamA
   document.getElementById("teamB").textContent = teamB
+  document.getElementById("titoloB").textContent = (teamA === "Polismile A") ? teamB : teamA
 }
 
 let url = 
