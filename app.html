@@ -43,16 +43,17 @@
   <div id="contenuto">
     <div id="topControls">
       <div id="squadraB" class="hidden">
-        <h1 id="titoloB"></h1>
-        <div class="squadraB-row">
-		  <!-- Bottoni punteggio: nascosti di default -->
-          <div id="controlsB">
-          <!--  <button class="tiro">➕1</button> -->
-          <!--  <button class="tiro">➕2</button> -->
-          <!--  <button class="tiro">➕3</button> -->
-          <!--  <button class="undo">↩️</button> -->
+        <!-- Rettangolo colorato con bordo -->
+        <div id="squadraB-box" class="squadra-box">
+          <!-- Nome squadra a sinistra -->
+          <div class="squadraB-left">
+            <h1 id="titoloB">Squadra</h1>
+            <span id="punti_squadraB" class="punteggio"></span>
           </div>
-          <span id="punti_squadraB" class="punteggio"></span>
+          <!-- Bottoni a destra -->
+          <div class="squadraB-right" id="controlsB">
+            <!-- Bottoni punteggio generati via JS -->
+          </div>
         </div>
       </div>
     </div>
@@ -72,7 +73,7 @@
     <div id="scriptVersion" class="versione"></div>
   </div>
 
-  <script src="script.js?v=1.0.37"></script>
+  <script src="script.js?v=1.0.38"></script>
   <script>
   
   window.addEventListener("beforeunload", function (event) {
