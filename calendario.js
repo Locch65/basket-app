@@ -1,5 +1,7 @@
 const url = 
-	"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
+"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
+
+//	"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
 
 function parseItalianDate(dateStr, timeStr) {
       const [giorno, mese, anno] = dateStr.split("/").map(Number);
@@ -122,6 +124,7 @@ function caricaListaPartite(filtroCampionato = null) {
               localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
               localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
               localStorage.setItem("convocazioni", p.convocazioni);
+              localStorage.setItem("videoId", p.videoId);
               window.location.href = "match.html";
             });
 
