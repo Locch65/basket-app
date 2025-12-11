@@ -89,7 +89,7 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
   let player;
-  const hudLabel = document.getElementById("hud-label"); // CORRETTO: seleziona il badge
+  const hudLabel = document.getElementById("hud-label");
 
   const urlParams = new URLSearchParams(window.location.search);
   const VideoId = urlParams.get("videoId") || "7LMjqTC9DyQ"; // fallback
@@ -146,6 +146,22 @@
       }
     }, 500);
   }
+
+  // --- Metodo 1: API Fullscreen ---
+  function requestFullscreen() {
+    const el = document.querySelector(".video-container");
+    if (el.requestFullscreen) {
+      el.requestFullscreen();
+    } else if (el.webkitRequestFullscreen) { // Safari
+      el.webkitRequestFullscreen();
+    }
+  }
+
+  window.addEventListener("orientationchange", () => {
+    if (screen.orientation.type.startsWith("landscape")) {
+      requestFullscreen();
+    }
+  });
 </script>
 </body>
 </html>
