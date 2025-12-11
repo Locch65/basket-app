@@ -957,7 +957,7 @@ function init() {
   videoBtn.addEventListener("click", () => {
     if (videoId !== null) {
       // passa videoId come query string
-      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(videoId) + "t=" + encodeURIComponent(videoStartTime);
+      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(videoId);
     } else {
       // fallback se videoId è nullo
       alert("Nessun videoId disponibile");
