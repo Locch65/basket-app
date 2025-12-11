@@ -33,10 +33,10 @@ function extractYouTubeId(input) {
     }
 
     // Caso 4: altri formati non previsti
-    return null;
+    return "";
   } catch (e) {
     console.error("Input non valido:", e);
-    return null;
+    return "";
   }
 }
 
