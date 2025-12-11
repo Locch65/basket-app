@@ -1,10 +1,12 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.41";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.50";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
-"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
+"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
+
+//"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
 
 // =====================
 // DATI INIZIALI
@@ -933,8 +935,7 @@ function init() {
   teamA = localStorage.getItem("teamA");
   teamB = localStorage.getItem("teamB");
   convocazioni = localStorage.getItem("convocazioni");
-  VideoId = localStorage.getItem("VideoId"); // metti null se non vuoi mostrare il bottone
-  VideoId = "7LMjqTC9DyQ"; // ATTENZIONE CANCELLARE
+  videoId = localStorage.getItem("videoId"); // metti null se non vuoi mostrare il bottone
   
   
   const savedMatchId = localStorage.getItem("matchId");
@@ -948,18 +949,18 @@ function init() {
 
   const videoBtn = document.getElementById("videoBtn");
 
-  // Mostra il bottone solo se VideoId è diverso da null
-  if (VideoId !== null) {
+  // Mostra il bottone solo se videoId è diverso da null
+  if (videoId !== null) {
     videoBtn.style.display = "inline-block";
   }
 
   videoBtn.addEventListener("click", () => {
-    if (VideoId !== null) {
-      // passa VideoId come query string
-      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(VideoId);
+    if (videoId !== null) {
+      // passa videoId come query string
+      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(videoId);
     } else {
-      // fallback se VideoId è nullo
-      alert("Nessun VideoId disponibile");
+      // fallback se videoId è nullo
+      alert("Nessun videoId disponibile");
     }
   });
 
