@@ -1,187 +1,314 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>YouTube HUD Demo – Fix Error 153</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- IMPORTANTE: serve HTTPS e un dominio (non file://) -->
-  <style>
-    :root { color-scheme: light dark; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: #111;
-      color: #eee;
-    }
-  
-    .video-container {
-      width: 100vw;
-      aspect-ratio: 16 / 9;   /* proporzione corretta in verticale */
-      margin: 0;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #000;
-    }
-  
-    /* In orizzontale: forza fullscreen */
-    @media (orientation: landscape) {
-      .video-container {
-        width: 100vw;
-        height: 100vh;
-        aspect-ratio: auto;   /* disattiva vincolo proporzioni */
-        border-radius: 0;     /* opzionale: elimina bordi per fullscreen */
+const url = 
+"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
+
+
+function parseItalianDate(dateStr, timeStr) {
+      const [giorno, mese, anno] = dateStr.split("/").map(Number);
+      const [ore, minuti] = timeStr.split(":").map(Number);
+      return new Date(anno, mese - 1, giorno, ore, minuti);
+}
+
+
+
+function extractYoutubeTime(input) {
+  try {
+    const urlObj = new URL(input);
+
+    if (urlObj.searchParams.has("t")) {
+      const t = urlObj.searchParams.get("t");
+
+      // Gestione formati: solo numeri (es. "60") o con suffissi (es. "1m30s")
+      const match = t.match(/(?:(\d+)m)?(?:(\d+)s)?$/);
+      if (match) {
+        const minutes = parseInt(match[1] || "0", 10);
+        const seconds = parseInt(match[2] || "0", 10);
+        return minutes * 60 + seconds;
       }
-    }
-  
-    #ytplayer {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
-  
-    #hud-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      display: grid;
-      place-items: start center;
-      padding-top: 10px;
-      color: #6CFF6C;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(16px, 2.4vw, 24px);
-      text-shadow: 0 0 6px rgba(0,0,0,.9);
-    }
-  
-    .badge {
-      pointer-events: none;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(108,255,108,.4);
-      border-radius: 12px;
-      padding: .4rem .8rem;
-      backdrop-filter: blur(4px);
-    }
-  
-    @keyframes pulse {
-      0%   { transform: scale(1); opacity: 1 }
-      50%  { transform: scale(1.15); opacity: .8 }
-      100% { transform: scale(1); opacity: 1 }
-    }
-    .pulse { animation: pulse 900ms ease; }
-  </style>
-</head>
-    <body>
-      <div class="video-container">
-      <div id="ytplayer"></div>
 
-    <div id="hud-overlay">
-      <div id="hud-label" class="badge">HUD 1.0.54</div>
-    </div>
-  </div>
-
-  <!-- IFrame API: carica una sola volta, in global scope -->
-<script src="https://www.youtube.com/iframe_api"></script>
-<script>
-  let player;
-  let timelineInterval; // variabile globale per gestire l'intervallo
-  const hudLabel = document.getElementById("hud-label");
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const videoId = urlParams.get("videoId");
-  console.log("Youtube videoId= ", videoId);
-
-  const hudMessages = [
-    { time: 5, text: "🏀 Inizio partita!" },
-    { time: 15, text: "🔥 Tripla spettacolare!" },
-    { time: 30, text: "⏱ Timeout tecnico" },
-    { time: 45, text: "💪 Rimonta in corso!" }
-  ];
-
-  window.onYouTubeIframeAPIReady = function () {
-    if (!videoId) {
-      hudLabel.textContent = "⚠️ Nessun videoId fornito";
-      return;
+      // Se è solo un numero (es. "120")
+      return parseInt(t, 10);
     }
-    player = new YT.Player('ytplayer', {
-      videoId: videoId,
-      playerVars: {
-        origin: window.location.origin,
-        rel: 0,
-        modestbranding: 1,
-        playsinline: 1,
-        fs: 0 // disabilita pulsante fullscreen nativo
-      },
-      events: {
-        'onReady': onPlayerReady,
-        'onError': onPlayerError
+
+    return 0; // default: inizio da 0
+  } catch (e) {
+    console.error("Input non valido:", e);
+    return 0;
+  }
+}
+
+
+function extractYouTubeId(input) {
+  try {
+    // Caso 0: input già un videoId (11 caratteri alfanumerici tipici di YouTube)
+    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+      return input;
+    }
+
+    const urlObj = new URL(input);
+
+    // Caso 1: URL classico con parametro ?v=...
+    if (urlObj.searchParams.has("v")) {
+      return urlObj.searchParams.get("v");
+    }
+
+    // Caso 2: URL corto youtu.be/ID
+    if (urlObj.hostname.includes("youtu.be")) {
+      return urlObj.pathname.slice(1);
+    }
+
+    // Caso 3: URL embed /embed/ID
+    if (urlObj.pathname.includes("/embed/")) {
+      return urlObj.pathname.split("/embed/")[1].split(/[?&]/)[0];
+    }
+
+    // Caso 4: altri formati non previsti
+    return "";
+  } catch (e) {
+    console.error("Input non valido:", e);
+    return "";
+  }
+}
+
+
+
+function caricaListaPartite(filtroCampionato = null) {
+      const container = document.getElementById("listaPartite");
+      // 🔧 Mostra sempre Loading lampeggiante
+      container.classList.add("loading");
+      container.textContent = "Loading...";
+
+      fetch(url + "?sheet=Partite")
+        .then(res => res.json())
+        .then(data => {
+          container.classList.remove("loading");
+          const partite = Array.isArray(data) ? data : data.data;
+          if (!Array.isArray(partite) || partite.length === 0) {
+            container.textContent = "Nessuna partita disponibile";
+            return;
+          }
+
+          let partiteFiltrate = partite;
+
+          // 🔧 Filtro campionato
+          if (filtroCampionato) {
+            partiteFiltrate = partiteFiltrate.filter(p =>
+              String(p.matchId ?? "").includes(filtroCampionato)
+            );
+          }
+    
+          // 🔧 Escludi partite passate se toggle attivo
+          const excludePast = document.getElementById("togglePast").checked;
+          const oggi = new Date();
+          if (excludePast) {
+            // Normalizza "oggi" a mezzanotte
+            oggi.setHours(0, 0, 0, 0);
+          
+            partiteFiltrate = partiteFiltrate.filter(p => {
+              const dataPartita = parseItalianDate(p.data, p.orario);
+              // Normalizza anche la data della partita
+              dataPartita.setHours(0, 0, 0, 0);
+          
+              return dataPartita >= oggi;
+            });
+          }
+
+
+          // 🔧 Ordina per data crescente
+          partiteFiltrate.sort((a, b) => {
+            const dataA = parseItalianDate(a.data, a.orario);
+            const dataB = parseItalianDate(b.data, b.orario);
+            return dataA - dataB;
+          });
+          const frag = document.createDocumentFragment();
+          //const oggi = new Date();
+
+          partiteFiltrate.forEach(p => {
+            let campionato = "";
+            if (String(p.matchId).includes("U14")) {
+              campionato = "U14";
+            } else if (String(p.matchId).includes("U15")) {
+              campionato = "U15";
+            } else {
+              campionato = "Altro"; // fallback se non contiene U14/U15
+            }
+			// 🔧 Ripulisci matchId eliminando il nome del campionato
+            let matchIdPulito = String(p.matchId)
+              .replace("U14 ", "")
+              .replace("U15 ", "")
+              .trim();
+			  
+            const card = document.createElement("div");
+            card.classList.add("match-card");
+
+            const dataPartita = parseItalianDate(p.data, p.orario);
+            if (dataPartita < oggi) {
+              card.classList.add("past");
+            }
+
+            // Giorni della settimana in italiano (abbreviati)
+            const giorniSettimana = ["Dom.", "Lun.", "Mar.", "Mer.", "Gio.", "Ven.", "Sab."];
+            
+            // Calcola giorno della settimana
+            const giornoSettimana = giorniSettimana[dataPartita.getDay()];
+
+            const casaIcon = "🏠";
+            const trasfertaIcon = "🚌";
+            const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
+
+            card.innerHTML = `
+              <div class="match-top">
+                <span class="campionato ${campionato}">${campionato}</span>
+                <span class="match-id">${matchIdPulito}</span>
+                <span class="data">${giornoSettimana} ${p.data}</span>
+                <span class="orario">${p.orario}</span>
+              </div>
+              <div class="match-middle">
+                <span class="casa">${icona}</span>
+                <span class="luogo">${p.luogo}</span>
+              </div>
+              <div class="match-bottom">
+                <span class="teamA"><span class="team-name">${p.squadraA}</span> <strong>${p.punteggioA ?? "-"}</strong></span>
+                <span class="vs">vs</span>
+                <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
+              </div>
+            `;
+            
+            if (p.casaTrasferta === "Casa") {
+              card.querySelector(".teamA .team-name").classList.add("highlight");
+            } else if (p.casaTrasferta === "Trasferta") {
+              card.querySelector(".teamB .team-name").classList.add("highlight");
+            }
+
+            card.addEventListener("click", () => {
+              localStorage.setItem("matchId", p.matchId);
+              localStorage.setItem("teamA", p.squadraA);
+              localStorage.setItem("teamB", p.squadraB);
+              localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
+              localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
+              localStorage.setItem("convocazioni", p.convocazioni);
+              localStorage.setItem("videoId", extractYouTubeId(p.videoId));
+              localStorage.setItem("videoStartTime", extractYoutubeTime(p.videoId));
+              window.location.href = "match.html";
+            });
+
+            frag.appendChild(card);
+          });
+
+          container.replaceChildren(frag);
+        })
+        .catch(err => {
+          container.classList.remove("loading");
+          container.textContent = "Errore caricamento partite: " + err.message;
+          console.error(err);
+        });
+}
+
+function filtraPartite(campionato, titolo) {
+        console.log("Filtro attivato per:", campionato);
+    
+        if (campionato && campionato.includes("Tutti")) {
+          campionato = null;
+          titolo.textContent = "Calendario U14 + U15";
+        } else if (campionato === "U14") {
+          titolo.textContent = "Calendario U14";
+        } else if (campionato === "U15") {
+          titolo.textContent = "Calendario U15";
+        } else {
+          titolo.textContent = "Calendario";
+        }
+    
+        // 👉 Memorizza il campionato selezionato
+        localStorage.setItem("campionatoSelezionato", campionato ?? "Tutti");
+    
+        caricaListaPartite(campionato);
+}
+
+function init() {
+      const hamburgerBtn1 = document.getElementById("hamburgerBtn1");
+      const menu1 = document.getElementById("menu1");
+      const toggleTheme1 = document.getElementById("toggleTheme1");
+      const campionatoItem = document.querySelector(".has-submenu");
+      const submenu = campionatoItem.querySelector(".submenu");
+      const togglePast = document.getElementById("togglePast");
+      const titolo = document.querySelector("h1");
+    
+      // Apri/chiudi menu principale
+      hamburgerBtn1.addEventListener("click", () => {
+        menu1.classList.toggle("hidden");
+      });
+    
+      // Apri/chiudi sottomenu Campionato
+      campionatoItem.addEventListener("click", () => {
+        submenu.classList.toggle("hidden");
+      });
+    
+      // Chiudi menu dopo selezione
+      menu1.querySelectorAll("li, button").forEach(item => {
+        item.addEventListener("click", (e) => {
+          if (!item.classList.contains("has-submenu")) {
+            menu1.classList.add("hidden");
+          }
+          e.stopPropagation();
+        });
+      });
+    
+      // Funzione filtro campionato
+    
+      // Associa click agli item campionato
+      document.querySelectorAll(".campionato-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const campionato = item.dataset.campionato;
+          filtraPartite(campionato, titolo);
+        });
+      });
+    
+      // Toggle per escludere partite passate
+      togglePast.addEventListener("change", () => {
+        const excludePast = togglePast.checked;
+        localStorage.setItem("excludePast", excludePast ? "true" : "false");
+    
+        const campionatoSalvato = localStorage.getItem("campionatoSelezionato");
+        caricaListaPartite(campionatoSalvato && campionatoSalvato !== "Tutti" ? campionatoSalvato : null);
+      });
+    
+      // Ripristina tema salvato
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+        toggleTheme1.textContent = "☀️ Light Mode";
       }
-    });
-
-    // Timeout di sicurezza: se entro 10s non è pronto, abort
-    setTimeout(() => {
-      if (!player || typeof player.getCurrentTime !== "function") {
-        hudLabel.textContent = "❌ Video non disponibile";
-        if (timelineInterval) clearInterval(timelineInterval);
+    
+      // Toggle Dark Mode
+      toggleTheme1.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+        const isDark = document.body.classList.contains("dark-mode");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        toggleTheme1.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+      });
+    
+      // Ripristina stato togglePast
+      const savedExcludePast = localStorage.getItem("excludePast");
+      if (savedExcludePast === "true") {
+        togglePast.checked = true;
       }
-    }, 10000);
-  };
-
-  function onPlayerReady() {
-    hudLabel.textContent = "▶️ Riproduzione pronta";
-	
-	const startTime = 420; // tempo di avvio in secondi
-    player.seekTo(startTime, true); // salta al tempo desiderato
-    player.playVideo();             // avvia la riproduzione
-  
-    tickTimeline();
-  }
-
-  function onPlayerError(e) {
-    hudLabel.textContent = `⚠️ Errore player (${e?.data ?? "sconosciuto"})`;
-    if (timelineInterval) clearInterval(timelineInterval); // aborta timeline
-  }
-
-  function tickTimeline() {
-    let lastShownAt = -1;
-    timelineInterval = setInterval(() => {
-      if (!player || typeof player.getCurrentTime !== "function") return;
-      const t = Math.floor(player.getCurrentTime());
-      if (t === lastShownAt) return;
-      const hit = hudMessages.find(m => m.time === t);
-      if (hit) {
-        hudLabel.textContent = hit.text;
-        hudLabel.classList.add("pulse");
-        setTimeout(() => hudLabel.classList.remove("pulse"), 900);
-        lastShownAt = t;
+    
+      // Ripristina campionato selezionato da localStorage + aggiorna titolo
+      const campionatoSalvato = localStorage.getItem("campionatoSelezionato");
+      if (campionatoSalvato === "U14") {
+        titolo.textContent = "Calendario U14";
+        caricaListaPartite("U14");
+      } else if (campionatoSalvato === "U15") {
+        titolo.textContent = "Calendario U15";
+        caricaListaPartite("U15");
+      } else if (campionatoSalvato === "Tutti") {
+        titolo.textContent = "Calendario U14 + U15";
+        caricaListaPartite();
+      } else {
+        titolo.textContent = "Calendario";
+        caricaListaPartite();
       }
-    }, 500);
-  }
+}
 
-  // --- Fullscreen automatico in landscape, uscita in portrait ---
-  function requestFullscreen() {
-    const el = document.querySelector(".video-container");
-    if (el.requestFullscreen) {
-      el.requestFullscreen();
-    } else if (el.webkitRequestFullscreen) {
-      el.webkitRequestFullscreen();
-    }
-  }
-
-  function exitFullscreen() {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  }
-
-  window.addEventListener("orientationchange", () => {
-    if (screen.orientation.type.startsWith("landscape")) {
-      requestFullscreen();
-    } else if (screen.orientation.type.startsWith("portrait")) {
-      exitFullscreen();
-    }
-  });
-</script>
-</body>
-</html>
+document.addEventListener("DOMContentLoaded", () => {
+		init();
+});
