@@ -70,12 +70,12 @@
     .pulse { animation: pulse 900ms ease; }
   </style>
 </head>
-<body>
-  <div class="video-container">
-<div id="ytplayer"></div>
+    <body>
+      <div class="video-container">
+      <div id="ytplayer"></div>
 
     <div id="hud-overlay">
-      <div id="hud-label" class="badge">HUD 1.0.47</div>
+      <div id="hud-label" class="badge">HUD 1.0.50</div>
     </div>
   </div>
 
@@ -87,7 +87,7 @@
   const hudLabel = document.getElementById("hud-label");
 
   const urlParams = new URLSearchParams(window.location.search);
-  const VideoId = urlParams.get("videoId") || "7LMjqTC9DyQ"; // fallback
+  const videoId = urlParams.get("videoId") || "7LMjqTC9DyQ"; // fallback
 
   const hudMessages = [
     { time: 5, text: "🏀 Inizio partita!" },
@@ -97,12 +97,12 @@
   ];
 
   window.onYouTubeIframeAPIReady = function () {
-    if (!VideoId) {
-      hudLabel.textContent = "⚠️ Nessun VideoId fornito";
+    if (!videoId) {
+      hudLabel.textContent = "⚠️ Nessun videoId fornito";
       return;
     }
     player = new YT.Player('ytplayer', {
-      videoId: VideoId,
+      videoId: videoId,
       playerVars: {
         origin: window.location.origin,
         rel: 0,
@@ -179,4 +179,3 @@
 </script>
 </body>
 </html>
-
