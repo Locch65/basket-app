@@ -34,9 +34,7 @@ h1 {
   left: 10px;
   
   display: flex;
-  gap: 40px; /* aumenta lo spazio tra hamburger e bottone Video */
-  
-  
+  gap: 25px; /* aumenta lo spazio tra hamburger e bottone Video */
 }
 
 #hamburgerBtn {
@@ -711,3 +709,4 @@ h1 {
   padding: 14px;
   margin-top: 60px;
 }
+
