@@ -1,12 +1,11 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.50";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.52";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
 
-//"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
 
 // =====================
 // DATI INIZIALI
@@ -997,3 +996,4 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
