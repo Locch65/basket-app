@@ -72,10 +72,10 @@
 </head>
 <body>
   <div class="video-container">
-    <iframe id="ytplayer"></iframe>
+<div id="ytplayer"></div>
 
     <div id="hud-overlay">
-      <div id="hud-label" class="badge">HUD 1.0.48</div>
+      <div id="hud-label" class="badge">HUD pronto</div>
     </div>
   </div>
 
@@ -83,6 +83,7 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
   let player;
+  let timelineInterval; // variabile globale per gestire l'intervallo
   const hudLabel = document.getElementById("hud-label");
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -107,13 +108,21 @@
         rel: 0,
         modestbranding: 1,
         playsinline: 1,
-        fs: 0
+        fs: 0 // disabilita pulsante fullscreen nativo
       },
       events: {
         'onReady': onPlayerReady,
         'onError': onPlayerError
       }
     });
+
+    // Timeout di sicurezza: se entro 10s non è pronto, abort
+    setTimeout(() => {
+      if (!player || typeof player.getCurrentTime !== "function") {
+        hudLabel.textContent = "❌ Video non disponibile";
+        if (timelineInterval) clearInterval(timelineInterval);
+      }
+    }, 10000);
   };
 
   function onPlayerReady() {
@@ -123,11 +132,12 @@
 
   function onPlayerError(e) {
     hudLabel.textContent = `⚠️ Errore player (${e?.data ?? "sconosciuto"})`;
+    if (timelineInterval) clearInterval(timelineInterval); // aborta timeline
   }
 
   function tickTimeline() {
     let lastShownAt = -1;
-    setInterval(() => {
+    timelineInterval = setInterval(() => {
       if (!player || typeof player.getCurrentTime !== "function") return;
       const t = Math.floor(player.getCurrentTime());
       if (t === lastShownAt) return;
@@ -141,19 +151,29 @@
     }, 500);
   }
 
-  // --- Metodo 1: API Fullscreen ---
+  // --- Fullscreen automatico in landscape, uscita in portrait ---
   function requestFullscreen() {
     const el = document.querySelector(".video-container");
     if (el.requestFullscreen) {
       el.requestFullscreen();
-    } else if (el.webkitRequestFullscreen) { // Safari
+    } else if (el.webkitRequestFullscreen) {
       el.webkitRequestFullscreen();
+    }
+  }
+
+  function exitFullscreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
     }
   }
 
   window.addEventListener("orientationchange", () => {
     if (screen.orientation.type.startsWith("landscape")) {
       requestFullscreen();
+    } else if (screen.orientation.type.startsWith("portrait")) {
+      exitFullscreen();
     }
   });
 </script>
