@@ -75,7 +75,7 @@
       <div id="ytplayer"></div>
 
     <div id="hud-overlay">
-      <div id="hud-label" class="badge">HUD 1.0.50</div>
+      <div id="hud-label" class="badge">HUD 1.0.54</div>
     </div>
   </div>
 
@@ -128,6 +128,11 @@
 
   function onPlayerReady() {
     hudLabel.textContent = "▶️ Riproduzione pronta";
+	
+	const startTime = 420; // tempo di avvio in secondi
+    player.seekTo(startTime, true); // salta al tempo desiderato
+    player.playVideo();             // avvia la riproduzione
+  
     tickTimeline();
   }
 
