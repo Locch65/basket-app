@@ -8,6 +8,35 @@ function parseItalianDate(dateStr, timeStr) {
       return new Date(anno, mese - 1, giorno, ore, minuti);
 }
 
+
+
+function extractYoutubeTime(input) {
+  try {
+    const urlObj = new URL(input);
+
+    if (urlObj.searchParams.has("t")) {
+      const t = urlObj.searchParams.get("t");
+
+      // Gestione formati: solo numeri (es. "60") o con suffissi (es. "1m30s")
+      const match = t.match(/(?:(\d+)m)?(?:(\d+)s)?$/);
+      if (match) {
+        const minutes = parseInt(match[1] || "0", 10);
+        const seconds = parseInt(match[2] || "0", 10);
+        return minutes * 60 + seconds;
+      }
+
+      // Se è solo un numero (es. "120")
+      return parseInt(t, 10);
+    }
+
+    return 0; // default: inizio da 0
+  } catch (e) {
+    console.error("Input non valido:", e);
+    return 0;
+  }
+}
+
+
 function extractYouTubeId(input) {
   try {
     // Caso 0: input già un videoId (11 caratteri alfanumerici tipici di YouTube)
@@ -39,6 +68,8 @@ function extractYouTubeId(input) {
     return "";
   }
 }
+
+
 
 function caricaListaPartite(filtroCampionato = null) {
       const container = document.getElementById("listaPartite");
@@ -156,6 +187,7 @@ function caricaListaPartite(filtroCampionato = null) {
               localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
               localStorage.setItem("convocazioni", p.convocazioni);
               localStorage.setItem("videoId", extractYouTubeId(p.videoId));
+              localStorage.setItem("videoStartTime", extractYoutubeTime(p.videoId));
               window.location.href = "match.html";
             });
 
