@@ -87,7 +87,8 @@
   const hudLabel = document.getElementById("hud-label");
 
   const urlParams = new URLSearchParams(window.location.search);
-  const videoId = urlParams.get("videoId") || "7LMjqTC9DyQ"; // fallback
+  const videoId = urlParams.get("videoId");
+  console.log("Youtube videoId= ", videoId);
 
   const hudMessages = [
     { time: 5, text: "🏀 Inizio partita!" },
