@@ -1,12 +1,43 @@
 const url = 
 "https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
 
-//	"https://script.google.com/macros/s/AKfycbzJpH70VkGlk-o12vYd4RyPtlpNhkRWbxsEOoemgWFoaV0QGRIsJJ7yuNjReHU2a6WS1w/exec";
 
 function parseItalianDate(dateStr, timeStr) {
       const [giorno, mese, anno] = dateStr.split("/").map(Number);
       const [ore, minuti] = timeStr.split(":").map(Number);
       return new Date(anno, mese - 1, giorno, ore, minuti);
+}
+
+function extractYouTubeId(input) {
+  try {
+    // Caso 0: input già un videoId (11 caratteri alfanumerici tipici di YouTube)
+    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+      return input;
+    }
+
+    const urlObj = new URL(input);
+
+    // Caso 1: URL classico con parametro ?v=...
+    if (urlObj.searchParams.has("v")) {
+      return urlObj.searchParams.get("v");
+    }
+
+    // Caso 2: URL corto youtu.be/ID
+    if (urlObj.hostname.includes("youtu.be")) {
+      return urlObj.pathname.slice(1);
+    }
+
+    // Caso 3: URL embed /embed/ID
+    if (urlObj.pathname.includes("/embed/")) {
+      return urlObj.pathname.split("/embed/")[1].split(/[?&]/)[0];
+    }
+
+    // Caso 4: altri formati non previsti
+    return null;
+  } catch (e) {
+    console.error("Input non valido:", e);
+    return null;
+  }
 }
 
 function caricaListaPartite(filtroCampionato = null) {
@@ -124,7 +155,7 @@ function caricaListaPartite(filtroCampionato = null) {
               localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
               localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
               localStorage.setItem("convocazioni", p.convocazioni);
-              localStorage.setItem("videoId", p.videoId);
+              localStorage.setItem("videoId", extractYouTubeId(p.videoId));
               window.location.href = "match.html";
             });
 
