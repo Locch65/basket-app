@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.54";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.55";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
@@ -935,7 +935,8 @@ function init() {
   teamB = localStorage.getItem("teamB");
   convocazioni = localStorage.getItem("convocazioni");
   videoId = localStorage.getItem("videoId"); // metti null se non vuoi mostrare il bottone
-  
+  videoStartTime = localStorage.getItem("videoStartTime");
+
   
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
@@ -956,7 +957,7 @@ function init() {
   videoBtn.addEventListener("click", () => {
     if (videoId !== null) {
       // passa videoId come query string
-      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(videoId);
+      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(videoId) + "t=" + encodeURIComponent(videoStartTime);
     } else {
       // fallback se videoId è nullo
       alert("Nessun videoId disponibile");
@@ -996,4 +997,3 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
