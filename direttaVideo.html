@@ -75,7 +75,7 @@
       <div id="ytplayer"></div>
 
     <div id="hud-overlay">
-      <div id="hud-label" class="badge">HUD 1.0.57</div>
+      <div id="hud-label" class="badge"></div>
     </div>
   </div>
 
@@ -94,10 +94,10 @@
   console.log("Youtube videoId= ", videoId);
 
   const hudMessages = [
-    { time: 5, text: "🏀 Inizio partita!" },
-    { time: 15, text: "🔥 Tripla spettacolare!" },
-    { time: 30, text: "⏱ Timeout tecnico" },
-    { time: 45, text: "💪 Rimonta in corso!" }
+//    { time: 5, text: "🏀 Inizio partita!" },
+//    { time: 15, text: "🔥 Tripla spettacolare!" },
+//    { time: 30, text: "⏱ Timeout tecnico" },
+//    { time: 45, text: "💪 Rimonta in corso!" }
   ];
 
   window.onYouTubeIframeAPIReady = function () {
@@ -130,7 +130,7 @@
   };
 
   function onPlayerReady() {
-    hudLabel.textContent = "▶️ Riproduzione pronta";
+    //hudLabel.textContent = "▶️ Riproduzione pronta";
 	
     player.seekTo(startTime, true); // salta al tempo desiderato
     player.playVideo();             // avvia la riproduzione
