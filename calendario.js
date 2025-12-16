@@ -61,7 +61,12 @@ function extractYouTubeId(input) {
       return urlObj.pathname.split("/embed/")[1].split(/[?&]/)[0];
     }
 
-    // Caso 4: altri formati non previsti
+    // Caso 4: URL live /live/ID
+    if (urlObj.pathname.includes("/live/")) {
+      return urlObj.pathname.split("/live/")[1].split(/[?&]/)[0];
+    }
+
+    // Caso 5: altri formati non previsti
     return "";
   } catch (e) {
     console.error("Input non valido:", e);
