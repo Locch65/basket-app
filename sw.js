@@ -6,6 +6,7 @@
 //    - abilitare update automatico punteggi solo se c'è una partita live
 //
 //  Match.html
+//    - un utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
 //    - sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
 //    - leggere lista giocatori da Google Sheet
 //    - inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Anagrafica", "Calendario", "Classifiche", "Impostazioni", 
@@ -41,7 +42,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.59"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.60"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
