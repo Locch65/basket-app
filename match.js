@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.59.01";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.60";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
