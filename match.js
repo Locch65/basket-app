@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.59";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.59.01";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
@@ -724,7 +724,6 @@ function undoSquadraB() {
 }
 
 function aggiornaScoreboard() {
-  navigator.vibrate(200);
   const punti = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
   const puntiASalvati = localStorage.getItem("puntiSquadraA");
   const puntiBSalvati = localStorage.getItem("puntiSquadraB");
@@ -749,6 +748,7 @@ function aggiornaScoreboard() {
     void scoreboard.offsetWidth; // forza reflow
     scoreboard.classList.add("flash");
 
+    navigator.vibrate(200);
     // Dopo 500ms torna allo stato normale
     setTimeout(() => scoreboard.classList.remove("flash"), 500);
   }
@@ -998,6 +998,7 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
 
 
 
