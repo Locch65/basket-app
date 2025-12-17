@@ -44,19 +44,36 @@ h1 {
   cursor: pointer;
 }
 
+/* Stile base bottone video */
 #videoBtn {
-  padding: 10px 18px;
-  background-color: #e74c3c; /* rosso */
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 18px; /* font più grande */
-  display: none; /* nascosto di default */
+    padding: 10px 20px;
+	font-size: 1.6rem;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-#videoBtn:hover {
-  background-color: #c0392b; /* rosso più scuro al passaggio */
+/* Stato Default: BLU */
+.btn-video-default {
+    background-color: #3498db;
+	display: none;
+}
+
+.btn-video-default:hover {
+    background-color: #2980b9;
+}
+
+/* Stato Live: ROSSO */
+.btn-live-active {
+    background-color: #e74c3c;
+    animation: pulse-red 2s infinite;
+}
+
+.btn-live-active:hover {
+    background-color: #c0392b;
 }
 
 
@@ -386,6 +403,9 @@ h1 {
   position: absolute;
   top: 10px;
   right: 10px;
+  display: flex;          /* attiva il flexbox */
+  flex-direction: column; /* impila i bottoni in verticale */
+  gap: 5px;               /* spazio tra i bottoni */
 }
 
 .popup {
@@ -518,6 +538,10 @@ h1 {
 .convocazioniPopup-confirmBtn:hover,
 .convocazioniPopup-closeBtn:hover {
   background-color: #0056b3;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .squadra-box {
