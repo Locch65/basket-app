@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.61";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.62";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
@@ -16,9 +16,9 @@ let url =
 const giocatoriA = [
   "E. Carfora","K. Popa","G. Giacco","H. Taylor",
   "C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
-  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa"
+  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
 ];
-const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29"];
+const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29", "99"];
 let convocazioni = "";
 let puntiSquadraA = 0;
 let puntiSquadraB = 0;
@@ -737,11 +737,11 @@ function aggiornaScoreboard() {
   
   const scoreboard = document.getElementById("scoreboard");
   let nuovoTesto = "";
-  let difference = (teamA === "Polismile A") ? punti != parseInt(puntiASalvati, 10) : punti != parseInt(puntiBSalvati, 10)
-  if (difference && !isAdmin) {
-    nuovoTesto = `${puntiASalvati} - ${puntiBSalvati}`;
-  }
-  else
+  // let difference = (teamA === "Polismile A") ? punti != parseInt(puntiASalvati, 10) : punti != parseInt(puntiBSalvati, 10)
+  // if (difference && !isAdmin) {
+  //   nuovoTesto = `${puntiASalvati} - ${puntiBSalvati}`;
+  // }
+  // else
   {
     nuovoTesto = (teamA === "Polismile A") ? `${punti} - ${puntiSquadraB}` : `${puntiSquadraB} - ${punti}`;
 	puntiSquadraA = punti;
@@ -848,7 +848,6 @@ function caricaDatiPartita(matchId) {
     .then(rows => {
       console.log("Dati caricati:", rows);
 
-      aggiornaTitoli();
 
       // … poi aggiorni i giocatori
       rows.forEach(r => {
@@ -862,6 +861,7 @@ function caricaDatiPartita(matchId) {
           contatoriB = JSON.parse(r.dettagli || "{}");
         }
       });
+      aggiornaTitoli();
       renderGiocatori(giocatoriObj);
       aggiornaScoreboard();
       ordinaGiocatori(ultimoOrdinamento);
