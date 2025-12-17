@@ -3,14 +3,16 @@
 //
 //  Calendario.html
 //    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
-//    - abilitare update automatico punteggi solo se c'è una partita live
+//    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
 //
 //  Match.html
+//    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 
+//
+//    - inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
 //    - un utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
 //    - sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
 //    - leggere lista giocatori da Google Sheet
 //    - inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Anagrafica", "Calendario", "Classifiche", "Impostazioni", 
-//    - bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
 //    - quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
 //    - password Admin da crittografare
 //    - implementare dark mode
@@ -19,7 +21,7 @@
 //    - inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
 //    - inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
 //
-//  Angrafica.html
+//  Anagrafica.html
 //    - 1) mostrare lista Roster. Quando si clicca su un nome
 //         1.1) si apre dettaglio anagrafica e statistiche    
 //
@@ -34,6 +36,10 @@
 //       - Dark Mode (toggle)
 //       - refresh rate dei punteggi live (di default 5 secondi)
 //
+//
+//
+//  VARIE:
+//    - cambiare i loop di lettura ogni 5 secondi con una implementazioni a eventi con un server realtime (notifica push)
 //
 //
 // -----------------------------------------------------------------------------------
@@ -113,48 +119,3 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("message", (event) => {
   // placeholder se vuoi gestire comandi dal client
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
