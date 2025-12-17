@@ -1,10 +1,13 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.60";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.61";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
-"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
+"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
+
+
+//"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
 
 
 // =====================
@@ -29,6 +32,8 @@ let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
 let matchId = null;
 let teamA = "";
 let teamB = "";
+let isLive = false;
+
 let refreshTimer = null; // variabile globale per l'ID del timer
 
 const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
@@ -201,9 +206,11 @@ function login(pwd) {
     isAdmin = true;
 	interrompiAggiornamentoAutomatico();
 	
-    // Nascondi elementi non necessari e mostra strumenti admin
-    const loginDiv = document.getElementById("login");
-	document.getElementById("squadraB").classList.remove("hidden");
+    // MOSTRA LA SQUADRA B
+    const squadraB = document.getElementById("squadraB");
+    if (squadraB) {
+      squadraB.classList.remove("hidden");
+    }
 	
 	initOrdinamenti();
     aggiornaTitoli();
@@ -921,6 +928,21 @@ function SalvaPunteggi() {
     });
 }
 
+// --- FUNZIONE AGGIORNAMENTO BOTTONE VIDEO ---
+function aggiornaStatoVideo() {
+  const videoBtn = document.getElementById("videoBtn");
+  if (!videoBtn) return;
+
+  // Controllo isLive (gestito come stringa per sicurezza da localStorage)
+  if (isLive === "true" || isLive === true) {
+    videoBtn.textContent = "Live";
+    videoBtn.className = "btn-live-active"; // Diventa Rosso
+  } else {
+    videoBtn.textContent = "Video";
+    videoBtn.className = "btn-video-default"; // Diventa Blu
+  }
+}
+
 // =====================
 // INIZIALIZZAZIONE
 // =====================
@@ -937,7 +959,9 @@ function init() {
   convocazioni = localStorage.getItem("convocazioni");
   videoId = localStorage.getItem("videoId"); // metti null se non vuoi mostrare il bottone
   videoStartTime = localStorage.getItem("videoStartTime");
-
+  isLive = localStorage.getItem("isLive");
+// Applica lo stato al bottone Video
+  aggiornaStatoVideo();
   
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
