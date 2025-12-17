@@ -1,6 +1,10 @@
 const url = 
-"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
+"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
 
+//"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
+
+
+let refreshInterval = null; // Gestisce il loop di aggiornamento
 
 function parseItalianDate(dateStr, timeStr) {
       const [giorno, mese, anno] = dateStr.split("/").map(Number);
@@ -127,6 +131,8 @@ function caricaListaPartite(filtroCampionato = null) {
           const frag = document.createDocumentFragment();
           //const oggi = new Date();
 
+          let almenoUnaLive = false;
+		  
           partiteFiltrate.forEach(p => {
             let campionato = "";
             if (String(p.matchId).includes("U14")) {
@@ -144,7 +150,14 @@ function caricaListaPartite(filtroCampionato = null) {
 			  
             const card = document.createElement("div");
             card.classList.add("match-card");
-
+			card.setAttribute("data-matchid", p.matchId);
+			
+            // --- Controllo Live per il bordo ---
+            if (p.isLive === "true" || p.isLive === true) {
+              card.classList.add("live-border");
+              almenoUnaLive = true;
+            }
+			
             const dataPartita = parseItalianDate(p.data, p.orario);
             if (dataPartita < oggi) {
               card.classList.add("past");
@@ -193,6 +206,7 @@ function caricaListaPartite(filtroCampionato = null) {
               localStorage.setItem("convocazioni", p.convocazioni);
               localStorage.setItem("videoId", extractYouTubeId(p.videoId));
               localStorage.setItem("videoStartTime", extractYoutubeTime(p.videoId));
+              localStorage.setItem("isLive", p.isLive);
               window.location.href = "match.html";
             });
 
@@ -200,6 +214,10 @@ function caricaListaPartite(filtroCampionato = null) {
           });
 
           container.replaceChildren(frag);
+		  
+          // --- LOGICA REFRESH AUTOMATICO ---
+          startRefreshAutomatico(almenoUnaLive, filtroCampionato);
+
         })
         .catch(err => {
           container.classList.remove("loading");
@@ -226,6 +244,92 @@ function filtraPartite(campionato, titolo) {
         localStorage.setItem("campionatoSelezionato", campionato ?? "Tutti");
     
         caricaListaPartite(campionato);
+}
+
+function OLDaggiornaPunteggiLive() {
+  fetch(url + "?sheet=Partite")
+    .then(res => res.json())
+    .then(data => {
+      const partite = Array.isArray(data) ? data : data.data;
+      if (!Array.isArray(partite)) return;
+
+      partite.forEach(p => {
+        // Cerchiamo nel documento la card che ha quel matchId
+        const card = document.querySelector(`.match-card[data-matchid="${p.matchId}"]`);
+        
+        if (card) {
+          // 1. Aggiorna i punteggi nel DOM
+          const teamAscore = card.querySelector(".teamA strong");
+          const teamBscore = card.querySelector(".teamB strong");
+          
+          if (teamAscore) teamAscore.textContent = p.punteggioA ?? "-";
+          if (teamBscore) teamBscore.textContent = p.punteggioB ?? "-";
+
+          // 2. Gestisci dinamicamente il bordo live se lo stato cambia
+          if (p.isLive === true || p.isLive === "true" || p.isLive === "TRUE") {
+            card.classList.add("live-border");
+          } else {
+            card.classList.remove("live-border");
+          }
+        }
+      });
+    })
+    .catch(err => console.error("Errore aggiornamento live:", err));
+}
+
+function aggiornaPunteggiLive() {
+  fetch(url + "?sheet=Partite")
+    .then(res => res.json())
+    .then(data => {
+      const partite = Array.isArray(data) ? data : data.data;
+      if (!Array.isArray(partite)) return;
+
+      partite.forEach(p => {
+        const card = document.querySelector(`.match-card[data-matchid="${p.matchId}"]`);
+        if (card) {
+          const teamAscore = card.querySelector(".teamA strong");
+          const teamBscore = card.querySelector(".teamB strong");
+
+          const applicaFlash = (elemento, nuovoPunto) => {
+            const nuovoValore = String(nuovoPunto ?? "-");
+            if (elemento && elemento.textContent !== nuovoValore) {
+              elemento.textContent = nuovoValore;
+              
+              // Reset animazione
+              elemento.classList.remove("flash-update");
+              void elemento.offsetWidth; 
+              elemento.classList.add("flash-update");
+            }
+          };
+
+          applicaFlash(teamAscore, p.punteggioA);
+          applicaFlash(teamBscore, p.punteggioB);
+          
+          // Aggiorna anche il bordo se la partita finisce o inizia il live
+          if (p.isLive === true || p.isLive === "true") {
+            card.classList.add("live-border");
+          } else {
+            card.classList.remove("live-border");
+          }
+        }
+      });
+    });
+}
+
+function startRefreshAutomatico(attiva, filtro) {
+  // Se c'è almeno una partita live e non c'è già un timer attivo
+  if (attiva && !refreshInterval) {
+    console.log("Partita Live rilevata: avvio loop aggiornamento (5s)");
+    refreshInterval = setInterval(() => {
+      aggiornaPunteggiLive();
+    }, 5000); // 5000 ms = 30 secondi
+  } 
+  // Se non ci sono più partite live, ferma il timer
+  else if (!attiva && refreshInterval) {
+    console.log("Nessuna partita Live: stop loop aggiornamento");
+    clearInterval(refreshInterval);
+    refreshInterval = null;
+  }
 }
 
 function init() {
