@@ -9,11 +9,11 @@
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 
 //
 //    - inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
-//    - un utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
+//    - FATTO: n utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
 //    - sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
 //    - leggere lista giocatori da Google Sheet
 //    - inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Anagrafica", "Calendario", "Classifiche", "Impostazioni", 
-//    - quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
+//    - FATTO: quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
 //    - password Admin da crittografare
 //    - implementare dark mode
 //
@@ -48,7 +48,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.60"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.62"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
