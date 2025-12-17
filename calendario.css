@@ -108,6 +108,36 @@ body.dark-mode .match-bottom .vs {
   background-color: #efefef;
 }
 
+/* --- ANIMAZIONE LIVE POTENZIATA --- */
+.match-card.live-border {
+  /* Usiamo una variabile per il colore per gestirlo meglio nell'animazione */
+  --live-red: #ff0000;
+  
+  border: 4px solid var(--live-red) !important;
+  position: relative;
+  z-index: 10;
+  /* Applica l'animazione: nome, durata, ripetizione infinita */
+  animation: blink-red-intense 2.0s infinite ease-in-out !important;
+}
+
+@keyframes blink-red-intense {
+  0% {
+    border-color: #ff0000;
+    box-shadow: 0 0 5px #ff0000;
+    transform: scale(1);
+  }
+  50% {
+    border-color: #550000; /* Rosso molto scuro per creare contrasto */
+    box-shadow: 0 0 20px #ff0000;
+    transform: scale(1.01); /* Leggerissimo aumento di dimensione per l'effetto pulsante */
+  }
+  100% {
+    border-color: #ff0000;
+    box-shadow: 0 0 5px #ff0000;
+    transform: scale(1);
+  }
+}
+
 /* Riga 1: info principali */
 .match-top {
   display: flex;
@@ -149,6 +179,12 @@ body.dark-mode .match-bottom .vs {
   width: 100%;
 }
 
+/* Assicurati che il contenitore del punteggio permetta la trasformazione */
+.match-bottom strong {
+  display: inline-block;
+  transition: color 0.3s;
+}
+
 /* Riga 3: squadre */
 .match-bottom {
   display: flex;
@@ -159,12 +195,33 @@ body.dark-mode .match-bottom .vs {
   font-weight: bold;
 }
 
+/* Mantieni le tue definizioni e aggiungi queste proprietà */
 .match-bottom strong {
   font-size: 20px;
   color: #000;
   margin: 0 6px;
+  /* Fondamentali per l'animazione */
+  display: inline-block; 
+  transition: color 0.3s;
 }
 
+/* --- ANIMAZIONE FLASH --- */
+.flash-update {
+  animation: flash-yellow 0.8s ease-out;
+}
+
+@keyframes flash-yellow {
+  0% {
+    color: #f1c40f; /* Giallo */
+    transform: scale(1.3);
+    text-shadow: 0 0 10px rgba(241, 196, 15, 0.8);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+    text-shadow: none;
+  }
+}
 .match-bottom .score {
   font-size: 32px;     /* molto più grande */
   font-weight: bold;
