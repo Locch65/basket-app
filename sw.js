@@ -1,19 +1,29 @@
 // -----------------------------------------------------------------------------------
+// Comando per webserver locale:
+//  py -m http.server 8000 --directory C:\Users\locch\Desktop\Basket\basket-app-main.1.0.61
+//
+// Comando per attivare pagina web:
+//  http://localhost:8000/match.html
+//
+// -----------------------------------------------------------------------------------
 // TODO List:
 //
 //  Calendario.html
-//    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
 //    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
+//    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
+//    - i dati del match (tipo Islive) vengono caricati quando fa il refresh, non quando si clicca sulla partita. (risultato: il bottone VIdeo rimane blu)
 //
 //  Match.html
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 
+//    - FATTO: n utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
+//    - FATTO: quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
+//
+//    - passare matchid come parametro. cambiare i matchid delle partite nel DB. renderli numeri casuali
 //
 //    - inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
-//    - FATTO: n utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
 //    - sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
 //    - leggere lista giocatori da Google Sheet
 //    - inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Anagrafica", "Calendario", "Classifiche", "Impostazioni", 
-//    - FATTO: quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
 //    - password Admin da crittografare
 //    - implementare dark mode
 //
@@ -48,7 +58,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.62"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.63"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
