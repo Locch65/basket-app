@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.62";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.63";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
@@ -50,6 +50,8 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
     stato: "Out"
   };
 });
+
+function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
 function addPoints(points) {
   if (!isAdmin) return; // blocco minimo lato client
@@ -755,7 +757,9 @@ function aggiornaScoreboard() {
     void scoreboard.offsetWidth; // forza reflow
     scoreboard.classList.add("flash");
 
-    navigator.vibrate(200);
+    if (isMobile()) { 
+	  navigator.vibrate(100);
+	}
     // Dopo 500ms torna allo stato normale
     setTimeout(() => scoreboard.classList.remove("flash"), 500);
   }
@@ -885,7 +889,7 @@ function avviaAggiornamentoAutomatico() {
   }
   
   // Ogni 5 secondi ricarica i dati
-  if (!isAdmin) {
+  if (!isAdmin && (isLive === "true" || isLive === true)) {
 	  refreshTimer = setInterval(() => {
 		//const matchId = matchSelector.value;
 		caricaDatiPartita(matchId);
@@ -960,8 +964,6 @@ function init() {
   videoId = localStorage.getItem("videoId"); // metti null se non vuoi mostrare il bottone
   videoStartTime = localStorage.getItem("videoStartTime");
   isLive = localStorage.getItem("isLive");
-// Applica lo stato al bottone Video
-  aggiornaStatoVideo();
   
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
@@ -977,12 +979,14 @@ function init() {
   // Mostra il bottone solo se videoId è diverso da null
   if (videoId !== null && videoId !== "") {
     videoBtn.style.display = "inline-block";
+    // Applica lo stato al bottone Video
+    aggiornaStatoVideo();
   }
 
   videoBtn.addEventListener("click", () => {
     if (videoId !== null) {
       // passa videoId come query string
-      window.location.href = "direttaVideo.html?videoId=" + encodeURIComponent(videoId);
+      window.location.href = "direttaVideo.html?matchId=" + encodeURIComponent(matchId) + "&videoId=" + encodeURIComponent(videoId);
     } else {
       // fallback se videoId è nullo
       alert("Nessun videoId disponibile");
