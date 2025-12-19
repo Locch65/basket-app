@@ -60,25 +60,70 @@ function onPlayerError(e) {
   if (timelineInterval) clearInterval(timelineInterval);
 }
 
-function OLDcaricaDatiPartita(mId) {
-  fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
-    .then(res => res.json())
-    .then(rows => {
-      rows.forEach(r => {
-        const g = giocatoriObj.find(x => String(x.numero) === String(r.numero));
-        if (g) {
-          g.lastPunteggio = g.punteggio; // Salva il vecchio
-          g.punteggio = parseInt(r.punti, 10) || 0;
-          g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
-          try { g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}'); } catch(e) {}
-        } else if (r.giocatore === "Squadra B") {
-          punteggioB = parseInt(r.punti, 10) || 0;
-        }
-      });
-      updateScoreboard();
-      renderPlayerList();
-    });
+function extractYoutubeTime(input) {
+  try {
+    const urlObj = new URL(input);
+
+    if (urlObj.searchParams.has("t")) {
+      const t = urlObj.searchParams.get("t");
+
+      // Gestione formati: solo numeri (es. "60") o con suffissi (es. "1m30s")
+      const match = t.match(/(?:(\d+)m)?(?:(\d+)s)?$/);
+      if (match) {
+        const minutes = parseInt(match[1] || "0", 10);
+        const seconds = parseInt(match[2] || "0", 10);
+        return minutes * 60 + seconds;
+      }
+
+      // Se è solo un numero (es. "120")
+      return parseInt(t, 10);
+    }
+
+    return 0; // default: inizio da 0
+  } catch (e) {
+    console.error("Input non valido:", e);
+    return 0;
+  }
 }
+
+
+function extractYouTubeId(input) {
+  try {
+    // Caso 0: input già un videoId (11 caratteri alfanumerici tipici di YouTube)
+    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+      return input;
+    }
+
+    const urlObj = new URL(input);
+
+    // Caso 1: URL classico con parametro ?v=...
+    if (urlObj.searchParams.has("v")) {
+      return urlObj.searchParams.get("v");
+    }
+
+    // Caso 2: URL corto youtu.be/ID
+    if (urlObj.hostname.includes("youtu.be")) {
+      return urlObj.pathname.slice(1);
+    }
+
+    // Caso 3: URL embed /embed/ID
+    if (urlObj.pathname.includes("/embed/")) {
+      return urlObj.pathname.split("/embed/")[1].split(/[?&]/)[0];
+    }
+
+    // Caso 4: URL live /live/ID
+    if (urlObj.pathname.includes("/live/")) {
+      return urlObj.pathname.split("/live/")[1].split(/[?&]/)[0];
+    }
+
+    // Caso 5: altri formati non previsti
+    return "";
+  } catch (e) {
+    console.error("Input non valido:", e);
+    return "";
+  }
+}
+
 
 function caricaAnagraficaSingolaPartita(targetMatchId) {
   if (!targetMatchId) return;
@@ -108,6 +153,8 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
         puntiSquadraA: partita.punteggioA === "" ? 0 : partita.punteggioA,
         puntiSquadraB: partita.punteggioB === "" ? 0 : partita.punteggioB,
         convocazioni: partita.convocazioni,
+		videoId: extractYouTubeId(partita.videoId),
+		startTime: extractYoutubeTime(partita.videoId),
         isLive: partita.isLive
       };
 
@@ -124,6 +171,9 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
     });
 }
 
+// Variabile di stato globale (fuori dalla funzione)
+let isFirstLoad = true;
+
 function caricaDatiPartita(mId) {
   fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
     .then(res => res.json())
@@ -133,19 +183,26 @@ function caricaDatiPartita(mId) {
         if (g) {
           const nuoviPunti = parseInt(r.punti, 10) || 0;
           
-          // RILEVAZIONE CANESTRO SENZA CODA
-          if (nuoviPunti > g.punteggio) {
+          // RILEVAZIONE CANESTRO: 
+          // Mostra il toast solo se NON è il primo caricamento E il punteggio è aumentato
+          if (!isFirstLoad && nuoviPunti > g.punteggio) {
             const incremento = nuoviPunti - g.punteggio;
             showBasketToast(g.displayName, incremento);
           }
 
           g.punteggio = nuoviPunti;
           g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
-          try { g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}'); } catch(e) {}
+          try { 
+            g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}'); 
+          } catch(e) {}
         } else if (r.giocatore === "Squadra B") {
           punteggioB = parseInt(r.punti, 10) || 0;
         }
       });
+
+      // Dopo aver elaborato tutti i dati per la prima volta, impostiamo il flag a false
+      isFirstLoad = false;
+
       updateScoreboard();
       renderPlayerList();
     });
