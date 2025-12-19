@@ -33,6 +33,8 @@ const matchId = urlParams.get("matchId");
 const videoId = urlParams.get("videoId");
 const startTime = parseInt(localStorage.getItem("videoStartTime") || "0", 10);
 
+caricaAnagraficaSingolaPartita(matchId);
+
 const teamA = localStorage.getItem("teamA"); // ATTENZIONE: da leggere da google sheet in funzione del matchId
 const teamB = localStorage.getItem("teamB");
 
@@ -75,6 +77,50 @@ function OLDcaricaDatiPartita(mId) {
       });
       updateScoreboard();
       renderPlayerList();
+    });
+}
+
+function caricaAnagraficaSingolaPartita(targetMatchId) {
+  if (!targetMatchId) return;
+
+  // Mostra un feedback di caricamento se necessario (opzionale)
+  console.log("Caricamento dati per il match:", targetMatchId);
+
+  return fetch(url + "?sheet=Partite")
+    .then(res => res.json())
+    .then(data => {
+      const partite = Array.isArray(data) ? data : data.data;
+      
+      // Cerchiamo il match specifico tramite matchId
+      const partita = partite.find(p => String(p.matchId) === String(targetMatchId));
+
+      if (!partita) {
+        throw new Error("Partita non trovata");
+      }
+
+      // --- ESTRAZIONE E SALVATAGGIO DATI ---
+      // Ripetiamo la logica di pulizia e salvataggio che avevi nel click
+      
+      const datiPartita = {
+        matchId: partita.matchId,
+        teamA: partita.squadraA,
+        teamB: partita.squadraB,
+        puntiSquadraA: partita.punteggioA === "" ? 0 : partita.punteggioA,
+        puntiSquadraB: partita.punteggioB === "" ? 0 : partita.punteggioB,
+        convocazioni: partita.convocazioni,
+        isLive: partita.isLive
+      };
+
+      // Se ti serve salvarli subito nel localStorage:
+      Object.keys(datiPartita).forEach(key => {
+        localStorage.setItem(key, datiPartita[key]);
+      });
+
+      console.log("Dati partita caricati con successo:", datiPartita);
+      return datiPartita; 
+    })
+    .catch(err => {
+      console.error("Errore nel recupero della partita:", err);
     });
 }
 
