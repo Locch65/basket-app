@@ -28,8 +28,9 @@
 //    - implementare dark mode
 //
 //  DirettaVideo.html
+//    - FATTO: inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
+//    - simulazione OPPO: eliminare la scrollbar orizzontale
 //    - inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
-//    - inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
 //
 //  Anagrafica.html
 //    - 1) mostrare lista Roster. Quando si clicca su un nome
@@ -58,7 +59,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.63"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.64"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
