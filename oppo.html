@@ -39,19 +39,27 @@
       padding: 0 8px;
     }
 
-    /* Wrapper che nasconde la barra a destra */
     .iframe-wrapper {
-      position: relative;
-      flex: 1;
-      overflow: hidden; /* taglia la scrollbar dell'iframe */
-    }
+  position: relative;
+  flex: 1;
+  overflow: hidden; 
+  /* Se vuoi nascondere la scrollbar verticale pur permettendo lo scroll, 
+     puoi usare le proprietà sotto */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.iframe-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
 
     /* Sposta la scrollbar fuori dalla cornice visibile */
     .screen {
-      width: calc(95% + 20px); /* 20px ≈ larghezza tipica scrollbar desktop */
-      height: 100%;
-      border: none;
-    }
+  width: 100%; /* Rimosso il calc che causava lo sforamento */
+  height: 100%;
+  border: none;
+  display: block;
+}
 
     .fullscreen-btn {
       position: absolute;
@@ -93,11 +101,11 @@
     // (Opzionale) Misura dinamicamente la larghezza scrollbar e aggiorna l'iframe
     // Utile se 20px non è accurato sul tuo sistema.
     window.addEventListener('load', () => {
-      const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-      if (scrollbarW > 0) {
-        const iframe = document.querySelector('.screen');
-        iframe.style.width = `calc(100% + ${scrollbarW}px)`;
-      }
+      //const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+      //if (scrollbarW > 0) {
+      //  const iframe = document.querySelector('.screen');
+      //  iframe.style.width = `calc(100% + ${scrollbarW}px)`;
+      //}
     });
   </script>
 </body>
