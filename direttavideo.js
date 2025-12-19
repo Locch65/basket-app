@@ -58,7 +58,7 @@ function onPlayerError(e) {
   if (timelineInterval) clearInterval(timelineInterval);
 }
 
-function caricaDatiPartita(mId) {
+function OLDcaricaDatiPartita(mId) {
   fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
     .then(res => res.json())
     .then(rows => {
@@ -78,10 +78,88 @@ function caricaDatiPartita(mId) {
     });
 }
 
-function updateHUDStatus(msg) {
-  if (hudLabel) {
-    hudLabel.textContent = msg;
-    hudLabel.style.borderColor = isUserLive ? "red" : "rgba(108,255,108,.4)";
+function caricaDatiPartita(mId) {
+  fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
+    .then(res => res.json())
+    .then(rows => {
+      rows.forEach(r => {
+        const g = giocatoriObj.find(x => String(x.numero) === String(r.numero));
+        if (g) {
+          const nuoviPunti = parseInt(r.punti, 10) || 0;
+          
+          // RILEVAZIONE CANESTRO SENZA CODA
+          if (nuoviPunti > g.punteggio) {
+            const incremento = nuoviPunti - g.punteggio;
+            showBasketToast(g.displayName, incremento);
+          }
+
+          g.punteggio = nuoviPunti;
+          g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
+          try { g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}'); } catch(e) {}
+        } else if (r.giocatore === "Squadra B") {
+          punteggioB = parseInt(r.punti, 10) || 0;
+        }
+      });
+      updateScoreboard();
+      renderPlayerList();
+    });
+}
+
+// Funzione Flash Semplificata (Durata 2 secondi)
+function OLDshowBasketToast(name, points) {
+  const toast = document.getElementById("basket-toast");
+  if (!toast) return;
+
+  // Sovrascrive immediatamente qualsiasi messaggio precedente
+  toast.textContent = `${name.toUpperCase()} +${points}`;
+  toast.classList.remove("hidden");
+  toast.classList.add("toast-active");
+
+  // Reset dopo 2 secondi esatti
+  setTimeout(() => {
+    toast.classList.add("hidden");
+    toast.classList.remove("toast-active");
+  }, 2500);
+}
+
+// Variabile di controllo per la durata del flash
+let isToastRunning = false;
+
+function showBasketToast(name, points) {
+  const toast = document.getElementById("basket-toast");
+  if (!toast) return;
+
+  // Evita che il refresh dei dati resetti l'animazione se è lo stesso evento
+  if (isToastRunning && toast.textContent.includes(name.toUpperCase())) {
+    return;
+  }
+
+  isToastRunning = true;
+  toast.classList.remove("toast-active");
+  void toast.offsetWidth; // Reset dell'animazione nel DOM
+
+  // Genera i palloni in base ai punti (1, 2 o 3)
+  const balls = "🏀".repeat(Math.min(Math.max(points, 1), 3));
+  
+  // NUOVO ORDINE: Palloni prima del nome
+  toast.textContent = `${balls} ${name}`;
+  
+  toast.classList.add("toast-active");
+
+  // Rimuove lo stato di blocco dopo 2 secondi
+  setTimeout(() => {
+    toast.classList.remove("toast-active");
+    isToastRunning = false;
+  }, 2000);
+}
+
+function updateHUDStatus() {
+  const liveLabel = document.getElementById("hud-live-status");
+  if (liveLabel) {
+    // Aggiorna solo il testo e il colore in base allo stato
+    liveLabel.textContent = isUserLive ? "🔴 LIVE" : "";
+    liveLabel.style.color = isUserLive ? "#ff4d4d" : "#aaa";
+    // Il bordo rimane rimosso grazie al CSS
   }
 }
 
@@ -117,6 +195,10 @@ function updateScoreboard() {
   const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
   const currentScore = (teamA === "Polismile A") ? `${puntiA} - ${punteggioB}` : `${punteggioB} - ${puntiA}`;
 
+  // Aggiorna l'HUD in alto nel video
+  const hudScore = document.getElementById("hud-score");
+  if (hudScore) hudScore.textContent = currentScore;
+  
   if (currentScore !== lastScoreStr) {
     scoreEl.textContent = currentScore;
     scoreEl.classList.remove("flash");
@@ -139,23 +221,25 @@ function renderPlayerList() {
 
   container.innerHTML = sorted.map(g => {
     const c = g.contatori;
-    const stats = `1pt:${c[1]||0} 2pt:${c[2]||0} 3pt:${c[3]||0}`;
+    //const stats = `1pt:${c[1]||0} 2pt:${c[2]||0} 3pt:${c[3]||0}`;
+    const stats = `[${c[1]||0}, ${c[2]||0}, ${c[3]||0}]`;
     
     // Verifica se attivare il flash (punteggio aumentato)
     const hasChanged = g.punteggio !== g.lastPunteggio;
     const flashClass = hasChanged ? 'flash-update' : '';
 
     return `
-      <div class="player-item ${g.stato === 'In' ? 'is-in' : 'is-out'} ${flashClass}">
+      <div class="player-item ${g.stato === 'In' ? 'is-in' : 'is-out'}">
         <div>
           <span class="player-num">#${g.numero}</span>
           <span class="player-name">${g.displayName}</span>
         </div>
         <div class="player-stats">
-          ${stats} <span class="player-points">${g.punteggio} pts</span>
+          ${stats} 
+          <span class="player-points">${g.punteggio}</span>
         </div>
       </div>
-    `;
+        `;
   }).join('');
 }
 
