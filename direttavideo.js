@@ -30,7 +30,8 @@ let isUserLive = true;
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
 const matchId = urlParams.get("matchId");
-const videoId = urlParams.get("videoId");
+//const videoId = urlParams.get("videoId");
+const videoId = localStorage.getItem("videoId");
 const startTime = parseInt(localStorage.getItem("videoStartTime") || "0", 10);
 
 caricaAnagraficaSingolaPartita(matchId);
