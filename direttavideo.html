@@ -2,17 +2,27 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>YouTube HUD Demo – Fix Error 153</title>
+  <title>YouTube Live Stats – Full Version</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="direttavideo.css">
 </head>
 <body>
   <div class="video-container">
     <div id="ytplayer"></div>
-
     <div id="hud-overlay">
       <div id="hud-label" class="badge"></div>
     </div>
+  </div>
+
+  <div id="stats-section" class="players-list-container">
+    <div class="scoreboard">
+      <div class="team-labels">
+        <span id="label-team-A">SQUADRA A</span>
+        <span id="label-team-B">SQUADRA B</span>
+      </div>
+      <div id="game-score" class="main-score">0 - 0</div>
+    </div>
+    <div id="players-grid"></div>
   </div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
