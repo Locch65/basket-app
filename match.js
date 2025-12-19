@@ -987,7 +987,7 @@ function init() {
     if (videoId !== null) {
       // passa videoId come query string
       //window.location.href = "direttavideo.html?matchId=" + encodeURIComponent(matchId) + "&videoId=" + encodeURIComponent(videoId);
-      localStorage.setItem("matchId", matchId);
+      localStorage.setItem("videoId", videoId);
       window.location.href = "direttavideo.html?matchId=" + encodeURIComponent(matchId);
     } else {
       // fallback se videoId è nullo
