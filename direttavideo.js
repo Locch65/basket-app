@@ -1,5 +1,5 @@
 let LIVE_OFFSET = 5;
-let REFRESH_TIME = 2000;
+let REFRESH_TIME = 1000;
 let url = "https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec";
 
 const giocatoriA = [
@@ -30,7 +30,6 @@ let isUserLive = true;
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
 const matchId = urlParams.get("matchId");
-//const videoId = urlParams.get("videoId");
 const videoId = localStorage.getItem("videoId");
 const startTime = parseInt(localStorage.getItem("videoStartTime") || "0", 10);
 
@@ -279,6 +278,36 @@ function initTeamNames() {
   if (elB) elB.textContent = teamB;
 }
 
+/**
+ * Scambia le posizioni verticali di HUD Score e Basket Toast.
+ * Se lo score è in alto, lo sposta in basso e viceversa.
+ */
+function scambiaPosizioniHUD() {
+  const hudScore = document.getElementById('hud-score');
+  const basketToast = document.querySelector('.toast');
+
+  if (!hudScore || !basketToast) return;
+
+  // Controlliamo la posizione attuale dello score
+  const isScoreAtTop = hudScore.style.top === '0px' || getComputedStyle(hudScore).top === '0px';
+
+  if (isScoreAtTop) {
+    // Sposta Score in basso e Toast in alto
+    hudScore.style.top = 'auto';
+    hudScore.style.bottom = '10px';
+    
+    basketToast.style.bottom = 'auto';
+    basketToast.style.top = '20px';
+  } else {
+    // Ripristina Score in alto e Toast in basso (valori originali CSS)
+    hudScore.style.bottom = 'auto';
+    hudScore.style.top = '0px';
+    
+    basketToast.style.top = 'auto';
+    basketToast.style.bottom = '5px';
+  }
+}
+
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
 function updateScoreboard() {
@@ -394,3 +423,22 @@ window.addEventListener("resize", () => {
         requestFullscreen();
     }
 });
+
+
+function init() {
+  // Seleziona l'elemento dello score
+  const hudScoreElement = document.getElementById('hud-score');
+  
+  // Aggiunge l'ascoltatore per il click
+  if (hudScoreElement) {
+    hudScoreElement.style.pointerEvents = 'auto'; // Importante: abilita i click sull'elemento
+    hudScoreElement.style.cursor = 'pointer';      // Cambia il cursore per far capire che è cliccabile
+    
+    hudScoreElement.addEventListener('click', () => {
+      scambiaPosizioniHUD();
+    });
+  }
+
+}
+
+document.addEventListener("DOMContentLoaded", init);
