@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.65";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.67";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
@@ -78,6 +78,217 @@ function undoPunteggio(target) {
 }
 
 function apriConvocazioni() {
+  const giocatori = giocatoriA;
+  const numeri = numeriMaglia;
+
+  // Rimuove popup esistenti per evitare duplicati
+  const existingPopup = document.getElementById("convocazioniPopup");
+  if (existingPopup) existingPopup.remove();
+
+  const popup = document.createElement("div");
+  popup.id = "convocazioniPopup";
+  popup.className = "convocazioniPopup-overlay";
+
+  const content = document.createElement("div");
+  content.className = "convocazioniPopup-content";
+
+  const title = document.createElement("h2");
+  title.textContent = "Convocazioni";
+  content.appendChild(title);
+
+  const list = document.createElement("ul");
+  list.className = "convocazioniPopup-list";
+
+  // 1. Mappatura e Ordinamento Alfabetico per Cognome
+  let listaOrdinata = giocatori.map((nomeCompleto, index) => {
+    const parts = nomeCompleto.trim().split(" ");
+    const nome = parts[0];
+    const cognome = parts.slice(1).join(" ");
+    return {
+      index: index,
+      nome: nome,
+      cognome: cognome,
+      visuale: `${cognome} ${nome}`,
+      numeroMaglia: numeri[index]
+    };
+  });
+
+  listaOrdinata.sort((a, b) => a.cognome.localeCompare(b.cognome));
+
+  // 2. Recupero convocati salvati
+  let convocatiNum = [];
+  if (typeof convocazioni !== 'undefined' && convocazioni.trim() !== "") {
+    try {
+      const parsed = JSON.parse(convocazioni);
+      convocatiNum = Array.isArray(parsed) ? parsed.map(n => Number(n)) : [];
+    } catch (e) { console.error("Errore parse convocazioni", e); }
+  }
+
+  // 3. Generazione Lista con allineamento
+  listaOrdinata.forEach((item) => {
+    const li = document.createElement("li");
+    li.className = "convocazioniPopup-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `conv_${item.index}`;
+    checkbox.value = item.index;
+    if (convocatiNum.includes(Number(item.numeroMaglia))) checkbox.checked = true;
+
+    const label = document.createElement("label");
+    label.htmlFor = `conv_${item.index}`;
+    // Struttura HTML per allineamento CSS
+    label.innerHTML = `
+      <span class="conv-num">${item.numeroMaglia}</span>
+      <span class="conv-name">${item.visuale}</span>
+    `;
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    list.appendChild(li);
+  });
+
+  content.appendChild(list);
+
+  // Bottoni Azione
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "convocazioniPopup-buttons";
+
+  const confirmBtn = document.createElement("button");
+  confirmBtn.textContent = "Conferma";
+  confirmBtn.className = "convocazioniPopup-confirmBtn";
+  confirmBtn.onclick = () => {
+    const selezionati = [];
+    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
+      selezionati.push(Number(numeri[cb.value]));
+    });
+    convocazioni = JSON.stringify(selezionati);
+    localStorage.setItem("convocazioni", convocazioni);
+    if (typeof renderGiocatori === "function") renderGiocatori(giocatoriObj);
+    popup.remove();
+  };
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Chiudi";
+  closeBtn.className = "convocazioniPopup-closeBtn";
+  closeBtn.onclick = () => popup.remove();
+
+  buttonsContainer.append(confirmBtn, closeBtn);
+  content.appendChild(buttonsContainer);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+}
+
+function OLD2apriConvocazioni() {
+  const giocatori = giocatoriA;
+  const numeri = numeriMaglia;
+
+  // Se il popup esiste già, lo rimuovo
+  const existingPopup = document.getElementById("convocazioniPopup");
+  if (existingPopup) existingPopup.remove();
+
+  // Overlay e Contenuto
+  const popup = document.createElement("div");
+  popup.id = "convocazioniPopup";
+  popup.className = "convocazioniPopup-overlay";
+
+  const content = document.createElement("div");
+  content.className = "convocazioniPopup-content";
+
+  const title = document.createElement("h2");
+  title.textContent = "Convocazioni";
+  content.appendChild(title);
+
+  const list = document.createElement("ul");
+  list.className = "convocazioniPopup-list";
+
+  // --- LOGICA DI ORDINAMENTO ALFABETICO ---
+  // Creiamo una lista di oggetti mappati per poterli ordinare correttamente
+  let listaOrdinata = giocatori.map((nomeCompleto, index) => {
+    const parts = nomeCompleto.trim().split(" ");
+    const nome = parts[0];
+    const cognome = parts.slice(1).join(" ");
+    return {
+      index: index, // conserviamo l'indice originale per i riferimenti ai numeri maglia
+      nome: nome,
+      cognome: cognome,
+      visuale: `${cognome} ${nome}`,
+      numeroMaglia: numeri[index]
+    };
+  });
+
+  // Ordina per cognome (A-Z)
+  listaOrdinata.sort((a, b) => a.cognome.localeCompare(b.cognome));
+
+  // --- GESTIONE CONVOCATI ESISTENTI ---
+  let convocatiNum = [];
+  if (convocazioni && convocazioni.trim() !== "") {
+    try {
+      const parsed = JSON.parse(convocazioni);
+      convocatiNum = Array.isArray(parsed) ? parsed.map(n => Number(n)) : [];
+    } catch (e) {
+      console.warn("Formato convocazioni non valido:", convocazioni);
+    }
+  }
+
+  // --- RENDER LISTA ORDINATA ---
+  listaOrdinata.forEach((item) => {
+    const li = document.createElement("li");
+    li.className = "convocazioniPopup-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `conv_${item.index}`;
+    checkbox.value = item.index;
+
+    if (convocatiNum.includes(Number(item.numeroMaglia))) {
+      checkbox.checked = true;
+    }
+
+    const label = document.createElement("label");
+    label.htmlFor = `conv_${item.index}`;
+    label.textContent = `${item.numeroMaglia} - ${item.visuale}`;
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    list.appendChild(li);
+  });
+
+  content.appendChild(list);
+
+  // Bottoni (Conferma e Chiudi)
+  const confirmBtn = document.createElement("button");
+  confirmBtn.textContent = "Conferma";
+  confirmBtn.className = "convocazioniPopup-confirmBtn";
+  confirmBtn.addEventListener("click", () => {
+    const selezionati = [];
+    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
+      const idx = parseInt(cb.value, 10);
+      selezionati.push(Number(numeri[idx]));
+    });
+
+    convocazioni = "[" + selezionati.join(", ") + "]";
+    localStorage.setItem("convocazioni", convocazioni);
+    renderGiocatori(giocatoriObj);
+    popup.remove();
+  });
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Chiudi";
+  closeBtn.className = "convocazioniPopup-closeBtn";
+  closeBtn.addEventListener("click", () => popup.remove());
+
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "convocazioniPopup-buttons";
+  buttonsContainer.appendChild(confirmBtn);
+  buttonsContainer.appendChild(closeBtn);
+
+  content.appendChild(buttonsContainer);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+}
+
+function OLDapriConvocazioni() {
   const giocatori = giocatoriA;
   const numeri = numeriMaglia;
 
