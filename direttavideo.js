@@ -347,22 +347,59 @@ function renderPlayerList() {
   }).join('');
 }
 
-// Fullscreen & Orientation
+// --- FUNZIONI FULLSCREEN ---
 function requestFullscreen() {
-  const el = document.querySelector(".video-container");
-  if (el.requestFullscreen) el.requestFullscreen();
-  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  // Seleziona il contenitore del video o l'intero documento se preferisci
+  const el = document.querySelector(".video-container") || document.documentElement;
+
+  if (el.requestFullscreen) {
+    el.requestFullscreen();
+  } else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen(); // Per Safari e vecchi Chrome
+  } else if (el.msRequestFullscreen) {
+    el.msRequestFullscreen(); // Per IE/Edge
+  }
 }
 
 function exitFullscreen() {
-  if (document.exitFullscreen) document.exitFullscreen();
-  else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
 }
 
-window.addEventListener("orientationchange", () => {
-  if (screen.orientation && screen.orientation.type.startsWith("landscape")) {
-    requestFullscreen();
-  } else if (screen.orientation && screen.orientation.type.startsWith("portrait")) {
-    exitFullscreen();
+// --- GESTORE ORIENTAMENTO INTEGRATO ---
+function gestisciRotazione() {
+  // Metodo moderno
+  if (window.screen && screen.orientation) {
+    const type = screen.orientation.type;
+    if (type.includes("landscape")) {
+      requestFullscreen();
+    } else {
+      exitFullscreen();
+    }
+  } 
+  // Fallback per dispositivi che non supportano screen.orientation
+  else {
+    const orientation = window.orientation; // 90 o -90 è landscape
+    if (Math.abs(orientation) === 90) {
+      requestFullscreen();
+    } else {
+      exitFullscreen();
+    }
   }
+}
+
+// Ascolta il cambio di orientamento
+window.addEventListener("orientationchange", gestisciRotazione);
+
+// Opzionale: aggiungi un controllo anche al resize per sicurezza su alcuni Android
+window.addEventListener("resize", () => {
+    // Se la larghezza supera l'altezza, siamo probabilmente in landscape
+    if (window.innerWidth > window.innerHeight) {
+        requestFullscreen();
+    }
 });
