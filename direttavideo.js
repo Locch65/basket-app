@@ -210,21 +210,6 @@ function caricaDatiPartita(mId) {
 }
 
 // Funzione Flash Semplificata (Durata 2 secondi)
-function OLDshowBasketToast(name, points) {
-  const toast = document.getElementById("basket-toast");
-  if (!toast) return;
-
-  // Sovrascrive immediatamente qualsiasi messaggio precedente
-  toast.textContent = `${name.toUpperCase()} +${points}`;
-  toast.classList.remove("hidden");
-  toast.classList.add("toast-active");
-
-  // Reset dopo 2 secondi esatti
-  setTimeout(() => {
-    toast.classList.add("hidden");
-    toast.classList.remove("toast-active");
-  }, 2500);
-}
 
 // Variabile di controllo per la durata del flash
 let isToastRunning = false;
@@ -294,6 +279,8 @@ function initTeamNames() {
   if (elB) elB.textContent = teamB;
 }
 
+function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+
 function updateScoreboard() {
   const scoreEl = document.getElementById("game-score");
   const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
@@ -304,6 +291,10 @@ function updateScoreboard() {
   if (hudScore) hudScore.textContent = currentScore;
   
   if (currentScore !== lastScoreStr) {
+    if (isMobile()) { 
+	  navigator.vibrate(100);
+	}
+	  
     scoreEl.textContent = currentScore;
     scoreEl.classList.remove("flash");
     void scoreEl.offsetWidth; 
