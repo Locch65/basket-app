@@ -622,22 +622,29 @@ h1 {
   margin-top: 20px;
 }
 /* Bottoni */
-.convocazioniPopup-confirmBtn,
-.convocazioniPopup-closeBtn {
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 2.5rem;
-  min-width: 120px; /* larghezza minima per uniformità */
-}
+/* --- 12. Convocazioni Popup (AGGIORNATO) --- */
 
-.convocazioniPopup-confirmBtn:hover,
-.convocazioniPopup-closeBtn:hover {
-  background-color: #0056b3;
-}
+/* Bottone CONFERMA (Uguale a Salva/OK) */
+.convocazioniPopup-confirmBtn,
+  .convocazioniPopup-closeBtn {
+    font-size: 1.4rem !important; /* Come i popup Admin */
+    padding: 12px 22px !important;
+    min-width: 100px;
+    margin: 10px 5px;
+    font-weight: bold;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .convocazioniPopup-confirmBtn {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .convocazioniPopup-closeBtn {
+    background-color: #f28b82;
+    color: white;
+  }
 
 .hidden {
     display: none !important;
@@ -771,20 +778,32 @@ h1 {
   }
 
   /* 2. Intestazione */
+  .squadra-label {
+    font-size: 14px;      /* Ridotto ulteriormente da 16px a 14px */
+    padding: 6px 4px;     /* Ridotto il padding laterale */
+    width: 120px;         /* Ridotto per farle stare affiancate senza sovrapposizioni */
+    border-radius: 6px;
+    white-space: nowrap;  /* Impedisce al testo di andare a capo */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Se il nome è troppo lungo, mette i puntini */
+  }
+
+  /* Spostamento del titolo per non coprire il menu */
   h1 {
     font-size: 18px;
-    margin-left: 55px;
-    margin-top: 4px;
+    margin-left: 0;       /* Rimuoviamo il margine fisso */
+    text-align: center;   /* Centriamo il titolo dell'app */
+    width: 100%;
+    margin-top: 40px;     /* Diamo spazio sopra per l'hamburger menu */
   }
 
-  /* 3. Nomi delle squadre */
-  .squadra-label {
-    font-size: 16px;
-    padding: 6px 8px;
-    width: 130px;
-    border-radius: 6px;
+  /* Gestione del contenitore dei nomi delle squadre */
+  #teamNames {
+    gap: 8px;             /* Riduciamo lo spazio tra le due etichette */
+    justify-content: center;
+    margin-top: 10px;
   }
-
+  
   /* 4. Scoreboard */
   #scoreboard {
     font-size: 32px;
@@ -913,17 +932,34 @@ h1 {
     width: 20px;
     height: 20px;
   }
-  .convocazioniPopup-confirmBtn,
+.convocazioniPopup-confirmBtn,
   .convocazioniPopup-closeBtn {
-    font-size: 16px;
-    padding: 6px 12px;
-    min-width: 70px;
+    font-size: 1.4rem !important; /* Come i popup Admin */
+    padding: 12px 22px !important;
+    min-width: 100px;
+    margin: 10px 5px;
+    font-weight: bold;
+    border-radius: 8px;
+    display: inline-block;
   }
-  .convocazioniPopup-content {
-    margin-top: 20px; /* Più spazio visibile su smartphone */
-    max-height: 90vh;
-    overflow-y: auto;
+
+  .convocazioniPopup-confirmBtn {
+    background-color: #4CAF50;
+    color: white;
   }
+
+  .convocazioniPopup-closeBtn {
+    background-color: #f28b82;
+    color: white;
+  }
+  
+  /* Assicurati che il contenitore dei bottoni li centri bene */
+  .convocazioniPopup-content div:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+  }  
   
   /* 13. Grid dei giocatori "out" e giocatori "in" */
   #giocatori-out {
