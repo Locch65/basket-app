@@ -56,9 +56,11 @@ html, body {
 
 /* 2. HUD OVERLAY (SOPRA IL VIDEO) */
 #hud-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  pointer-events: none; /* Permette di cliccare il video "attraverso" l'HUD */
 }
 
 .badge {
@@ -72,28 +74,20 @@ html, body {
 
 /* 1. Score HUD - Più piccolo, più in alto e più trasparente */
 #hud-score {
-  position: absolute;
-  top: 0px;                /* Spostato più in alto (da 10px a 5px) */
-  left: 50%;
-  transform: translateX(-50%);
-  
-  /* Stile del testo */
-  font-family: monospace;
-  font-size: 1.1rem;       /* Più piccolo (da 1.2rem a 0.9rem) */
-  font-weight: bold;
-  color: rgba(108, 255, 108, 0.7); /* Più trasparente (opacità 0.7) */
-  
-  /* Contrasto migliorato */
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 1); 
-  
-  /* Sfondo più trasparente */
-  background: rgba(0, 0, 0, 0.2); 
-  border: 1px solid rgba(108, 255, 108, 0.2);
+  font-size: 2.5rem !important; /* Molto più grande */
+  font-weight: 900 !important;
+  padding: 10px 20px !important;
+  background-color: rgba(0, 0, 0, 0.8) !important; /* Più scuro per risaltare */
+  color: #6CFF6C !important; /* Colore verde Polismile */
+  border: 2px solid #6CFF6C !important;
   border-radius: 8px;
-  padding: 2px 8px;
-  backdrop-filter: blur(2px);
-  pointer-events: none;
-  z-index: 10;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  
+  /* Assicura che il contenitore si adatti al testo grande */
+  display: inline-block;
+  min-width: 140px;
+  text-align: center;
+  white-space: nowrap; 
 }
 
 .live-badge {
@@ -149,14 +143,46 @@ html, body {
 
 .main-score { font-size: 3.5rem; font-weight: 900; font-family: monospace; }
 
-.team-labels { 
-  display: flex; 
-  justify-content: space-between; 
-  font-weight: 800; 
-  color: #888; 
-  font-size: 1.4rem; 
-  padding: 0 15px; 
-  margin-bottom: 2px;
+.team-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Allinea verticalmente nomi e bottoni */
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.sync-controls-mini {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.sync-controls-mini button {
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sync-controls-mini button:active {
+  background: #ff4d4d; /* Feedback visivo al tocco */
+}
+
+#sync-value {
+  font-size: 0.8rem;
+  color: #aaa;
+  min-width: 25px;
+  text-align: center;
 }
 
 #label-team-A { text-align: left; flex: 1; color: #bbb; }
