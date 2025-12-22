@@ -1,6 +1,9 @@
 const url = 
-"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
+"https://script.google.com/macros/s/AKfycbyVX3yXW_PwRBeUgJKqFeS7MMWtHroHa0qRlgx6w7zX52tw0Arp1r-OIqpsN7obZF8SqA/exec"
 
+//"https://script.google.com/macros/s/AKfycbyg-5Tvq7hRZWAhjlHlz9Z3q-zJblWhRGRLg8jQomNBxxDjkvDkEBml-oOCUFPDvc40tA/exec"
+//"https://script.google.com/macros/s/AKfycbzmBxzYOwNhcw4yyn1W03tUDRd1hO5htCh0XEEpVWBORyFhu1uJOEMDyq1sSjLbLZjWHA/exec"
+//"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
 //"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
 
 
@@ -204,9 +207,11 @@ function caricaListaPartite(filtroCampionato = null) {
               localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
               localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
               localStorage.setItem("convocazioni", p.convocazioni);
-              localStorage.setItem("videoId", extractYouTubeId(p.videoId));
-              localStorage.setItem("videoStartTime", extractYoutubeTime(p.videoId));
+              localStorage.setItem("videoURL", p.videoURL);
+              localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
+              localStorage.setItem("videoStartTime", extractYoutubeTime(p.videoURL));
               localStorage.setItem("isLive", p.isLive);
+              localStorage.setItem("statoPartita", p.statoPartita);
               window.location.href = "match.html";
             });
 
