@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.67";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.68";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
@@ -52,6 +52,16 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
 });
 
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+
+function gestisciDirettaYoutube() {
+  console.log("Bottone Diretta Youtube premuto");
+  // Inserisci qui la logica futura
+}
+
+function gestisciGoLive() {
+  console.log("Bottone Go Live premuto");
+  // Inserisci qui la logica futura
+}
 
 function addPoints(points) {
   if (!isAdmin) return; // blocco minimo lato client
@@ -179,220 +189,6 @@ function apriConvocazioni() {
   document.body.appendChild(popup);
 }
 
-function OLD2apriConvocazioni() {
-  const giocatori = giocatoriA;
-  const numeri = numeriMaglia;
-
-  // Se il popup esiste già, lo rimuovo
-  const existingPopup = document.getElementById("convocazioniPopup");
-  if (existingPopup) existingPopup.remove();
-
-  // Overlay e Contenuto
-  const popup = document.createElement("div");
-  popup.id = "convocazioniPopup";
-  popup.className = "convocazioniPopup-overlay";
-
-  const content = document.createElement("div");
-  content.className = "convocazioniPopup-content";
-
-  const title = document.createElement("h2");
-  title.textContent = "Convocazioni";
-  content.appendChild(title);
-
-  const list = document.createElement("ul");
-  list.className = "convocazioniPopup-list";
-
-  // --- LOGICA DI ORDINAMENTO ALFABETICO ---
-  // Creiamo una lista di oggetti mappati per poterli ordinare correttamente
-  let listaOrdinata = giocatori.map((nomeCompleto, index) => {
-    const parts = nomeCompleto.trim().split(" ");
-    const nome = parts[0];
-    const cognome = parts.slice(1).join(" ");
-    return {
-      index: index, // conserviamo l'indice originale per i riferimenti ai numeri maglia
-      nome: nome,
-      cognome: cognome,
-      visuale: `${cognome} ${nome}`,
-      numeroMaglia: numeri[index]
-    };
-  });
-
-  // Ordina per cognome (A-Z)
-  listaOrdinata.sort((a, b) => a.cognome.localeCompare(b.cognome));
-
-  // --- GESTIONE CONVOCATI ESISTENTI ---
-  let convocatiNum = [];
-  if (convocazioni && convocazioni.trim() !== "") {
-    try {
-      const parsed = JSON.parse(convocazioni);
-      convocatiNum = Array.isArray(parsed) ? parsed.map(n => Number(n)) : [];
-    } catch (e) {
-      console.warn("Formato convocazioni non valido:", convocazioni);
-    }
-  }
-
-  // --- RENDER LISTA ORDINATA ---
-  listaOrdinata.forEach((item) => {
-    const li = document.createElement("li");
-    li.className = "convocazioniPopup-item";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = `conv_${item.index}`;
-    checkbox.value = item.index;
-
-    if (convocatiNum.includes(Number(item.numeroMaglia))) {
-      checkbox.checked = true;
-    }
-
-    const label = document.createElement("label");
-    label.htmlFor = `conv_${item.index}`;
-    label.textContent = `${item.numeroMaglia} - ${item.visuale}`;
-
-    li.appendChild(checkbox);
-    li.appendChild(label);
-    list.appendChild(li);
-  });
-
-  content.appendChild(list);
-
-  // Bottoni (Conferma e Chiudi)
-  const confirmBtn = document.createElement("button");
-  confirmBtn.textContent = "Conferma";
-  confirmBtn.className = "convocazioniPopup-confirmBtn";
-  confirmBtn.addEventListener("click", () => {
-    const selezionati = [];
-    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
-      const idx = parseInt(cb.value, 10);
-      selezionati.push(Number(numeri[idx]));
-    });
-
-    convocazioni = "[" + selezionati.join(", ") + "]";
-    localStorage.setItem("convocazioni", convocazioni);
-    renderGiocatori(giocatoriObj);
-    popup.remove();
-  });
-
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Chiudi";
-  closeBtn.className = "convocazioniPopup-closeBtn";
-  closeBtn.addEventListener("click", () => popup.remove());
-
-  const buttonsContainer = document.createElement("div");
-  buttonsContainer.className = "convocazioniPopup-buttons";
-  buttonsContainer.appendChild(confirmBtn);
-  buttonsContainer.appendChild(closeBtn);
-
-  content.appendChild(buttonsContainer);
-  popup.appendChild(content);
-  document.body.appendChild(popup);
-}
-
-function OLDapriConvocazioni() {
-  const giocatori = giocatoriA;
-  const numeri = numeriMaglia;
-
-  // Se il popup esiste già, lo rimuovo
-  const existingPopup = document.getElementById("convocazioniPopup");
-  if (existingPopup) existingPopup.remove();
-
-  // Overlay
-  const popup = document.createElement("div");
-  popup.id = "convocazioniPopup";
-  popup.className = "convocazioniPopup-overlay";
-
-  // Contenuto
-  const content = document.createElement("div");
-  content.className = "convocazioniPopup-content";
-
-  const title = document.createElement("h2");
-  title.textContent = "Convocazioni";
-  content.appendChild(title);
-
-  // Lista giocatori
-  const list = document.createElement("ul");
-  list.className = "convocazioniPopup-list";
-
-  // Converto la stringa globale convocazioni in array di numeri
-  let convocatiNum = [];
-  if (convocazioni && convocazioni.trim() !== "") {
-    try {
-      const parsed = JSON.parse(convocazioni); // es. "[10, 7, 5]"
-      convocatiNum = Array.isArray(parsed) ? parsed.map(n => Number(n)) : [];
-    } catch (e) {
-      console.warn("Formato convocazioni non valido:", convocazioni);
-    }
-  }
-
-  giocatori.forEach((nomeCompleto, index) => {
-    const li = document.createElement("li");
-    li.className = "convocazioniPopup-item";
-
-    // Split nome e cognome
-    const parts = nomeCompleto.trim().split(" ");
-    let visuale = nomeCompleto; // fallback
-    if (parts.length >= 2) {
-      const nome = parts[0];
-      const cognome = parts.slice(1).join(" ");
-      visuale = `${cognome} ${nome}`;
-    }
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.id = `conv_${index}`;
-    checkbox.value = index; // salvo l'indice
-
-    const numeroMaglia = Number(numeri[index]); // normalizzo a numero
-    if (convocatiNum.includes(numeroMaglia)) {
-      checkbox.checked = true;
-    }
-
-    const label = document.createElement("label");
-    label.htmlFor = `conv_${index}`;
-    label.textContent = `${numeri[index]} - ${visuale}`;
-
-    li.appendChild(checkbox);
-    li.appendChild(label);
-    list.appendChild(li);
-  });
-
-  content.appendChild(list);
-
-  // Bottoni
-  const confirmBtn = document.createElement("button");
-  confirmBtn.textContent = "Conferma";
-  confirmBtn.className = "convocazioniPopup-confirmBtn";
-  confirmBtn.addEventListener("click", () => {
-    const selezionati = [];
-    list.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
-      const idx = parseInt(cb.value, 10);
-      selezionati.push(Number(numeri[idx])); // salvo come numeri
-    });
-
-    // Memorizzo nella variabile globale come stringa "[x, y, z]"
-    convocazioni = "[" + selezionati.join(", ") + "]";
-    localStorage.setItem("convocazioni", convocazioni);
-    renderGiocatori(giocatoriObj);
-	popup.remove();
-  });
-
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Chiudi";
-  closeBtn.className = "convocazioniPopup-closeBtn";
-  closeBtn.addEventListener("click", () => {
-    popup.remove();
-  });
-
-  const buttonsContainer = document.createElement("div");
-  buttonsContainer.className = "convocazioniPopup-buttons";
-  buttonsContainer.appendChild(confirmBtn);
-  buttonsContainer.appendChild(closeBtn);
-
-  content.appendChild(buttonsContainer);
-  popup.appendChild(content);
-  document.body.appendChild(popup);
-}
-
 function initOrdinamenti() {
   const ordinamenti = document.getElementById("ordinamenti");
 
@@ -415,63 +211,145 @@ function initOrdinamenti() {
 }
 
 function login(pwd) {
-  if (pwd === "007") {   // password hardcoded
-    isAdmin = true;
-	interrompiAggiornamentoAutomatico();
-	
-    // MOSTRA LA SQUADRA B
-    const squadraB = document.getElementById("squadraB");
-    if (squadraB) {
-      squadraB.classList.remove("hidden");
+  const adminBtn = document.getElementById("adminBtn");
+
+  // --- CASO LOGOUT ---
+  if (isAdmin && pwd === "logout") {
+    isAdmin = false;
+    
+    if (adminBtn) {
+      adminBtn.innerHTML = `<i class="fas fa-user-shield"></i> Admin`;
     }
-	
-	initOrdinamenti();
+
+    const squadraB = document.getElementById("squadraB");
+    if (squadraB) squadraB.classList.add("hidden");
+
+    // RIMOZIONE BOTTONI (usiamo querySelector per sicurezza)
+    const btnYoutube = document.getElementById("youtubeBtn");
+    const btnGoLive = document.getElementById("goLiveBtn");
+    if (btnYoutube) btnYoutube.closest("li").remove();
+    if (btnGoLive) btnGoLive.closest("li").remove();
+
+    avviaAggiornamentoAutomatico();
+    renderGiocatori(listaGiocatoriCorrente);
+    return;
+  }
+
+  // --- CASO LOGIN ---
+  if (pwd === "007") {   
+    isAdmin = true;
+    interrompiAggiornamentoAutomatico();
+    
+    if (adminBtn) {
+      adminBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> Logout`;
+    }
+
+    const squadraB = document.getElementById("squadraB");
+    if (squadraB) squadraB.classList.remove("hidden");
+    
+    const menuUl = document.querySelector("#menu ul");
+    if (menuUl && !document.getElementById("youtubeBtn")) {
+      const liYoutube = document.createElement("li");
+      liYoutube.innerHTML = `<button id="youtubeBtn"><i class="fab fa-youtube"></i> Diretta Youtube</button>`;
+      const liGoLive = document.createElement("li");
+      liGoLive.innerHTML = `<button id="goLiveBtn"><i class="fas fa-broadcast-tower"></i> Go Live</button>`;
+      
+      menuUl.appendChild(liYoutube);
+      menuUl.appendChild(liGoLive);
+
+      // Colleghiamo le funzioni (assicurati che esistano nel file)
+      //document.getElementById("youtubeBtn").onclick = gestisciDirettaYoutube;
+      //document.getElementById("goLiveBtn").onclick = gestisciGoLive;
+	  // Gestione click Diretta Youtube
+      document.getElementById("youtubeBtn").onclick = () => {
+        gestisciDirettaYoutube();
+        document.getElementById("menu").classList.add("hidden"); // Chiude il menu
+      };
+
+      // Gestione click Go Live
+      document.getElementById("goLiveBtn").onclick = () => {
+        gestisciGoLive();
+        document.getElementById("menu").classList.add("hidden"); // Chiude il menu
+      };
+    }
+
+    initOrdinamenti();
     aggiornaTitoli();
-	initSquadraBControls(); // collega gli eventi ai bottoni
-    // eventualmente puoi ricaricare la lista giocatori per mostrare i bottoni
+    initSquadraBControls(); 
     renderGiocatori(listaGiocatoriCorrente);
   } else {
-    alert("Password errata. Accesso negato.");
+    alert("Password errata.");
   }
 }
 
 function createAdminLoginPopup() {
   const adminBtn = document.getElementById("adminBtn");
   const popup = document.getElementById("adminPopup");
+  
+  // Elementi interni al popup
   const okBtn = document.getElementById("adminOkBtn");
   const cancelBtn = document.getElementById("adminCancelBtn");
   const pwdInput = document.getElementById("adminPassword");
 
-  adminBtn.addEventListener("click", () => {
-    popup.classList.remove("hidden");
-    pwdInput.value = "";
-    pwdInput.focus();
-  });
+  // Controllo fondamentale: se manca il tasto del menu o il popup, non possiamo fare nulla
+  if (!adminBtn || !popup) {
+    console.error("Errore: adminBtn o adminPopup non trovati.");
+    return;
+  }
 
-  okBtn.addEventListener("click", () => {
-    login(pwdInput.value.trim());
-    // Chiudi solo se login riuscito
-    if (isAdmin) popup.classList.add("hidden");
-  });
+  // 1. Gestione tasto Admin/Logout nel Menu (SEMPRE ATTIVO)
+  adminBtn.onclick = (e) => {
+    e.preventDefault();
+    if (isAdmin) {
+      if (confirm("Vuoi uscire dalla modalità Admin?")) {
+        login("logout");
+        document.getElementById("menu").classList.add("hidden");
+      }
+    } else {
+      popup.classList.remove("hidden");
+      if (pwdInput) {
+        pwdInput.value = "";
+        setTimeout(() => pwdInput.focus(), 100);
+      }
+    }
+  };
 
-  cancelBtn.addEventListener("click", () => {
-    popup.classList.add("hidden");
-  });
+  // 2. Gestione bottoni interni (se esistono nel DOM)
+  if (okBtn) {
+    okBtn.onclick = (e) => {
+      e.stopPropagation();
+      const password = pwdInput ? pwdInput.value : "";
+      if (password) {
+        login(password);
+        popup.classList.add("hidden");
+        const menu = document.getElementById("menu");
+        if (menu) menu.classList.add("hidden");
+      }
+    };
+  }
 
-  // Invio con Enter
-  pwdInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      okBtn.click();
-    } else if (e.key === "Escape") {
+  if (cancelBtn) {
+    cancelBtn.onclick = (e) => {
+      e.stopPropagation();
+      popup.classList.add("hidden");
+    };
+  }
+
+  if (pwdInput) {
+    pwdInput.onkeypress = (e) => {
+      if (e.key === "Enter" && okBtn) {
+        okBtn.onclick(e);
+      }
+    };
+  }
+
+  // Chiudi cliccando fuori dal contenuto bianco del popup
+  popup.onclick = (e) => {
+    if (e.target === popup) {
       popup.classList.add("hidden");
     }
-  });
-
-  // Chiudi cliccando fuori dalla finestra
-  popup.addEventListener("click", (e) => {
-    if (e.target === popup) popup.classList.add("hidden");
-  });
-};
+  };
+}
 
 function showSquadraBPopup() {
   // Rimuovi eventuale popup già aperto
@@ -1223,14 +1101,33 @@ function init() {
     aggiornaTitoli(); aggiornaScoreboard();
   });
 
-  // Hamburger
   const hamburgerBtn = document.getElementById("hamburgerBtn");
-  if (hamburgerBtn) {
-    hamburgerBtn.addEventListener("click", () => {
-      window.location.href = "./calendario.html";
+  const menu = document.getElementById("menu");
+  
+  if (hamburgerBtn && menu) {
+    hamburgerBtn.addEventListener("click", (e) => {
+      e.stopPropagation(); // Evita che il click si propaghi al documento
+      menu.classList.toggle("hidden");
+    });
+  
+    // Selezioniamo tutti gli elementi della lista nel menu
+    const menuItems = menu.querySelectorAll("li");
+    menuItems.forEach(item => {
+      item.addEventListener("click", () => {
+        menu.classList.add("hidden");
+      });
+    });
+	
+    // Chiude il menu se si clicca fuori
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target) && e.target !== hamburgerBtn) {
+        menu.classList.add("hidden");
+      }
     });
   }
-  
+
+// Assicurati che la funzione createAdminLoginPopup() sia presente 
+// per gestire l'apertura del popup quando si clicca sul nuovo adminBtn nel menu
   createAdminLoginPopup();
   aggiornaTitoli();
   renderGiocatori(giocatoriObj);
