@@ -88,19 +88,19 @@
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="match.js?v=1.0.68"></script>
+  <script src="match.js?v=1.0.69"></script>
   <script>
   
-  window.addEventListener("beforeunload", function (event) {
-    // Mostra la finestra di conferma
-	if (isAdmin) {
-	  SalvaPunteggi();
-      event.preventDefault();
-      event.returnValue = "Vuoi salvare i dati prima di uscire o ricaricare?";
-      // ⚠️ Nota: il messaggio personalizzato non sempre viene mostrato,
-      // ma la finestra di conferma appare comunque.
-	}
-  });
+  //window.addEventListener("beforeunload", function (event) {
+  //  // Mostra la finestra di conferma
+  //  if (isAdmin) {
+  //    salvaPunteggi();
+  //    event.preventDefault();
+  //    event.returnValue = "Vuoi salvare i dati prima di uscire o ricaricare?";
+  //    // ⚠️ Nota: il messaggio personalizzato non sempre viene mostrato,
+  //    // ma la finestra di conferma appare comunque.
+	//}
+  //});
   
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then((reg) => {
