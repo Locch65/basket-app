@@ -1,12 +1,14 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.68";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.69";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
-"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
+"https://script.google.com/macros/s/AKfycbyVX3yXW_PwRBeUgJKqFeS7MMWtHroHa0qRlgx6w7zX52tw0Arp1r-OIqpsN7obZF8SqA/exec"
 
-
+//"https://script.google.com/macros/s/AKfycbyg-5Tvq7hRZWAhjlHlz9Z3q-zJblWhRGRLg8jQomNBxxDjkvDkEBml-oOCUFPDvc40tA/exec"
+//"https://script.google.com/macros/s/AKfycbzmBxzYOwNhcw4yyn1W03tUDRd1hO5htCh0XEEpVWBORyFhu1uJOEMDyq1sSjLbLZjWHA/exec"
+//"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
 //"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
 
 
@@ -33,6 +35,7 @@ let matchId = null;
 let teamA = "";
 let teamB = "";
 let isLive = false;
+let statoPartita = "";
 
 let refreshTimer = null; // variabile globale per l'ID del timer
 
@@ -54,13 +57,251 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
 function gestisciDirettaYoutube() {
-  console.log("Bottone Diretta Youtube premuto");
-  // Inserisci qui la logica futura
+    const overlay = document.createElement('div');
+    overlay.id = 'youtubePopup';
+    overlay.className = 'popup';
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.textAlign = 'left';
+
+    // Usiamo direttamente la variabile videoURL se esiste, altrimenti stringa vuota
+    const urlIniziale = (typeof videoURL !== 'undefined') ? videoURL : "";
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 20px; text-align:center;">Diretta Youtube</h2>
+        
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">URL:</label>
+        <input type="text" id="ytUrl" style="width:100%; padding:10px; margin-bottom:15px; font-size:1rem;" 
+               placeholder="https://www.youtube.com/watch?v=..." value="${urlIniziale}">
+
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">Ora inizio Diretta (HH:mm:ss):</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="time" id="ytOraInizio" step="1" style="flex: 1; padding:10px; font-size:1rem;">
+            <button id="ytCalcolaBtn" disabled style="padding: 10px; font-size: 1rem; cursor: not-allowed; opacity: 0.5; background-color: #3498db; color: white; border: none; border-radius: 5px;">
+                Calcola
+            </button>
+        </div>
+
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">Offset Inizio Partita (secondi):</label>
+        <input type="number" id="ytOffset" style="width:100%; padding:10px; margin-bottom:25px; font-size:1rem;" 
+               placeholder="Esempio: 30" value="${videoStartTime || ""}">
+
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <button id="ytSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="ytCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+    `;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const urlInput = document.getElementById('ytUrl');
+    const calcolaBtn = document.getElementById('ytCalcolaBtn');
+
+    // Funzione per validare e gestire lo stato del tasto Calcola
+    const validaUrl = (valore) => {
+        const isValid = valore.startsWith('http://') || valore.startsWith('https://');
+        calcolaBtn.disabled = !isValid;
+        calcolaBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+        calcolaBtn.style.opacity = isValid ? '1' : '0.5';
+    };
+
+    // Controllo iniziale all'apertura
+    validaUrl(urlInput.value.trim());
+
+    urlInput.addEventListener('input', () => validaUrl(urlInput.value.trim()));
+
+    calcolaBtn.onclick = () => calcolaOraDaYoutube();
+
+    document.getElementById('ytCancelBtn').onclick = () => {
+        document.body.removeChild(overlay);
+    };
+
+    document.getElementById('ytSaveBtn').onclick = () => {
+      let finalUrl = urlInput.value.trim();
+      const offsetValue = document.getElementById('ytOffset').value;
+  
+      if (offsetValue && parseInt(offsetValue) >= 0) {
+          // Creiamo l'oggetto URL per manipolare i parametri facilmente
+          try {
+              let urlObj = new URL(finalUrl);
+              
+              // YouTube usa "t" o "start" per il timestamp
+              // Noi standardizziamo su "t" con il formato in secondi (es: 30s)
+              urlObj.searchParams.set("t", offsetValue + "s");
+              
+              // Se esisteva il parametro "start", lo rimuoviamo per evitare conflitti
+              urlObj.searchParams.delete("start");
+              
+              finalUrl = urlObj.toString();
+          } catch (e) {
+              // Se l'URL non è valido (es. testo semplice), facciamo un fallback manuale
+              if (!finalUrl.includes('t=') && !finalUrl.includes('start=')) {
+                  const separator = finalUrl.includes('?') ? '&' : '?';
+                  finalUrl = `${finalUrl}${separator}t=${offsetValue}s`;
+              } else {
+                  // Sostituzione via Regex se l'URL è particolare (es. shortlink)
+                  finalUrl = finalUrl.replace(/([?&])(t|start)=[^&]*/, `$1t=${offsetValue}s`);
+              }
+          }
+      }
+  
+      const dati = {
+          url: finalUrl,
+          oraInizio: document.getElementById('ytOraInizio').value,
+          offset: offsetValue
+      };
+      videoURL = dati.url;
+	  videoStartTime = dati.offset;
+	  
+      salvaPunteggi();
+      document.body.removeChild(overlay);
+    };
+}
+
+
+// Funzione vuota per il calcolo
+function calcolaOraDaYoutube() {
+    console.log("Eseguo il calcolo dell'ora dall'URL inserito...");
+    // Qui andrà la logica per estrarre i dati dai metadati di Youtube
 }
 
 function gestisciGoLive() {
-  console.log("Bottone Go Live premuto");
-  // Inserisci qui la logica futura
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.textAlign = 'left';
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 20px; text-align:center;">Stato Partita</h2>
+        
+        <label style="display:block; font-size: 1.2rem; margin-bottom: 10px;">Quarto:</label>
+        <div id="quartiContainer" style="display: flex; gap: 8px; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="btn-quarto" data-q="1° Quarto">1</button>
+            <button class="btn-quarto" data-q="2° Quarto">2</button>
+            <button class="btn-quarto" data-q="3° Quarto">3</button>
+            <button class="btn-quarto" data-q="4° Quarto">4</button>
+            <button class="btn-quarto" data-q="Extra Time" style="flex-basis: 100%; margin-top: 5px;">Extra Time</button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="checkGoLive" style="width: 25px; height: 25px;">
+                <label for="checkGoLive" style="font-size: 1.2rem;">Go Live</label>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="checkTerminata" style="width: 25px; height: 25px;">
+                <label for="checkTerminata" style="font-size: 1.2rem;">Partita terminata</label>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+
+        <style>
+            .btn-quarto {
+                flex: 1;
+                min-width: 50px;
+                padding: 12px 5px;
+                font-size: 1.1rem;
+                border: 2px solid #3498db;
+                background-color: white;
+                color: #3498db;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .btn-quarto.active {
+                background-color: #3498db;
+                color: white;
+            }
+        </style>
+    `;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniQuarto = content.querySelectorAll('.btn-quarto');
+    const checkGoLive = document.getElementById('checkGoLive');
+    const checkTerminata = document.getElementById('checkTerminata');
+
+    // --- LOGICA DI INIZIALIZZAZIONE STATO ---
+    
+    // 1. Setta il checkbox Go Live
+    checkGoLive.checked = isLive;
+
+    // 2. Setta lo stato "Terminata" o evidenzia il Quarto attivo
+    if (statoPartita === "Terminata") {
+        checkTerminata.checked = true;
+        checkGoLive.checked = false; // Se è terminata, non può essere live
+    } else {
+        // Confronto flessibile: controlla se il data-q contiene il valore di statoPartita o viceversa
+        bottoniQuarto.forEach(btn => {
+            const val = btn.dataset.q;
+            // Esempio: "1° Quarto" === "1° Quarto" oppure se statoPartita è solo "1"
+            if (val === statoPartita || val.startsWith(statoPartita)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    // --- GESTIONE EVENTI ---
+
+    bottoniQuarto.forEach(btn => {
+        btn.onclick = () => {
+            if (checkTerminata.checked) return; 
+            bottoniQuarto.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+    });
+
+    checkTerminata.onchange = () => {
+        if (checkTerminata.checked) {
+            checkGoLive.checked = false;
+            bottoniQuarto.forEach(b => b.classList.remove('active'));
+        }
+    };
+
+    checkGoLive.onchange = () => {
+        if (checkGoLive.checked) {
+            checkTerminata.checked = false;
+        }
+    };
+
+    document.getElementById('liveCancelBtn').onclick = () => {
+        document.body.removeChild(overlay);
+    };
+
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const quartoAttivo = content.querySelector('.btn-quarto.active');
+        const dati = {
+            goLive: checkGoLive.checked,
+            quarto: quartoAttivo ? quartoAttivo.dataset.q : (checkTerminata.checked ? "Terminata" : statoPartita),
+            terminata: checkTerminata.checked
+        };
+        
+        salvaStatoLive(dati);
+        document.body.removeChild(overlay);
+    };
+}
+
+function salvaStatoLive(dati) {
+    console.log("Dati inviati a salvaStatoLive:", dati);
+	isLive = (dati.goLive === true);
+	if (dati.terminata === true) {
+        statoPartita = "Terminata";
+    } else {
+        // Se non è terminata, usa il quarto selezionato o mantieni quello attuale
+        statoPartita = dati.quarto || "1° Quarto";
+    }
+	salvaPunteggi();
 }
 
 function addPoints(points) {
@@ -165,7 +406,7 @@ function apriConvocazioni() {
   buttonsContainer.className = "convocazioniPopup-buttons";
 
   const confirmBtn = document.createElement("button");
-  confirmBtn.textContent = "Conferma";
+  confirmBtn.textContent = "Salva";
   confirmBtn.className = "convocazioniPopup-confirmBtn";
   confirmBtn.onclick = () => {
     const selezionati = [];
@@ -179,7 +420,7 @@ function apriConvocazioni() {
   };
 
   const closeBtn = document.createElement("button");
-  closeBtn.textContent = "Chiudi";
+  closeBtn.textContent = "Annulla";
   closeBtn.className = "convocazioniPopup-closeBtn";
   closeBtn.onclick = () => popup.remove();
 
@@ -187,27 +428,6 @@ function apriConvocazioni() {
   content.appendChild(buttonsContainer);
   popup.appendChild(content);
   document.body.appendChild(popup);
-}
-
-function initOrdinamenti() {
-  const ordinamenti = document.getElementById("ordinamenti");
-
-  // Se sei Admin, aggiungi il bottone Convocazioni
-  if (isAdmin) {
-    // Evita di aggiungerlo due volte
-    if (!ordinamenti.querySelector(".convocazioni-btn")) {
-      const convocazioniBtn = document.createElement("button");
-      convocazioniBtn.className = "convocazioni-btn";
-      convocazioniBtn.textContent = "Convocazioni";
-
-      // 👉 qui puoi aggiungere l’evento click
-      convocazioniBtn.addEventListener("click", () => {
-        apriConvocazioni(); // funzione da definire
-      });
-
-      ordinamenti.appendChild(convocazioniBtn);
-    }
-  }
 }
 
 function login(pwd) {
@@ -224,11 +444,11 @@ function login(pwd) {
     const squadraB = document.getElementById("squadraB");
     if (squadraB) squadraB.classList.add("hidden");
 
-    // RIMOZIONE BOTTONI (usiamo querySelector per sicurezza)
-    const btnYoutube = document.getElementById("youtubeBtn");
-    const btnGoLive = document.getElementById("goLiveBtn");
-    if (btnYoutube) btnYoutube.closest("li").remove();
-    if (btnGoLive) btnGoLive.closest("li").remove();
+    // RIMOZIONE BOTTONI DAL MENU
+    ["convocazioniBtnLi", "youtubeBtnLi", "goLiveBtnLi"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    });
 
     avviaAggiornamentoAutomatico();
     renderGiocatori(listaGiocatoriCorrente);
@@ -249,31 +469,45 @@ function login(pwd) {
     
     const menuUl = document.querySelector("#menu ul");
     if (menuUl && !document.getElementById("youtubeBtn")) {
+      
+      // Creazione LI Convocazioni
+      const liConv = document.createElement("li");
+      liConv.id = "convocazioniBtnLi";
+      liConv.innerHTML = `<button id="menuConvocazioniBtn"><i class="fas fa-list-ul"></i> Convocazioni</button>`;
+      
+      // Creazione LI Youtube
       const liYoutube = document.createElement("li");
+      liYoutube.id = "youtubeBtnLi";
       liYoutube.innerHTML = `<button id="youtubeBtn"><i class="fab fa-youtube"></i> Diretta Youtube</button>`;
+      
+      // Creazione LI Go Live
       const liGoLive = document.createElement("li");
+      liGoLive.id = "goLiveBtnLi";
       liGoLive.innerHTML = `<button id="goLiveBtn"><i class="fas fa-broadcast-tower"></i> Go Live</button>`;
       
+      // Append nell'ordine richiesto: Convocazioni, poi Youtube, poi Go Live
+      menuUl.appendChild(liConv);
       menuUl.appendChild(liYoutube);
       menuUl.appendChild(liGoLive);
 
-      // Colleghiamo le funzioni (assicurati che esistano nel file)
-      //document.getElementById("youtubeBtn").onclick = gestisciDirettaYoutube;
-      //document.getElementById("goLiveBtn").onclick = gestisciGoLive;
-	  // Gestione click Diretta Youtube
-      document.getElementById("youtubeBtn").onclick = () => {
-        gestisciDirettaYoutube();
-        document.getElementById("menu").classList.add("hidden"); // Chiude il menu
+      // Eventi
+      document.getElementById("menuConvocazioniBtn").onclick = () => {
+        apriConvocazioni();
+        document.getElementById("menu").classList.add("hidden");
       };
 
-      // Gestione click Go Live
+      document.getElementById("youtubeBtn").onclick = () => {
+        gestisciDirettaYoutube();
+        document.getElementById("menu").classList.add("hidden");
+      };
+
       document.getElementById("goLiveBtn").onclick = () => {
         gestisciGoLive();
-        document.getElementById("menu").classList.add("hidden"); // Chiude il menu
+        document.getElementById("menu").classList.add("hidden");
       };
     }
 
-    initOrdinamenti();
+    // initOrdinamenti(); // <-- PUOI RIMUOVERE O COMMENTARE QUESTA CHIAMATA
     aggiornaTitoli();
     initSquadraBControls(); 
     renderGiocatori(listaGiocatoriCorrente);
@@ -281,6 +515,7 @@ function login(pwd) {
     alert("Password errata.");
   }
 }
+
 
 function createAdminLoginPopup() {
   const adminBtn = document.getElementById("adminBtn");
@@ -403,6 +638,7 @@ function showSquadraBPopup() {
         historyB.push(-p);
         aggiornaScoreboard();
         salvaSquadraB();
+  	    salvaPunteggi();
         scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
       }
     });
@@ -530,6 +766,7 @@ function showPlayerPopup(g) {
       aggiornaUIGiocatore(g);
       aggiornaScoreboard();
       salvaSuGoogleSheets(g);
+	  salvaPunteggi();
     });
     incContainer.appendChild(btn);
   });
@@ -549,6 +786,7 @@ function showPlayerPopup(g) {
         aggiornaUIGiocatore(g);
         aggiornaScoreboard();
         salvaSuGoogleSheets(g);
+  	    salvaPunteggi();
       }
     });
     decContainer.appendChild(btn);
@@ -726,6 +964,8 @@ function aggiungiPuntiGiocatore(id, punti) {
   }
 
   salvaSuGoogleSheets(g);
+  salvaPunteggi();
+  
   console.log("Salvato punti:", punti);
 }
 
@@ -783,16 +1023,6 @@ function animatePunteggio(span) {
   }
 }
 
-function aggiungiPuntiGiocatore(id, punti) {
-  const g = giocatoriObj.find(x => x.id === id);
-  aggiornaPunteggio(g, punti);
-  aggiornaUIGiocatore(g);
-  aggiornaScoreboard();
-
-  salvaSuGoogleSheets(g);
-  console.log("Salvato punti:", punti)
-}
-
 function undoGiocatore(id) {
   const g = giocatoriObj.find(x => x.id === id);
   undoPunteggio(g);
@@ -800,6 +1030,7 @@ function undoGiocatore(id) {
   aggiornaScoreboard();
   console.log("undoGiocatore: ",g.punteggio );	
   salvaSuGoogleSheets(g);
+  salvaPunteggi();
 
 }
 
@@ -809,6 +1040,7 @@ function aggiungiPuntiSquadraB(punti) {
   historyB.push(punti);
   aggiornaScoreboard();
   salvaSquadraB();
+  salvaPunteggi();
 }
 
 function undoSquadraB() {
@@ -818,7 +1050,7 @@ function undoSquadraB() {
   contatoriB[last]--;
   aggiornaScoreboard();
   salvaSquadraB();
-
+  salvaPunteggi();
 }
 
 function aggiornaScoreboard() {
@@ -986,7 +1218,7 @@ function avviaAggiornamentoAutomatico() {
   }
 }
 
-function SalvaPunteggi() {
+function salvaPunteggi() {
   
     if (!matchId) {
       console.warn("Nessun matchId trovato, non salvo");
@@ -1004,8 +1236,11 @@ function SalvaPunteggi() {
       formData.append("punteggioB", puntiSquadraA);
     }
 
-    // Aggiungi la variabile convocazioni
+    // Aggiungi altre variabili
     formData.append("convocazioni", convocazioni);
+    formData.append("videoURL", videoURL);
+    formData.append("isLive", isLive);
+    formData.append("statoPartita", statoPartita);
 
     // Invia al tuo Google Apps Script
     fetch(url, {
@@ -1050,9 +1285,11 @@ function init() {
   teamA = localStorage.getItem("teamA");
   teamB = localStorage.getItem("teamB");
   convocazioni = localStorage.getItem("convocazioni");
-  videoId = localStorage.getItem("videoId"); // metti null se non vuoi mostrare il bottone
+  videoURL = localStorage.getItem("videoURL");
+  videoId = localStorage.getItem("videoId");
   videoStartTime = localStorage.getItem("videoStartTime");
   isLive = localStorage.getItem("isLive");
+  statoPartita = localStorage.getItem("statoPartita");
   
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
