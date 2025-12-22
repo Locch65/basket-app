@@ -10,18 +10,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  <!-- Bottone Hamburger -->
   <div id="hamburgerMenu">
     <button id="hamburgerBtn">☰</button>
-    <!-- Bottone Video -->
-    <!-- <button id="videoBtn">Video</button> -->
-  </div>
-  <!-- Intestazione -->
+    <nav id="menu" class="hidden">
+      <ul>
+        <li>
+          <a href="./calendario.html" style="text-decoration: none; color: inherit; display: block;">
+            <i class="fas fa-calendar-alt"></i> Calendario
+          </a>
+        </li>
+        <li>
+          <button id="adminBtn"><i class="fas fa-user-shield"></i> Admin</button>
+        </li>
+      </ul>
+    </nav>
+  </div>  <!-- Intestazione -->
   <div id="header">
 
 	<!-- Bottone Admin -->
     <div id="adminButtonContainer">
-      <button id="adminBtn">Admin</button>
       <!-- Nuovo bottone Video -->
       <button id="videoBtn" class="btn-video-default">Video</button>
     </div>
@@ -81,7 +88,7 @@
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="match.js?v=1.0.67"></script>
+  <script src="match.js?v=1.0.68"></script>
   <script>
   
   window.addEventListener("beforeunload", function (event) {
