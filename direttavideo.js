@@ -2,6 +2,8 @@ let LIVE_OFFSET = 5;
 let REFRESH_TIME = 1000;
 let url = "https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec";
 
+const myAPIKey = "AIzaSyCoKusDWEguLJI19btAeqyCCM2txLaouMI";
+
 const giocatoriA = [
   "E. Carfora","K. Popa","G. Giacco","H. Taylor","C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
   "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
@@ -27,11 +29,16 @@ let punteggioB = 0;
 let lastScoreStr = "";
 let isUserLive = true;
 
+let orarioInizioPartita = null; // Valore di default
+let syncDelay = 0; // Valore predefinito in secondi
+let eventBuffer = [];
+
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
 const matchId = urlParams.get("matchId");
 const videoId = localStorage.getItem("videoId");
 const startTime = parseInt(localStorage.getItem("videoStartTime") || "0", 10);
+
 
 caricaAnagraficaSingolaPartita(matchId);
 
@@ -155,6 +162,7 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
         convocazioni: partita.convocazioni,
 		videoId: extractYouTubeId(partita.videoId),
 		startTime: extractYoutubeTime(partita.videoId),
+		//YouTubeVideoStartTime : getLiveStartTime(partita.videoId, myAPIKey),
         isLive: partita.isLive
       };
 
@@ -178,6 +186,7 @@ function caricaDatiPartita(mId) {
   fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
     .then(res => res.json())
     .then(rows => {
+	  const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
       rows.forEach(r => {
         const g = giocatoriObj.find(x => String(x.numero) === String(r.numero));
         if (g) {
@@ -187,7 +196,13 @@ function caricaDatiPartita(mId) {
           // Mostra il toast solo se NON è il primo caricamento E il punteggio è aumentato
           if (!isFirstLoad && nuoviPunti > g.punteggio) {
             const incremento = nuoviPunti - g.punteggio;
-            showBasketToast(g.displayName, incremento);
+			console.log("Ricevuto punteggio: ", g.displayName);
+			// Usiamo la variabile globale syncDelay
+            eventBuffer.push({
+              name: g.displayName,
+              points: incremento,
+              timestamp: currentVideoTime + syncDelay 
+            });
           }
 
           g.punteggio = nuoviPunti;
@@ -207,6 +222,65 @@ function caricaDatiPartita(mId) {
       renderPlayerList();
     });
 }
+
+// Funzione per estrarre l'orario di inizio dall'URL
+function recuperaOrarioInizio() {
+    const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('start')) {
+    orarioInizioPartita = urlParams.get('start');
+    // Se c'è un orario, facciamo un primo calcolo automatico all'avvio
+    // (opzionale, puoi anche aspettare il click su AUTO)
+} else {
+    console.log("Orario inizio non specificato: sync impostato a 0s");
+}
+}
+
+function calcolaLatenzaAutomatica() {
+    if (!orarioInizioPartita) {
+        alert("Attenzione: orario di inizio partita non specificato nel link. Impossibile calcolare il sync automatico.");
+        syncDelay = 0;
+        document.getElementById("sync-value").textContent = "0s";
+        return;
+    }
+
+    if (!player || typeof player.getCurrentTime !== "function") {
+        alert("Il video non è ancora pronto");
+        return;
+    }
+
+    const oraAttuale = new Date();
+    const parti = orarioInizioPartita.split(":");
+    
+    const inizio = new Date();
+    inizio.setHours(
+        parseInt(parti[0], 10), 
+        parseInt(parti[1], 10), 
+        parseInt(parti[2] || 0, 10), 
+        0
+    );
+
+    const secondiDallInizioReali = (oraAttuale - inizio) / 1000;
+    const secondoAttualePlayer = player.getCurrentTime();
+    const latenzaCalcolata = secondiDallInizioReali - secondoAttualePlayer;
+
+    if (latenzaCalcolata > 0) {
+        syncDelay = Math.floor(latenzaCalcolata);
+    } else {
+        // Se l'orario è nel futuro o il calcolo è errato, resettiamo a 0
+        syncDelay = 0;
+    }
+    
+    document.getElementById("sync-value").textContent = syncDelay + "s";
+}
+
+// Funzione per cambiare il ritardo dall'interfaccia
+function cambiaSync(valore) {
+    syncDelay = Math.max(0, syncDelay + valore);
+    document.getElementById("sync-value").textContent = syncDelay + "s";
+
+    console.log("Ritardo sincronizzazione impostato a:", syncDelay);
+} 
+
 
 // Funzione Flash Semplificata (Durata 2 secondi)
 
@@ -263,11 +337,28 @@ function checkLiveStatus() {
   }
 }
 
+function processEventBuffer() {
+  if (!player || typeof player.getCurrentTime !== "function") return;
+  
+  const currentTime = player.getCurrentTime();
+
+  // Filtriamo gli eventi: mostriamo quelli il cui timestamp è <= al tempo attuale del video
+  eventBuffer = eventBuffer.filter(event => {
+    if (currentTime >= event.timestamp) {
+      showBasketToast(event.name, event.points);
+      return false; // Rimuove l'evento dal buffer dopo averlo mostrato
+    }
+    return true; // Mantiene l'evento nel buffer se il video non ci è ancora arrivato
+  });
+}
+
 function tickTimeline() {
   timelineInterval = setInterval(() => {
     if (!player || typeof player.getCurrentTime !== "function") return;
     checkLiveStatus();
     caricaDatiPartita(matchId);
+	// Controlliamo il buffer più frequentemente (es. ogni secondo)
+    processEventBuffer();
   }, REFRESH_TIME);
 }
 
@@ -424,6 +515,74 @@ window.addEventListener("resize", () => {
     }
 });
 
+/**
+ * Accetta l'URL di un video YouTube e restituisce l'ora di inizio reale.
+ * @param {string} youtubeUrl - L'indirizzo completo del video.
+ * @param {string} apiKey - La tua YouTube Data API Key.
+ * @returns {Promise<string>} - Una stringa con la data/ora o l'errore.
+ */
+
+function getLiveStartTimeById(youtubeUrl, apiKey) {
+    //// 1. Estrazione ID Video
+    //var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    //var match = youtubeUrl.match(regExp);
+    //var videoId = (match && match[2].length === 11) ? match[2] : null;
+	//
+    //if (!videoId) {
+    //    return Promise.reject("URL YouTube non valido");
+    //}
+
+    var apiUrl = "https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=" + videoId + "&key=" + apiKey;
+
+    // Usiamo fetch con le Promises (.then) invece di await
+    return fetch(apiUrl)
+        .then(function(response) {
+            if (!response.ok) throw new Error("Errore API: " + response.status);
+            return response.json();
+        })
+        .then(function(data) {
+            if (!data.items || data.items.length === 0) {
+                throw new Error("Video non trovato");
+            }
+
+            var live = data.items[0].liveStreamingDetails;
+            if (!live) {
+                throw new Error("Questo non è un video live");
+            }
+
+            // Restituiamo l'ora reale di inizio (o quella programmata se non è ancora partito)
+            return live.actualStartTime || live.scheduledStartTime || "Data non disponibile";
+        });
+}
+
+function eseguiRicercaESalva(videoId, miaApiKey) {
+    if (!videoId) {
+        console.error("ID video mancante");
+        return;
+    }
+
+    // 1. Controlliamo se il dato è già in memoria
+    var datoSalvato = localStorage.getItem("yt_start_" + videoId);
+
+    if (datoSalvato) {
+        console.log("Dato recuperato dal localStorage (quota risparmiata!):", datoSalvato);
+        return; // Usciamo dalla funzione, non serve chiamare l'API
+    }
+
+    // 2. Se non c'è, procediamo con la chiamata API
+    console.log("Dato non trovato. Chiamata all'API di YouTube per l'ID: " + videoId);
+
+    getLiveStartTimeById(videoId, miaApiKey)
+        .then(function(startTime) {
+            // Salvataggio per usi futuri
+            localStorage.setItem("yt_start_" + videoId, startTime);
+            console.log("Successo! Data scaricata e salvata.");
+            
+        })
+        .catch(function(errore) {
+            console.error("Errore durante l'operazione:", errore);
+        });
+}
 
 function init() {
   // Seleziona l'elemento dello score
@@ -439,6 +598,11 @@ function init() {
     });
   }
 
+  //const miaKey = "LA_TUA_CHIAVE";
+  //  
+  //const startTime = getLiveStartTime(urlUtente, miaKey);
+  //console.log("Lo start time è:", startTime);
+  eseguiRicercaESalva(videoId, myAPIKey);
 }
 
 document.addEventListener("DOMContentLoaded", init);
