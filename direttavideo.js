@@ -7,7 +7,7 @@ let url =
 //"https://script.google.com/macros/s/AKfycbzmBxzYOwNhcw4yyn1W03tUDRd1hO5htCh0XEEpVWBORyFhu1uJOEMDyq1sSjLbLZjWHA/exec"
 //"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec";
 
-const myAPIKey = "AIzaSyCoKusDWEguLJI19btAeqyCCM2txLaouMI";
+const myAPIKey = "";
 
 const giocatoriA = [
   "E. Carfora","K. Popa","G. Giacco","H. Taylor","C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
@@ -612,3 +612,4 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
