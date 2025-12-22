@@ -1,6 +1,11 @@
 let LIVE_OFFSET = 5;
 let REFRESH_TIME = 1000;
-let url = "https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec";
+let url = 
+"https://script.google.com/macros/s/AKfycbyVX3yXW_PwRBeUgJKqFeS7MMWtHroHa0qRlgx6w7zX52tw0Arp1r-OIqpsN7obZF8SqA/exec"
+
+//"https://script.google.com/macros/s/AKfycbyg-5Tvq7hRZWAhjlHlz9Z3q-zJblWhRGRLg8jQomNBxxDjkvDkEBml-oOCUFPDvc40tA/exec"
+//"https://script.google.com/macros/s/AKfycbzmBxzYOwNhcw4yyn1W03tUDRd1hO5htCh0XEEpVWBORyFhu1uJOEMDyq1sSjLbLZjWHA/exec"
+//"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec";
 
 const myAPIKey = "AIzaSyCoKusDWEguLJI19btAeqyCCM2txLaouMI";
 
@@ -160,6 +165,7 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
         puntiSquadraA: partita.punteggioA === "" ? 0 : partita.punteggioA,
         puntiSquadraB: partita.punteggioB === "" ? 0 : partita.punteggioB,
         convocazioni: partita.convocazioni,
+		videoURL: partita.videoId,
 		videoId: extractYouTubeId(partita.videoId),
 		startTime: extractYoutubeTime(partita.videoId),
 		//YouTubeVideoStartTime : getLiveStartTime(partita.videoId, myAPIKey),
