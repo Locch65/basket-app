@@ -28,21 +28,114 @@ h1 {
   margin-bottom: 20px; 
   gap: 20px;
 }
+/* --- STILE HAMBURGER MENU (stile calendario) --- */
 #hamburgerMenu {
   position: absolute;
   top: 10px;
   left: 10px;
-  
-  display: flex;
-  gap: 25px; /* aumenta lo spazio tra hamburger e bottone Video */
+  z-index: 1100;
 }
 
 #hamburgerBtn {
-  padding: 8px 12px;
-  font-size: 2rem;
-  border-radius: 4px;
+  font-size: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2c3e50;
+  padding: 5px 10px;
+}
+
+#menu {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: 200px;
+  z-index: 1000;
+}
+
+#menu.hidden {
+  display: none;
+}
+
+#menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#menu li {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+#menu li:hover {
+  background-color: #f5f5f5;
+}
+
+#menu li:last-child {
+  border-bottom: none;
+}
+
+/* Reset dello stile per i bottoni e i link nel menu */
+#menu ul li button, 
+#menu ul li a {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #333; /* Grigio scuro, come le altre voci del menu */
+    text-align: left;
+    font-size: 18px; /* Uniformato a #menu li */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0; /* Rimuoviamo il padding qui perché lo ha già il genitore LI */
+    font-family: inherit;
+    text-decoration: none;
+}
+
+/* Gestione icone */
+#menu ul li i {
+    width: 25px;
+    text-align: center;
+    color: #2c3e50; /* Colore bluastro scuro per le icone */
+}
+
+/* Hover: cambiamo solo il colore del testo se lo sfondo diventa chiaro */
+#menu li:hover button, 
+#menu li:hover a {
+    color: #000;
+}
+
+/* Reset stile bottone admin dentro il menu */
+#adminBtn {
+  background: none !important;
+  border: none !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100%;
+  text-align: left;
   cursor: pointer;
 }
+
+#menu i {
+  margin-right: 10px;
+  width: 20px;
+  text-align: center;
+}
+
 
 /* Stile base bottone video */
 #videoBtn {
@@ -430,13 +523,6 @@ h1 {
   z-index: 10000; /* 👈 opzionale, per sicurezza */
 }
 
-/* Bottone Admin */
-#adminBtn {
-  font-size: 1.6rem;      /* testo molto grande */
-  padding: 14px 24px;     /* più spazio */
-  border-radius: 10px;
-}
-
 /* Input password nel popup */
 #adminPassword {
   font-size: 1.4rem;
@@ -491,15 +577,6 @@ h1 {
   margin: 0 0 20px 0;
 }
 
-.convocazioniPopup-itemOLD {
-  display: flex;
-  align-items: center;
-  padding: 4px 12px;   /* Ridotto da 12px a 4px per avvicinarli */
-  margin: 2px 0;      /* Ridotto da 6px a 2px */
-  gap: 10px;          /* Ridotto leggermente lo spazio tra checkbox e nome */
-  background: #f9f9f9;
-  border-radius: 6px;
-}
 .convocazioniPopup-item {
   padding: 2px 10px; /* Gap minimo tra i nomi */
   margin: 0;
@@ -516,12 +593,6 @@ h1 {
 }
 
 /* Nomi giocatori più grandi */
-.convocazioniPopup-item labelOLD {
-  font-size: 32px;        /* ingrandisce il testo */
-  font-weight: 600;       /* semi-bold */
-  cursor: pointer;
-}
-
 .convocazioniPopup-item label {
   display: flex;
   align-items: center;
