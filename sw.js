@@ -10,27 +10,32 @@
 //
 //  Calendario.html
 //    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
+//
 //    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
 //    - i dati del match (tipo Islive) vengono caricati quando fa il refresh, non quando si clicca sulla partita. (risultato: il bottone VIdeo rimane blu)
+//    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //
 //  Match.html
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 
 //    - FATTO: n utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
 //    - FATTO: quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
+//    - FATTO: sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
+//    - FATTO: inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Calendario", "Impostazioni", 
+//    - FATTO: Salvare APIKey in locale non su GitHub
+//    - FATTO: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //
+//    - sincronizzare messaggi punteggi con video
 //    - passare matchid come parametro. cambiare i matchid delle partite nel DB. renderli numeri casuali
-//
+//    - inserire hamburger menu con le voci: "IMpostazioni", "Anagrafica", "Classifiche", 
 //    - inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
-//    - sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
 //    - leggere lista giocatori da Google Sheet
-//    - inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Anagrafica", "Calendario", "Classifiche", "Impostazioni", 
 //    - password Admin da crittografare
 //    - implementare dark mode
 //
 //  DirettaVideo.html
 //    - FATTO: inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
-//    - simulazione OPPO: eliminare la scrollbar orizzontale
-//    - inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
+//    - FATTO: simulazione OPPO: eliminare la scrollbar orizzontale
+//    - FATTO: inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
 //
 //  Anagrafica.html
 //    - 1) mostrare lista Roster. Quando si clicca su un nome
@@ -59,7 +64,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.69"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.70"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
