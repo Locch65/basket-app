@@ -1,11 +1,12 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.69";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.70";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
-"https://script.google.com/macros/s/AKfycbyVX3yXW_PwRBeUgJKqFeS7MMWtHroHa0qRlgx6w7zX52tw0Arp1r-OIqpsN7obZF8SqA/exec"
+"https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec"
 
+//"https://script.google.com/macros/s/AKfycbyVX3yXW_PwRBeUgJKqFeS7MMWtHroHa0qRlgx6w7zX52tw0Arp1r-OIqpsN7obZF8SqA/exec"
 //"https://script.google.com/macros/s/AKfycbyg-5Tvq7hRZWAhjlHlz9Z3q-zJblWhRGRLg8jQomNBxxDjkvDkEBml-oOCUFPDvc40tA/exec"
 //"https://script.google.com/macros/s/AKfycbzmBxzYOwNhcw4yyn1W03tUDRd1hO5htCh0XEEpVWBORyFhu1uJOEMDyq1sSjLbLZjWHA/exec"
 //"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
@@ -36,6 +37,10 @@ let teamA = "";
 let teamB = "";
 let isLive = false;
 let statoPartita = "";
+let lastScoreState = ""; 
+let lastQuartoState = "";
+let quartoAttuale = ""; // Variabile globale per il quarto attuale
+let googleApiKey = "";
 
 let refreshTimer = null; // variabile globale per l'ID del timer
 
@@ -65,8 +70,9 @@ function gestisciDirettaYoutube() {
     content.className = 'popup-content';
     content.style.textAlign = 'left';
 
-    // Usiamo direttamente la variabile videoURL se esiste, altrimenti stringa vuota
     const urlIniziale = (typeof videoURL !== 'undefined') ? videoURL : "";
+    // Recuperiamo l'API Key corrente dalla variabile locale
+    const apiKeyCorrente = googleApiKey || "";
 
     content.innerHTML = `
         <h2 style="margin-bottom: 20px; text-align:center;">Diretta Youtube</h2>
@@ -84,8 +90,12 @@ function gestisciDirettaYoutube() {
         </div>
 
         <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">Offset Inizio Partita (secondi):</label>
-        <input type="number" id="ytOffset" style="width:100%; padding:10px; margin-bottom:25px; font-size:1rem;" 
+        <input type="number" id="ytOffset" style="width:100%; padding:10px; margin-bottom:15px; font-size:1rem;" 
                placeholder="Esempio: 30" value="${videoStartTime || ""}">
+
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">API Key:</label>
+        <input type="text" id="ytApiKey" style="width:100%; padding:10px; margin-bottom:25px; font-size:1rem;" 
+               placeholder="Inserisci la tua Google API Key" value="${apiKeyCorrente}">
 
         <div style="display: flex; justify-content: center; gap: 20px;">
             <button id="ytSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
@@ -99,7 +109,6 @@ function gestisciDirettaYoutube() {
     const urlInput = document.getElementById('ytUrl');
     const calcolaBtn = document.getElementById('ytCalcolaBtn');
 
-    // Funzione per validare e gestire lo stato del tasto Calcola
     const validaUrl = (valore) => {
         const isValid = valore.startsWith('http://') || valore.startsWith('https://');
         calcolaBtn.disabled = !isValid;
@@ -107,9 +116,7 @@ function gestisciDirettaYoutube() {
         calcolaBtn.style.opacity = isValid ? '1' : '0.5';
     };
 
-    // Controllo iniziale all'apertura
     validaUrl(urlInput.value.trim());
-
     urlInput.addEventListener('input', () => validaUrl(urlInput.value.trim()));
 
     calcolaBtn.onclick = () => calcolaOraDaYoutube();
@@ -121,45 +128,34 @@ function gestisciDirettaYoutube() {
     document.getElementById('ytSaveBtn').onclick = () => {
       let finalUrl = urlInput.value.trim();
       const offsetValue = document.getElementById('ytOffset').value;
+      const apiKeyValue = document.getElementById('ytApiKey').value.trim();
   
       if (offsetValue && parseInt(offsetValue) >= 0) {
-          // Creiamo l'oggetto URL per manipolare i parametri facilmente
           try {
               let urlObj = new URL(finalUrl);
-              
-              // YouTube usa "t" o "start" per il timestamp
-              // Noi standardizziamo su "t" con il formato in secondi (es: 30s)
               urlObj.searchParams.set("t", offsetValue + "s");
-              
-              // Se esisteva il parametro "start", lo rimuoviamo per evitare conflitti
               urlObj.searchParams.delete("start");
-              
               finalUrl = urlObj.toString();
           } catch (e) {
-              // Se l'URL non è valido (es. testo semplice), facciamo un fallback manuale
               if (!finalUrl.includes('t=') && !finalUrl.includes('start=')) {
                   const separator = finalUrl.includes('?') ? '&' : '?';
                   finalUrl = `${finalUrl}${separator}t=${offsetValue}s`;
               } else {
-                  // Sostituzione via Regex se l'URL è particolare (es. shortlink)
                   finalUrl = finalUrl.replace(/([?&])(t|start)=[^&]*/, `$1t=${offsetValue}s`);
               }
           }
       }
   
-      const dati = {
-          url: finalUrl,
-          oraInizio: document.getElementById('ytOraInizio').value,
-          offset: offsetValue
-      };
-      videoURL = dati.url;
-	  videoStartTime = dati.offset;
+      // Salvataggio nelle variabili locali e nel localStorage
+      videoURL = finalUrl;
+      videoStartTime = offsetValue;
+      googleApiKey = apiKeyValue;
+      localStorage.setItem("googleApiKey", apiKeyValue); // Persistenza tra le sessioni
 	  
       salvaPunteggi();
       document.body.removeChild(overlay);
     };
 }
-
 
 // Funzione vuota per il calcolo
 function calcolaOraDaYoutube() {
@@ -168,6 +164,282 @@ function calcolaOraDaYoutube() {
 }
 
 function gestisciGoLive() {
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.textAlign = 'left';
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 20px; text-align:center;">Stato Partita</h2>
+        
+        <label style="display:block; font-size: 1.2rem; margin-bottom: 10px;">Quarto attuale:</label>
+        <div id="quartiContainer" style="display: flex; gap: 8px; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="btn-quarto" data-q="1° Quarto">1</button>
+            <button class="btn-quarto" data-q="2° Quarto">2</button>
+            <button class="btn-quarto" data-q="3° Quarto">3</button>
+            <button class="btn-quarto" data-q="4° Quarto">4</button>
+            <button class="btn-quarto" data-q="Extra Time" style="flex-basis: 100%; margin-top: 5px;">Extra Time</button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="checkGoLive" style="width: 25px; height: 25px;">
+                <label for="checkGoLive" style="font-size: 1.2rem;">Go Live</label>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="checkTerminata" style="width: 25px; height: 25px;">
+                <label for="checkTerminata" style="font-size: 1.2rem;">Partita terminata</label>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+
+        <style>
+            .btn-quarto {
+                flex: 1;
+                min-width: 50px;
+                padding: 12px 5px;
+                font-size: 1.1rem;
+                border: 2px solid #3498db;
+                background-color: white;
+                color: #3498db;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .btn-quarto.active {
+                background-color: #3498db !important;
+                color: white !important;
+            }
+        </style>
+    `;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniQuarto = content.querySelectorAll('.btn-quarto');
+    const checkGoLive = document.getElementById('checkGoLive');
+    const checkTerminata = document.getElementById('checkTerminata');
+
+    // --- 1. LOGICA DI INIZIALIZZAZIONE ---
+    
+    checkGoLive.checked = (isLive === true || isLive === "TRUE" || isLive === "true");
+
+    if (statoPartita === "Terminata" || statoPartita === "Fine") {
+        checkTerminata.checked = true;
+        checkGoLive.checked = false;
+    } else {
+        checkTerminata.checked = false;
+        bottoniQuarto.forEach(btn => {
+            const val = btn.dataset.q; // es: "1° Quarto"
+            // Se statoPartita è "1" o "1° Quarto", attiva il bottone
+            if (quartoAttuale && (val === quartoAttuale || quartoAttuale.toString().startsWith(val.charAt(0)))) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    // --- 2. GESTIONE EVENTI ---
+
+    bottoniQuarto.forEach(btn => {
+        btn.onclick = () => {
+            if (checkTerminata.checked) return;
+            bottoniQuarto.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+    });
+
+    checkTerminata.onchange = () => {
+        if (checkTerminata.checked) {
+            checkGoLive.checked = false;
+            bottoniQuarto.forEach(b => b.classList.remove('active'));
+        }
+    };
+
+    checkGoLive.onchange = () => {
+        if (checkGoLive.checked) checkTerminata.checked = false;
+    };
+
+    document.getElementById('liveCancelBtn').onclick = () => {
+        document.body.removeChild(overlay);
+    };
+
+    // --- 3. FIX TASTO SALVA ---
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const quartoAttivo = content.querySelector('.btn-quarto.active');
+        
+        // Definiamo il nuovo stato correttamente
+        let nuovoStato = statoPartita; 
+        if (checkTerminata.checked) {
+            nuovoStato = "Terminata";
+        } else if (quartoAttivo) {
+            nuovoStato = quartoAttivo.dataset.q;
+        }
+
+        const dati = {
+            goLive: checkGoLive.checked,
+            quarto: quartoAttivo ? quartoAttivo.dataset.q : (checkTerminata.checked ? "Terminata" : statoPartita),
+            terminata: checkTerminata.checked
+        };
+        
+        console.log("Salvataggio in corso:", dati);
+        
+        // Chiamata alla funzione di salvataggio
+        if (typeof salvaStatoLive === "function") {
+            salvaStatoLive(dati);
+        } else {
+            console.error("Funzione salvaStatoLive non trovata!");
+        }
+        
+        document.body.removeChild(overlay);
+    };
+}
+
+function OLD2gestisciGoLive() {
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.textAlign = 'left';
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 20px; text-align:center;">Stato Partita</h2>
+        
+        <label style="display:block; font-size: 1.2rem; margin-bottom: 10px;">Quarto attuale:</label>
+        <div id="quartiContainer" style="display: flex; gap: 8px; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="btn-quarto" data-q="1° Quarto">1</button>
+            <button class="btn-quarto" data-q="2° Quarto">2</button>
+            <button class="btn-quarto" data-q="3° Quarto">3</button>
+            <button class="btn-quarto" data-q="4° Quarto">4</button>
+            <button class="btn-quarto" data-q="Extra Time" style="flex-basis: 100%; margin-top: 5px;">Extra Time</button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 30px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="checkGoLive" style="width: 25px; height: 25px;">
+                <label for="checkGoLive" style="font-size: 1.2rem;">Go Live</label>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="checkTerminata" style="width: 25px; height: 25px;">
+                <label for="checkTerminata" style="font-size: 1.2rem;">Partita terminata</label>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+
+        <style>
+            .btn-quarto {
+                flex: 1;
+                min-width: 50px;
+                padding: 12px 5px;
+                font-size: 1.1rem;
+                border: 2px solid #3498db;
+                background-color: white;
+                color: #3498db;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .btn-quarto.active {
+                background-color: #3498db;
+                color: white;
+            }
+        </style>
+    `;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniQuarto = content.querySelectorAll('.btn-quarto');
+    const checkGoLive = document.getElementById('checkGoLive');
+    const checkTerminata = document.getElementById('checkTerminata');
+
+    // --- LOGICA DI INIZIALIZZAZIONE STATO ---
+    
+    // 1. Setta il checkbox Go Live (converte stringa "TRUE" o booleano)
+    checkGoLive.checked = (isLive || isLive === true || isLive === "TRUE");
+
+    // 2. Setta lo stato "Terminata" o evidenzia il Quarto/Periodo attivo
+    // Usiamo la variabile globale 'statoPartita' popolata da caricaDatiPartita
+    if (statoPartita === "Terminata" || statoPartita === "Fine") {
+        checkTerminata.checked = true;
+        checkGoLive.checked = false; 
+        bottoniQuarto.forEach(b => b.classList.remove('active'));
+    } else {
+        checkTerminata.checked = false;
+        bottoniQuarto.forEach(btn => {
+            const val = btn.dataset.q;
+            // Se lo stato salvato (es. "1° Quarto") coincide con il tasto, lo attiva
+            if (val === statoPartita || val.startsWith(statoPartita)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    // --- GESTIONE EVENTI (Interattività) ---
+
+    bottoniQuarto.forEach(btn => {
+        btn.onclick = () => {
+            if (checkTerminata.checked) return; // Non cambia quarto se segnato come terminata
+            bottoniQuarto.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+    });
+
+    checkTerminata.onchange = () => {
+        if (checkTerminata.checked) {
+            checkGoLive.checked = false;
+            bottoniQuarto.forEach(b => b.classList.remove('active'));
+        }
+    };
+
+    checkGoLive.onchange = () => {
+        if (checkGoLive.checked) {
+            checkTerminata.checked = false; // Se vado in Live, non può essere terminata
+        }
+    };
+
+    document.getElementById('liveCancelBtn').onclick = () => {
+        document.body.removeChild(overlay);
+    };
+
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const quartoAttivo = content.querySelector('.btn-quarto.active');
+        
+        //// Definiamo il nuovo stato da inviare al server
+        //let nuovoStato = statoPartita; 
+        //if (checkTerminata.checked) {
+        //    nuovoStato = "Terminata";
+        //} else if (quartoAttivo) {
+        //    nuovoStato = quartoAttivo.dataset.q;
+        //}
+
+        const dati = {
+            matchId: matchIdAttuale, // Assicurati di passare l'ID della partita
+            goLive: checkGoLive.checked,
+            statoPartita: nuovoStato
+        };
+        
+        console.log("Salvataggio stato live...", dati);
+        salvaStatoLive(dati); // Questa funzione dovrà fare la chiamata POST/GET al server
+        document.body.removeChild(overlay);
+    };
+}
+
+function OLDgestisciGoLive() {
     const overlay = document.createElement('div');
     overlay.id = 'goLivePopup';
     overlay.className = 'popup';
@@ -294,14 +566,20 @@ function gestisciGoLive() {
 
 function salvaStatoLive(dati) {
     console.log("Dati inviati a salvaStatoLive:", dati);
-	isLive = (dati.goLive === true);
-	if (dati.terminata === true) {
+    isLive = (dati.goLive === true);
+    
+    // Gestione logica quarto e variabile globale
+    if (dati.terminata === true) {
         statoPartita = "Terminata";
+        quartoAttuale = "Terminata";
     } else {
-        // Se non è terminata, usa il quarto selezionato o mantieni quello attuale
         statoPartita = dati.quarto || "1° Quarto";
+        // Estraiamo solo il numero o "Extra Time" (es: "1" invece di "1° Quarto")
+        quartoAttuale = statoPartita.replace("° Quarto", "").trim();
     }
-	salvaPunteggi();
+    
+    salvaPunteggi();
+    aggiornaScoreboard(); // Chiamiamo l'aggiornamento per mostrare subito il cambio
 }
 
 function addPoints(points) {
@@ -515,7 +793,6 @@ function login(pwd) {
     alert("Password errata.");
   }
 }
-
 
 function createAdminLoginPopup() {
   const adminBtn = document.getElementById("adminBtn");
@@ -1054,40 +1331,77 @@ function undoSquadraB() {
 }
 
 function aggiornaScoreboard() {
-  const punti = giocatoriObj.reduce((sum,g)=>sum+g.punteggio,0);
-  const puntiASalvati = localStorage.getItem("puntiSquadraA");
-  const puntiBSalvati = localStorage.getItem("puntiSquadraB");
-  
+  const punti = giocatoriObj.reduce((sum, g) => sum + g.punteggio, 0);
+  puntiSquadraA = punti;
+
+  // Determiniamo i valori correnti
+  const punteggioCorrente = (teamA === "Polismile A") ? `${punti}-${puntiSquadraB}` : `${puntiSquadraB}-${punti}`;
+  const quartoCorrente = quartoAttuale;
+
+  // Verifichiamo se qualcosa è cambiato
+  const punteggioCambiato = punteggioCorrente !== lastScoreState;
+  const quartoCambiato = quartoCorrente !== lastQuartoState;
+
+  // Se nulla è cambiato, usciamo subito dalla funzione
+  if (!punteggioCambiato && !quartoCambiato) return;
+
   const scoreboard = document.getElementById("scoreboard");
-  let nuovoTesto = "";
-  // let difference = (teamA === "Polismile A") ? punti != parseInt(puntiASalvati, 10) : punti != parseInt(puntiBSalvati, 10)
-  // if (difference && !isAdmin) {
-  //   nuovoTesto = `${puntiASalvati} - ${puntiBSalvati}`;
-  // }
-  // else
-  {
-    nuovoTesto = (teamA === "Polismile A") ? `${punti} - ${puntiSquadraB}` : `${puntiSquadraB} - ${punti}`;
-	puntiSquadraA = punti;
-  }
 
-  if (scoreboard.textContent !== nuovoTesto) {
-    scoreboard.textContent = nuovoTesto;
-
-    // Forza reflow e applica transizione
+  // 1. Aggiornamento selettivo del Punteggio
+  if (punteggioCambiato) {
+    let divPunteggio = document.getElementById("punteggioNumerico");
+    if (!divPunteggio) {
+      // Se non esiste (primo avvio), lo creiamo
+      divPunteggio = document.createElement("div");
+      divPunteggio.id = "punteggioNumerico";
+      scoreboard.prepend(divPunteggio); // Lo mette all'inizio
+    }
+    
+    if (teamA === "Polismile A") {
+      divPunteggio.innerHTML = `<span id="score">${punti}</span> - <span id="scoreB">${puntiSquadraB}</span>`;
+    } else {
+      divPunteggio.innerHTML = `<span id="score">${puntiSquadraB}</span> - <span id="scoreB">${punti}</span>`;
+    }
+    
+    // Attiva l'animazione flash solo se cambia il punteggio
     scoreboard.classList.remove("flash");
-    void scoreboard.offsetWidth; // forza reflow
+    void scoreboard.offsetWidth; 
     scoreboard.classList.add("flash");
-
-    if (isMobile()) { 
-	  navigator.vibrate(100);
-	}
-    // Dopo 500ms torna allo stato normale
+    
+    if (typeof isMobile === "function" && isMobile()) { 
+      navigator.vibrate(100); 
+    }
     setTimeout(() => scoreboard.classList.remove("flash"), 500);
   }
 
+  // 2. Aggiornamento selettivo del Quarto (a destra)
+  if (quartoCambiato) {
+    let spanPeriodo = document.getElementById("periodoAttuale");
+    if (!spanPeriodo) {
+      spanPeriodo = document.createElement("span");
+      spanPeriodo.id = "periodoAttuale";
+      scoreboard.appendChild(spanPeriodo); // Lo mette alla fine (destra)
+    }
+    
+    spanPeriodo.textContent = quartoCorrente;
+
+    if (quartoCorrente === "Terminata") {
+      spanPeriodo.classList.add("terminata");
+    } else {
+      spanPeriodo.classList.remove("terminata");
+    }
+  }
+
+  // 3. Salvataggio dello stato attuale per il prossimo confronto
+  lastScoreState = punteggioCorrente;
+  lastQuartoState = quartoCorrente;
+
+  // 4. Aggiornamento dettagli Admin per squadra B (sempre se admin)
   if (isAdmin) {
-    document.getElementById("punti_squadraB").textContent =
-      `[${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
+    const puntiBElement = document.getElementById("punti_squadraB");
+    if (puntiBElement && contatoriB) {
+      puntiBElement.textContent = `[${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
+    }
   }
 }
 
@@ -1166,15 +1480,30 @@ function salvaSquadraB() {
 }
 
 function caricaDatiPartita(matchId) {
-  const url_1 = url + "?matchId=" + encodeURIComponent(matchId);
-  console.log("URL: " + url_1)
+  // Specifichiamo sheet=Statistiche per essere sicuri di attivare la logica corretta
+  const url_1 = url + "?sheet=Statistiche&matchId=" + encodeURIComponent(matchId);
+  console.log("URL: " + url_1);
+
   fetch(url_1)
     .then(res => res.json())
-    .then(rows => {
-      console.log("Dati caricati:", rows);
+    .then(data => { // 'data' ora è l'oggetto { dettagliGara, statisticheGiocatori }
+      console.log("Dati caricati:", data);
 
+      // 1. GESTIONE DATI PARTITA
+      if (data.dettagliGara) {
+        const info = data.dettagliGara;
+		quartoAttuale = info.statoPartita.replace("° Quarto", "").trim();
+        // Esempio: aggiorna variabili globali o elementi UI con i dati della partita
+        // nomeSquadraA = info.squadraA;
+        // nomeSquadraB = info.squadraB;
+        // punteggioA = info.punteggioA;
+        // punteggioB = info.punteggioB;
+        console.log("Info Partita recuperate:", info.squadraA + " vs " + info.squadraB);
+      }
 
-      // … poi aggiorni i giocatori
+      // 2. GESTIONE STATISTICHE GIOCATORI
+      const rows = data.statisticheGiocatori || [];
+
       rows.forEach(r => {
         const g = giocatoriObj.find(x => String(x.numero) === String(r.numero));
         if (g) {
@@ -1186,11 +1515,14 @@ function caricaDatiPartita(matchId) {
           contatoriB = JSON.parse(r.dettagli || "{}");
         }
       });
+
+      // 3. AGGIORNAMENTO UI
       aggiornaTitoli();
       renderGiocatori(giocatoriObj);
       aggiornaScoreboard();
       ordinaGiocatori(ultimoOrdinamento);
-    });
+    })
+    .catch(err => console.error("Errore nel caricamento dati:", err));
 }
 
 function interrompiAggiornamentoAutomatico() {
@@ -1290,6 +1622,7 @@ function init() {
   videoStartTime = localStorage.getItem("videoStartTime");
   isLive = localStorage.getItem("isLive");
   statoPartita = localStorage.getItem("statoPartita");
+  googleApiKey = localStorage.getItem("googleApiKey") || ""; // Recupera il valore salvato  
   
   const savedMatchId = localStorage.getItem("matchId");
   if (savedMatchId && savedMatchId !== "undefined") {
