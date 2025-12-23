@@ -48,7 +48,10 @@
       <label id="teamB" class="squadra-label" >Squadra B</label>
     </div>
     <div id="scoreboard">
-      <div class="loading">Caricamento scoreboard...</div>
+      <div id="punteggioNumerico">
+        <span id="score">0</span> - <span id="scoreB">0</span>
+      </div>
+      <span id="periodoAttuale"></span>
     </div>
   </div>
 
@@ -88,7 +91,7 @@
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="match.js?v=1.0.69"></script>
+  <script src="match.js?v=1.0.70"></script>
   <script>
   
   //window.addEventListener("beforeunload", function (event) {
