@@ -188,10 +188,21 @@ h1 {
 
 
 #scoreboard {
+  position: relative; /* Necessario per il posizionamento del quarto */
+  display: flex;
+  justify-content: center; /* Centra il punteggioNumerico */
+  align-items: center;
+  width: 100%;
+  min-height: 80px;
   font-size: 64px;
-  color: #000;              /* colore normale */
-  transform: scale(1);      /* stato normale */
-  transition: color 0.5s ease, transform 0.3s ease;
+  margin: 10px 0;
+}
+
+#punteggioNumerico {
+  /* Questo div rimarrà sempre al centro perfetto dello schermo, 
+     allineandosi ai nomi delle squadre sopra */
+  display: flex;
+  gap: 15px;
 }
 
 #scoreboard.flash {
@@ -199,6 +210,26 @@ h1 {
   transform: scale(1.2);    /* leggermente più grande */
 }
 
+/* Stile per l'indicazione del quarto/stato attuale */
+#periodoAttuale {
+  position: relative;
+  margin-left: 25px;      /* Aumentato lo spazio dal punteggio */
+  font-size: 24px;        /* Font molto più grande */
+  color: #ffffff;         /* Testo bianco */
+  background: #e74c3c;    /* Sfondo rosso */
+  padding: 8px 15px;      /* Più spazio interno */
+  border: 3px solid #c0392b; /* Bordino rosso scuro più evidente */
+  border-radius: 10px;    /* Angoli più arrotondati */
+  text-transform: uppercase;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Ombra per profondità */
+}
+
+/* Se la partita è terminata, possiamo cambiare colore in grigio */
+#periodoAttuale.terminata {
+  background: #7f8c8d !important;   /* Grigio scuro */
+  border-color: #34495e !important; /* Bordino grigio ancora più scuro */
+  color: #ecf0f1 !important;        /* Testo quasi bianco */
+}
 
 #contenuto { 
   display: flex; 
@@ -771,10 +802,19 @@ h1 {
 /* ======================================== */
 @media (max-width: 450px) {
 
+  #header { 
+    gap: 10px;
+	margin-bottom: 5px;
+  }
+
   /* 1. Body: riduce il font base e i margini */
   body {
     font-size: 12px;
     margin: 4px; 
+  }
+
+  #contenuto { 
+    gap: 5px; 
   }
 
   /* 2. Intestazione */
@@ -807,8 +847,19 @@ h1 {
   /* 4. Scoreboard */
   #scoreboard {
     font-size: 32px;
+    min-height: 50px;
   }
-
+  
+  #periodoAttuale {
+    font-size: 20px;      /* Dimensione bilanciata per mobile */
+    margin-left: 10px;
+    padding: 4px 8px;
+    border-width: 2px;
+    left: auto;           /* Fondamentale: annulla il vecchio left: 5px */
+  }
+  #periodoAttuale.terminata {
+	  font-size: 14px;
+  }
   /* 5. Controlli top (Undo/Punteggio Squadra B) */
   #controlsB .punteggio {
     font-size: 16px; 
@@ -829,10 +880,6 @@ h1 {
     padding: 6px 8px;
     margin: 2px;
     border-radius: 4px;
-  }
-  #ordinamenti .convocazioni-btn {
-    font-size: 12px;
-    padding: 6px 8px;
   }
   
   /* 7. Giocatori (la parte più importante per Admin) */
