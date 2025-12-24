@@ -11,10 +11,11 @@
 </head>
 <body>
   <div class="video-container">
+
     <div id="ytplayer"></div>
     <div id="hud-overlay">
       <div id="hud-score" class="badge">0 - 0</div>
-      
+      <div id="hud-period" class="badge period-badge hidden"></div>
       <div id="hud-live-status" class="badge live-badge">🔴 LIVE</div>
       
       <div id="basket-toast" class="toast hidden"></div>
@@ -36,11 +37,12 @@
           <span id="label-team-B">SQUADRA B</span>
         </div>
       <div id="game-score" class="main-score">0 - 0</div>
+	  <span id="game-period" class="period-box-mini hidden"></span>
     </div>
     <div id="players-grid"></div>
   </div>
 
+  <script src="direttavideo.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script type="module" src="direttavideo.js"></script>
 </body>
 </html>
