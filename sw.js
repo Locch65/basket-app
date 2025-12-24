@@ -36,6 +36,9 @@
 //    - FATTO: inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
 //    - FATTO: simulazione OPPO: eliminare la scrollbar orizzontale
 //    - FATTO: inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
+//    - inserire indicazioni del quarto attuale
+//    - i bottono +/- per ritardare i messaggi vanno messi solo se Admin e devono memorizzare il dato in Google sheet e trasmesso ai client
+//    - i client non devono fare polling ma usare notifiche realtime da Firebase
 //
 //  Anagrafica.html
 //    - 1) mostrare lista Roster. Quando si clicca su un nome
@@ -64,7 +67,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.70"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.71"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
