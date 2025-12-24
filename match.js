@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.70";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.71";  // Aggiorna questo numero ad ogni modifica
 
 let url = 
 "https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec"
@@ -789,11 +789,33 @@ function login(pwd) {
     aggiornaTitoli();
     initSquadraBControls(); 
     renderGiocatori(listaGiocatoriCorrente);
+	abilitaClickQuarto();
+	
   } else {
     alert("Password errata.");
   }
 }
+//
+function abilitaClickQuarto() {
+  const rettangoloQuarto = document.getElementById("periodoAttuale");
+  
+  if (isAdmin && rettangoloQuarto) {
+    // Aggiunge la classe per il cursore puntatore
+    rettangoloQuarto.classList.add("admin-clickable");
+    
+    // Rimuove eventuali listener precedenti per evitare doppie aperture
+    rettangoloQuarto.onclick = () => {
+      if (typeof gestisciGoLive === "function") {
+        gestisciGoLive(); //
+      }
+    };
+  } else if (rettangoloQuarto) {
+    rettangoloQuarto.classList.remove("admin-clickable");
+    rettangoloQuarto.onclick = null;
+  }
+}
 
+// Ricordati di chiamare abilitaClickQuartoAdmin() subito dopo che isAdmin diventa true
 function createAdminLoginPopup() {
   const adminBtn = document.getElementById("adminBtn");
   const popup = document.getElementById("adminPopup");
