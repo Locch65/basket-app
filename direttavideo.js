@@ -53,19 +53,57 @@ const teamB = localStorage.getItem("teamB");
 
 initTeamNames();
 
+//
+let initTimeout;
+
 window.onYouTubeIframeAPIReady = function () {
-  if (!videoId) { hudLabel.textContent = "⚠️ Nessun videoId"; return; }
+  if (!videoId) { 
+    mostraErrore("⚠️ Nessun videoId trovato"); 
+    return; 
+  }
+
+  // Avvia un timeout di sicurezza: se dopo 8 secondi il player non è pronto, 
+  // forziamo l'avvio delle funzioni di rete (tickTimeline)
+  initTimeout = setTimeout(() => {
+    console.warn("L'evento onReady di YT non è scattato in tempo. Avvio forzato.");
+    mostraErrore("Il player ha difficoltà a caricarsi, ma i dati verranno aggiornati.");
+    tickTimeline(); 
+  }, 8000);
+
   player = new YT.Player('ytplayer', {
     videoId: videoId,
     playerVars: { origin: window.location.origin, rel: 0, modestbranding: 1, playsinline: 1, fs: 0 },
-    events: { 'onReady': onPlayerReady }
+    events: { 
+      'onReady': (e) => {
+        clearTimeout(initTimeout); // Cancella il timeout se risponde in tempo
+        nascondiErrore();
+        onPlayerReady(e);
+      },
+      'onError': onPlayerError 
+    }
   });
 };
 
 function onPlayerReady() {
+  console.log("Player pronto");
   player.seekTo(startTime, true);
   player.playVideo();
   tickTimeline();
+}
+
+// Funzioni di supporto per l'interfaccia
+function mostraErrore(msg) {
+  const overlay = document.getElementById("player-error-overlay");
+  const text = document.getElementById("error-message");
+  if (overlay && text) {
+    overlay.classList.remove("hidden");
+    text.textContent = msg;
+  }
+}
+
+function nascondiErrore() {
+  const overlay = document.getElementById("player-error-overlay");
+  if (overlay) overlay.classList.add("hidden");
 }
 
 function onPlayerError(e) {
@@ -192,7 +230,11 @@ let isFirstLoad = true;
 function caricaDatiPartita(mId) {
   fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
     .then(res => res.json())
-    .then(rows => {
+    .then(data => {
+		// 1. Estrazione dati dai nuovi campi indicati
+      const rows = data.statisticheGiocatori || []; 
+      const dettagli = data.dettagliGara || {};
+
 	  const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
       rows.forEach(r => {
         const g = giocatoriObj.find(x => String(x.numero) === String(r.numero));
@@ -222,6 +264,29 @@ function caricaDatiPartita(mId) {
         }
       });
 
+      // GESTIONE QUARTO/PERIODO
+      const periodo = data.dettagliGara?.statoPartita;
+      
+      const hudPeriodEl = document.getElementById("hud-period"); // Box nel video
+      const gamePeriodEl = document.getElementById("game-period"); // Box nella scoreboard
+
+      //[hudPeriodEl, gamePeriodEl].forEach(el => {
+      [gamePeriodEl].forEach(el => {
+        if (el && periodo) {
+          el.textContent = periodo;
+          el.classList.remove("hidden");
+
+          // Colore grigio se terminata, rosso se in corso
+          if (periodo.toLowerCase().includes("terminata")) {
+            el.style.backgroundColor = "#666";
+            el.style.borderColor = "#999";
+          } else {
+            el.style.backgroundColor = "#ff0000";
+            el.style.borderColor = "#ff4d4d";
+          }
+        }
+      });
+	  
       // Dopo aver elaborato tutti i dati per la prima volta, impostiamo il flag a false
       isFirstLoad = false;
 
