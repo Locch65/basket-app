@@ -170,7 +170,7 @@ function extractYouTubeId(input) {
     // Caso 5: altri formati non previsti
     return "";
   } catch (e) {
-    console.error("Input non valido:", e);
+    //console.error("Input non valido:", e);
     return "";
   }
 }
@@ -670,11 +670,6 @@ function init() {
     });
   }
 
-  //const miaKey = "LA_TUA_CHIAVE";
-  //  
-  //const startTime = getLiveStartTime(urlUtente, miaKey);
-  //console.log("Lo start time è:", startTime);
-  eseguiRicercaESalva(videoId, myAPIKey);
 }
 
 document.addEventListener("DOMContentLoaded", init);
