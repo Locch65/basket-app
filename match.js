@@ -61,6 +61,69 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
 
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
+function extractYouTubeId(input) {
+  try {
+    // Caso 0: input già un videoId (11 caratteri alfanumerici tipici di YouTube)
+    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+      return input;
+    }
+
+    const urlObj = new URL(input);
+
+    // Caso 1: URL classico con parametro ?v=...
+    if (urlObj.searchParams.has("v")) {
+      return urlObj.searchParams.get("v");
+    }
+
+    // Caso 2: URL corto youtu.be/ID
+    if (urlObj.hostname.includes("youtu.be")) {
+      return urlObj.pathname.slice(1);
+    }
+
+    // Caso 3: URL embed /embed/ID
+    if (urlObj.pathname.includes("/embed/")) {
+      return urlObj.pathname.split("/embed/")[1].split(/[?&]/)[0];
+    }
+
+    // Caso 4: URL live /live/ID
+    if (urlObj.pathname.includes("/live/")) {
+      return urlObj.pathname.split("/live/")[1].split(/[?&]/)[0];
+    }
+
+    // Caso 5: altri formati non previsti
+    return "";
+  } catch (e) {
+    //console.error("Input non valido:", e);
+    return "";
+  }
+}
+
+function extractYoutubeTime(input) {
+  try {
+    const urlObj = new URL(input);
+
+    if (urlObj.searchParams.has("t")) {
+      const t = urlObj.searchParams.get("t");
+
+      // Gestione formati: solo numeri (es. "60") o con suffissi (es. "1m30s")
+      const match = t.match(/(?:(\d+)m)?(?:(\d+)s)?$/);
+      if (match) {
+        const minutes = parseInt(match[1] || "0", 10);
+        const seconds = parseInt(match[2] || "0", 10);
+        return minutes * 60 + seconds;
+      }
+
+      // Se è solo un numero (es. "120")
+      return parseInt(t, 10);
+    }
+
+    return 0; // default: inizio da 0
+  } catch (e) {
+    console.error("Input non valido:", e);
+    return 0;
+  }
+}
+
 function gestisciDirettaYoutube() {
     const overlay = document.createElement('div');
     overlay.id = 'youtubePopup';
@@ -1520,6 +1583,9 @@ function caricaDatiPartita(matchId) {
         // nomeSquadraB = info.squadraB;
         // punteggioA = info.punteggioA;
         // punteggioB = info.punteggioB;
+		videoId = extractYouTubeId(info.videoURL),
+        videoStartTime = extractYoutubeTime(info.videoURL)
+		aggiornaStatoVideo();
         console.log("Info Partita recuperate:", info.squadraA + " vs " + info.squadraB);
       }
 
@@ -1615,6 +1681,11 @@ function aggiornaStatoVideo() {
   const videoBtn = document.getElementById("videoBtn");
   if (!videoBtn) return;
 
+  // Mostra il bottone solo se videoId è diverso da null
+  if (videoId === null || videoId === "") return;
+    
+  videoBtn.style.display = "inline-block";
+  
   // Controllo isLive (gestito come stringa per sicurezza da localStorage)
   if (isLive === "true" || isLive === true) {
     videoBtn.textContent = "Live";
@@ -1659,7 +1730,7 @@ function init() {
 
   // Mostra il bottone solo se videoId è diverso da null
   if (videoId !== null && videoId !== "") {
-    videoBtn.style.display = "inline-block";
+    //videoBtn.style.display = "inline-block";
     // Applica lo stato al bottone Video
     aggiornaStatoVideo();
   }
