@@ -1,27 +1,17 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.71";  // Aggiorna questo numero ad ogni modifica
-
-let url = 
-"https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec"
-
-//"https://script.google.com/macros/s/AKfycbyVX3yXW_PwRBeUgJKqFeS7MMWtHroHa0qRlgx6w7zX52tw0Arp1r-OIqpsN7obZF8SqA/exec"
-//"https://script.google.com/macros/s/AKfycbyg-5Tvq7hRZWAhjlHlz9Z3q-zJblWhRGRLg8jQomNBxxDjkvDkEBml-oOCUFPDvc40tA/exec"
-//"https://script.google.com/macros/s/AKfycbzmBxzYOwNhcw4yyn1W03tUDRd1hO5htCh0XEEpVWBORyFhu1uJOEMDyq1sSjLbLZjWHA/exec"
-//"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec"
-//"https://script.google.com/macros/s/AKfycbzXatgfzOvfViJByN7aZpNHQ-Xh-3CipzQZCiqON_Do-ZkfZQBgfGExxG38z0NXEEZ-YA/exec"
-
+const SCRIPT_VERSION = "1.0.72";  // Aggiorna questo numero ad ogni modifica
 
 // =====================
 // DATI INIZIALI
 // =====================
-const giocatoriA = [
-  "E. Carfora","K. Popa","G. Giacco","H. Taylor",
-  "C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
-  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
-];
-const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29", "99"];
+//const giocatoriA = [
+//  "E. Carfora","K. Popa","G. Giacco","H. Taylor",
+//  "C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
+//  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
+//];
+//const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29", "99"];
 let convocazioni = "";
 let puntiSquadraA = 0;
 let puntiSquadraB = 0;
@@ -60,69 +50,6 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
 });
 
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
-
-function extractYouTubeId(input) {
-  try {
-    // Caso 0: input già un videoId (11 caratteri alfanumerici tipici di YouTube)
-    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
-      return input;
-    }
-
-    const urlObj = new URL(input);
-
-    // Caso 1: URL classico con parametro ?v=...
-    if (urlObj.searchParams.has("v")) {
-      return urlObj.searchParams.get("v");
-    }
-
-    // Caso 2: URL corto youtu.be/ID
-    if (urlObj.hostname.includes("youtu.be")) {
-      return urlObj.pathname.slice(1);
-    }
-
-    // Caso 3: URL embed /embed/ID
-    if (urlObj.pathname.includes("/embed/")) {
-      return urlObj.pathname.split("/embed/")[1].split(/[?&]/)[0];
-    }
-
-    // Caso 4: URL live /live/ID
-    if (urlObj.pathname.includes("/live/")) {
-      return urlObj.pathname.split("/live/")[1].split(/[?&]/)[0];
-    }
-
-    // Caso 5: altri formati non previsti
-    return "";
-  } catch (e) {
-    //console.error("Input non valido:", e);
-    return "";
-  }
-}
-
-function extractYoutubeTime(input) {
-  try {
-    const urlObj = new URL(input);
-
-    if (urlObj.searchParams.has("t")) {
-      const t = urlObj.searchParams.get("t");
-
-      // Gestione formati: solo numeri (es. "60") o con suffissi (es. "1m30s")
-      const match = t.match(/(?:(\d+)m)?(?:(\d+)s)?$/);
-      if (match) {
-        const minutes = parseInt(match[1] || "0", 10);
-        const seconds = parseInt(match[2] || "0", 10);
-        return minutes * 60 + seconds;
-      }
-
-      // Se è solo un numero (es. "120")
-      return parseInt(t, 10);
-    }
-
-    return 0; // default: inizio da 0
-  } catch (e) {
-    console.error("Input non valido:", e);
-    return 0;
-  }
-}
 
 function gestisciDirettaYoutube() {
     const overlay = document.createElement('div');
