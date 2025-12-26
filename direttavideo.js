@@ -1,20 +1,13 @@
 let LIVE_OFFSET = 5;
 let REFRESH_TIME = 1000;
-let url = 
-"https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec"
-
-//"https://script.google.com/macros/s/AKfycbyVX3yXW_PwRBeUgJKqFeS7MMWtHroHa0qRlgx6w7zX52tw0Arp1r-OIqpsN7obZF8SqA/exec"
-//"https://script.google.com/macros/s/AKfycbyg-5Tvq7hRZWAhjlHlz9Z3q-zJblWhRGRLg8jQomNBxxDjkvDkEBml-oOCUFPDvc40tA/exec"
-//"https://script.google.com/macros/s/AKfycbzmBxzYOwNhcw4yyn1W03tUDRd1hO5htCh0XEEpVWBORyFhu1uJOEMDyq1sSjLbLZjWHA/exec"
-//"https://script.google.com/macros/s/AKfycbx8dqSRUD2GvEDj2H-s9Z845uEjbfEFVSVs2plzN_D1Cu_IXkCla6no1tuCEE-wsUFcUQ/exec";
 
 const myAPIKey = "";
 
-const giocatoriA = [
-  "E. Carfora","K. Popa","G. Giacco","H. Taylor","C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
-  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
-];
-const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29", "99"];
+//const giocatoriA = [
+//  "E. Carfora","K. Popa","G. Giacco","H. Taylor","C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
+//  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
+//];
+//const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29", "99"];
 
 // Inizializzazione con supporto al tracciamento dei cambiamenti
 let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
@@ -111,71 +104,6 @@ function onPlayerError(e) {
   if (timelineInterval) clearInterval(timelineInterval);
 }
 
-function extractYoutubeTime(input) {
-  try {
-    const urlObj = new URL(input);
-
-    if (urlObj.searchParams.has("t")) {
-      const t = urlObj.searchParams.get("t");
-
-      // Gestione formati: solo numeri (es. "60") o con suffissi (es. "1m30s")
-      const match = t.match(/(?:(\d+)m)?(?:(\d+)s)?$/);
-      if (match) {
-        const minutes = parseInt(match[1] || "0", 10);
-        const seconds = parseInt(match[2] || "0", 10);
-        return minutes * 60 + seconds;
-      }
-
-      // Se è solo un numero (es. "120")
-      return parseInt(t, 10);
-    }
-
-    return 0; // default: inizio da 0
-  } catch (e) {
-    console.error("Input non valido:", e);
-    return 0;
-  }
-}
-
-
-function extractYouTubeId(input) {
-  try {
-    // Caso 0: input già un videoId (11 caratteri alfanumerici tipici di YouTube)
-    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
-      return input;
-    }
-
-    const urlObj = new URL(input);
-
-    // Caso 1: URL classico con parametro ?v=...
-    if (urlObj.searchParams.has("v")) {
-      return urlObj.searchParams.get("v");
-    }
-
-    // Caso 2: URL corto youtu.be/ID
-    if (urlObj.hostname.includes("youtu.be")) {
-      return urlObj.pathname.slice(1);
-    }
-
-    // Caso 3: URL embed /embed/ID
-    if (urlObj.pathname.includes("/embed/")) {
-      return urlObj.pathname.split("/embed/")[1].split(/[?&]/)[0];
-    }
-
-    // Caso 4: URL live /live/ID
-    if (urlObj.pathname.includes("/live/")) {
-      return urlObj.pathname.split("/live/")[1].split(/[?&]/)[0];
-    }
-
-    // Caso 5: altri formati non previsti
-    return "";
-  } catch (e) {
-    //console.error("Input non valido:", e);
-    return "";
-  }
-}
-
-
 function caricaAnagraficaSingolaPartita(targetMatchId) {
   if (!targetMatchId) return;
 
@@ -204,9 +132,9 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
         puntiSquadraA: partita.punteggioA === "" ? 0 : partita.punteggioA,
         puntiSquadraB: partita.punteggioB === "" ? 0 : partita.punteggioB,
         convocazioni: partita.convocazioni,
-		videoURL: partita.videoId,
-		videoId: extractYouTubeId(partita.videoId),
-		startTime: extractYoutubeTime(partita.videoId),
+		videoURL: partita.videoURL,
+		videoId: extractYouTubeId(partita.videoURL),
+		startTime: extractYoutubeTime(partita.videoURL),
 		//YouTubeVideoStartTime : getLiveStartTime(partita.videoId, myAPIKey),
         isLive: partita.isLive
       };
