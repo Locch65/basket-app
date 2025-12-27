@@ -1,14 +1,6 @@
 let LIVE_OFFSET = 5;
 let REFRESH_TIME = 1000;
 
-const myAPIKey = "";
-
-//const giocatoriA = [
-//  "E. Carfora","K. Popa","G. Giacco","H. Taylor","C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
-//  "A. Salvatore","R. Bontempi","L. Ostuni","L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
-//];
-//const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29", "99"];
-
 // Inizializzazione con supporto al tracciamento dei cambiamenti
 let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
   const [nome, cognome] = nomeCompleto.split(" ");
@@ -28,7 +20,7 @@ let punteggioB = 0;
 let lastScoreStr = "";
 let isUserLive = true;
 
-let orarioInizioPartita = null; // Valore di default
+let oraInizioDirettaYoutube = null; // Valore di default
 let syncDelay = 0; // Valore predefinito in secondi
 let eventBuffer = [];
 
@@ -36,7 +28,7 @@ const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
 const matchId = urlParams.get("matchId");
 const videoId = localStorage.getItem("videoId");
-const startTime = parseInt(localStorage.getItem("videoStartTime") || "0", 10);
+const matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
 
 
 caricaAnagraficaSingolaPartita(matchId);
@@ -79,7 +71,7 @@ window.onYouTubeIframeAPIReady = function () {
 
 function onPlayerReady() {
   console.log("Player pronto");
-  player.seekTo(startTime, true);
+  player.seekTo(matchStartTime, true);
   player.playVideo();
   tickTimeline();
 }
@@ -134,8 +126,9 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
         convocazioni: partita.convocazioni,
 		videoURL: partita.videoURL,
 		videoId: extractYouTubeId(partita.videoURL),
-		startTime: extractYoutubeTime(partita.videoURL),
-		//YouTubeVideoStartTime : getLiveStartTime(partita.videoId, myAPIKey),
+		matchStartTime: extractYoutubeTime(partita.videoURL),
+		// ATTENZIONE: dobbiamo salvare l'ora di inizio della live, ancora da definire dentro il DB
+		//YouTubeVideoStartTime : partita.oraInizioVideoYoutube,
         isLive: partita.isLive
       };
 
@@ -227,7 +220,7 @@ function caricaDatiPartita(mId) {
 function recuperaOrarioInizio() {
     const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.has('start')) {
-    orarioInizioPartita = urlParams.get('start');
+    oraInizioDirettaYoutube = urlParams.get('start');
     // Se c'è un orario, facciamo un primo calcolo automatico all'avvio
     // (opzionale, puoi anche aspettare il click su AUTO)
 } else {
@@ -236,7 +229,7 @@ if (urlParams.has('start')) {
 }
 
 function calcolaLatenzaAutomatica() {
-    if (!orarioInizioPartita) {
+    if (!oraInizioDirettaYoutube) {
         alert("Attenzione: orario di inizio partita non specificato nel link. Impossibile calcolare il sync automatico.");
         syncDelay = 0;
         document.getElementById("sync-value").textContent = "0s";
@@ -249,7 +242,7 @@ function calcolaLatenzaAutomatica() {
     }
 
     const oraAttuale = new Date();
-    const parti = orarioInizioPartita.split(":");
+    const parti = oraInizioDirettaYoutube.split(":");
     
     const inizio = new Date();
     inizio.setHours(
@@ -514,75 +507,6 @@ window.addEventListener("resize", () => {
         requestFullscreen();
     }
 });
-
-/**
- * Accetta l'URL di un video YouTube e restituisce l'ora di inizio reale.
- * @param {string} youtubeUrl - L'indirizzo completo del video.
- * @param {string} apiKey - La tua YouTube Data API Key.
- * @returns {Promise<string>} - Una stringa con la data/ora o l'errore.
- */
-
-function getLiveStartTimeById(youtubeUrl, apiKey) {
-    //// 1. Estrazione ID Video
-    //var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    //var match = youtubeUrl.match(regExp);
-    //var videoId = (match && match[2].length === 11) ? match[2] : null;
-	//
-    //if (!videoId) {
-    //    return Promise.reject("URL YouTube non valido");
-    //}
-
-    var apiUrl = "https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=" + videoId + "&key=" + apiKey;
-
-    // Usiamo fetch con le Promises (.then) invece di await
-    return fetch(apiUrl)
-        .then(function(response) {
-            if (!response.ok) throw new Error("Errore API: " + response.status);
-            return response.json();
-        })
-        .then(function(data) {
-            if (!data.items || data.items.length === 0) {
-                throw new Error("Video non trovato");
-            }
-
-            var live = data.items[0].liveStreamingDetails;
-            if (!live) {
-                throw new Error("Questo non è un video live");
-            }
-
-            // Restituiamo l'ora reale di inizio (o quella programmata se non è ancora partito)
-            return live.actualStartTime || live.scheduledStartTime || "Data non disponibile";
-        });
-}
-
-function eseguiRicercaESalva(videoId, miaApiKey) {
-    if (!videoId) {
-        console.error("ID video mancante");
-        return;
-    }
-
-    // 1. Controlliamo se il dato è già in memoria
-    var datoSalvato = localStorage.getItem("yt_start_" + videoId);
-
-    if (datoSalvato) {
-        console.log("Dato recuperato dal localStorage (quota risparmiata!):", datoSalvato);
-        return; // Usciamo dalla funzione, non serve chiamare l'API
-    }
-
-    // 2. Se non c'è, procediamo con la chiamata API
-    console.log("Dato non trovato. Chiamata all'API di YouTube per l'ID: " + videoId);
-
-    getLiveStartTimeById(videoId, miaApiKey)
-        .then(function(startTime) {
-            // Salvataggio per usi futuri
-            localStorage.setItem("yt_start_" + videoId, startTime);
-            console.log("Successo! Data scaricata e salvata.");
-            
-        })
-        .catch(function(errore) {
-            console.error("Errore durante l'operazione:", errore);
-        });
-}
 
 function init() {
   // Seleziona l'elemento dello score
