@@ -1,5 +1,10 @@
 // common.js - Funzioni e variabili condivise
-const url = "https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec";
+const url = 
+"https://script.google.com/macros/s/AKfycbz0tn8zc9uDboqvDg8YtC1PT2-d4BAbPjfnuQboTEkfboIWu4t2eYU7sL4X_f6Fr6T7Tg/exec"
+
+//"https://script.google.com/macros/s/AKfycbzq4NE-vY7lI8eniR9lV-eayYhXtaI97-agenX1Mhu0lHHWkhk4YvARwmyHhP7dnPyn-Q/exec"
+//"https://script.google.com/macros/s/AKfycbyEE1MUZ3XCHFOFd5eVFDUhPUOohU0UQd8bc3h00hepesC9zZ17eEJmRFT2scDM9hcPrg/exec"
+//"https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec";
 
 const giocatoriA = [
   "E. Carfora","K. Popa","G. Giacco","H. Taylor","C. Licata","L. Migliari","F. Piazzano","V. Occhipinti",
@@ -50,7 +55,67 @@ function getLiveStartTimeById(youtubeUrl, apiKey) {
         });
 }
 
+function formattaOrarioRoma (isoString){
+    try {
+        const data = new Date(isoString);
+        if (isNaN(data.getTime())) return "00:00:00";
+        
+        // Converte e formatta per il fuso orario di Roma (gestisce ora legale/solare)
+        return data.toLocaleTimeString('it-IT', {
+            timeZone: 'Europe/Rome',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    } catch (e) {
+        return "00:00:00";
+    }
+}
+
 function CheckYoutubeAndASave(videoId, myApiKey) {
+    /**
+     * Controlla l'orario di inizio, lo salva localmente in formato HH:MM:SS (Roma)
+     * usando la chiave yt_start_. In caso di errore restituisce "00:00:00".
+     */
+    
+
+    if (!videoId) {
+        return Promise.resolve("00:00:00");
+    }
+
+    // 1. Controllo LocalStorage con la chiave richiesta
+    var datoSalvato = localStorage.getItem("yt_start_" + videoId);
+    
+    if (datoSalvato) {
+        // Se il dato è già un orario HH:MM:SS lo restituisce, 
+        // se fosse ancora in formato ISO lo formatta al volo
+        if (datoSalvato.includes("T") || datoSalvato.includes("Z")) {
+            return Promise.resolve(formattaOrarioRoma(datoSalvato));
+        }
+        console.log("Dato recuperato dalla memoria locale (yt_start_):", datoSalvato);
+        return Promise.resolve(datoSalvato);
+    }
+
+    // 2. Se non c'è, procediamo con la chiamata API YouTube
+    return getLiveStartTimeById(videoId, myApiKey)
+        .then(function(startTimeISO) {
+            // Trasformiamo l'ora ISO ricevuta da YouTube in ora di Roma
+            const oraRoma = formattaOrarioRoma(startTimeISO);
+            
+            // Salviamo l'ora di Roma nel localStorage con la chiave yt_start_
+            localStorage.setItem("yt_start_" + videoId, oraRoma);
+            
+            console.log("Successo! Ora salvata in yt_start_:", oraRoma);
+            return oraRoma;
+        })
+        .catch(function(errore) {
+            console.error("Errore durante il recupero da YouTube:", errore);
+            return "00:00:00";
+        });
+}
+
+function OLDCheckYoutubeAndASave(videoId, myApiKey) {
     // 
     // Controlla l'orario di inizio e restituisce una stringa "HH:MM:SS".
     // In caso di errore restituisce "00:00:00".
