@@ -17,6 +17,7 @@ let matchId = null;
 let teamA = "";
 let teamB = "";
 let isLive = false;
+let oraInizioDiretta = "";
 let statoPartita = "";
 let lastScoreState = ""; 
 let lastQuartoState = "";
@@ -87,6 +88,121 @@ function calcolaOraInizioDirettaYoutube() {
 }
 
 function gestisciDirettaYoutube() {
+    const overlay = document.createElement('div');
+    overlay.id = 'youtubePopup';
+    overlay.className = 'popup';
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.textAlign = 'left';
+
+    const urlIniziale = (typeof videoURL !== 'undefined') ? videoURL : "";
+    const apiKeyCorrente = googleApiKey || "";
+    
+    // Recuperiamo l'orario salvato per l'ID corrente (se esiste)
+    const videoIdIniziale = extractYouTubeId(urlIniziale);
+    //const oraSalvatatYt = videoIdIniziale ? formattaOrarioRoma(localStorage.getItem("yt_start_" + videoIdIniziale) || "") : "";
+    const oraSalvatatYt = videoIdIniziale ? (localStorage.getItem("yt_start_" + videoIdIniziale) || "") : "";
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 20px; text-align:center;">Diretta Youtube</h2>
+        
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">URL:</label>
+        <input type="text" id="ytUrl" style="width:100%; padding:10px; margin-bottom:15px; font-size:1rem;" 
+               placeholder="https://www.youtube.com/watch?v=..." value="${urlIniziale}">
+
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">Ora inizio Diretta (HH:mm:ss):</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="time" id="ytOraInizio" step="1" style="flex: 1; padding:10px; font-size:1rem;" value="${oraSalvatatYt}">
+            <button id="ytCalcolaBtn" disabled style="padding: 10px; font-size: 1rem; cursor: not-allowed; opacity: 0.5; background-color: #3498db; color: white; border: none; border-radius: 5px;">
+                Calcola
+            </button>
+        </div>
+
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">Offset Inizio Partita (secondi):</label>
+        <input type="number" id="ytOffset" style="width:100%; padding:10px; margin-bottom:15px; font-size:1rem;" 
+               placeholder="Esempio: 30" value="${matchStartTime || ""}">
+
+        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">API Key:</label>
+        <input type="text" id="ytApiKey" style="width:100%; padding:10px; margin-bottom:25px; font-size:1rem;" 
+               placeholder="Inserisci la tua Google API Key" value="${apiKeyCorrente}">
+
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <button id="ytSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="ytCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+    `;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const urlInput = document.getElementById('ytUrl');
+    const calcolaBtn = document.getElementById('ytCalcolaBtn');
+
+    const validaUrl = (valore) => {
+        const isValid = valore.startsWith('http://') || valore.startsWith('https://');
+        calcolaBtn.disabled = !isValid;
+        calcolaBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+        calcolaBtn.style.opacity = isValid ? '1' : '0.5';
+    };
+
+    validaUrl(urlInput.value.trim());
+    urlInput.addEventListener('input', () => validaUrl(urlInput.value.trim()));
+
+    calcolaBtn.onclick = () => calcolaOraInizioDirettaYoutube();
+
+    document.getElementById('ytCancelBtn').onclick = () => {
+        document.body.removeChild(overlay);
+    };
+
+    document.getElementById('ytSaveBtn').onclick = () => {
+      let finalUrl = urlInput.value.trim();
+      const offsetValue = document.getElementById('ytOffset').value;
+      const oraInizioValue = document.getElementById('ytOraInizio').value;
+      const apiKeyValue = document.getElementById('ytApiKey').value.trim();
+      const videoId = extractYouTubeId(finalUrl);
+  
+      if (offsetValue && parseInt(offsetValue) >= 0) {
+          try {
+              let urlObj = new URL(finalUrl);
+              urlObj.searchParams.set("t", offsetValue + "s");
+              urlObj.searchParams.delete("start");
+              finalUrl = urlObj.toString();
+          } catch (e) {
+              if (!finalUrl.includes('t=') && !finalUrl.includes('start=')) {
+                  const separator = finalUrl.includes('?') ? '&' : '?';
+                  finalUrl = `${finalUrl}${separator}t=${offsetValue}s`;
+              } else {
+                  finalUrl = finalUrl.replace(/([?&])(t|start)=[^&]*/, `$1t=${offsetValue}s`);
+              }
+          }
+      }
+  
+      // --- SALVATAGGIO DATI ---
+      videoURL = finalUrl;
+      matchStartTime = offsetValue;
+      googleApiKey = apiKeyValue;
+	  oraInizioDiretta = oraInizioValue;
+
+      // Salvataggio nel localStorage per persistenza
+      localStorage.setItem("googleApiKey", apiKeyValue); 
+      localStorage.setItem("matchStartTime", offsetValue);
+      localStorage.setItem("videoURL", finalUrl);
+      localStorage.setItem("oraInizioDiretta", oraInizioDiretta);
+      
+      // Se è stato inserito un orario manualmente o tramite calcolo, salviamolo per quell'ID
+      if (videoId && oraInizioValue) {
+          localStorage.setItem("yt_start_" + videoId, oraInizioValue);
+      }
+      
+      console.log("Dati salvati correttamente nel localStorage.");
+      
+      salvaDatiPartita(); // Invia i dati al foglio Google
+      document.body.removeChild(overlay);
+    };
+}
+
+function OLDgestisciDirettaYoutube() {
     const overlay = document.createElement('div');
     overlay.id = 'youtubePopup';
     overlay.className = 'popup';
@@ -177,7 +293,7 @@ function gestisciDirettaYoutube() {
       googleApiKey = apiKeyValue;
       localStorage.setItem("googleApiKey", apiKeyValue); // Persistenza tra le sessioni
 	  
-      salvaPunteggi();
+      salvaDatiPartita();
       document.body.removeChild(overlay);
     };
 }
@@ -335,7 +451,7 @@ function salvaStatoLive(dati) {
         quartoAttuale = statoPartita.replace("° Quarto", "").trim();
     }
     
-    salvaPunteggi();
+    salvaDatiPartita();
     aggiornaScoreboard(); // Chiamiamo l'aggiornamento per mostrare subito il cambio
 }
 
@@ -694,7 +810,7 @@ function showSquadraBPopup() {
         historyB.push(-p);
         aggiornaScoreboard();
         salvaSquadraB();
-  	    salvaPunteggi();
+  	    salvaDatiPartita();
         scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
       }
     });
@@ -822,7 +938,7 @@ function showPlayerPopup(g) {
       aggiornaUIGiocatore(g);
       aggiornaScoreboard();
       salvaSuGoogleSheets(g);
-	  salvaPunteggi();
+	  salvaDatiPartita();
     });
     incContainer.appendChild(btn);
   });
@@ -842,7 +958,7 @@ function showPlayerPopup(g) {
         aggiornaUIGiocatore(g);
         aggiornaScoreboard();
         salvaSuGoogleSheets(g);
-  	    salvaPunteggi();
+  	    salvaDatiPartita();
       }
     });
     decContainer.appendChild(btn);
@@ -1020,7 +1136,7 @@ function aggiungiPuntiGiocatore(id, punti) {
   }
 
   salvaSuGoogleSheets(g);
-  salvaPunteggi();
+  salvaDatiPartita();
   
   console.log("Salvato punti:", punti);
 }
@@ -1086,7 +1202,7 @@ function undoGiocatore(id) {
   aggiornaScoreboard();
   console.log("undoGiocatore: ",g.punteggio );	
   salvaSuGoogleSheets(g);
-  salvaPunteggi();
+  salvaDatiPartita();
 
 }
 
@@ -1096,7 +1212,7 @@ function aggiungiPuntiSquadraB(punti) {
   historyB.push(punti);
   aggiornaScoreboard();
   salvaSquadraB();
-  salvaPunteggi();
+  salvaDatiPartita();
 }
 
 function undoSquadraB() {
@@ -1106,7 +1222,7 @@ function undoSquadraB() {
   contatoriB[last]--;
   aggiornaScoreboard();
   salvaSquadraB();
-  salvaPunteggi();
+  salvaDatiPartita();
 }
 
 function aggiornaScoreboard() {
@@ -1332,7 +1448,7 @@ function avviaAggiornamentoAutomatico() {
   }
 }
 
-function salvaPunteggi() {
+function salvaDatiPartita() {
   
     if (!matchId) {
       console.warn("Nessun matchId trovato, non salvo");
@@ -1353,6 +1469,7 @@ function salvaPunteggi() {
     // Aggiungi altre variabili
     formData.append("convocazioni", convocazioni);
     formData.append("videoURL", videoURL);
+    formData.append("oraInizioDiretta", oraInizioDiretta);
     formData.append("isLive", isLive);
     formData.append("statoPartita", statoPartita);
 
@@ -1418,6 +1535,7 @@ function init() {
   videoURL = localStorage.getItem("videoURL");
   videoId = localStorage.getItem("videoId");
   matchStartTime = localStorage.getItem("matchStartTime");
+  oraInizioDiretta = videoId ? formattaOrarioRoma(localStorage.getItem("yt_start_" + videoId) || "") : "";
   isLive = localStorage.getItem("isLive");
   statoPartita = localStorage.getItem("statoPartita");
   googleApiKey = localStorage.getItem("googleApiKey") || ""; // Recupera il valore salvato  
