@@ -132,7 +132,7 @@ function caricaListaPartite(filtroCampionato = null) {
               localStorage.setItem("convocazioni", p.convocazioni);
               localStorage.setItem("videoURL", p.videoURL);
               localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
-              localStorage.setItem("videoStartTime", extractYoutubeTime(p.videoURL));
+              localStorage.setItem("matchStartTime", extractYoutubeTime(p.videoURL));
               localStorage.setItem("isLive", p.isLive);
               localStorage.setItem("statoPartita", p.statoPartita);
               window.location.href = "match.html";
@@ -172,37 +172,6 @@ function filtraPartite(campionato, titolo) {
         localStorage.setItem("campionatoSelezionato", campionato ?? "Tutti");
     
         caricaListaPartite(campionato);
-}
-
-function OLDaggiornaPunteggiLive() {
-  fetch(url + "?sheet=Partite")
-    .then(res => res.json())
-    .then(data => {
-      const partite = Array.isArray(data) ? data : data.data;
-      if (!Array.isArray(partite)) return;
-
-      partite.forEach(p => {
-        // Cerchiamo nel documento la card che ha quel matchId
-        const card = document.querySelector(`.match-card[data-matchid="${p.matchId}"]`);
-        
-        if (card) {
-          // 1. Aggiorna i punteggi nel DOM
-          const teamAscore = card.querySelector(".teamA strong");
-          const teamBscore = card.querySelector(".teamB strong");
-          
-          if (teamAscore) teamAscore.textContent = p.punteggioA ?? "-";
-          if (teamBscore) teamBscore.textContent = p.punteggioB ?? "-";
-
-          // 2. Gestisci dinamicamente il bordo live se lo stato cambia
-          if (p.isLive === true || p.isLive === "true" || p.isLive === "TRUE") {
-            card.classList.add("live-border");
-          } else {
-            card.classList.remove("live-border");
-          }
-        }
-      });
-    })
-    .catch(err => console.error("Errore aggiornamento live:", err));
 }
 
 function aggiornaPunteggiLive() {
