@@ -1,3 +1,5 @@
+
+
 let refreshInterval = null; // Gestisce il loop di aggiornamento
 
 function parseItalianDate(dateStr, timeStr) {
