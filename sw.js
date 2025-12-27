@@ -12,22 +12,22 @@
 //    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
 //
 //    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
-//    - i dati del match (tipo Islive) vengono caricati quando fa il refresh, non quando si clicca sulla partita. (risultato: il bottone VIdeo rimane blu)
 //    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //
 //  Match.html
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 
-//    - FATTO: n utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
+//    - FATTO: un utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
 //    - FATTO: quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
 //    - FATTO: sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
 //    - FATTO: inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Calendario", "Impostazioni", 
 //    - FATTO: Salvare APIKey in locale non su GitHub
 //    - FATTO: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
+//    - FATTO: inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
 //
+//    - leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
 //    - sincronizzare messaggi punteggi con video
 //    - passare matchid come parametro. cambiare i matchid delle partite nel DB. renderli numeri casuali
-//    - inserire hamburger menu con le voci: "IMpostazioni", "Anagrafica", "Classifiche", 
-//    - inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
+//    - inserire hamburger menu con le voci: "Impostazioni", "Anagrafica", "Classifiche", 
 //    - leggere lista giocatori da Google Sheet
 //    - password Admin da crittografare
 //    - implementare dark mode
@@ -36,8 +36,10 @@
 //    - FATTO: inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
 //    - FATTO: simulazione OPPO: eliminare la scrollbar orizzontale
 //    - FATTO: inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
-//    - inserire indicazioni del quarto attuale
-//    - i bottono +/- per ritardare i messaggi vanno messi solo se Admin e devono memorizzare il dato in Google sheet e trasmesso ai client
+//    - FATTO: inserire indicazioni del quarto attuale
+
+//    - eliminare caricaAnagraficaSingolaPartita() ???
+//    - i bottoni +/- per ritardare i messaggi vanno messi solo se Admin e devono memorizzare il dato in Google sheet e trasmesso ai client
 //    - i client non devono fare polling ma usare notifiche realtime da Firebase
 //
 //  Anagrafica.html
@@ -67,17 +69,27 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.72"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.73"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
 const FILES_TO_CACHE = [
-  "./index.html",
-  "./calendario.css",
-  "./match.css",
+  "./index.html?v=" + SW_VERSION",
+  "./calendaio.html?v=" + SW_VERSION",
+  "./match.html?v=" + SW_VERSION",
+  "./direttavideo.html?v=" + SW_VERSION",
+  
+  "./calendario.css?v=" + SW_VERSION",
+  "./match.css?v=" + SW_VERSION",
+  "./direttavideo.css?v=" + SW_VERSION",
+  
   "./calendaio.js?v=" + SW_VERSION,
   "./match.js?v=" + SW_VERSION,
-  "./manifest.json"
+  "./direttavideo.js?v=" + SW_VERSION,
+  "./common.js?v=" + SW_VERSION",
+  
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 // Install: cache i file della nuova versione
