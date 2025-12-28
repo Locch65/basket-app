@@ -135,6 +135,7 @@ function caricaListaPartite(filtroCampionato = null) {
               localStorage.setItem("videoURL", p.videoURL);
               localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
               localStorage.setItem("matchStartTime", extractYoutubeTime(p.videoURL));
+              localStorage.setItem("oraInizioDiretta", p.oraInizioDiretta);
               localStorage.setItem("isLive", p.isLive);
               localStorage.setItem("statoPartita", p.statoPartita);
               window.location.href = "match.html";
