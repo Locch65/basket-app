@@ -110,55 +110,9 @@ function CheckYoutubeAndASave(videoId, myApiKey) {
             return oraRoma;
         })
         .catch(function(errore) {
-            console.error("Errore durante il recupero da YouTube:", errore);
-            return "00:00:00";
-        });
-}
-
-function OLDCheckYoutubeAndASave(videoId, myApiKey) {
-    // 
-    // Controlla l'orario di inizio e restituisce una stringa "HH:MM:SS".
-    // In caso di errore restituisce "00:00:00".
-    // 
-    // Funzione interna per formattare la data ISO in HH:MM:SS
-    const formattaOrario = (isoString) => {
-        try {
-            const data = new Date(isoString);
-            if (isNaN(data.getTime())) return "00:00:00";
-            
-            const ore = String(data.getHours()).padStart(2, '0');
-            const minuti = String(data.getMinutes()).padStart(2, '0');
-            const secondi = String(data.getSeconds()).padStart(2, '0');
-            
-            return `${ore}:${minuti}:${secondi}`;
-        } catch (e) {
-            return "00:00:00";
-        }
-    };
-
-    if (!videoId) {
-        return Promise.resolve("00:00:00");
-    }
-
-    // 1. Controllo LocalStorage
-    var datoSalvato = localStorage.getItem("yt_start_" + videoId);
-    if (datoSalvato) {
-        console.log("Dato recuperato (cache):", datoSalvato);
-        return Promise.resolve(formattaOrario(datoSalvato));
-    }
-
-    // 2. Chiamata API YouTube
-    return getLiveStartTimeById(videoId, myApiKey)
-        .then(function(startTime) {
-            // Salviamo il valore originale (ISO) nel localStorage
-            localStorage.setItem("yt_start_" + videoId, startTime);
-            // Restituiamo il valore formattato
-            return formattaOrario(startTime);
-        })
-        .catch(function(errore) {
-            console.error("Errore YouTube:", errore);
-            // In caso di errore restituiamo il valore di default
-            return "00:00:00";
+			throw new Error("Errore durante il recupero da YouTube: " + errore);
+            //alert("Errore durante il recupero da YouTube:", errore);
+            //return "00:00:00";
         });
 }
 
