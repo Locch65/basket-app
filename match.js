@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.73";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.74";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -80,8 +80,9 @@ function calcolaOraInizioDirettaYoutube() {
         btn.textContent = testoOriginale;
         btn.disabled = false;
     }).catch(err => {
-        console.error("Errore nel calcolo:", err);
-        inputOraInizio.value = "00:00:00";
+        //console.error("Errore nel calcolo:", err);
+		alert(err);
+        //inputOraInizio.value = "00:00:00";
         btn.textContent = testoOriginale;
         btn.disabled = false;
     });
@@ -102,7 +103,8 @@ function gestisciDirettaYoutube() {
     // Recuperiamo l'orario salvato per l'ID corrente (se esiste)
     const videoIdIniziale = extractYouTubeId(urlIniziale);
     //const oraSalvatatYt = videoIdIniziale ? formattaOrarioRoma(localStorage.getItem("yt_start_" + videoIdIniziale) || "") : "";
-    const oraSalvatatYt = videoIdIniziale ? (localStorage.getItem("yt_start_" + videoIdIniziale) || "") : "";
+    //const oraSalvatatYt = videoIdIniziale ? (localStorage.getItem("yt_start_" + videoIdIniziale) || "") : "";
+    const oraSalvatatYt = oraInizioDiretta;
 
     content.innerHTML = `
         <h2 style="margin-bottom: 20px; text-align:center;">Diretta Youtube</h2>
@@ -191,9 +193,9 @@ function gestisciDirettaYoutube() {
       localStorage.setItem("oraInizioDiretta", oraInizioDiretta);
       
       // Se è stato inserito un orario manualmente o tramite calcolo, salviamolo per quell'ID
-      if (videoId && oraInizioValue) {
-          localStorage.setItem("yt_start_" + videoId, oraInizioValue);
-      }
+      //if (videoId && oraInizioValue) {
+      //    localStorage.setItem("yt_start_" + videoId, oraInizioValue);
+      //}
       
       console.log("Dati salvati correttamente nel localStorage.");
       
@@ -1395,6 +1397,7 @@ function caricaDatiPartita(matchId) {
         // punteggioB = info.punteggioB;
 		videoId = extractYouTubeId(info.videoURL),
         matchStartTime = extractYoutubeTime(info.videoURL)
+		oraInizioDiretta = info.oraInizioDiretta;
 		aggiornaStatoVideo(videoId);
         console.log("Info Partita recuperate:", info.squadraA + " vs " + info.squadraB);
       }
@@ -1535,7 +1538,8 @@ function init() {
   videoURL = localStorage.getItem("videoURL");
   videoId = localStorage.getItem("videoId");
   matchStartTime = localStorage.getItem("matchStartTime");
-  oraInizioDiretta = videoId ? formattaOrarioRoma(localStorage.getItem("yt_start_" + videoId) || "") : "";
+  //oraInizioDiretta = videoId ? formattaOrarioRoma(localStorage.getItem("yt_start_" + videoId) || "") : "";
+  oraInizioDiretta = localStorage.getItem("oraInizioDiretta");
   isLive = localStorage.getItem("isLive");
   statoPartita = localStorage.getItem("statoPartita");
   googleApiKey = localStorage.getItem("googleApiKey") || ""; // Recupera il valore salvato  
