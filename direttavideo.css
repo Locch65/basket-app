@@ -89,12 +89,26 @@ html, body {
 #ytplayer { width: 100%; height: 100%; border: 0; display: block; }
 
 /* 2. HUD OVERLAY (SOPRA IL VIDEO) */
-#hud-overlay {
+#hud-overlay_OLD {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 15px;
   pointer-events: none; /* Permette di cliccare il video "attraverso" l'HUD */
+}
+#hud-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Permette di cliccare sul video sottostante */
+  z-index: 9999;       /* Forza l'HUD sopra il player */
+  display: block !important; /* Impedisce che le media queries lo nascondano */
+}
+#basket-toast {
+  z-index: 10000;
+  pointer-events: auto; /* Permette interazioni se servono */
 }
 
 .badge {
@@ -107,7 +121,7 @@ html, body {
 }
 
 /* 1. Score HUD - Più piccolo, più in alto e più trasparente */
-#hud-score {
+#hud-scoreOLD {
   font-size: 2.5rem !important; /* Molto più grande */
   font-weight: 900 !important;
   padding: 10px 20px !important;
@@ -124,6 +138,30 @@ html, body {
   white-space: nowrap; 
 }
 
+/* 1. Score HUD - Centrato e con font ridotto */
+#hud-score {
+  position: absolute;      /* Per poterlo posizionare con precisione nel video */
+  top: 10px;               /* Distanza dal bordo superiore */
+  left: 50%;               /* Sposta il bordo sinistro al centro */
+  transform: translateX(-75%); /* Lo trasla indietro del 50% della sua larghezza per centrarlo perfettamente */
+  
+  font-size: 1.2rem !important; /* Font ridotto (era 2.5rem) */
+  font-weight: 900 !important;
+  padding: 6px 15px !important; /* Padding leggermente ridotto */
+  
+  background-color: rgba(0, 0, 0, 0.7) !important; /* Un po' più trasparente */
+  color: #6CFF6C !important;
+  border: 2px solid #6CFF6C !important;
+  border-radius: 8px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  
+  display: inline-block;
+  min-width: 100px;         /* Min-width ridotta per adattarsi al font più piccolo */
+  text-align: center;
+  white-space: nowrap;
+  z-index: 10;             /* Assicura che stia sopra altri elementi */
+}
+
 .live-badge {
   position: absolute;
   bottom: 0;
@@ -138,7 +176,7 @@ html, body {
 
 /* 3. Basket Flash - Versione 2 secondi al bordo inferiore */
 /* 3. Basket Flash - Versione equilibrata (2 secondi) */
-.toast {
+.toast_OLD {
   position: absolute;
   bottom: 5px;             /* Leggermente staccato dal bordo inferiore */
   left: 50%;
@@ -150,10 +188,43 @@ html, body {
   /* Ombra mantenuta per la leggibilità su ogni sfondo */
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 1), 0 0 15px rgba(108, 255, 108, 0.4); 
   white-space: nowrap;
-  z-index: 100;
+  z-index: 10000;
   pointer-events: none;
   opacity: 0;
   line-height: 1;
+}
+.toast {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.85); /* Sfondo scuro semitrasparente */
+  color: #6CFF6C; /* Verde acceso come i tuoi numeri */
+  padding: 12px 25px;
+  border-radius: 25px;
+  border: 2px solid #6CFF6C;
+  font-weight: bold;
+  font-size: 1.2rem;
+  z-index: 10001; /* Sopra l'hud-overlay */
+  transition: opacity 0.3s ease-in-out;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toast.hidden {
+  display: none !important;
+}
+
+.clock-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #eee;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  z-index: 10;
 }
 
 @keyframes basket-zoom {
@@ -296,5 +367,9 @@ html, body {
     left: 145px;
     font-size: 0.7rem;
     padding: 2px 6px;
+  }
+  .clock-badge {
+    font-size: 0.75rem;
+    padding: 3px 8px;
   }
 }
