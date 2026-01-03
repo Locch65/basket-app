@@ -1,7 +1,14 @@
 // common.js - Funzioni e variabili condivise
 const url = 
-"https://script.google.com/macros/s/AKfycbz0tn8zc9uDboqvDg8YtC1PT2-d4BAbPjfnuQboTEkfboIWu4t2eYU7sL4X_f6Fr6T7Tg/exec"
+"https://script.google.com/macros/s/AKfycbx6PhFjEvG85LtS_VJHN0QUWbpx_0PynviQmK273IDRLKsp0vBxN-1TjzlviKvBiPmwQA/exec"
 
+//"https://script.google.com/macros/s/AKfycbzwDJ4W1r9Wh10gDRaOc4IF0vF-GIjFiZKFxBvHrVxWHu6J4coHVpagaQx4PPK-y6gjbQ/exec"
+//"https://script.google.com/macros/s/AKfycbwQ7Bt5ZuivxMTcmYKpIGWA-_ChjCB9FuMWgd8DYegDIf9x_PNX2Lt9w625HuDSBHzDpg/exec"
+//"https://script.google.com/macros/s/AKfycbxH2mdeKSWbYOnFBxBvT5KAmx83RiYC2tq5t0a7WaXOnnUA_RgPAh2smBQ0Xvsw-UQbSQ/exec"
+//"https://script.google.com/macros/s/AKfycbwDGniIbwT2i1ApT4jdKppzjosqUg4RKeaoPKGmaNAkrQ5_yFigpCdrLwo7DzHUnXFTLA/exec"
+//"https://script.google.com/macros/s/AKfycbxrxF4QrfXwrKqYlIy-sdSKooaBRcjBwHAmFPW53H8qxUaabR5q2J96rMVjtbSPkBqEWQ/exec"
+//"https://script.google.com/macros/s/AKfycbzIMK6y50A0Jpwyy1um-pcyYxys4W9cMXd-sutQGpD7greXovCPDXC0U6lbXrmWvhEgZA/exec"
+//"https://script.google.com/macros/s/AKfycbz0tn8zc9uDboqvDg8YtC1PT2-d4BAbPjfnuQboTEkfboIWu4t2eYU7sL4X_f6Fr6T7Tg/exec"
 //"https://script.google.com/macros/s/AKfycbzq4NE-vY7lI8eniR9lV-eayYhXtaI97-agenX1Mhu0lHHWkhk4YvARwmyHhP7dnPyn-Q/exec"
 //"https://script.google.com/macros/s/AKfycbyEE1MUZ3XCHFOFd5eVFDUhPUOohU0UQd8bc3h00hepesC9zZ17eEJmRFT2scDM9hcPrg/exec"
 //"https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec";
@@ -13,6 +20,9 @@ const giocatoriA = [
 
 const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17", "9", "26", "41", "29", "99"];
 
+function getTeamName() {
+	return (teamA === "Polismile A") ? teamA : teamB;
+}
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
 function getLiveStartTimeById(youtubeUrl, apiKey) {
