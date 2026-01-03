@@ -24,7 +24,7 @@
 //    - FATTO: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - FATTO: inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
 //
-//    - leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
+//    - FATTO: leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
 //    - sincronizzare messaggi punteggi con video
 //    - passare matchid come parametro. cambiare i matchid delle partite nel DB. renderli numeri casuali
 //    - inserire hamburger menu con le voci: "Impostazioni", "Anagrafica", "Classifiche", 
@@ -69,24 +69,24 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.74"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.75"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
 const FILES_TO_CACHE = [
-  "./index.html?v=" + SW_VERSION",
-  "./calendaio.html?v=" + SW_VERSION",
-  "./match.html?v=" + SW_VERSION",
-  "./direttavideo.html?v=" + SW_VERSION",
+  "./index.html?v=" + SW_VERSION,
+  "./calendaio.html?v=" + SW_VERSION,
+  "./match.html?v=" + SW_VERSION,
+  "./direttavideo.html?v=" + SW_VERSION,
   
-  "./calendario.css?v=" + SW_VERSION",
-  "./match.css?v=" + SW_VERSION",
-  "./direttavideo.css?v=" + SW_VERSION",
+  "./calendario.css?v=" + SW_VERSION,
+  "./match.css?v=" + SW_VERSION,
+  "./direttavideo.css?v=" + SW_VERSION,
   
   "./calendaio.js?v=" + SW_VERSION,
   "./match.js?v=" + SW_VERSION,
   "./direttavideo.js?v=" + SW_VERSION,
-  "./common.js?v=" + SW_VERSION",
+  "./common.js?v=" + SW_VERSION,
   
   "./icon-192.png",
   "./icon-512.png"
