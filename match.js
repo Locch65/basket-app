@@ -36,7 +36,7 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
     displayName: `${cognome} ${nome}`,
     punteggio: 0,
     contatori: {1:0,2:0,3:0},
-    history: [],
+    history: [], // Qui verranno inseriti oggetti {punti: X, ora: "HH:mm:ss"}
     stato: "Out"
   };
 });
@@ -314,10 +314,10 @@ function gestisciGoLive() {
         
         <label style="display:block; font-size: 1.2rem; margin-bottom: 10px;">Quarto attuale:</label>
         <div id="quartiContainer" style="display: flex; gap: 8px; margin-bottom: 30px; flex-wrap: wrap;">
-            <button class="btn-quarto" data-q="1° Quarto">1</button>
-            <button class="btn-quarto" data-q="2° Quarto">2</button>
-            <button class="btn-quarto" data-q="3° Quarto">3</button>
-            <button class="btn-quarto" data-q="4° Quarto">4</button>
+            <button class="btn-quarto" data-q="Q1">Q1</button>
+            <button class="btn-quarto" data-q="Q2">Q2</button>
+            <button class="btn-quarto" data-q="Q3">Q3</button>
+            <button class="btn-quarto" data-q="Q4">Q4</button>
             <button class="btn-quarto" data-q="Extra Time" style="flex-basis: 100%; margin-top: 5px;">Extra Time</button>
         </div>
 
@@ -377,7 +377,7 @@ function gestisciGoLive() {
         bottoniQuarto.forEach(btn => {
             const val = btn.dataset.q; // es: "1° Quarto"
             // Se statoPartita è "1" o "1° Quarto", attiva il bottone
-            if (quartoAttuale && (val === quartoAttuale || quartoAttuale.toString().startsWith(val.charAt(0)))) {
+            if (quartoAttuale && (val === quartoAttuale || quartoAttuale.toString().startsWith("Q"+val.charAt(0)))) {
                 btn.classList.add('active');
             }
         });
@@ -471,10 +471,28 @@ function addPoints(points) {
 function aggiornaPunteggio(target, punti) {
   target.punteggio += punti;
   target.contatori[punti]++;
+  
+  // Memorizziamo un oggetto con punti e orario
+  const oraCorrente = new Date().toLocaleTimeString('it-IT'); 
+  target.history.push({ punti: punti, ora: oraCorrente });
+}
+
+function OLDaggiornaPunteggio(target, punti) {
+  target.punteggio += punti;
+  target.contatori[punti]++;
   target.history.push(punti);
 }
 
 function undoPunteggio(target) {
+  if (target.history.length === 0) return;
+  const lastEntry = target.history.pop(); // Estrae l'oggetto {punti, ora}
+  const puntiDaTogliere = lastEntry.punti;
+  
+  target.punteggio -= puntiDaTogliere;
+  target.contatori[puntiDaTogliere]--;
+}
+
+function OLDundoPunteggio(target) {
   if (target.history.length === 0) return;
   const last = target.history.pop();
   target.punteggio -= last;
@@ -791,7 +809,7 @@ function showSquadraBPopup() {
     btn.textContent = `+${p}`;
     btn.className = "btn-inc";
     btn.addEventListener("click", () => {
-      aggiungiPuntiSquadraB(p); // usa la tua funzione
+      aggiungiPuntiSquadraB(p, false); // usa la tua funzione
       scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
     });
     incContainer.appendChild(btn);
@@ -809,9 +827,14 @@ function showSquadraBPopup() {
         // decremento manuale
         puntiSquadraB -= p;
         contatoriB[p]--;
-        historyB.push(-p);
+		
+		const oraCorrente = new Date().toLocaleTimeString('it-IT');
+        historyB.push({ punti: -p, ora: oraCorrente }); // Salvataggio oggetto
+        //historyB.push(-p);
         aggiornaScoreboard();
         salvaSquadraB();
+		salvaEventoLive("", -p, "??", "SquadraB");
+
   	    salvaDatiPartita();
         scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
       }
@@ -855,7 +878,7 @@ function initSquadraBControls() {
     const btn = document.createElement("button");
     btn.className = "tiro";
     btn.textContent = `➕${p}`;
-    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p));
+    btn.addEventListener("click", () => aggiungiPuntiSquadraB(p, true));
     controlsContainer.appendChild(btn);
   });
 
@@ -940,6 +963,9 @@ function showPlayerPopup(g) {
       aggiornaUIGiocatore(g);
       aggiornaScoreboard();
       salvaSuGoogleSheets(g);
+	  
+	  salvaEventoLive(g.numero, p, "??", getTeamName()); // l'orario è indefinito
+	  
 	  salvaDatiPartita();
     });
     incContainer.appendChild(btn);
@@ -960,6 +986,9 @@ function showPlayerPopup(g) {
         aggiornaUIGiocatore(g);
         aggiornaScoreboard();
         salvaSuGoogleSheets(g);
+		
+	    salvaEventoLive(g.numero, -p, "??", getTeamName()); // vengono solo eliminati i punti (in negativo), l'orario è indefinito
+
   	    salvaDatiPartita();
       }
     });
@@ -1138,6 +1167,11 @@ function aggiungiPuntiGiocatore(id, punti) {
   }
 
   salvaSuGoogleSheets(g);
+  
+  const ultimaAzione = g.history[g.history.length - 1];
+  const timestampReale = ultimaAzione.ora;
+  salvaEventoLive(g.numero, punti, timestampReale, getTeamName());
+
   salvaDatiPartita();
   
   console.log("Salvato punti:", punti);
@@ -1199,16 +1233,40 @@ function animatePunteggio(span) {
 
 function undoGiocatore(id) {
   const g = giocatoriObj.find(x => x.id === id);
+  
+  if (g.history.length <= 0) return;
+    
+  const ultimaAzione = g.history[g.history.length - 1];
+  const timestampReale = ultimaAzione.ora;
+  const ultimoPunto = ultimaAzione.punti;
+
   undoPunteggio(g);
   aggiornaUIGiocatore(g);
   aggiornaScoreboard();
   console.log("undoGiocatore: ",g.punteggio );	
   salvaSuGoogleSheets(g);
+
+  salvaEventoLive(g.numero, -ultimoPunto, timestampReale, getTeamName());
+
   salvaDatiPartita();
 
 }
+function aggiungiPuntiSquadraB(punti, memorizzaOrario) {
+  puntiSquadraB += punti;
+  contatoriB[punti]++;
+  
+  const oraCorrente = memorizzaOrario ? new Date().toLocaleTimeString('it-IT') : "??";
+  historyB.push({ punti: punti, ora: oraCorrente }); // Salvataggio oggetto
+  
+  aggiornaScoreboard();
+  salvaSquadraB();
+  
+  salvaEventoLive("", punti, oraCorrente, "SquadraB");
 
-function aggiungiPuntiSquadraB(punti) {
+  salvaDatiPartita();
+}
+
+function OLDaggiungiPuntiSquadraB(punti) {
   puntiSquadraB += punti;
   contatoriB[punti]++;
   historyB.push(punti);
@@ -1218,6 +1276,22 @@ function aggiungiPuntiSquadraB(punti) {
 }
 
 function undoSquadraB() {
+  if (historyB.length === 0) return;
+  const lastEntry = historyB.pop();
+  const puntiDaTogliere = lastEntry.punti;
+
+  puntiSquadraB -= puntiDaTogliere;
+  contatoriB[puntiDaTogliere]--;
+  
+  aggiornaScoreboard();
+  salvaSquadraB();
+  
+  salvaEventoLive("", -puntiDaTogliere, lastEntry.ora, "SquadraB");
+
+  salvaDatiPartita();
+}
+
+function OLDundoSquadraB() {
   if (historyB.length === 0) return;
   const last = historyB.pop();
   puntiSquadraB -= last;
@@ -1337,6 +1411,54 @@ function aggiornaTitoli() {
   document.getElementById("titoloB").textContent = (teamA === "Polismile A") ? teamB : teamA
 }
 
+
+function salvaEventoLive(idGiocatore, puntiRealizzati, timestampReale, team) {
+    // 
+    // Invia un evento di punteggio live al backend utilizzando FormData.
+    // @param {string} idGiocatore - L'ID del giocatore (es. "Cognome_Nome").
+    // @param {number} puntiRealizzati - I punti segnati (1, 2 o 3).
+    // 
+
+	//const ultimaAzione = g.history[g.history.length - 1];
+    //const timestampReale = ultimaAzione.ora;
+
+    if (!matchId) {
+        console.error("Errore: matchId non trovato.");
+        return;
+    }
+
+    // 1. Creazione dell'oggetto FormData
+    const formData = new FormData();
+    
+    // 2. Aggiunta dei parametri (il backend leggerà questi tramite e.parameter)
+    formData.append("live", "1"); // Attiva il blocco live nel doPost
+    formData.append("matchId", matchId);
+    formData.append("idGiocatore", idGiocatore);
+    formData.append("puntiRealizzati", puntiRealizzati);
+    formData.append("squadra", team);
+    
+    // Timestamp reale
+    //const timestampReale = new Date().toLocaleTimeString('it-IT');
+    formData.append("timestampReale", timestampReale);
+
+    // Ora video (calcolata se hai una funzione o un timer attivo)
+    const oraVideo = typeof getCurrentGameTime === 'function' ? getCurrentGameTime() : "00:00:00";
+    formData.append("oraVideo", oraVideo);
+
+    // 3. Invio della richiesta fetch
+    fetch(url, {
+        method: "POST",
+        mode: "no-cors", // Cruciale per Google Apps Script
+        body: formData   // Passiamo direttamente l'oggetto FormData
+    })
+    .then(() => {
+        console.log(`[LIVE] Inviato con successo: ${idGiocatore} +${puntiRealizzati}`);
+    })
+    .catch(error => {
+        console.error("Errore nell'invio FormData live:", error);
+    });
+}
+
 function salvaSuGoogleSheets(g) {
   const formData = new FormData();
   formData.append("matchId", matchId);
@@ -1390,6 +1512,10 @@ function caricaDatiPartita(matchId) {
       if (data.dettagliGara) {
         const info = data.dettagliGara;
 		quartoAttuale = info.statoPartita.replace("° Quarto", "").trim();
+		// Se il periodo è un numero singolo da 1 a 4, aggiungiamo "Q"
+        if (/^[1-4]$/.test(quartoAttuale)) {
+         quartoAttuale = "Q" + quartoAttuale;
+        }
         // Esempio: aggiorna variabili globali o elementi UI con i dati della partita
         // nomeSquadraA = info.squadraA;
         // nomeSquadraB = info.squadraB;
