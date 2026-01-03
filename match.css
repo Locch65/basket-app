@@ -216,7 +216,7 @@ h1 {
   margin-left: 25px;      /* Aumentato lo spazio dal punteggio */
   font-size: 24px;        /* Font molto più grande */
   color: #ffffff;         /* Testo bianco */
-  background: #e74c3c;    /* Sfondo rosso */
+  background: red;    /* Sfondo rosso */
   padding: 8px 15px;      /* Più spazio interno */
   border: 3px solid #c0392b; /* Bordino rosso scuro più evidente */
   border-radius: 10px;    /* Angoli più arrotondati */
