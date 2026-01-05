@@ -97,9 +97,9 @@ function caricaListaPartite(filtroCampionato = null) {
             // Calcola giorno della settimana
             const giornoSettimana = giorniSettimana[dataPartita.getDay()];
 
-            const casaIcon = "🏠";
-            const trasfertaIcon = "🚌";
-            const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
+            //const casaIcon = "🏠";
+            //const trasfertaIcon = "🚌";
+            //const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
 
             card.innerHTML = `
               <div class="match-top">
@@ -109,7 +109,7 @@ function caricaListaPartite(filtroCampionato = null) {
                 <span class="orario">${p.orario}</span>
               </div>
               <div class="match-middle">
-                <span class="casa">${icona}</span>
+                 <!--<span class="casa">${"icona"}</span> -->
                 <span class="luogo">${p.luogo}</span>
               </div>
               <div class="match-bottom">
