@@ -114,8 +114,8 @@ html, body {
 .badge {
   background: rgba(0,0,0,.35);
   border: 1px solid rgba(108,255,108,.4);
-  border-radius: 12px;
-  padding: .4rem .8rem;
+  border-radius: 6px;
+  padding: .2rem .6rem;
   backdrop-filter: blur(4px);
   font-family: monospace;
 }
@@ -141,13 +141,13 @@ html, body {
 /* 1. Score HUD - Centrato e con font ridotto */
 #hud-score {
   position: absolute;      /* Per poterlo posizionare con precisione nel video */
-  top: 10px;               /* Distanza dal bordo superiore */
+  top: 2px;               /* Distanza dal bordo superiore */
   left: 50%;               /* Sposta il bordo sinistro al centro */
   transform: translateX(-75%); /* Lo trasla indietro del 50% della sua larghezza per centrarlo perfettamente */
   
   font-size: 1.2rem !important; /* Font ridotto (era 2.5rem) */
   font-weight: 900 !important;
-  padding: 6px 15px !important; /* Padding leggermente ridotto */
+  padding: 3px 6px !important; /* Padding leggermente ridotto */
   
   background-color: rgba(0, 0, 0, 0.7) !important; /* Un po' più trasparente */
   color: #6CFF6C !important;
@@ -217,7 +217,7 @@ html, body {
 
 .clock-badge {
   position: absolute;
-  top: 10px;
+  top: 2px;
   right: 10px;
   font-size: 0.9rem;
   font-weight: bold;
