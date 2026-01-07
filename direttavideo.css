@@ -145,24 +145,89 @@ html, body {
   left: 50%;               /* Sposta il bordo sinistro al centro */
   transform: translateX(-75%); /* Lo trasla indietro del 50% della sua larghezza per centrarlo perfettamente */
   
-  font-size: 1.2rem !important; /* Font ridotto (era 2.5rem) */
+  font-size: 1.0rem !important; /* Font ridotto (era 2.5rem) */
   font-weight: 900 !important;
   padding: 3px 6px !important; /* Padding leggermente ridotto */
   
   background-color: rgba(0, 0, 0, 0.7) !important; /* Un po' più trasparente */
   color: #6CFF6C !important;
   border: 2px solid #6CFF6C !important;
-  border-radius: 8px;
+  border-radius: 6px;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
   
   display: inline-block;
-  min-width: 100px;         /* Min-width ridotta per adattarsi al font più piccolo */
+  min-width: 10px;         /* Min-width ridotta per adattarsi al font più piccolo */
   text-align: center;
   white-space: nowrap;
   z-index: 10;             /* Assicura che stia sopra altri elementi */
 }
 
+/* Contenitore per allinearli */
+.time-container {
+    position: absolute;
+    top: 2px;
+    left: 1%; /* Posiziona il gruppo in alto a destra */
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Spazio tra orologio e pallino */
+}
+
+.clock-badgeOLD {
+  position: absolute;
+  top: 2px;
+  right: 10px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #eee;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  z-index: 10;
+}
+
+.clock-badge {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #eee;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  z-index: 10;
+}
+
+/* Live Badge: l'icona o il pallino */
 .live-badge {
+    cursor: pointer !important;    /* Forza la manina del mouse */
+	pointer-events: auto !important; /* Forza la sensibilità al click */
+    padding: 2px 5px; /* Ridotto per stare bene a fianco dell'orario */
+    border-radius: 50%;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;             /* Assicura che stia sopra altri elementi */
+}
+
+/* Stato LIVE: Pallino Rosso Lampeggiante */
+.live-badge.is-live {
+    color: #ff0000;
+    background: rgba(0, 0, 0, 0.5);
+    animation: blink 1.5s infinite;
+}
+
+/* Stato PASSATO: Simbolo Orologio Giallo/Ambra */
+.live-badge.is-delayed {
+    color: #ffcc00;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #ffcc00;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.live-badgeOLD {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -195,13 +260,13 @@ html, body {
 }
 .toast {
   position: absolute;
-  bottom: 20%;
+  bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.85); /* Sfondo scuro semitrasparente */
   color: #6CFF6C; /* Verde acceso come i tuoi numeri */
-  padding: 12px 25px;
-  border-radius: 25px;
+  padding: 2px 4px;
+  border-radius: 8px;
   border: 2px solid #6CFF6C;
   font-weight: bold;
   font-size: 1.2rem;
@@ -215,17 +280,6 @@ html, body {
   display: none !important;
 }
 
-.clock-badge {
-  position: absolute;
-  top: 2px;
-  right: 10px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #eee;
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  z-index: 10;
-}
 
 @keyframes basket-zoom {
   0% { transform: translateX(-50%) scale(0.9); opacity: 0; }
@@ -270,39 +324,6 @@ html, body {
 }
 
 
-.sync-controls-mini {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 8px;
-  border-radius: 20px;
-}
-
-.sync-controls-mini button {
-  background: #444;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  font-weight: bold;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.sync-controls-mini button:active {
-  background: #ff4d4d; /* Feedback visivo al tocco */
-}
-
-#sync-value {
-  font-size: 0.8rem;
-  color: #aaa;
-  min-width: 25px;
-  text-align: center;
-}
 
 #label-team-A { text-align: left; flex: 1; color: #bbb; }
 #label-team-B { text-align: right; flex: 1; color: #bbb; }
