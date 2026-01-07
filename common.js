@@ -23,7 +23,35 @@ const numeriMaglia = ["5","18","4","21","15","34","20","31","25","11","23","17",
 function getTeamName() {
 	return (teamA === "Polismile A") ? teamA : teamB;
 }
+
+function GetCognome(idGiocatore) {
+  // 1. Troviamo l'indice del giocatore cercando l'ID (convertito in stringa) 
+  // nell'array numeriMaglia
+  const index = numeriMaglia.findIndex(n => String(n) === String(idGiocatore));
+
+  // 2. Se l'ID non viene trovato, restituiamo una stringa vuota o un placeholder
+  if (index === -1) return "";
+
+  // 3. Recuperiamo la stringa completa (es: "N. Cognome") dall'array giocatoriA
+  const nomeCompleto = giocatoriA[index];
+
+  // 4. Dividiamo la stringa: il primo elemento è l'iniziale del nome, 
+  // il resto (gestendo cognomi composti) è il cognome
+  const parti = nomeCompleto.split(" ");
+  
+  // Rimuoviamo il primo elemento (iniziale del nome) e riuniamo il resto
+  const cognome = parti.slice(1).join(" ");
+
+  return cognome;
+}
+
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+
+function hmsToSeconds(hms) {
+    if (!hms || typeof hms !== 'string') return 0;
+    const [h, m, s] = hms.split(':').map(Number);
+    return (h * 3600) + (m * 60) + s;
+}
 
 function getLiveStartTimeById(youtubeUrl, apiKey) {
     // 
