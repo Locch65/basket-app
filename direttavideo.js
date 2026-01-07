@@ -1,5 +1,5 @@
 let LIVE_OFFSET = 5;
-let REFRESH_TIME = 1000;
+let REFRESH_TIME = 300;
 
 // Inizializzazione con supporto al tracciamento dei cambiamenti
 let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
@@ -16,13 +16,14 @@ let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
 
 let player;
 let timelineInterval;
+let punteggioA = 0;
 let punteggioB = 0;
 let lastScoreStr = "";
 let isUserLive = true;
 let oraInizioDiretta = null;
-let oraInizioDirettaYoutube = null; // Valore di default
-let syncDelay = 0; // Valore predefinito in secondi
-let eventBuffer = [];
+let orarioVisualizzato = null;
+let orarioVisualizzatoFormattato = null;
+let fullMatchHistory = []; // Qui salviamo tutto il liveData ricevuto
 
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
@@ -148,6 +149,28 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
 // Variabile di stato globale (fuori dalla funzione)
 let isFirstLoad = true;
 
+function generaHistory(liveDataDalBackend) {
+    let scoreA = 0;
+    let scoreB = 0;
+
+    fullMatchHistory = liveDataDalBackend.map(evento => {
+        // Accumulo punti
+        //if (evento.squadra === 'A' || evento.squadra === teamA) {
+        if (evento.squadra === 'Squadra B') {
+            scoreB += parseInt(evento.puntiRealizzati || 0);
+        } else {
+            scoreA += parseInt(evento.puntiRealizzati || 0);
+        }
+
+        return {
+            ...evento,
+            secondiReali: hmsToSeconds(evento.timestampReale.replace("*","")), // es: "14:00:00" -> 50400 Potrebbe esserci un * alla fine per indicare che il punteggio è stato modificato da popoup
+            punteggioA: scoreA,
+            punteggioB: scoreB
+        };
+    });
+}
+
 function caricaDatiPartita(mId) {
   fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
     .then(res => res.json())
@@ -155,7 +178,10 @@ function caricaDatiPartita(mId) {
 		// 1. Estrazione dati dai nuovi campi indicati
       const rows = data.statisticheGiocatori || []; 
       const dettagli = data.dettagliGara || {};
-	  const liveData = data.liveData || {};
+	  
+	  const matchIsLive = dettagli.isLive;
+	  
+	  generaHistory(data.liveData);
 
 	  const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
       rows.forEach(r => {
@@ -163,25 +189,20 @@ function caricaDatiPartita(mId) {
         if (g) {
           const nuoviPunti = parseInt(r.punti, 10) || 0;
           
-          // RILEVAZIONE CANESTRO: 
-          // Mostra il toast solo se NON è il primo caricamento E il punteggio è aumentato
-          if (!isFirstLoad && nuoviPunti > g.punteggio) {
-            const incremento = nuoviPunti - g.punteggio;
-			console.log("Ricevuto punteggio: ", g.displayName);
-			// Usiamo la variabile globale syncDelay
-            eventBuffer.push({
-              name: g.displayName,
-              points: incremento,
-              timestamp: currentVideoTime + syncDelay 
-            });
-          }
+          //?? // RILEVAZIONE CANESTRO: 
+          //?? // Mostra il toast solo se NON è il primo caricamento E il punteggio è aumentato
+          //?? if (!isFirstLoad && nuoviPunti > g.punteggio) {
+          //??   const incremento = nuoviPunti - g.punteggio;
+		  //?? //console.log("Ricevuto punteggio: ", g.displayName);
+          //?? }
 
           g.punteggio = nuoviPunti;
           g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
           try { 
             g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}'); 
           } catch(e) {}
-        } else if (r.giocatore === "Squadra B") {
+        } 
+		else if (r.giocatore === "Squadra B" && !matchIsLive) {
           punteggioB = parseInt(r.punti, 10) || 0;
         }
       });
@@ -212,71 +233,17 @@ function caricaDatiPartita(mId) {
       // Dopo aver elaborato tutti i dati per la prima volta, impostiamo il flag a false
       isFirstLoad = false;
 
-      updateScoreboard();
-      renderPlayerList();
+      updateScoreboard(matchIsLive);
+      if (!matchIsLive) {
+        renderPlayerList();
+	  }
+	  else {
+		  renderPlayerListLive();
+	  }
+	  
     });
 }
 
-// Funzione per estrarre l'orario di inizio dall'URL
-function recuperaOrarioInizio() {
-    const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.has('start')) {
-    oraInizioDirettaYoutube = urlParams.get('start');
-    // Se c'è un orario, facciamo un primo calcolo automatico all'avvio
-    // (opzionale, puoi anche aspettare il click su AUTO)
-} else {
-    console.log("Orario inizio non specificato: sync impostato a 0s");
-}
-}
-
-function calcolaLatenzaAutomatica() {
-    if (!oraInizioDirettaYoutube) {
-        alert("Attenzione: orario di inizio partita non specificato nel link. Impossibile calcolare il sync automatico.");
-        syncDelay = 0;
-        document.getElementById("sync-value").textContent = "0s";
-        return;
-    }
-
-    if (!player || typeof player.getCurrentTime !== "function") {
-        alert("Il video non è ancora pronto");
-        return;
-    }
-
-    const oraAttuale = new Date();
-    const parti = oraInizioDirettaYoutube.split(":");
-    
-    const inizio = new Date();
-    inizio.setHours(
-        parseInt(parti[0], 10), 
-        parseInt(parti[1], 10), 
-        parseInt(parti[2] || 0, 10), 
-        0
-    );
-
-    const secondiDallInizioReali = (oraAttuale - inizio) / 1000;
-    const secondoAttualePlayer = player.getCurrentTime();
-    const latenzaCalcolata = secondiDallInizioReali - secondoAttualePlayer;
-
-    if (latenzaCalcolata > 0) {
-        syncDelay = Math.floor(latenzaCalcolata);
-    } else {
-        // Se l'orario è nel futuro o il calcolo è errato, resettiamo a 0
-        syncDelay = 0;
-    }
-    
-    document.getElementById("sync-value").textContent = syncDelay + "s";
-}
-
-// Funzione per cambiare il ritardo dall'interfaccia
-function cambiaSync(valore) {
-    syncDelay = Math.max(0, syncDelay + valore);
-    document.getElementById("sync-value").textContent = syncDelay + "s";
-
-    console.log("Ritardo sincronizzazione impostato a:", syncDelay);
-} 
-
-
-// Funzione Flash Semplificata (Durata 2 secondi)
 
 // Variabile di controllo per la durata del flash
 let isToastRunning = false;
@@ -312,7 +279,7 @@ function showBasketToast(name, points) {
   }, 2000);
 }
 
-function updateHUDStatus() {
+function OLDupdateHUDStatus() {
   const liveLabel = document.getElementById("hud-live-status");
   if (liveLabel ) {
     // Aggiorna solo il testo e il colore in base allo stato
@@ -323,14 +290,27 @@ function updateHUDStatus() {
 }
 
 function checkLiveStatus() {
-  if (!player || typeof player.getDuration !== "function") return;
+  const liveStatusBadge = document.getElementById("hud-live-status");
+  if (!player || !liveStatusBadge || typeof player.getDuration !== "function") return;
+  
   const currentTime = player.getCurrentTime();
   const duration = player.getDuration();
   const isLive = (duration - currentTime <= LIVE_OFFSET);
   
-  if (isLive !== isUserLive) {
-    isUserLive = isLive;
-    updateHUDStatus();
+  
+  //if (isLive !== isUserLive) {
+  if (isLive) {
+    //isUserLive = isLive;
+    //updateHUDStatus();
+    liveStatusBadge.classList.remove("is-delayed");
+    liveStatusBadge.classList.add("is-live");
+    liveStatusBadge.innerHTML = "●"; // Pallino rosso	
+  }
+  else
+  {
+    liveStatusBadge.classList.remove("is-live");
+    liveStatusBadge.classList.add("is-delayed");
+    liveStatusBadge.innerHTML = "🕒"; // Simbolo orologio per tornare al live	  
   }
 
   // --- LOGICA PER ORARIO VIDEO ---
@@ -345,84 +325,47 @@ function checkLiveStatus() {
     );
 
     // Calcolo l'orario effettivo sommando i secondi correnti del player
-    const orarioVisualizzato = new Date(orarioInizioVideo.getTime() + (currentTime * 1000));
+    orarioVisualizzato = new Date(orarioInizioVideo.getTime() + (currentTime * 1000));
 
     // Formattazione HH:mm:ss
     const vHH = String(orarioVisualizzato.getHours()).padStart(2, '0');
     const vMM = String(orarioVisualizzato.getMinutes()).padStart(2, '0');
     const vSS = String(orarioVisualizzato.getSeconds()).padStart(2, '0');
 
-    const orarioFormattato = `${vHH}:${vMM}:${vSS}`;
+    orarioVisualizzatoFormattato = `${vHH}:${vMM}:${vSS}`;
 
     // Aggiorna l'HUD a video
     const clockEl = document.getElementById("hud-video-time");
     if (clockEl) {
-      clockEl.textContent = orarioFormattato;
+      clockEl.textContent = orarioVisualizzatoFormattato;
     }
   }
 }
-
-function OLDcheckLiveStatus() {
-  if (!player || typeof player.getDuration !== "function") return;
-  const currentTime = player.getCurrentTime();
-  const duration = player.getDuration();
-  const isLive = (duration - currentTime <= LIVE_OFFSET);
-  
-  if (isLive !== isUserLive) {
-    isUserLive = isLive;
-    updateHUDStatus();
-  }
-
-  // --- LOGICA PER ORARIO VIDEO E RITARDO FORMATTATO ---
-  if (oraInizioDiretta) {
-    const oraAttualeReale = new Date();
-    const parti = oraInizioDiretta.split(":");
-    
-    const orarioInizioVideo = new Date();
-    orarioInizioVideo.setHours(
-        parseInt(parti[0], 10), 
-        parseInt(parti[1], 10), 
-        parseInt(parti[2] || 0, 10), 
-        0
-    );
-
-    // 1. Orario di ciò che vedi nel player
-    const orarioVisualizzato = new Date(orarioInizioVideo.getTime() + (currentTime * 1000));
-
-    // 2. Calcolo del ritardo totale in secondi
-    const ritardoTotaleSecondi = Math.floor((oraAttualeReale - orarioVisualizzato) / 1000);
-
-    // 3. Formattazione dell'orario video (HH:mm:ss)
-    const vHH = String(orarioVisualizzato.getHours()).padStart(2, '0');
-    const vMM = String(orarioVisualizzato.getMinutes()).padStart(2, '0');
-    const vSS = String(orarioVisualizzato.getSeconds()).padStart(2, '0');
-
-    // 4. Formattazione del RITARDO (hh:mm:ss)
-    // Usiamo il valore assoluto per evitare problemi se il ritardo è leggermente negativo
-    const absRitardo = Math.abs(ritardoTotaleSecondi);
-    const rHH = String(Math.floor(absRitardo / 3600)).padStart(2, '0');
-    const rMM = String(Math.floor((absRitardo % 3600) / 60)).padStart(2, '0');
-    const rSS = String(absRitardo % 60).padStart(2, '0');
-
-    const segno = ritardoTotaleSecondi < 0 ? "-" : "";
-
-    console.log(`Video: ${vHH}:${vMM}:${vSS} | Ritardo: ${segno}${rHH}:${rMM}:${rSS}`);
-  }
-}
-
 function processEventBuffer() {
-  if (!player || typeof player.getCurrentTime !== "function") return;
-  
-  const currentTime = player.getCurrentTime();
+    if (!fullMatchHistory.length || !orarioVisualizzatoFormattato) return;
 
-  // Filtriamo gli eventi: mostriamo quelli il cui timestamp è <= al tempo attuale del video
-  eventBuffer = eventBuffer.filter(event => {
-    if (currentTime >= event.timestamp) {
-      showBasketToast(event.name, event.points);
-      return false; // Rimuove l'evento dal buffer dopo averlo mostrato
+    // Convertiamo l'orario che l'utente sta vedendo nel video in secondi
+    const secondiVisualizzati = hmsToSeconds(orarioVisualizzatoFormattato);
+
+    // Cerchiamo l'ultimo evento accaduto prima o in quel momento
+    const eventoCorrente = fullMatchHistory.findLast(e => e.secondiReali <= secondiVisualizzati);
+
+    if (eventoCorrente) {
+        // Aggiorna l'HUD con i dati dell'evento trovato
+        //document.getElementById('hud-score').textContent = `${eventoCorrente.punteggioA} - ${eventoCorrente.punteggioB}`;
+        punteggioA =  eventoCorrente.punteggioA;
+		punteggioB = eventoCorrente.punteggioB;
+		updateScoreboard(true);
+		if (secondiVisualizzati - eventoCorrente.secondiReali < 1 ) {
+			showBasketToast(GetCognome(eventoCorrente.idGiocatore), eventoCorrente.puntiRealizzati);
+		}
+
     }
-    return true; // Mantiene l'evento nel buffer se il video non ci è ancora arrivato
-  });
+	else {
+		// se non ci sono eventi da visualizzare è perchè siamo ancora "0 - 0"
+		punteggioA = 0;
+		punteggioB = 0;
+	}
 }
 
 function tickTimeline() {
@@ -442,11 +385,50 @@ function initTeamNames() {
   if (elB) elB.textContent = teamB;
 }
 
+
+// Variabile globale per tenere traccia della posizione attuale (0, 1 o 2)
+let hudPositionIndex = 1; // Partiamo dal 50% (centro)
+
+function scambiaPosizioniHUD() {
+  const hudScore = document.getElementById('hud-score');
+  const basketToast = document.querySelector('.toast');
+
+  if (!hudScore) return;
+
+  // Incrementiamo l'indice della posizione (ciclo tra 0, 1, 2)
+  hudPositionIndex = (hudPositionIndex + 1) % 3;
+
+  // Applichiamo le proprietà base per tenerlo sempre in alto
+  hudScore.style.top = '0px';
+  hudScore.style.bottom = 'auto';
+  hudScore.style.transform = 'translateX(-50%)';
+  hudScore.style.position = 'absolute'; // Assicurati che sia absolute o fixed
+
+  // Ruotiamo solo le posizioni orizzontali
+  switch (hudPositionIndex) {
+    case 0: // Sinistra (25%)
+      hudScore.style.left = '30%';
+      break;
+    case 1: // Centro (50%)
+      hudScore.style.left = '50%';
+      break;
+    case 2: // Destra (75%)
+      hudScore.style.left = '70%';
+      break;
+  }
+
+  // Poiché lo score è ora SEMPRE in alto, il toast rimane sempre in basso
+  if (basketToast) {
+    basketToast.style.top = 'auto';
+    basketToast.style.bottom = '5px';
+  }
+}
+
 /**
  * Scambia le posizioni verticali di HUD Score e Basket Toast.
  * Se lo score è in alto, lo sposta in basso e viceversa.
  */
-function scambiaPosizioniHUD() {
+function OLDscambiaPosizioniHUD() {
   const hudScore = document.getElementById('hud-score');
   const basketToast = document.querySelector('.toast');
 
@@ -474,10 +456,15 @@ function scambiaPosizioniHUD() {
 
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
-function updateScoreboard() {
+function updateScoreboard(matchIsLive) {
   const scoreEl = document.getElementById("game-score");
-  const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
-  const currentScore = (teamA === "Polismile A") ? `${puntiA} - ${punteggioB}` : `${punteggioB} - ${puntiA}`;
+  //const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
+  if (!matchIsLive) {
+    punteggioA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
+  }
+  
+  //const currentScore = (teamA === "Polismile A") ? `${puntiA} - ${punteggioB}` : `${punteggioB} - ${puntiA}`;
+  const currentScore = (teamA === "Polismile A") ? `${punteggioA} - ${punteggioB}` : `${punteggioB} - ${punteggioA}`;
 
   // Aggiorna l'HUD in alto nel video
   const hudScore = document.getElementById("hud-score");
@@ -528,6 +515,59 @@ function renderPlayerList() {
         </div>
       </div>
         `;
+  }).join('');
+}
+function renderPlayerListLive() {
+  const container = document.getElementById("players-grid");
+  if (!container || !fullMatchHistory.length) return;
+
+  // 1. Convertiamo l'orario attuale del video in secondi per il confronto
+  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
+
+  // 2. Creiamo una lista temporanea di giocatori con i punti ricalcolati "nel tempo"
+  const visualizzazioneGiocatori = giocatoriObj.map(g => {
+    // Filtriamo la storia: prendiamo solo i canestri di QUESTO giocatore
+    // avvenuti prima o durante il secondo visualizzato
+    const eventiGiocatore = fullMatchHistory.filter(evento => 
+      String(evento.idGiocatore) === String(g.numero) && 
+      evento.secondiReali <= secondiCorrentiVideo
+    );
+
+    // Calcoliamo i totali parziali per i canestri da 1, 2 e 3 punti
+    const parziale1 = eventiGiocatore.filter(e => parseInt(e.puntiRealizzati) === 1).length;
+    const parziale2 = eventiGiocatore.filter(e => parseInt(e.puntiRealizzati) === 2).length;
+    const parziale3 = eventiGiocatore.filter(e => parseInt(e.puntiRealizzati) === 3).length;
+    
+    const puntiTotaliNelTempo = eventiGiocatore.reduce((acc, e) => acc + (parseInt(e.puntiRealizzati) || 0), 0);
+
+    return {
+      ...g,
+      puntiNelTempo: puntiTotaliNelTempo,
+      statsNelTempo: `[${parziale1}, ${parziale2}, ${parziale3}]`
+    };
+  });
+
+  // 3. ORDINAMENTO: In campo prima, poi per punti fatti (nel tempo visualizzato)
+  visualizzazioneGiocatori.sort((a, b) => {
+    if (a.stato === 'In' && b.stato !== 'In') return -1;
+    if (a.stato !== 'In' && b.stato === 'In') return 1;
+    return b.puntiNelTempo - a.puntiNelTempo;
+  });
+
+  // 4. RENDERING HTML
+  container.innerHTML = visualizzazioneGiocatori.map(g => {
+    return `
+      <div class="player-item ${g.stato === 'In' ? 'is-in' : 'is-out'}">
+        <div>
+          <span class="player-num">#${g.numero}</span>
+          <span class="player-name">${g.displayName}</span>
+        </div>
+        <div class="player-stats">
+          ${g.statsNelTempo} 
+          <span class="player-points">${g.puntiNelTempo}</span>
+        </div>
+      </div>
+    `;
   }).join('');
 }
 
@@ -603,6 +643,14 @@ function init() {
     });
   }
 
+  const hudLiveStatus = document.getElementById("hud-live-status");
+  if (hudLiveStatus) {
+	  hudLiveStatus.addEventListener('click', () => {
+        const durataTotale = player.getDuration();
+        player.seekTo(durataTotale - 1, true);
+        player.playVideo();		  
+	  });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);
