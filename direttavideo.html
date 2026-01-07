@@ -16,8 +16,10 @@
     <div id="hud-overlay">
         <div id="hud-score" class="badge">0 - 0</div>
         <div id="hud-period" class="badge period-badge hidden"></div>
-        <div id="hud-video-time" class="badge clock-badge">00:00:00</div> 
-        <div id="hud-live-status" class="badge live-badge">🔴 LIVE</div>
+        <div class="time-container">
+          <div id="hud-video-time" class="badge clock-badge">00:00:00</div> 
+          <div id="hud-live-status" class="badge live-badge">●</div>
+        </div>
         <div id="basket-toast" class="toast hidden"></div>
     </div> 
   </div>
@@ -26,12 +28,6 @@
     <div class="scoreboard">
       <div class="team-labels">
           <span id="label-team-A">SQUADRA A</span>
-          
-          <div class="sync-controls-mini">
-            <button onclick="cambiaSync(-1)">-</button>
-              <span id="sync-value">2s</span>
-              <button onclick="cambiaSync(1)">+</button>
-		  </div>
           <span id="label-team-B">SQUADRA B</span>
         </div>
       <div id="game-score" class="main-score">0 - 0</div>
@@ -43,8 +39,8 @@
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.76"></script>
-  <script src="direttavideo.js?v=1.0.76"></script>
+  <script src="common.js?v=1.0.77"></script>
+  <script src="direttavideo.js?v=1.0.77"></script>
 
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
