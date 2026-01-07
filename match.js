@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.74";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.77";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -204,102 +204,6 @@ function gestisciDirettaYoutube() {
     };
 }
 
-function OLDgestisciDirettaYoutube() {
-    const overlay = document.createElement('div');
-    overlay.id = 'youtubePopup';
-    overlay.className = 'popup';
-
-    const content = document.createElement('div');
-    content.className = 'popup-content';
-    content.style.textAlign = 'left';
-
-    const urlIniziale = (typeof videoURL !== 'undefined') ? videoURL : "";
-    // Recuperiamo l'API Key corrente dalla variabile locale
-    const apiKeyCorrente = googleApiKey || "";
-
-    content.innerHTML = `
-        <h2 style="margin-bottom: 20px; text-align:center;">Diretta Youtube</h2>
-        
-        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">URL:</label>
-        <input type="text" id="ytUrl" style="width:100%; padding:10px; margin-bottom:15px; font-size:1rem;" 
-               placeholder="https://www.youtube.com/watch?v=..." value="${urlIniziale}">
-
-        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">Ora inizio Diretta (HH:mm:ss):</label>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <input type="time" id="ytOraInizio" step="1" style="flex: 1; padding:10px; font-size:1rem;">
-            <button id="ytCalcolaBtn" disabled style="padding: 10px; font-size: 1rem; cursor: not-allowed; opacity: 0.5; background-color: #3498db; color: white; border: none; border-radius: 5px;">
-                Calcola
-            </button>
-        </div>
-
-        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">Offset Inizio Partita (secondi):</label>
-        <input type="number" id="ytOffset" style="width:100%; padding:10px; margin-bottom:15px; font-size:1rem;" 
-               placeholder="Esempio: 30" value="${matchStartTime || ""}">
-
-        <label style="display:block; font-size:1.2rem; margin-bottom: 5px;">API Key:</label>
-        <input type="text" id="ytApiKey" style="width:100%; padding:10px; margin-bottom:25px; font-size:1rem;" 
-               placeholder="Inserisci la tua Google API Key" value="${apiKeyCorrente}">
-
-        <div style="display: flex; justify-content: center; gap: 20px;">
-            <button id="ytSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
-            <button id="ytCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
-        </div>
-    `;
-
-    overlay.appendChild(content);
-    document.body.appendChild(overlay);
-
-    const urlInput = document.getElementById('ytUrl');
-    const calcolaBtn = document.getElementById('ytCalcolaBtn');
-
-    const validaUrl = (valore) => {
-        const isValid = valore.startsWith('http://') || valore.startsWith('https://');
-        calcolaBtn.disabled = !isValid;
-        calcolaBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
-        calcolaBtn.style.opacity = isValid ? '1' : '0.5';
-    };
-
-    validaUrl(urlInput.value.trim());
-    urlInput.addEventListener('input', () => validaUrl(urlInput.value.trim()));
-
-    calcolaBtn.onclick = () => calcolaOraInizioDirettaYoutube();
-
-    document.getElementById('ytCancelBtn').onclick = () => {
-        document.body.removeChild(overlay);
-    };
-
-    document.getElementById('ytSaveBtn').onclick = () => {
-      let finalUrl = urlInput.value.trim();
-      const offsetValue = document.getElementById('ytOffset').value;
-      const apiKeyValue = document.getElementById('ytApiKey').value.trim();
-  
-      if (offsetValue && parseInt(offsetValue) >= 0) {
-          try {
-              let urlObj = new URL(finalUrl);
-              urlObj.searchParams.set("t", offsetValue + "s");
-              urlObj.searchParams.delete("start");
-              finalUrl = urlObj.toString();
-          } catch (e) {
-              if (!finalUrl.includes('t=') && !finalUrl.includes('start=')) {
-                  const separator = finalUrl.includes('?') ? '&' : '?';
-                  finalUrl = `${finalUrl}${separator}t=${offsetValue}s`;
-              } else {
-                  finalUrl = finalUrl.replace(/([?&])(t|start)=[^&]*/, `$1t=${offsetValue}s`);
-              }
-          }
-      }
-  
-      // Salvataggio nelle variabili locali e nel localStorage
-      videoURL = finalUrl;
-      matchStartTime = offsetValue;
-      googleApiKey = apiKeyValue;
-      localStorage.setItem("googleApiKey", apiKeyValue); // Persistenza tra le sessioni
-	  
-      salvaDatiPartita();
-      document.body.removeChild(overlay);
-    };
-}
-
 function gestisciGoLive() {
     const overlay = document.createElement('div');
     overlay.id = 'goLivePopup';
@@ -477,12 +381,6 @@ function aggiornaPunteggio(target, punti) {
   target.history.push({ punti: punti, ora: oraCorrente });
 }
 
-function OLDaggiornaPunteggio(target, punti) {
-  target.punteggio += punti;
-  target.contatori[punti]++;
-  target.history.push(punti);
-}
-
 function undoPunteggio(target) {
   if (target.history.length === 0) return;
   const lastEntry = target.history.pop(); // Estrae l'oggetto {punti, ora}
@@ -490,13 +388,6 @@ function undoPunteggio(target) {
   
   target.punteggio -= puntiDaTogliere;
   target.contatori[puntiDaTogliere]--;
-}
-
-function OLDundoPunteggio(target) {
-  if (target.history.length === 0) return;
-  const last = target.history.pop();
-  target.punteggio -= last;
-  target.contatori[last]--;
 }
 
 function apriConvocazioni() {
@@ -833,8 +724,7 @@ function showSquadraBPopup() {
         //historyB.push(-p);
         aggiornaScoreboard();
         salvaSquadraB();
-		salvaEventoLive("", -p, "??", "SquadraB");
-
+		salvaEventoLive("", -p, oraCorrente + "*", "Squadra B");
   	    salvaDatiPartita();
         scoreLine.textContent = `Punteggio: ${puntiSquadraB} [${contatoriB[1]},${contatoriB[2]},${contatoriB[3]}]`;
       }
@@ -963,8 +853,9 @@ function showPlayerPopup(g) {
       aggiornaUIGiocatore(g);
       aggiornaScoreboard();
       salvaSuGoogleSheets(g);
-	  
-	  salvaEventoLive(g.numero, p, "??", getTeamName()); // l'orario è indefinito
+	  const oraCorrente = new Date().toLocaleTimeString('it-IT'); 
+
+	  salvaEventoLive(g.numero, p, oraCorrente + "*", getTeamName()); // l'orario è indefinito
 	  
 	  salvaDatiPartita();
     });
@@ -986,8 +877,8 @@ function showPlayerPopup(g) {
         aggiornaUIGiocatore(g);
         aggiornaScoreboard();
         salvaSuGoogleSheets(g);
-		
-	    salvaEventoLive(g.numero, -p, "??", getTeamName()); // vengono solo eliminati i punti (in negativo), l'orario è indefinito
+		const oraCorrente = new Date().toLocaleTimeString('it-IT'); 
+	    salvaEventoLive(g.numero, -p, oraCorrente + "*", getTeamName()); // vengono solo eliminati i punti (in negativo), l'orario è indefinito
 
   	    salvaDatiPartita();
       }
@@ -1261,17 +1152,8 @@ function aggiungiPuntiSquadraB(punti, memorizzaOrario) {
   aggiornaScoreboard();
   salvaSquadraB();
   
-  salvaEventoLive("", punti, oraCorrente, "SquadraB");
+  salvaEventoLive("", punti, oraCorrente, "Squadra B");
 
-  salvaDatiPartita();
-}
-
-function OLDaggiungiPuntiSquadraB(punti) {
-  puntiSquadraB += punti;
-  contatoriB[punti]++;
-  historyB.push(punti);
-  aggiornaScoreboard();
-  salvaSquadraB();
   salvaDatiPartita();
 }
 
@@ -1286,18 +1168,8 @@ function undoSquadraB() {
   aggiornaScoreboard();
   salvaSquadraB();
   
-  salvaEventoLive("", -puntiDaTogliere, lastEntry.ora, "SquadraB");
+  salvaEventoLive("", -puntiDaTogliere, lastEntry.ora, "Squadra B");
 
-  salvaDatiPartita();
-}
-
-function OLDundoSquadraB() {
-  if (historyB.length === 0) return;
-  const last = historyB.pop();
-  puntiSquadraB -= last;
-  contatoriB[last]--;
-  aggiornaScoreboard();
-  salvaSquadraB();
   salvaDatiPartita();
 }
 
