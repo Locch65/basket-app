@@ -23,7 +23,6 @@
 //    - FATTO: Salvare APIKey in locale non su GitHub
 //    - FATTO: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - FATTO: inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
-//
 //    - FATTO: leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
 //    - FATTO: sincronizzare messaggi punteggi con video
 //
@@ -69,7 +68,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.78"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.79"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
