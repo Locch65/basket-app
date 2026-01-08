@@ -14,8 +14,10 @@
 
     <div id="ytplayer"></div>
     <div id="hud-overlay">
-        <div id="hud-score" class="badge">0 - 0</div>
-        <div id="hud-period" class="badge period-badge hidden"></div>
+        <div id="hud-score" class="badge">
+            <span id="score-text">0 - 0</span>
+            <div id="hud-period" class="badge period-badge hidden">??</div>
+        </div>
         <div class="time-container">
           <div id="hud-video-time" class="badge clock-badge">00:00:00</div> 
           <div id="hud-live-status" class="badge live-badge">●</div>
@@ -40,7 +42,7 @@
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
   <script src="common.js?v=1.0.77"></script>
-  <script src="direttavideo.js?v=1.0.78"></script>
+  <script src="direttavideo.js?v=1.0.79"></script>
 
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
