@@ -65,6 +65,7 @@ window.onYouTubeIframeAPIReady = function () {
         nascondiErrore();
         onPlayerReady(e);
       },
+	  onStateChange: onPlayerStateChange,
       'onError': onPlayerError 
     }
   });
@@ -279,40 +280,93 @@ function showBasketToast(name, points) {
   }, 2000);
 }
 
-function OLDupdateHUDStatus() {
-  const liveLabel = document.getElementById("hud-live-status");
-  if (liveLabel ) {
-    // Aggiorna solo il testo e il colore in base allo stato
-    liveLabel.textContent = isUserLive ? "🔴 LIVE" : "";
-    liveLabel.style.color = isUserLive ? "#ff4d4d" : "#aaa";
-    // Il bordo rimane rimosso grazie al CSS
+
+let maxCurrentTime = 0;
+let wasPaused = false;
+let pauseStartTime = null;
+let userIsBehindBecauseOfPause = false;
+
+function isLiveStream() {
+  const data = player.getVideoData();
+  return data.isLive === true;
+}
+
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.PAUSED) {
+    wasPaused = true;
+    pauseStartTime = performance.now();
   }
+
+  if (event.data === YT.PlayerState.PLAYING) {
+    // Se riprendi dopo una pausa lunga, sei indietro
+    if (wasPaused && pauseStartTime) {
+      const pausedFor = (performance.now() - pauseStartTime) / 1000;
+      if (pausedFor > 2) {
+        // segna che sei indietro
+        userIsBehindBecauseOfPause = true;
+      }
+    }
+    wasPaused = false;
+  }
+}
+
+function updateLiveEdge() {
+  const current = player.getCurrentTime();
+  if (current > maxCurrentTime) {
+    maxCurrentTime = current;
+	userIsBehindBecauseOfPause = false;
+  }
+}
+
+function isBehindLiveEdge(threshold = 3) {
+  const current = player.getCurrentTime();
+  return (maxCurrentTime - current) > threshold;
+}
+
+function isUserBehindLive() {
+  // Caso 1: sei in pausa
+  if (player.getPlayerState() === YT.PlayerState.PAUSED) {
+    return true;
+  }
+
+  // Caso 2: eri in pausa e hai appena ripreso
+  if (userIsBehindBecauseOfPause) {
+    return true;
+  }
+
+  // Caso 3: sei indietro rispetto al live edge
+  return isBehindLiveEdge();
 }
 
 function checkLiveStatus() {
   const liveStatusBadge = document.getElementById("hud-live-status");
   if (!player || !liveStatusBadge || typeof player.getDuration !== "function") return;
   
-  const currentTime = player.getCurrentTime();
-  const duration = player.getDuration();
-  const isLive = (duration - currentTime <= LIVE_OFFSET);
+  updateLiveEdge();
   
+  const isLive = !isUserBehindLive();
   
   //if (isLive !== isUserLive) {
-  if (isLive) {
-    //isUserLive = isLive;
-    //updateHUDStatus();
-    liveStatusBadge.classList.remove("is-delayed");
-    liveStatusBadge.classList.add("is-live");
-    liveStatusBadge.innerHTML = "●"; // Pallino rosso	
+  if (isLiveStream()) {	  
+    liveStatusBadge.classList.remove("hidden");
+    if (isLive) {
+      //isUserLive = isLive;
+      liveStatusBadge.classList.remove("is-delayed");
+      liveStatusBadge.classList.add("is-live");
+      liveStatusBadge.innerHTML = "●"; // Pallino rosso	
+    }
+    else
+    {
+      liveStatusBadge.classList.remove("is-live");
+      liveStatusBadge.classList.add("is-delayed");
+      liveStatusBadge.innerHTML = "🕒"; // Simbolo orologio per tornare al live	  
+    }
   }
-  else
-  {
-    liveStatusBadge.classList.remove("is-live");
-    liveStatusBadge.classList.add("is-delayed");
-    liveStatusBadge.innerHTML = "🕒"; // Simbolo orologio per tornare al live	  
+  else {
+	// NASCONDE il badge se non è un video live (è un caricamento differito/VOD)
+    liveStatusBadge.classList.add("hidden");
   }
-
+  
   // --- LOGICA PER ORARIO VIDEO ---
   if (oraInizioDiretta) {
     const parti = oraInizioDiretta.split(":");
@@ -325,6 +379,7 @@ function checkLiveStatus() {
     );
 
     // Calcolo l'orario effettivo sommando i secondi correnti del player
+    const currentTime = player.getCurrentTime();
     orarioVisualizzato = new Date(orarioInizioVideo.getTime() + (currentTime * 1000));
 
     // Formattazione HH:mm:ss
@@ -419,36 +474,6 @@ function scambiaPosizioniHUD() {
 
   // Poiché lo score è ora SEMPRE in alto, il toast rimane sempre in basso
   if (basketToast) {
-    basketToast.style.top = 'auto';
-    basketToast.style.bottom = '5px';
-  }
-}
-
-/**
- * Scambia le posizioni verticali di HUD Score e Basket Toast.
- * Se lo score è in alto, lo sposta in basso e viceversa.
- */
-function OLDscambiaPosizioniHUD() {
-  const hudScore = document.getElementById('hud-score');
-  const basketToast = document.querySelector('.toast');
-
-  if (!hudScore || !basketToast) return;
-
-  // Controlliamo la posizione attuale dello score
-  const isScoreAtTop = hudScore.style.top === '0px' || getComputedStyle(hudScore).top === '0px';
-
-  if (isScoreAtTop) {
-    // Sposta Score in basso e Toast in alto
-    hudScore.style.top = 'auto';
-    hudScore.style.bottom = '10px';
-    
-    basketToast.style.bottom = 'auto';
-    basketToast.style.top = '20px';
-  } else {
-    // Ripristina Score in alto e Toast in basso (valori originali CSS)
-    hudScore.style.bottom = 'auto';
-    hudScore.style.top = '0px';
-    
     basketToast.style.top = 'auto';
     basketToast.style.bottom = '5px';
   }
