@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Seleziona Partita</title>
   <link rel="stylesheet" href="calendario.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -11,26 +12,33 @@
   <h1>Calendario</h1>
 
   <!-- Hamburger Menu -->
-  <div id="hamburgerMenu1">
-    <button id="hamburgerBtn1">☰</button>
-    <nav id="menu1" class="hidden">
+  <div id="hamburgerMenu">
+    <button id="hamburgerBtn">☰</button>
+    <nav id="menu" class="hidden">
       <ul>
         <li class="has-submenu">
-          Campionato ▾
+          <i class="fas fa-trophy"></i> Campionato ▾
           <ul class="submenu hidden">
             <li class="campionato-item" data-campionato="U14">U14</li>
             <li class="campionato-item" data-campionato="U15">U15</li>
             <li class="campionato-item" data-campionato="Tutti">*Tutti*</li>
           </ul>
         </li>
-		<li>
-          <label>
+        <li>
+          <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="togglePast" />
             Escludi giocate
           </label>
         </li>
         <li>
-          <button id="toggleTheme1">🌙 Dark Mode</button>
+          <button id="toggleTheme1" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; padding:0; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-moon"></i> Dark Mode
+          </button>
+        </li>
+        <li>
+          <button id="adminBtn" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; padding:0; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-user-shield"></i> Admin
+          </button>
         </li>
       </ul>
     </nav>
@@ -39,11 +47,13 @@
   <!-- Contenitore partite -->
   <div id="listaPartite" class="loading">Caricamento Calendario...</div>
   
+  </div>
+
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.76"></script>
-  <script src="calendario.js?v=1.0.76"></script>
+  <script src="common.js?v=1.0.80"></script>
+  <script src="calendario.js?v=1.0.80"></script>
 
 </body>
 </html>
