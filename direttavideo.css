@@ -38,6 +38,11 @@ html, body {
   .scoreboard { 
     display: none !important; 
   }
+  
+  /* Mostra lo score sopra il video solo qui */
+  #hud-score, #hud-period {
+    display: inline-block !important;
+  }
 }
 
 /* Quando lo schermo è in PORTRAIT (Verticale) */
@@ -49,6 +54,11 @@ html, body {
   .players-list-container {
     display: flex;
     flex-direction: column;
+  }
+  
+  /* Nasconde lo score sopra il video quando sei in verticale */
+  #hud-score, #hud-period {
+    display: none !important;
   }
 }
 
@@ -160,6 +170,25 @@ html, body {
   text-align: center;
   white-space: nowrap;
   z-index: 10;             /* Assicura che stia sopra altri elementi */
+}
+
+/* Definizione specifica per il badge del periodo */
+#hud-period {
+  position: absolute; /* Si posiziona rispetto a #hud-score */
+  top: 50%;          /* Lo centra verticalmente rispetto allo score */
+  left: 100%;        /* Lo sposta subito dopo la fine dello score */
+  transform: translateY(-50%); /* Correzione per il centraggio verticale */
+  margin-left: 8px;  /* Crea un piccolo spazio tra score e periodo */
+  
+  font-size: 1.0rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #ff0000; /* Rosso come nel tuo script */
+  border: 1px solid #ff4d4d;
+  border-radius: 4px;
+  padding: 2px 2px;
+  white-space: nowrap;
+  z-index: 11;
 }
 
 /* Contenitore per allinearli */
@@ -310,7 +339,25 @@ html, body {
   margin-bottom: 5px;
 }
 /* Stile per il box del quarto */
+
 .period-badge {
+  position: absolute;
+  /* Rimuovi top: 10px e left: 170px se presenti */
+  top: 50%;           /* Centra verticalmente rispetto alla riga dello score */
+  transform: translateY(-50%); 
+  left: 105%;         /* Lo posiziona subito dopo la fine del box dello score */
+  
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid red;
+  z-index: 10;
+  white-space: nowrap; /* Evita che il testo vada a capo */
+}
+
+.period-badgeOLD {
   position: absolute;
   top: 10px;        /* Allineato allo score */
   left: 170px;      /* Posizionato a destra dello score (regola in base a min-width score) */
