@@ -154,9 +154,27 @@ function generaHistory(liveDataDalBackend) {
     let scoreA = 0;
     let scoreB = 0;
 
+
+    // Se i dati dal backend sono vuoti o non validi, inizializziamo con i convocati a 0
+    if (!liveDataDalBackend || liveDataDalBackend.length === 0) {
+        console.log("Nessun evento live trovato. Inizializzazione cronologia con i convocati.");
+        
+        fullMatchHistory = giocatoriObj.map(g => {
+            return {
+                idGiocatore: g.numero,
+                puntiRealizzati: 0,
+                squadra: 'Polismile A', // Assumiamo squadra A per i convocati in giocatoriObj
+                timestampReale: "00:00:00",
+                secondiReali: 0,
+                punteggioA: 0,
+                punteggioB: 0
+            };
+        });
+        return; // Usciamo dalla funzione
+    }
+	
     fullMatchHistory = liveDataDalBackend.map(evento => {
         // Accumulo punti
-        //if (evento.squadra === 'A' || evento.squadra === teamA) {
         if (evento.squadra === 'Squadra B') {
             scoreB += parseInt(evento.puntiRealizzati || 0);
         } else {
