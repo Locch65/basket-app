@@ -118,7 +118,7 @@ h1 {
 }
 
 /* Reset stile bottone admin dentro il menu */
-#adminBtn {
+#adminBtn1 {
   background: none !important;
   border: none !important;
   color: inherit !important;
@@ -933,7 +933,7 @@ h1 {
     padding: 4px 8px;
     font-size: 1.2rem;
   }
-  #videoBtn, #adminBtn {
+  #videoBtn, #adminBtn1 {
     padding: 4px 8px;
     font-size: 12px;
     border-radius: 4px;
