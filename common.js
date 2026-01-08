@@ -187,3 +187,75 @@ function extractYoutubeTime(input) {
     return 0;
   }
 }
+
+function createAdminPopup() {
+  // Verifica se esiste già per evitare duplicati
+  if (document.getElementById("adminPopup")) return;
+
+  const popup = document.createElement("div");
+  popup.id = "adminPopup";
+  popup.className = "popup hidden";
+  popup.innerHTML = `
+    <div class="popup-content">
+      <h3>Accesso Admin</h3>
+      <input type="password" id="adminPassword" placeholder="Password" />
+      <div class="popup-buttons">
+        <button id="confirmAdmin">Conferma</button>
+        <button id="closeAdmin">Annulla</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  const inputPass = document.getElementById("adminPassword");
+
+  // Funzione per chiudere il popup
+  const closePopup = () => {
+    document.getElementById("adminPopup").classList.add("hidden");
+  };
+
+  // Funzione di validazione
+  const handleLogin = () => {
+    const pass = inputPass.value;
+	const storedPassword = localStorage.getItem("AdminPassword") || "";
+    if (pass === "007") { 
+//    if (pass === storedPassword) { 
+      isAdmin = true;
+      localStorage.setItem("isAdmin", "true");
+      localStorage.setItem("AdminPassword", pass);
+
+      
+      // CAMBIO TESTO IN LOGOUT
+      const adminBtn = document.getElementById("adminBtn");
+      if (adminBtn) {
+        adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+      }
+
+      closePopup();
+    } else {
+      alert("Password errata!");
+    }
+  };
+  // 1. Click sul tasto Annulla
+  document.getElementById("closeAdmin").onclick = closePopup;
+
+  // 2. Click sul tasto Conferma
+  document.getElementById("confirmAdmin").onclick = handleLogin;
+
+  // 3. Tasto Enter nell'input
+  inputPass.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleLogin();
+    }
+  });
+
+  // 4. NUOVO: Click all'esterno (sull'overlay scuro)
+  popup.addEventListener("click", (event) => {
+    // Se il target del click è proprio il div 'adminPopup' (l'overlay)
+    // e NON il 'popup-content' o i suoi figli
+    if (event.target === popup) {
+      closePopup();
+    }
+  });
+}
