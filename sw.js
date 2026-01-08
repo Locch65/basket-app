@@ -10,6 +10,8 @@
 //
 //  Calendario.html
 //    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
+//    - aggiungere in hamburger menu la voce Administrator, deve permettere la lettura e memorizzazione della password.
+//      quando si seleziona una partita, se è stato fatto login come Administrator va alla pagina match.html, altrimenti a direttavideo.html
 //
 //    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
 //    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
@@ -40,6 +42,7 @@
 
 //    - SERVE?: i bottoni +/- per ritardare i messaggi vanno messi solo se Admin e devono memorizzare il dato in Google sheet e trasmesso ai client
 //    - i client non devono fare polling ma usare notifiche realtime da Firebase
+//    - anticipare la prima lettura del database, ci mette troppo tempo.
 //
 //  Anagrafica.html
 //    - 1) mostrare lista Roster. Quando si clicca su un nome
@@ -68,7 +71,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.79"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.80"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
