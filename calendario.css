@@ -34,6 +34,7 @@ body.dark-mode {
   background-color: #121212;
   color: #f0f0f0;
 }
+
 body.dark-mode h1 {
   color: #27ae60;   /* verde acceso */
 }
@@ -98,6 +99,7 @@ body.dark-mode .match-bottom .vs {
   box-sizing: border-box;   /* include padding nel calcolo della larghezza */
   overflow-x: hidden;       /* nasconde eventuali sforamenti */
 }
+
 .match-card.past {
       background-color: #f5f5f5;   /* grigio tenue */
       border: 1px solid #999;
@@ -148,7 +150,6 @@ body.dark-mode .match-bottom .vs {
   color: #555;
   margin-bottom: 6px;
 }
-
 
 .match-top .match-id {
   margin-right: auto;   /* spinge il matchId tutto a sinistra */
@@ -271,69 +272,75 @@ body.dark-mode .highlight {
   }
 }
 
-#hamburgerMenu1 {
+/* --- NUOVO STILE HAMBURGER MENU (stile match.html) --- */
+#hamburgerMenu {
   position: absolute;
   top: 10px;
   left: 10px;
+  z-index: 1100;
 }
 
-#hamburgerBtn1 {
-  font-size: 1.4rem;   /* ridotto */
-  padding: 4px 8px;
-  border-radius: 4px;
+#hamburgerBtn {
+  font-size: 30px;
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: 5px 10px;
+  color: #2c3e50; /* Colore scuro come in match */
 }
 
-#menu1 {
-  background-color: #f9f9f9;
-  border: 2px solid #ccc;
+/* Menu a comparsa */
+#menu {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
   border-radius: 8px;
-  padding: 10px;
-  margin-top: 10px;
-  position: relative;
-  z-index: 1000;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  min-width: 220px;
+  padding: 10px 0;
 }
 
-#menu1 ul {
+/* Dark mode compatibility per il menu */
+body.dark-mode #menu {
+  background-color: #222;
+  border-color: #444;
+  color: #eee;
+}
+
+#menu ul {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
-#menu1 li {
-  padding: 6px 10px;
-  cursor: pointer;
+#menu li {
+  padding: 12px 20px;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
 }
 
-#menu1 li:hover {
-  background-color: #eee;
+body.dark-mode #menu li {
+  border-bottom-color: #333;
 }
 
-.has-submenu {
-  position: relative;
+#menu li:hover {
+  background-color: #f5f5f5;
 }
 
+body.dark-mode #menu li:hover {
+  background-color: #333;
+}
+
+/* Sottomenu Campionato */
 .submenu {
-  list-style: none;
-  padding: 6px 10px;
-  margin-top: 6px;
-  border-left: 2px solid #ccc;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-top: 10px;
+  padding-left: 15px !important;
+  border-left: 2px solid #3498db;
 }
 
-.submenu li {
-  padding: 4px 8px;
-}
-
-.submenu li:hover {
-  background-color: #ddd;
-}
-
-.hidden {
-  display: none;
-}
+.hidden { display: none !important; }
 
 .campionato-item {
   padding: 8px 12px;
@@ -351,17 +358,17 @@ body.dark-mode .highlight {
 }
 
 /* 🌙 Dark Mode per il menu */
-body.dark-mode #menu1 {
+body.dark-mode #menu {
   background-color: #1e1e1e;
   border: 2px solid #444;
   color: #f0f0f0;
 }
 
-body.dark-mode #menu1 li {
+body.dark-mode #menu li {
   color: #f0f0f0;
 }
 
-body.dark-mode #menu1 li:hover {
+body.dark-mode #menu li:hover {
   background-color: #333;
 }
 
@@ -399,6 +406,7 @@ body.dark-mode #toggleTheme1 {
 body.dark-mode #toggleTheme1:hover {
   background-color: #444;
 }
+
 .campionato {
   font-size: 1.2rem;      /* più grande */
   font-weight: bold;
@@ -456,3 +464,28 @@ body.dark-mode .campionato.U15 {
   100% { opacity: 1; }
 }
 
+
+.popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+.popup-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  width: 90%;
+  max-width: 350px;
+  color: #333;
+}
+body.dark-mode .popup-content {
+  background: #222;
+  color: #eee;
+}
+.hidden { display: none !important; }
