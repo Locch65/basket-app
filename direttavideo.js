@@ -214,8 +214,8 @@ function caricaDatiPartita(mId) {
       const hudPeriodEl = document.getElementById("hud-period"); // Box nel video
       const gamePeriodEl = document.getElementById("game-period"); // Box nella scoreboard
 
-      //[hudPeriodEl, gamePeriodEl].forEach(el => {
-      [gamePeriodEl].forEach(el => {
+      [hudPeriodEl, gamePeriodEl].forEach(el => {
+      //[gamePeriodEl].forEach(el => {
         if (el && periodo) {
           el.textContent = periodo;
           el.classList.remove("hidden");
@@ -492,8 +492,8 @@ function updateScoreboard(matchIsLive) {
   const currentScore = (teamA === "Polismile A") ? `${punteggioA} - ${punteggioB}` : `${punteggioB} - ${punteggioA}`;
 
   // Aggiorna l'HUD in alto nel video
-  const hudScore = document.getElementById("hud-score");
-  if (hudScore) hudScore.textContent = currentScore;
+  const scoreText = document.getElementById("score-text");
+  if (scoreText) scoreText.textContent = currentScore;
   
   if (currentScore !== lastScoreStr) {
     if (isMobile()) { 
