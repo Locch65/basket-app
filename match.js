@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.77";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.80";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -493,11 +493,13 @@ function apriConvocazioni() {
 }
 
 function login(pwd) {
-  const adminBtn = document.getElementById("adminBtn");
+  const adminBtn = document.getElementById("adminBtn1");
 
   // --- CASO LOGOUT ---
   if (isAdmin && pwd === "logout") {
     isAdmin = false;
+    localStorage.setItem("isAdmin", isAdmin);
+    localStorage.setItem("AdminPassword", "");
     
     if (adminBtn) {
       adminBtn.innerHTML = `<i class="fas fa-user-shield"></i> Admin`;
@@ -601,7 +603,7 @@ function abilitaClickQuarto() {
 
 // Ricordati di chiamare abilitaClickQuartoAdmin() subito dopo che isAdmin diventa true
 function createAdminLoginPopup() {
-  const adminBtn = document.getElementById("adminBtn");
+  const adminBtn = document.getElementById("adminBtn1");
   const popup = document.getElementById("adminPopup");
   
   // Elementi interni al popup
@@ -1616,7 +1618,32 @@ function init() {
 
 // Assicurati che la funzione createAdminLoginPopup() sia presente 
 // per gestire l'apertura del popup quando si clicca sul nuovo adminBtn nel menu
-  createAdminLoginPopup();
+  // ATTENZIONE: chiama match.html
+  isAdmin = localStorage.getItem("isAdmin");
+  AdminPassword = localStorage.getItem("AdminPassword");
+  if (isAdmin) {
+    login(AdminPassword);
+  }
+  
+  // gestione Logout
+  const adminBtn = document.getElementById("adminBtn1");
+  adminBtn.onclick = (e) => {
+    e.preventDefault();
+    if (isAdmin) {
+      if (confirm("Vuoi uscire dalla modalità Admin?")) {
+        login("logout");
+        document.getElementById("menu").classList.add("hidden");
+      }
+    } else {
+      popup.classList.remove("hidden");
+      if (pwdInput) {
+        pwdInput.value = "";
+        setTimeout(() => pwdInput.focus(), 100);
+      }
+    }
+  };
+
+  //createAdminLoginPopup();
   aggiornaTitoli();
   renderGiocatori(giocatoriObj);
   aggiornaScoreboard();
