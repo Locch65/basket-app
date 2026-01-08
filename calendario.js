@@ -1,4 +1,4 @@
-
+let isAdmin = localStorage.getItem("isAdmin") === "true";
 
 let refreshInterval = null; // Gestisce il loop di aggiornamento
 
@@ -126,19 +126,26 @@ function caricaListaPartite(filtroCampionato = null) {
             }
 
             card.addEventListener("click", () => {
-              localStorage.setItem("matchId", p.matchId);
-              localStorage.setItem("teamA", p.squadraA);
-              localStorage.setItem("teamB", p.squadraB);
-              localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
-              localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
-              localStorage.setItem("convocazioni", p.convocazioni);
-              localStorage.setItem("videoURL", p.videoURL);
-              localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
-              localStorage.setItem("matchStartTime", extractYoutubeTime(p.videoURL));
-              localStorage.setItem("oraInizioDiretta", p.oraInizioDiretta);
-              localStorage.setItem("isLive", p.isLive);
-              localStorage.setItem("statoPartita", p.statoPartita);
-              window.location.href = "match.html";
+				if (isAdmin) {
+                  localStorage.setItem("matchId", p.matchId);
+                  localStorage.setItem("teamA", p.squadraA);
+                  localStorage.setItem("teamB", p.squadraB);
+                  localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
+                  localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
+                  localStorage.setItem("convocazioni", p.convocazioni);
+                  localStorage.setItem("videoURL", p.videoURL);
+                  localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
+                  localStorage.setItem("matchStartTime", extractYoutubeTime(p.videoURL));
+                  localStorage.setItem("oraInizioDiretta", p.oraInizioDiretta);
+                  localStorage.setItem("isLive", p.isLive);
+                  localStorage.setItem("statoPartita", p.statoPartita);
+                  window.location.href = "match.html";
+				}
+				else {
+                  localStorage.setItem("matchId", p.matchId);
+                  localStorage.setItem("videoURL", p.videoURL);
+                  window.location.href = "direttavideo.html";
+				}
             });
 
             frag.appendChild(card);
@@ -231,10 +238,78 @@ function startRefreshAutomatico(attiva, filtro) {
     refreshInterval = null;
   }
 }
+function createAdminLoginPopup() {
+  const adminBtn = document.getElementById("adminBtn");
+  const popup = document.getElementById("adminPopup");
+  
+  // Elementi interni al popup
+  const okBtn = document.getElementById("adminOkBtn");
+  const cancelBtn = document.getElementById("adminCancelBtn");
+  const pwdInput = document.getElementById("adminPassword");
+
+  // Controllo fondamentale: se manca il tasto del menu o il popup, non possiamo fare nulla
+  if (!adminBtn || !popup) {
+    console.error("Errore: adminBtn o adminPopup non trovati.");
+    return;
+  }
+
+  // 1. Gestione tasto Admin/Logout nel Menu (SEMPRE ATTIVO)
+  adminBtn.onclick = (e) => {
+    e.preventDefault();
+    if (isAdmin) {
+      if (confirm("Vuoi uscire dalla modalità Admin?")) {
+        login("logout");
+        document.getElementById("menu").classList.add("hidden");
+      }
+    } else {
+      popup.classList.remove("hidden");
+      if (pwdInput) {
+        pwdInput.value = "";
+        setTimeout(() => pwdInput.focus(), 100);
+      }
+    }
+  };
+
+  // 2. Gestione bottoni interni (se esistono nel DOM)
+  if (okBtn) {
+    okBtn.onclick = (e) => {
+      e.stopPropagation();
+      const password = pwdInput ? pwdInput.value : "";
+      if (password) {
+        login(password);
+        popup.classList.add("hidden");
+        const menu = document.getElementById("menu");
+        if (menu) menu.classList.add("hidden");
+      }
+    };
+  }
+
+  if (cancelBtn) {
+    cancelBtn.onclick = (e) => {
+      e.stopPropagation();
+      popup.classList.add("hidden");
+    };
+  }
+
+  if (pwdInput) {
+    pwdInput.onkeypress = (e) => {
+      if (e.key === "Enter" && okBtn) {
+        okBtn.onclick(e);
+      }
+    };
+  }
+
+  // Chiudi cliccando fuori dal contenuto bianco del popup
+  popup.onclick = (e) => {
+    if (e.target === popup) {
+      popup.classList.add("hidden");
+    }
+  };
+}
 
 function init() {
-      const hamburgerBtn1 = document.getElementById("hamburgerBtn1");
-      const menu1 = document.getElementById("menu1");
+      const hamburgerBtn = document.getElementById("hamburgerBtn");
+      const menu = document.getElementById("menu");
       const toggleTheme1 = document.getElementById("toggleTheme1");
       const campionatoItem = document.querySelector(".has-submenu");
       const submenu = campionatoItem.querySelector(".submenu");
@@ -242,8 +317,8 @@ function init() {
       const titolo = document.querySelector("h1");
     
       // Apri/chiudi menu principale
-      hamburgerBtn1.addEventListener("click", () => {
-        menu1.classList.toggle("hidden");
+      hamburgerBtn.addEventListener("click", () => {
+        menu.classList.toggle("hidden");
       });
     
       // Apri/chiudi sottomenu Campionato
@@ -252,10 +327,10 @@ function init() {
       });
     
       // Chiudi menu dopo selezione
-      menu1.querySelectorAll("li, button").forEach(item => {
+      menu.querySelectorAll("li, button").forEach(item => {
         item.addEventListener("click", (e) => {
           if (!item.classList.contains("has-submenu")) {
-            menu1.classList.add("hidden");
+            menu.classList.add("hidden");
           }
           e.stopPropagation();
         });
@@ -301,6 +376,44 @@ function init() {
         togglePast.checked = true;
       }
     
+	  //createAdminLoginPopup();
+          // Crea il popup (rimarrà nascosto fino al click)
+      if (typeof createAdminPopup === "function") {
+          createAdminPopup();
+      }
+  
+      isAdmin = localStorage.getItem("isAdmin") === "true";
+
+      const adminBtn = document.getElementById("adminBtn");
+      // Al caricamento, se siamo già admin, scriviamo subito Logout
+      if (isAdmin && adminBtn) {
+          adminBtn.innerHTML = '<i class="fas fa-user-shield"></i> Logout';
+      }
+  
+      if (adminBtn) {
+          adminBtn.addEventListener("click", () => {
+              const menu = document.getElementById("menu") || document.getElementById("menu1");
+              if (menu) menu.classList.add("hidden");
+  
+              if (isAdmin) {
+                  // LOGICA LOGOUT
+                  if (confirm("Vuoi uscire dalla modalità Admin?")) {
+                      isAdmin = false;
+                      localStorage.setItem("isAdmin", "false");
+                      localStorage.setItem("AdminPassword", "");
+                      adminBtn.innerHTML = '<i class="fas fa-user-shield"></i> Admin';
+                  }
+              } else {
+                  // LOGICA LOGIN (Apre il popup)
+                  const popup = document.getElementById("adminPopup");
+                  if (popup) {
+                      popup.classList.remove("hidden");
+                      document.getElementById("adminPassword").value = "";
+                      document.getElementById("adminPassword").focus();
+                  }
+              }
+          });
+      }	
       // Ripristina campionato selezionato da localStorage + aggiorna titolo
       const campionatoSalvato = localStorage.getItem("campionatoSelezionato");
       if (campionatoSalvato === "U14") {
