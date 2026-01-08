@@ -25,7 +25,8 @@
 //    - FATTO: inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
 //
 //    - FATTO: leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
-//    - sincronizzare messaggi punteggi con video
+//    - FATTO: sincronizzare messaggi punteggi con video
+//
 //    - passare matchid come parametro. cambiare i matchid delle partite nel DB. renderli numeri casuali
 //    - inserire hamburger menu con le voci: "Impostazioni", "Anagrafica", "Classifiche", 
 //    - leggere lista giocatori da Google Sheet
@@ -38,8 +39,7 @@
 //    - FATTO: inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
 //    - FATTO: inserire indicazioni del quarto attuale
 
-//    - eliminare caricaAnagraficaSingolaPartita() ???
-//    - i bottoni +/- per ritardare i messaggi vanno messi solo se Admin e devono memorizzare il dato in Google sheet e trasmesso ai client
+//    - SERVE?: i bottoni +/- per ritardare i messaggi vanno messi solo se Admin e devono memorizzare il dato in Google sheet e trasmesso ai client
 //    - i client non devono fare polling ma usare notifiche realtime da Firebase
 //
 //  Anagrafica.html
@@ -69,7 +69,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.77"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.78"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
