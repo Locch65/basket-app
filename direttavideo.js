@@ -1,5 +1,5 @@
 let LIVE_OFFSET = 5;
-let REFRESH_TIME = 300;
+let REFRESH_TIME = 500;
 
 // Inizializzazione con supporto al tracciamento dei cambiamenti
 let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
@@ -24,83 +24,55 @@ let oraInizioDiretta = null;
 let orarioVisualizzato = null;
 let orarioVisualizzatoFormattato = null;
 let fullMatchHistory = []; // Qui salviamo tutto il liveData ricevuto
+let videoId = null;
+let matchStartTime = 0;
 
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
 const matchId = urlParams.get("matchId");
-const videoId = localStorage.getItem("videoId");
-const matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
-
-
-caricaAnagraficaSingolaPartita(matchId);
-
 const teamA = localStorage.getItem("teamA"); // ATTENZIONE: da leggere da google sheet in funzione del matchId
 const teamB = localStorage.getItem("teamB");
 
 initTeamNames();
 
-//
-let initTimeout;
-
 window.onYouTubeIframeAPIReady = function () {
-  if (!videoId) { 
-    mostraErrore("⚠️ Nessun videoId trovato"); 
-    return; 
-  }
-
-  // Avvia un timeout di sicurezza: se dopo 8 secondi il player non è pronto, 
-  // forziamo l'avvio delle funzioni di rete (tickTimeline)
-  initTimeout = setTimeout(() => {
-    console.warn("L'evento onReady di YT non è scattato in tempo. Avvio forzato.");
-    mostraErrore("Il player ha difficoltà a caricarsi, ma i dati verranno aggiornati.");
-    tickTimeline(); 
-  }, 8000);
-
-  player = new YT.Player('ytplayer', {
-    videoId: videoId,
-    playerVars: { origin: window.location.origin, rel: 0, modestbranding: 1, playsinline: 1, fs: 0 },
-    events: { 
-      'onReady': (e) => {
-        clearTimeout(initTimeout); // Cancella il timeout se risponde in tempo
-        nascondiErrore();
-        onPlayerReady(e);
-      },
-	  onStateChange: onPlayerStateChange,
-      'onError': onPlayerError 
-    }
-  });
+  console.log("YouTube API Ready");
 };
 
 function onPlayerReady() {
   console.log("Player pronto");
   player.seekTo(matchStartTime, true);
   player.playVideo();
-  tickTimeline();
+  if (timelineInterval) clearInterval(timelineInterval); // Sicurezza anti-doppioni
+  timelineInterval = setInterval(tickTimeline, REFRESH_TIME);
 }
 
-// Funzioni di supporto per l'interfaccia
-function mostraErrore(msg) {
-  const overlay = document.getElementById("player-error-overlay");
-  const text = document.getElementById("error-message");
-  if (overlay && text) {
-    overlay.classList.remove("hidden");
-    text.textContent = msg;
-  }
-}
-
-function nascondiErrore() {
-  const overlay = document.getElementById("player-error-overlay");
-  if (overlay) overlay.classList.add("hidden");
-}
-
-function onPlayerError(e) {
-  hudLabel.textContent = `⚠️ Errore player (${e?.data ?? "sconosciuto"})`;
-  if (timelineInterval) clearInterval(timelineInterval);
+function creaIlPlayer(vId) {
+    if (!vId) return;
+    
+    player = new YT.Player('ytplayer', {
+        height: '100%', // ATTENZIONE: serve? nella vecchia versione non c'era
+        width: '100%',  // ATTENZIONE: serve? nella vecchia versione non c'era
+        videoId: vId,
+        playerVars: {
+            'autoplay': 1,
+            'controls': 1,
+            'rel': 0,
+            'modestbranding': 1,
+            'playsinline': 1
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
 }
 
 function caricaAnagraficaSingolaPartita(targetMatchId) {
   if (!targetMatchId) return;
 
+  localStorage.removeItem("videoId");
+  
   // Mostra un feedback di caricamento se necessario (opzionale)
   console.log("Caricamento dati per il match:", targetMatchId);
 
@@ -147,8 +119,7 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
     });
 }
 
-// Variabile di stato globale (fuori dalla funzione)
-let isFirstLoad = true;
+let isFirstLoad = true; // Variabile di stato globale (fuori dalla funzione)
 
 function generaHistory(liveDataDalBackend) {
     let scoreA = 0;
@@ -190,82 +161,76 @@ function generaHistory(liveDataDalBackend) {
     });
 }
 
-function caricaDatiPartita(mId) {
-  fetch(`${url}?matchId=${encodeURIComponent(mId)}`)
-    .then(res => res.json())
-    .then(data => {
-		// 1. Estrazione dati dai nuovi campi indicati
-      const rows = data.statisticheGiocatori || []; 
-      const dettagli = data.dettagliGara || {};
-	  
-	  const matchIsLive = dettagli.isLive;
-	  
-	  generaHistory(data.liveData);
+// Aggiungiamo 'async' per gestire l'attesa del server
+async function caricaDatiPartita(mId) {
+  if (!mId) return;
 
-	  const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
-      rows.forEach(r => {
-        const g = giocatoriObj.find(x => String(x.numero) === String(r.numero));
-        if (g) {
-          const nuoviPunti = parseInt(r.punti, 10) || 0;
-          
-          //?? // RILEVAZIONE CANESTRO: 
-          //?? // Mostra il toast solo se NON è il primo caricamento E il punteggio è aumentato
-          //?? if (!isFirstLoad && nuoviPunti > g.punteggio) {
-          //??   const incremento = nuoviPunti - g.punteggio;
-		  //?? //console.log("Ricevuto punteggio: ", g.displayName);
-          //?? }
+  try {
+    // Usiamo await per bloccare l'esecuzione finché la fetch non risponde
+    const response = await fetch(`${url}?matchId=${encodeURIComponent(mId)}`);
+    const data = await response.json();
 
-          g.punteggio = nuoviPunti;
-          g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
-          try { 
-            g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}'); 
-          } catch(e) {}
-        } 
-		else if (r.giocatore === "Squadra B" && !matchIsLive) {
-          punteggioB = parseInt(r.punti, 10) || 0;
-        }
-      });
+    // 1. Estrazione dati dai nuovi campi indicati
+    const rows = data.statisticheGiocatori || [];
+    const dettagli = data.dettagliGara || {};
+    const matchIsLive = dettagli.isLive;
 
-      // GESTIONE QUARTO/PERIODO
-      const periodo = data.dettagliGara?.statoPartita;
-      
-      const hudPeriodEl = document.getElementById("hud-period"); // Box nel video
-      const gamePeriodEl = document.getElementById("game-period"); // Box nella scoreboard
+    generaHistory(data.liveData);
 
-      [hudPeriodEl, gamePeriodEl].forEach(el => {
-      //[gamePeriodEl].forEach(el => {
-        if (el && periodo) {
-          el.textContent = periodo;
-          el.classList.remove("hidden");
+    const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
+    
+    rows.forEach(r => {
+      const g = giocatoriObj.find(x => String(x.numero) === String(r.numero));
+      if (g) {
+        const nuoviPunti = parseInt(r.punti, 10) || 0;
 
-          // Colore grigio se terminata, rosso se in corso
-          if (periodo.toLowerCase().includes("terminata")) {
-            el.style.backgroundColor = "#666";
-            el.style.borderColor = "#999";
-          } else {
-            el.style.backgroundColor = "#ff0000";
-            el.style.borderColor = "#ff4d4d";
-          }
-        }
-      });
-	  
-      // Dopo aver elaborato tutti i dati per la prima volta, impostiamo il flag a false
-      isFirstLoad = false;
-
-      updateScoreboard(matchIsLive);
-      if (!matchIsLive) {
-        renderPlayerList();
-	  }
-	  else {
-		  renderPlayerListLive();
-	  }
-	  
+        g.punteggio = nuoviPunti;
+        g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
+        try {
+          g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}');
+        } catch (e) {}
+      } else if (r.giocatore === "Squadra B" && !matchIsLive) {
+        punteggioB = parseInt(r.punti, 10) || 0;
+      }
     });
+
+    // GESTIONE QUARTO/PERIODO
+    const periodo = data.dettagliGara?.statoPartita;
+    const hudPeriodEl = document.getElementById("hud-period");
+    const gamePeriodEl = document.getElementById("game-period");
+
+    [hudPeriodEl, gamePeriodEl].forEach(el => {
+      if (el && periodo) {
+        el.textContent = periodo;
+        el.classList.remove("hidden");
+        if (periodo.toLowerCase().includes("terminata")) {
+          el.style.backgroundColor = "#666";
+          el.style.borderColor = "#999";
+        } else {
+          el.style.backgroundColor = "#ff0000";
+          el.style.borderColor = "#ff4d4d";
+        }
+      }
+    });
+
+    isFirstLoad = false;
+
+    updateScoreboard(matchIsLive);
+    if (!matchIsLive) {
+      renderPlayerList();
+    } else {
+      renderPlayerListLive();
+    }
+
+    // Restituiamo i dati se servisse usarli altrove
+    return data;
+
+  } catch (err) {
+    console.error("Errore nel caricamento dati partita:", err);
+  }
 }
 
-
-// Variabile di controllo per la durata del flash
-let isToastRunning = false;
+let isToastRunning = false; // Variabile di controllo per la durata del flash
 
 function showBasketToast(name, points) {
   const toast = document.getElementById("basket-toast");
@@ -414,6 +379,7 @@ function checkLiveStatus() {
     }
   }
 }
+
 function processEventBuffer() {
     if (!fullMatchHistory.length || !orarioVisualizzatoFormattato) return;
 
@@ -429,7 +395,7 @@ function processEventBuffer() {
         punteggioA =  eventoCorrente.punteggioA;
 		punteggioB = eventoCorrente.punteggioB;
 		updateScoreboard(true);
-		if (secondiVisualizzati - eventoCorrente.secondiReali < 1 ) {
+		if (secondiVisualizzati - eventoCorrente.secondiReali <= 1 ) {
 			showBasketToast(GetCognome(eventoCorrente.idGiocatore), eventoCorrente.puntiRealizzati);
 		}
 
@@ -441,14 +407,13 @@ function processEventBuffer() {
 	}
 }
 
-function tickTimeline() {
-  timelineInterval = setInterval(() => {
+async function tickTimeline() {
+    // Se il player non è pronto, non fare nulla
     if (!player || typeof player.getCurrentTime !== "function") return;
-    checkLiveStatus();
-    caricaDatiPartita(matchId);
-	// Controlliamo il buffer più frequentemente (es. ogni secondo)
-    processEventBuffer();
-  }, REFRESH_TIME);
+
+    checkLiveStatus();           // Controlla se l'utente è in diretta
+    await caricaDatiPartita(matchId);   // Scarica i nuovi punti/falli
+    processEventBuffer();        // Gestisce i toast dei canestri
 }
 
 function initTeamNames() {
@@ -560,6 +525,7 @@ function renderPlayerList() {
         `;
   }).join('');
 }
+
 function renderPlayerListLive() {
   const container = document.getElementById("players-grid");
   if (!container || !fullMatchHistory.length) return;
@@ -671,7 +637,28 @@ window.addEventListener("resize", () => {
     }
 });
 
+
 function init() {
+	
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentMatchId = urlParams.get("matchId");
+
+  if (currentMatchId) {
+    // Carichiamo i dati freschi dal server prima di mostrare il video
+    caricaAnagraficaSingolaPartita(matchId).then(() => {
+            
+      videoId = localStorage.getItem("videoId");
+      matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
+
+      // Crea il player (questo poi chiamerà onPlayerReady in automatico)
+      if (videoId) {
+        creaIlPlayer(videoId);
+      }            
+            
+      console.log("Timeline avviata per il match:", matchId);
+    });
+  }	
+	
   oraInizioDiretta = localStorage.getItem("oraInizioDiretta");
   // Seleziona l'elemento dello score
   const hudScoreElement = document.getElementById('hud-score');
