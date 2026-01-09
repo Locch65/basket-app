@@ -41,8 +41,16 @@ window.onYouTubeIframeAPIReady = function () {
 
 function onPlayerReady() {
   console.log("Player pronto");
+  
+  // NASCONDI LO SPINNER DEL VIDEO
+  const videoSpinner = document.getElementById("video-loading");
+  if (videoSpinner) {
+    videoSpinner.classList.add("hidden");
+  }
+
   player.seekTo(matchStartTime, true);
   player.playVideo();
+  tickTimeline();
   if (timelineInterval) clearInterval(timelineInterval); // Sicurezza anti-doppioni
   timelineInterval = setInterval(tickTimeline, REFRESH_TIME);
 }
@@ -226,7 +234,8 @@ async function caricaDatiPartita(mId) {
     return data;
 
   } catch (err) {
-    console.error("Errore nel caricamento dati partita:", err);
+      document.getElementById("players-grid").innerHTML = "Errore nel caricamento dati.";
+      console.error("Errore nel caricamento dati partita:", err);
   }
 }
 
@@ -627,7 +636,7 @@ function gestisciRotazione() {
 }
 
 // Ascolta il cambio di orientamento
-window.addEventListener("orientationchange", gestisciRotazione);
+window.addEventListener("orientationchange", gestisciRotazione, { passive: true });
 
 // Opzionale: aggiungi un controllo anche al resize per sicurezza su alcuni Android
 window.addEventListener("resize", () => {
@@ -635,7 +644,7 @@ window.addEventListener("resize", () => {
     if (window.innerWidth > window.innerHeight) {
         requestFullscreen();
     }
-});
+}, { passive: true });
 
 
 function init() {
@@ -670,7 +679,7 @@ function init() {
     
     hudScoreElement.addEventListener('click', () => {
       scambiaPosizioniHUD();
-    });
+    }, { passive: true });
   }
 
   const hudLiveStatus = document.getElementById("hud-live-status");
@@ -679,9 +688,9 @@ function init() {
         const durataTotale = player.getDuration();
         player.seekTo(durataTotale - 1, true);
         player.playVideo();		  
-	  });
+	  }, { passive: true });
   }
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", init, { passive: true });
 
