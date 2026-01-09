@@ -403,7 +403,7 @@ function processEventBuffer() {
         //document.getElementById('hud-score').textContent = `${eventoCorrente.punteggioA} - ${eventoCorrente.punteggioB}`;
         punteggioA =  eventoCorrente.punteggioA;
 		punteggioB = eventoCorrente.punteggioB;
-		updateScoreboard(true);
+		updateScoreboard(matchIsLive);
 		if (secondiVisualizzati - eventoCorrente.secondiReali <= 1 ) {
 			showBasketToast(GetCognome(eventoCorrente.idGiocatore), eventoCorrente.puntiRealizzati);
 		}
