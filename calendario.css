@@ -111,7 +111,7 @@ body.dark-mode .match-bottom .vs {
 }
 
 /* --- ANIMAZIONE LIVE POTENZIATA --- */
-.match-card.live-border {
+.match-card.live-borderOLD {
   /* Usiamo una variabile per il colore per gestirlo meglio nell'animazione */
   --live-red: #ff0000;
   
@@ -121,7 +121,6 @@ body.dark-mode .match-bottom .vs {
   /* Applica l'animazione: nome, durata, ripetizione infinita */
   animation: blink-red-intense 2.0s infinite ease-in-out !important;
 }
-
 @keyframes blink-red-intense {
   0% {
     border-color: #ff0000;
@@ -139,6 +138,19 @@ body.dark-mode .match-bottom .vs {
     transform: scale(1);
   }
 }
+
+/* Solo il bordo lampeggia */
+.match-card.live-border {
+  border: 3px solid #e74c3c;
+  animation: blink-border 1.5s infinite;
+}
+
+@keyframes blink-border {
+  0% { border-color: #e74c3c; }
+  50% { border-color: transparent; }
+  100% { border-color: #e74c3c; }
+}
+
 
 /* Riga 1: info principali */
 .match-top {
@@ -437,12 +449,16 @@ body.dark-mode .campionato.U15 {
 }
 
 
-#listaPartite.loading { /* ATTENZIONE in quale file serve */
+#listaPartite.loadingOLD { /* ATTENZIONE in quale file serve */
 
   text-align: center;
   font-weight: bold;
   color: #27ae60; /* verde o colore a scelta */
   animation: blink 1s infinite;
+}
+#listaPartite.loading {
+  animation: none; 
+  color: #7f8c8d;
 }
 
 @keyframes blink {
