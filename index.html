@@ -29,6 +29,7 @@
     async function checkLiveAndRedirect() {
       const status = document.getElementById("status-msg");
       try {
+	  if (false) {
         // Recupero dati usando l'URL da common.js
         const response = await fetch(url + "?sheet=Partite"); 
         const data = await response.json();
@@ -48,9 +49,12 @@
             return;
           }
         }
-        
+        }
         // Se nessuna live o rifiuto, vai al calendario
-        window.location.href = "calendario.html";
+        //window.location.href = "calendario.html";
+        // Ti manda subito al calendario passando il parametro "live"
+        window.location.href = "calendario.html?live=true";		
+		
       } catch (err) {
         console.error("Errore:", err);
         status.textContent = "Errore di connessione. Reindirizzamento...";
