@@ -11,7 +11,10 @@
 </head>
 <body>
   <div class="video-container">
-
+    <div id="video-loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Inizializzazione video...</p>
+    </div>
     <div id="ytplayer"></div>
     <div id="hud-overlay">
         <div id="hud-score" class="badge">
@@ -35,14 +38,18 @@
       <div id="game-score" class="main-score">0 - 0</div>
 	  <span id="game-period" class="period-box-mini hidden"></span>
     </div>
-    <div id="players-grid"></div>
-  </div>
+    <div id="players-grid">
+        <div class="loading-container">
+            <img src="icon-192.png" class="spinner-icon" alt="Caricamento...">
+            <p>Caricamento statistiche...</p>
+        </div>
+    </div>  </div>
 
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.81"></script>
-  <script src="direttavideo.js?v=1.0.81"></script>
+  <script src="common.js?v=1.0.82"></script>
+  <script src="direttavideo.js?v=1.0.82"></script>
 
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
