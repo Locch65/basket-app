@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.81";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.82";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -913,21 +913,24 @@ function addLongPressListener(element, callback, duration = 600) {
 
   element.addEventListener("mousedown", () => {
     timer = setTimeout(callback, duration);
-  });
+  }, { passive: true });
   element.addEventListener("mouseup", () => {
     clearTimeout(timer);
-  });
+  }, { passive: true });
   element.addEventListener("mouseleave", () => {
     clearTimeout(timer);
-  });
+  }, { passive: true });
 
   // Supporto per smartphone (touch)
   element.addEventListener("touchstart", () => {
+	// Cancella eventuali timer precedenti se l'utente tocca di nuovo
+    clearTimeout(timer);
+	
     timer = setTimeout(callback, duration);
-  });
+  }, { passive: true });
   element.addEventListener("touchend", () => {
     clearTimeout(timer);
-  });
+  }, { passive: true });
 }
 
 function renderGiocatori(lista) {
