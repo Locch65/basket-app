@@ -8,161 +8,187 @@ function parseItalianDate(dateStr, timeStr) {
       return new Date(anno, mese - 1, giorno, ore, minuti);
 }
 
+/**
+ * Funzione principale per caricare le partite.
+ * Gestisce la cache immediata e decide se ridisegnare la lista o aggiornare i dati.
+ */
 function caricaListaPartite(filtroCampionato = null) {
-      const container = document.getElementById("listaPartite");
-      // 🔧 Mostra sempre Loading lampeggiante
-      container.classList.add("loading");
-      container.textContent = "Loading...";
+    const container = document.getElementById("listaPartite");
+    const cacheDati = localStorage.getItem("cache_partite");
 
-      fetch(url + "?sheet=Partite")
+    // 1. Caricamento immediato dalla Cache (se disponibile)
+    if (cacheDati) {
+        try {
+            const datiLocali = JSON.parse(cacheDati);
+            container.classList.remove("loading");
+            renderizzaPartite(datiLocali, filtroCampionato);
+        } catch (e) {
+            console.error("Errore lettura cache:", e);
+        }
+    }
+
+    // 2. Fetch dei dati aggiornati da Google Sheets
+    fetch(url + "?sheet=Partite")
         .then(res => res.json())
         .then(data => {
-          container.classList.remove("loading");
-          const partite = Array.isArray(data) ? data : data.data;
-          if (!Array.isArray(partite) || partite.length === 0) {
-            container.textContent = "Nessuna partita disponibile";
-            return;
-          }
+            container.classList.remove("loading");
+            const partite = Array.isArray(data) ? data : data.data;
+            if (!Array.isArray(partite)) return;
 
-          let partiteFiltrate = partite;
+            // Salva i nuovi dati in cache per il prossimo reload
+            localStorage.setItem("cache_partite", JSON.stringify(partite));
 
-          // 🔧 Filtro campionato
-          if (filtroCampionato) {
-            partiteFiltrate = partiteFiltrate.filter(p =>
-              String(p.matchId ?? "").includes(filtroCampionato)
-            );
-          }
-    
-          // 🔧 Escludi partite passate se toggle attivo
-          const excludePast = document.getElementById("togglePast").checked;
-          const oggi = new Date();
-          if (excludePast) {
-            // Normalizza "oggi" a mezzanotte
-            oggi.setHours(0, 0, 0, 0);
-          
-            partiteFiltrate = partiteFiltrate.filter(p => {
-              const dataPartita = parseItalianDate(p.data, p.orario);
-              // Normalizza anche la data della partita
-              dataPartita.setHours(0, 0, 0, 0);
-          
-              return dataPartita >= oggi;
-            });
-          }
-
-
-          // 🔧 Ordina per data crescente
-          partiteFiltrate.sort((a, b) => {
-            const dataA = parseItalianDate(a.data, a.orario);
-            const dataB = parseItalianDate(b.data, b.orario);
-            return dataA - dataB;
-          });
-          const frag = document.createDocumentFragment();
-          //const oggi = new Date();
-
-          let almenoUnaLive = false;
-		  
-          partiteFiltrate.forEach(p => {
-            let campionato = "";
-            if (String(p.matchId).includes("U14")) {
-              campionato = "U14";
-            } else if (String(p.matchId).includes("U15")) {
-              campionato = "U15";
+            // Se il filtro è attivo o la lista è vuota, eseguiamo un render completo.
+            // Altrimenti aggiorniamo chirurgicamente i punteggi/live.
+            if (container.querySelector('.match-card')) {
+                // Se la lista esiste già, aggiorniamo solo i dati sensibili senza "blink"
+                aggiornaDatiSenzaBlink(partite);
             } else {
-              campionato = "Altro"; // fallback se non contiene U14/U15
-            }
-			// 🔧 Ripulisci matchId eliminando il nome del campionato
-            let matchIdPulito = String(p.matchId)
-              .replace("U14 ", "")
-              .replace("U15 ", "")
-              .trim();
-			  
-            const card = document.createElement("div");
-            card.classList.add("match-card");
-			card.setAttribute("data-matchid", p.matchId);
-			
-            // --- Controllo Live per il bordo ---
-            if (p.isLive === "true" || p.isLive === true) {
-              card.classList.add("live-border");
-              almenoUnaLive = true;
-            }
-			
-            const dataPartita = parseItalianDate(p.data, p.orario);
-            if (dataPartita < oggi) {
-              card.classList.add("past");
+                renderizzaPartite(partite, filtroCampionato);
             }
 
-            // Giorni della settimana in italiano (abbreviati)
-            const giorniSettimana = ["Dom.", "Lun.", "Mar.", "Mer.", "Gio.", "Ven.", "Sab."];
-            
-            // Calcola giorno della settimana
-            const giornoSettimana = giorniSettimana[dataPartita.getDay()];
+            // Gestione Refresh Automatico
+            const almenoUnaLive = partite.some(p => p.isLive === "true" || p.isLive === true);
+            startRefreshAutomatico(almenoUnaLive, filtroCampionato);
+        })
+        .catch(err => {
+            container.classList.remove("loading");
+            if (container.children.length === 0) {
+                container.textContent = "Errore di connessione.";
+            }
+            console.error(err);
+        });
+}
 
-            //const casaIcon = "🏠";
-            //const trasfertaIcon = "🚌";
-            //const icona = (p.casaTrasferta === "Casa") ? casaIcon : trasfertaIcon;
+/**
+ * Ricostruisce l'intero DOM della lista.
+ * Da usare al caricamento o quando si cambia filtro (U14/U15).
+ */
+function renderizzaPartite(partite, filtroCampionato) {
+    const container = document.getElementById("listaPartite");
+    const oggi = new Date();
+    const excludePast = document.getElementById("togglePast").checked;
+    
+    let partiteFiltrate = partite;
 
-            card.innerHTML = `
-              <div class="match-top">
-                <span class="campionato ${campionato}">${campionato}</span>
-                <span class="match-id">${matchIdPulito}</span>
-                <span class="data">${giornoSettimana} ${p.data}</span>
+    // Filtro per Campionato
+    if (filtroCampionato && filtroCampionato !== "Tutti") {
+        partiteFiltrate = partiteFiltrate.filter(p =>
+            String(p.matchId ?? "").includes(filtroCampionato)
+        );
+    }
+
+    // Filtro per partite passate
+    if (excludePast) {
+        const oggiMezzanotte = new Date();
+        oggiMezzanotte.setHours(0, 0, 0, 0);
+        partiteFiltrate = partiteFiltrate.filter(p => {
+            const dataP = parseItalianDate(p.data, p.orario);
+            dataP.setHours(0, 0, 0, 0);
+            return dataP >= oggiMezzanotte;
+        });
+    }
+
+    // Ordinamento cronologico
+    partiteFiltrate.sort((a, b) => parseItalianDate(a.data, a.orario) - parseItalianDate(b.data, b.orario));
+
+    const frag = document.createDocumentFragment();
+
+    partiteFiltrate.forEach(p => {
+        let cat = String(p.matchId).includes("U14") ? "U14" : String(p.matchId).includes("U15") ? "U15" : "Altro";
+        let mIdPulito = String(p.matchId).replace("U14 ", "").replace("U15 ", "").trim();
+
+        const card = document.createElement("div");
+        card.classList.add("match-card");
+        card.setAttribute("data-matchid", p.matchId);
+
+        if (p.isLive === "true" || p.isLive === true) card.classList.add("live-border");
+        if (parseItalianDate(p.data, p.orario) < oggi) card.classList.add("past");
+
+        const giorni = ["Dom.", "Lun.", "Mar.", "Mer.", "Gio.", "Ven.", "Sab."];
+        const giornoSett = giorni[parseItalianDate(p.data, p.orario).getDay()];
+
+        card.innerHTML = `
+            <div class="match-top">
+                <span class="campionato ${cat}">${cat}</span>
+                <span class="match-id">${mIdPulito}</span>
+                <span class="data">${giornoSett} ${p.data}</span>
                 <span class="orario">${p.orario}</span>
-              </div>
-              <div class="match-middle">
-                 <!--<span class="casa">${"icona"}</span> -->
-                <span class="luogo">${p.luogo}</span>
-              </div>
-              <div class="match-bottom">
+            </div>
+            <div class="match-middle"><span class="luogo">${p.luogo}</span></div>
+            <div class="match-bottom">
                 <span class="teamA"><span class="team-name">${p.squadraA}</span> <strong>${p.punteggioA ?? "-"}</strong></span>
                 <span class="vs">vs</span>
                 <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
-              </div>
-            `;
+            </div>`;
+        
+        // Highlight squadra di casa/trasferta
+        if (p.casaTrasferta === "Casa") card.querySelector(".teamA .team-name").classList.add("highlight");
+        else if (p.casaTrasferta === "Trasferta") card.querySelector(".teamB .team-name").classList.add("highlight");
+
+        card.onclick = () => {
+            localStorage.setItem("matchId", p.matchId);
+            localStorage.setItem("teamA", p.squadraA);
+            localStorage.setItem("teamB", p.squadraB);
+            localStorage.setItem("puntiSquadraA", p.punteggioA || 0);
+            localStorage.setItem("puntiSquadraB", p.punteggioB || 0);
+            localStorage.setItem("convocazioni", p.convocazioni || "");
+            localStorage.setItem("videoURL", p.videoURL || "");
+            localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
+            localStorage.setItem("matchStartTime", extractYoutubeTime(p.videoURL));
+            localStorage.setItem("oraInizioDiretta", p.oraInizioDiretta || "");
+            localStorage.setItem("isLive", p.isLive || false);
+            localStorage.setItem("statoPartita", p.statoPartita || "");
             
-            if (p.casaTrasferta === "Casa") {
-              card.querySelector(".teamA .team-name").classList.add("highlight");
-            } else if (p.casaTrasferta === "Trasferta") {
-              card.querySelector(".teamB .team-name").classList.add("highlight");
+            window.location.href = (localStorage.getItem("isAdmin") === "true") ? "match.html" : "direttavideo.html?matchId=" + encodeURIComponent(p.matchId);
+        };
+
+        frag.appendChild(card);
+    });
+
+    container.replaceChildren(frag);
+}
+
+/**
+ * Aggiorna i dati nelle card esistenti senza ricreare il DOM.
+ * Impedisce il fastidioso flickering della pagina.
+ */
+function aggiornaDatiSenzaBlink(partite) {
+    partite.forEach(p => {
+        const card = document.querySelector(`.match-card[data-matchid="${p.matchId}"]`);
+        if (card) {
+            const scoreA = card.querySelector(".teamA strong");
+            const scoreB = card.querySelector(".teamB strong");
+            
+            // Aggiorna solo se il valore è cambiato
+            if (scoreA && scoreA.textContent !== String(p.punteggioA ?? "-")) scoreA.textContent = p.punteggioA ?? "-";
+            if (scoreB && scoreB.textContent !== String(p.punteggioB ?? "-")) scoreB.textContent = p.punteggioB ?? "-";
+
+            // Gestione dinamica del bordo live
+            if (p.isLive === "true" || p.isLive === true) {
+                card.classList.add("live-border");
+            } else {
+                card.classList.remove("live-border");
             }
+        }
+    });
+}
 
-            card.addEventListener("click", () => {
-				if (isAdmin) {
-                  localStorage.setItem("matchId", p.matchId);
-                  localStorage.setItem("teamA", p.squadraA);
-                  localStorage.setItem("teamB", p.squadraB);
-                  localStorage.setItem("puntiSquadraA", p.punteggioA === "" ? 0 : p.punteggioA);
-                  localStorage.setItem("puntiSquadraB", p.punteggioB === "" ? 0 : p.punteggioB);
-                  localStorage.setItem("convocazioni", p.convocazioni);
-                  localStorage.setItem("videoURL", p.videoURL);
-                  localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
-                  localStorage.setItem("matchStartTime", extractYoutubeTime(p.videoURL));
-                  localStorage.setItem("oraInizioDiretta", p.oraInizioDiretta);
-                  localStorage.setItem("isLive", p.isLive);
-                  localStorage.setItem("statoPartita", p.statoPartita);
-                  window.location.href = "match.html";
-				}
-				else {
-                  localStorage.setItem("matchId", p.matchId);
-                  localStorage.setItem("videoURL", p.videoURL);
-                  window.location.href = "direttavideo.html";
-				}
-            });
-
-            frag.appendChild(card);
-          });
-
-          container.replaceChildren(frag);
-		  
-          // --- LOGICA REFRESH AUTOMATICO ---
-          startRefreshAutomatico(almenoUnaLive, filtroCampionato);
-
-        })
-        .catch(err => {
-          container.classList.remove("loading");
-          container.textContent = "Errore caricamento partite: " + err.message;
-          console.error(err);
+/**
+ * Richiamata dal timer di refresh automatico.
+ */
+function aggiornaPunteggiLive() {
+    fetch(url + "?sheet=Partite")
+        .then(res => res.json())
+        .then(data => {
+            const partite = Array.isArray(data) ? data : data.data;
+            if (Array.isArray(partite)) {
+                localStorage.setItem("cache_partite", JSON.stringify(partite));
+                aggiornaDatiSenzaBlink(partite);
+            }
         });
 }
+
 
 function filtraPartite(campionato, titolo) {
         console.log("Filtro attivato per:", campionato);
@@ -182,45 +208,6 @@ function filtraPartite(campionato, titolo) {
         localStorage.setItem("campionatoSelezionato", campionato ?? "Tutti");
     
         caricaListaPartite(campionato);
-}
-
-function aggiornaPunteggiLive() {
-  fetch(url + "?sheet=Partite")
-    .then(res => res.json())
-    .then(data => {
-      const partite = Array.isArray(data) ? data : data.data;
-      if (!Array.isArray(partite)) return;
-
-      partite.forEach(p => {
-        const card = document.querySelector(`.match-card[data-matchid="${p.matchId}"]`);
-        if (card) {
-          const teamAscore = card.querySelector(".teamA strong");
-          const teamBscore = card.querySelector(".teamB strong");
-
-          const applicaFlash = (elemento, nuovoPunto) => {
-            const nuovoValore = String(nuovoPunto ?? "-");
-            if (elemento && elemento.textContent !== nuovoValore) {
-              elemento.textContent = nuovoValore;
-              
-              // Reset animazione
-              elemento.classList.remove("flash-update");
-              void elemento.offsetWidth; 
-              elemento.classList.add("flash-update");
-            }
-          };
-
-          applicaFlash(teamAscore, p.punteggioA);
-          applicaFlash(teamBscore, p.punteggioB);
-          
-          // Aggiorna anche il bordo se la partita finisce o inizia il live
-          if (p.isLive === true || p.isLive === "true") {
-            card.classList.add("live-border");
-          } else {
-            card.classList.remove("live-border");
-          }
-        }
-      });
-    });
 }
 
 function startRefreshAutomatico(attiva, filtro) {
