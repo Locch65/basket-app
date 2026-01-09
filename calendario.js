@@ -12,7 +12,7 @@ function parseItalianDate(dateStr, timeStr) {
  * Funzione principale per caricare le partite.
  * Gestisce la cache immediata e decide se ridisegnare la lista o aggiornare i dati.
  */
-function caricaListaPartite(filtroCampionato = null) {
+function OLD_OKcaricaListaPartite(filtroCampionato = null) {
     const container = document.getElementById("listaPartite");
     const cacheDati = localStorage.getItem("cache_partite");
 
@@ -57,6 +57,49 @@ function caricaListaPartite(filtroCampionato = null) {
                 container.textContent = "Errore di connessione.";
             }
             console.error(err);
+        });
+}
+
+function caricaListaPartite(filtroCampionato = null) {
+    const container = document.getElementById("listaPartite");
+    
+    // --- NUOVA LOGICA FILTRO LIVE ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterLiveOnly = urlParams.get('live') === 'true';
+    const titolo = document.querySelector("h1");
+    // --------------------------------
+
+    const cacheDati = localStorage.getItem("cache_partite");
+
+    if (cacheDati) {
+        try {
+            let datiLocali = JSON.parse(cacheDati);
+            
+            // Applichiamo il filtro se siamo in modalità live
+            if (filterLiveOnly) {
+                datiLocali = datiLocali.filter(p => p.isLive === "true" || p.isLive === true);
+                if (titolo) titolo.textContent = "Partite in Diretta";
+            }
+            
+            container.classList.remove("loading");
+            renderizzaPartite(datiLocali, filtroCampionato);
+        } catch (e) { console.error(e); }
+    }
+
+    fetch(url + "?sheet=Partite")
+        .then(res => res.json())
+        .then(data => {
+            container.classList.remove("loading");
+            let partite = Array.isArray(data) ? data : data.data;
+
+            // Applichiamo lo stesso filtro ai dati freschi dal server
+            if (filterLiveOnly) {
+                partite = partite.filter(p => p.isLive === "true" || p.isLive === true);
+                if (titolo) titolo.textContent = "Partite in Diretta";
+            }
+
+            localStorage.setItem("cache_partite", JSON.stringify(partite));
+            renderizzaPartite(partite, filtroCampionato);
         });
 }
 
@@ -206,6 +249,12 @@ function filtraPartite(campionato, titolo) {
     
         // 👉 Memorizza il campionato selezionato
         localStorage.setItem("campionatoSelezionato", campionato ?? "Tutti");
+
+        // --- AGGIUNTA: Rimuove il parametro ?live dall'URL senza ricaricare la pagina ---
+        const url = new URL(window.location);
+        url.searchParams.delete('live');
+        window.history.replaceState({}, '', url);
+        // ---------------------------------------------------------------------------
     
         caricaListaPartite(campionato);
 }
@@ -374,7 +423,7 @@ function init() {
       const adminBtn = document.getElementById("adminBtn");
       // Al caricamento, se siamo già admin, scriviamo subito Logout
       if (isAdmin && adminBtn) {
-          adminBtn.innerHTML = '<i class="fas fa-user-shield"></i> Logout';
+          adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
       }
   
       if (adminBtn) {
