@@ -10,9 +10,10 @@
 //
 //  Calendario.html
 //    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
-//    - aggiungere in hamburger menu la voce Administrator, deve permettere la lettura e memorizzazione della password.
-//      quando si seleziona una partita, se è stato fatto login come Administrator va alla pagina match.html, altrimenti a direttavideo.html
+//    - FATTO: aggiungere in hamburger menu la voce Administrator, deve permettere la lettura e memorizzazione della password.
+//    - FATTO: quando si seleziona una partita, se è stato fatto login come Administrator va alla pagina match.html, altrimenti a direttavideo.html
 //
+//    - visualizzare i dati del calendario nella cache mentre accede a google sheets per fare il refresh
 //    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
 //    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //
@@ -71,7 +72,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.80"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.81"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
