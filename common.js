@@ -248,7 +248,7 @@ function createAdminPopup() {
       event.preventDefault();
       handleLogin();
     }
-  });
+  }, { passive: true });
 
   // 4. NUOVO: Click all'esterno (sull'overlay scuro)
   popup.addEventListener("click", (event) => {
@@ -257,5 +257,5 @@ function createAdminPopup() {
     if (event.target === popup) {
       closePopup();
     }
-  });
+  }, { passive: true });
 }
