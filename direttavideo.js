@@ -1,5 +1,5 @@
 let LIVE_OFFSET = 5;
-let REFRESH_TIME = 500;
+let REFRESH_TIME = 300;
 
 // Inizializzazione con supporto al tracciamento dei cambiamenti
 let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
@@ -182,6 +182,7 @@ async function caricaDatiPartita(mId) {
     const rows = data.statisticheGiocatori || [];
     const dettagli = data.dettagliGara || {};
     const matchIsLive = dettagli.isLive;
+	isUserLive = matchIsLive;
 
     generaHistory(data.liveData);
 
@@ -403,8 +404,8 @@ function processEventBuffer() {
         //document.getElementById('hud-score').textContent = `${eventoCorrente.punteggioA} - ${eventoCorrente.punteggioB}`;
         punteggioA =  eventoCorrente.punteggioA;
 		punteggioB = eventoCorrente.punteggioB;
-		updateScoreboard(matchIsLive);
-		if (secondiVisualizzati - eventoCorrente.secondiReali <= 1 ) {
+		updateScoreboard(isUserLive);
+		if (isUserLive && secondiVisualizzati - eventoCorrente.secondiReali < 1 ) {
 			showBasketToast(GetCognome(eventoCorrente.idGiocatore), eventoCorrente.puntiRealizzati);
 		}
 
@@ -416,12 +417,22 @@ function processEventBuffer() {
 	}
 }
 
+// Inizializza il contatore fuori dalla funzione
+let tickCounter = 0;
+
 async function tickTimeline() {
     // Se il player non è pronto, non fare nulla
     if (!player || typeof player.getCurrentTime !== "function") return;
 
     checkLiveStatus();           // Controlla se l'utente è in diretta
-    await caricaDatiPartita(matchId);   // Scarica i nuovi punti/falli
+
+    // Incrementiamo sempre il contatore
+    tickCounter++;
+
+    // L'operatore modulo (%) restituisce 0 ogni volta che tickCounter è un multiplo di 5
+    if (tickCounter % 5 === 0) {
+        await caricaDatiPartita(matchId);
+    }
     processEventBuffer();        // Gestisce i toast dei canestri
 }
 
@@ -478,6 +489,7 @@ function updateScoreboard(matchIsLive) {
   //const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
   if (!matchIsLive) {
     punteggioA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
+	punteggioB = localStorage.getItem("puntiSquadraB");
   }
   
   //const currentScore = (teamA === "Polismile A") ? `${puntiA} - ${punteggioB}` : `${punteggioB} - ${puntiA}`;
