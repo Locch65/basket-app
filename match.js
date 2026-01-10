@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.82";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.84";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -1654,6 +1654,7 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
 
 
 
