@@ -487,13 +487,19 @@ function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.use
 function updateScoreboard(matchIsLive) {
   const scoreEl = document.getElementById("game-score");
   //const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
+  let currentScore = "";
   if (!matchIsLive) {
-    punteggioA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
+    //punteggioA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);
+	punteggioA = localStorage.getItem("puntiSquadraA");
 	punteggioB = localStorage.getItem("puntiSquadraB");
+	currentScore = `${punteggioA} - ${punteggioB}`;
+  }
+  else {
+    currentScore = (teamA === "Polismile A") ? `${punteggioA} - ${punteggioB}` : `${punteggioB} - ${punteggioA}`;
   }
   
   //const currentScore = (teamA === "Polismile A") ? `${puntiA} - ${punteggioB}` : `${punteggioB} - ${puntiA}`;
-  const currentScore = (teamA === "Polismile A") ? `${punteggioA} - ${punteggioB}` : `${punteggioB} - ${punteggioA}`;
+  // const currentScore = (teamA === "Polismile A") ? `${punteggioA} - ${punteggioB}` : `${punteggioB} - ${punteggioA}`;
 
   // Aggiorna l'HUD in alto nel video
   const scoreText = document.getElementById("score-text");
