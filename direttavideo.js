@@ -182,6 +182,7 @@ async function caricaDatiPartita(mId) {
     const rows = data.statisticheGiocatori || [];
     const dettagli = data.dettagliGara || {};
     const matchIsLive = dettagli.isLive;
+	oraInizioDiretta = dettagli.oraInizioDiretta;
 	isUserLive = matchIsLive;
 
     generaHistory(data.liveData);
