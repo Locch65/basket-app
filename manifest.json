@@ -1,5 +1,5 @@
 {
-  "name": "Statistiche Basket",
+  "name": "Polismile Basket Stats",
   "short_name": "Basket",
   "start_url": "index.html",
   "display": "standalone",
@@ -19,3 +19,4 @@
     }
   ]
 }
+
