@@ -74,7 +74,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.85"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.86"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
@@ -155,6 +155,7 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("message", (event) => {
   // placeholder se vuoi gestire comandi dal client
 });
+
 
 
 
