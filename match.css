@@ -898,7 +898,7 @@ h1 {
     border-radius: 4px;
   }
   .clock-display {
-        font-size: 1.1rem; /* Dimensione ridotta per il cellulare */
+        font-size: 0.9rem; /* Dimensione ridotta per il cellulare */
         min-width: 85px;   /* Riduce l'ingombro orizzontale */
         padding: 2px 6px;  /* Riduce lo spazio interno */
         border-width: 1px; /* Bordo più sottile per non appesantire */
