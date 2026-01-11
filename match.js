@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.84";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.85";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -1524,6 +1524,18 @@ function aggiornaStatoVideo(videoId) {
     }
 }
 
+function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    const clockElement = document.getElementById('digitalClock');
+    if (clockElement) {
+        clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+    }
+}
+
 // =====================
 // INIZIALIZZAZIONE
 // =====================
@@ -1651,6 +1663,10 @@ function init() {
   renderGiocatori(giocatoriObj);
   aggiornaScoreboard();
   avviaAggiornamentoAutomatico();
+  
+  // Avvia l'orologio immediatamente e poi ogni secondo
+  setInterval(updateClock, 1000);
+  updateClock();
 }
 
 document.addEventListener("DOMContentLoaded", init);
