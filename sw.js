@@ -12,9 +12,11 @@
 //    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
 //    - FATTO: aggiungere in hamburger menu la voce Administrator, deve permettere la lettura e memorizzazione della password.
 //    - FATTO: quando si seleziona una partita, se è stato fatto login come Administrator va alla pagina match.html, altrimenti a direttavideo.html
+//    - FATTO: visualizzare i dati del calendario nella cache mentre accede a google sheets per fare il refresh
 //
-//    - visualizzare i dati del calendario nella cache mentre accede a google sheets per fare il refresh
+//    - inserire un bottone refresh e un messaggio"loading" per la lista delle partite live
 //    - Aggiungere in hamburger le voci: "Anagrafica", "Classifiche", "Impostazioni", 
+//    - mettere U14, U15, TUtti allo stesso livello non nel sottomenu Campionato
 //    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //
 //  Match.html
@@ -29,11 +31,12 @@
 //    - FATTO: leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
 //    - FATTO: sincronizzare messaggi punteggi con video
 //
+//    - inserire bottoni +/- per ritardare la visualizzazione dei messaggi (solo Admin). devono modificare il valore di oraInizioDiretta. i client devono leggere continuamente il valore
 //    - passare matchid come parametro. cambiare i matchid delle partite nel DB. renderli numeri casuali
 //    - inserire hamburger menu con le voci: "Impostazioni", "Anagrafica", "Classifiche", 
 //    - leggere lista giocatori da Google Sheet
 //    - password Admin da crittografare
-//    - implementare dark mode
+//    - NICE TO HAVE: implementare dark mode
 //
 //  DirettaVideo.html
 //    - FATTO: inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
@@ -41,9 +44,8 @@
 //    - FATTO: inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
 //    - FATTO: inserire indicazioni del quarto attuale
 
-//    - SERVE?: i bottoni +/- per ritardare i messaggi vanno messi solo se Admin e devono memorizzare il dato in Google sheet e trasmesso ai client
+//
 //    - i client non devono fare polling ma usare notifiche realtime da Firebase
-//    - anticipare la prima lettura del database, ci mette troppo tempo.
 //
 //  Anagrafica.html
 //    - 1) mostrare lista Roster. Quando si clicca su un nome
@@ -72,7 +74,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.84"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.85"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
