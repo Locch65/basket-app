@@ -5,7 +5,6 @@
   <title>Anagrafica Roster</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Swiper CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <style>
@@ -13,6 +12,7 @@
       font-family: Arial, sans-serif;
       margin: 0;
       background: #f5f5f5;
+      overflow-x: hidden; /* Evita micro-scroll laterali */
     }
     .swiper {
       width: 100%;
@@ -27,6 +27,9 @@
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      /* Fondamentale per evitare lo slittamento accumulato: */
+      box-sizing: border-box; 
+      width: 100%;
     }
     .player-photo {
       width: 200px;
@@ -34,6 +37,7 @@
       object-fit: cover;
       border-radius: 50%;
       margin-bottom: 20px;
+      background: #eee; /* Placeholder grigio se l'immagine carica lenta */
     }
     .player-info {
       text-align: center;
@@ -41,120 +45,106 @@
     .player-info h2 {
       margin: 5px 0;
     }
-    .loading {
-      text-align: center;
-      font-size: 1.5em;
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      50% { opacity: 0; }
+    /* Pulsante per tornare alla lista */
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Swiper container -->
+  <a href="roster.html" class="back-btn">← Torna alla lista</a>
+
   <div class="swiper">
     <div class="swiper-wrapper" id="roster-container">
-      <!-- Le schede verranno generate dinamicamente -->
-    </div>
-    <!-- Paginazione -->
+      </div>
     <div class="swiper-pagination"></div>
-    <!-- Frecce -->
     <div class="swiper-button-prev"></div>
     <div class="swiper-button-next"></div>
   </div>
 
-  <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <script>
-    const url = 
-       "https://script.google.com/macros/s/AKfycbxbXnHTn9ODioPfLLrMV9zVeRJ1TiQ9tnLMLPj6rmIosdqSW21opDXoWaZ-Y2bMMuWhgA/exec"
-
     function normalizeUrl(url) {
       if (!url) return "";
-      if (!/^https?:\/\//i.test(url)) {
-        return "https://" + url;
-      }
+      if (!/^https?:\/\//i.test(url)) return "https://" + url;
       return url.trim();
     }
 
-    // Converte un link Google Drive "view" in un link diretto "uc?id"
     function convertDriveLink(url) {
       if (!url) return "";
-      // Caso: /d/FILE_ID/
-      let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
         return `https://drive.google.com/uc?id=${match[1]}`;
       }
-      // Caso: id=FILE_ID
-      match = url.match(/id=([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        return `https://drive.google.com/uc?id=${match[1]}`;
-      }
-      return url; // fallback
+      return url;
     }
 
     function caricaRoster() {
       const container = document.getElementById("roster-container");
-      container.classList.add("loading");
-      container.innerHTML = "<div class='loading'>Loading...</div>";
+      
+      // Recupero dati da localStorage salvati da roster.html
+      const datiSalvati = localStorage.getItem("datiRoster");
+      
+      if (!datiSalvati) {
+        container.innerHTML = "<div class='swiper-slide'><h2>Dati non trovati. Torna alla lista.</h2></div>";
+        return;
+      }
 
-      fetch(url + "?sheet=Roster")
-        .then(res => res.json())
-        .then(data => {
-          container.classList.remove("loading");
-          const roster = Array.isArray(data) ? data : data.data;
-          if (!Array.isArray(roster) || roster.length === 0) {
-            container.innerHTML = "<div>Nessun giocatore disponibile</div>";
-            return;
-          }
+      const roster = JSON.parse(datiSalvati);
+      const frag = document.createDocumentFragment();
 
-          const frag = document.createDocumentFragment();
+      roster.forEach(player => {
+        const slide = document.createElement("div");
+        slide.classList.add("swiper-slide");
+        
+        // Conversione corretta del link foto
+        const imgUrl = normalizeUrl(convertDriveLink((player.Foto || "").trim()));
+        
+        slide.innerHTML = `
+          <img src="${player.Foto}" alt="${player.Nome}" class="player-photo" />
+          <div class="player-info">
+            <h2>#${player["Numero Maglia"] || "00"}</h2>
+            <h2>${player.Nome} ${player.Cognome}</h2>
+          </div>
+        `;
+        frag.appendChild(slide);
+      });
 
-          roster.forEach(player => {
-            const slide = document.createElement("div");
-            slide.classList.add("swiper-slide");
-            // Normalizza e converte il link della foto
-            const img = normalizeUrl(convertDriveLink((player.Foto || "").trim()));
-			console.log(player.Foto);
-			console.log(img);
-            
-            slide.innerHTML = `
-              <img src="${player.Foto}" 
-              alt="${player.Nome} ${player.Cognome}" 
-                   class="player-photo" />
-              <div class="player-info">
-                <h2>#${player["Numero Maglia"]}</h2>
-                <h2>${player.Nome} ${player.Cognome}</h2>
-              </div>
-            `;
+      container.replaceChildren(frag);
 
+      // Gestione indice per posizionamento iniziale
+      const urlParams = new URLSearchParams(window.location.search);
+      const playerIndex = urlParams.get('player');
 
-            frag.appendChild(slide);
-          });
-
-          container.replaceChildren(frag);
-
-          // Inizializza Swiper
-          new Swiper('.swiper', {
-            direction: 'horizontal',
-            loop: false,
-            pagination: { el: '.swiper-pagination', clickable: true },
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-            keyboard: { enabled: true },
-            effect: 'slide', // puoi provare anche 'fade', 'cube', 'coverflow'
-            speed: 600       // velocità transizione in ms
-          });
-        })
-        .catch(err => {
-          container.classList.remove("loading");
-          container.innerHTML = "<div>Errore caricamento roster: " + err.message + "</div>";
-          console.error(err);
-        });
+      // Inizializzazione Swiper
+      new Swiper('.swiper', {
+        direction: 'horizontal',
+        initialSlide: playerIndex ? parseInt(playerIndex) : 0,
+        loop: false,
+        slidesPerView: 1,
+        centeredSlides: true,
+        spaceBetween: 0,
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        keyboard: { enabled: true },
+        speed: 400,
+        observer: true,
+        observeParents: true
+      });
     }
 
+    // Esecuzione al caricamento della pagina
     caricaRoster();
   </script>
 </body>
