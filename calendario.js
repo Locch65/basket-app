@@ -8,11 +8,11 @@ function parseItalianDate(dateStr, timeStr) {
       return new Date(anno, mese - 1, giorno, ore, minuti);
 }
 
+function OLD_OKcaricaListaPartite(filtroCampionato = null) {
 /**
  * Funzione principale per caricare le partite.
  * Gestisce la cache immediata e decide se ridisegnare la lista o aggiornare i dati.
  */
-function OLD_OKcaricaListaPartite(filtroCampionato = null) {
     const container = document.getElementById("listaPartite");
     const cacheDati = localStorage.getItem("cache_partite");
 
@@ -103,11 +103,11 @@ function caricaListaPartite(filtroCampionato = null) {
         });
 }
 
+function renderizzaPartite(partite, filtroCampionato) {
 /**
  * Ricostruisce l'intero DOM della lista.
  * Da usare al caricamento o quando si cambia filtro (U14/U15).
  */
-function renderizzaPartite(partite, filtroCampionato) {
     const container = document.getElementById("listaPartite");
     const oggi = new Date();
     const excludePast = document.getElementById("togglePast").checked;
@@ -192,11 +192,11 @@ function renderizzaPartite(partite, filtroCampionato) {
     container.replaceChildren(frag);
 }
 
+function aggiornaDatiSenzaBlink(partite) {
 /**
  * Aggiorna i dati nelle card esistenti senza ricreare il DOM.
  * Impedisce il fastidioso flickering della pagina.
  */
-function aggiornaDatiSenzaBlink(partite) {
     partite.forEach(p => {
         const card = document.querySelector(`.match-card[data-matchid="${p.matchId}"]`);
         if (card) {
@@ -217,10 +217,10 @@ function aggiornaDatiSenzaBlink(partite) {
     });
 }
 
+function aggiornaPunteggiLive() {
 /**
  * Richiamata dal timer di refresh automatico.
  */
-function aggiornaPunteggiLive() {
     fetch(url + "?sheet=Partite")
         .then(res => res.json())
         .then(data => {
@@ -231,7 +231,6 @@ function aggiornaPunteggiLive() {
             }
         });
 }
-
 
 function filtraPartite(campionato, titolo) {
         console.log("Filtro attivato per:", campionato);
@@ -274,6 +273,7 @@ function startRefreshAutomatico(attiva, filtro) {
     refreshInterval = null;
   }
 }
+
 function createAdminLoginPopup() {
   const adminBtn = document.getElementById("adminBtn");
   const popup = document.getElementById("adminPopup");
@@ -344,127 +344,105 @@ function createAdminLoginPopup() {
 }
 
 function init() {
-      const hamburgerBtn = document.getElementById("hamburgerBtn");
-      const menu = document.getElementById("menu");
-      const toggleTheme1 = document.getElementById("toggleTheme1");
-      const campionatoItem = document.querySelector(".has-submenu");
-      const submenu = campionatoItem.querySelector(".submenu");
-      const togglePast = document.getElementById("togglePast");
-      const titolo = document.querySelector("h1");
-    
-      // Apri/chiudi menu principale
-      hamburgerBtn.addEventListener("click", () => {
-        menu.classList.toggle("hidden");
-      });
-    
-      // Apri/chiudi sottomenu Campionato
-      campionatoItem.addEventListener("click", () => {
-        submenu.classList.toggle("hidden");
-      });
-    
-      // Chiudi menu dopo selezione
-      menu.querySelectorAll("li, button").forEach(item => {
-        item.addEventListener("click", (e) => {
-          if (!item.classList.contains("has-submenu")) {
-            menu.classList.add("hidden");
-          }
-          e.stopPropagation();
-        });
-      });
-    
-      // Funzione filtro campionato
-    
-      // Associa click agli item campionato
-      document.querySelectorAll(".campionato-item").forEach(item => {
-        item.addEventListener("click", () => {
-          const campionato = item.dataset.campionato;
-          filtraPartite(campionato, titolo);
-        });
-      });
-    
-      // Toggle per escludere partite passate
-      togglePast.addEventListener("change", () => {
-        const excludePast = togglePast.checked;
-        localStorage.setItem("excludePast", excludePast ? "true" : "false");
-    
-        const campionatoSalvato = localStorage.getItem("campionatoSelezionato");
-        caricaListaPartite(campionatoSalvato && campionatoSalvato !== "Tutti" ? campionatoSalvato : null);
-      });
-    
-      // Ripristina tema salvato
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme === "dark") {
-        document.body.classList.add("dark-mode");
-        toggleTheme1.textContent = "☀️ Light Mode";
-      }
-    
-      // Toggle Dark Mode
-      toggleTheme1.addEventListener("click", () => {
-        document.body.classList.toggle("dark-mode");
-        const isDark = document.body.classList.contains("dark-mode");
-        localStorage.setItem("theme", isDark ? "dark" : "light");
-        toggleTheme1.textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-      });
-    
-      // Ripristina stato togglePast
-      const savedExcludePast = localStorage.getItem("excludePast");
-      if (savedExcludePast === "true") {
-        togglePast.checked = true;
-      }
-    
-	  //createAdminLoginPopup();
-          // Crea il popup (rimarrà nascosto fino al click)
-      if (typeof createAdminPopup === "function") {
-          createAdminPopup();
-      }
-  
-      isAdmin = localStorage.getItem("isAdmin") === "true";
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const menu = document.getElementById("menu");
+    const toggleTheme1 = document.getElementById("toggleTheme1");
+    const togglePast = document.getElementById("togglePast");
+    const titolo = document.querySelector("h1");
+    const adminBtn = document.getElementById("adminBtn");
+    const campRadios = document.querySelectorAll('.camp-radio');
 
-      const adminBtn = document.getElementById("adminBtn");
-      // Al caricamento, se siamo già admin, scriviamo subito Logout
-      if (isAdmin && adminBtn) {
-          adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-      }
-  
-      if (adminBtn) {
-          adminBtn.addEventListener("click", () => {
-              const menu = document.getElementById("menu") || document.getElementById("menu1");
-              if (menu) menu.classList.add("hidden");
-  
-              if (isAdmin) {
-                  // LOGICA LOGOUT
-                  if (confirm("Vuoi uscire dalla modalità Admin?")) {
-                      isAdmin = false;
-                      localStorage.setItem("isAdmin", "false");
-                      localStorage.setItem("AdminPassword", "");
-                      adminBtn.innerHTML = '<i class="fas fa-user-shield"></i> Admin';
-                  }
-              } else {
-                  // LOGICA LOGIN (Apre il popup)
-                  const popup = document.getElementById("adminPopup");
-                  if (popup) {
-                      popup.classList.remove("hidden");
-                      document.getElementById("adminPassword").value = "";
-                      document.getElementById("adminPassword").focus();
-                  }
-              }
-          });
-      }	
-      // Ripristina campionato selezionato da localStorage + aggiorna titolo
-      const campionatoSalvato = localStorage.getItem("campionatoSelezionato");
-      if (campionatoSalvato === "U14") {
-        titolo.textContent = "Calendario U14";
-        caricaListaPartite("U14");
-      } else if (campionatoSalvato === "U15") {
-        titolo.textContent = "Calendario U15";
-        caricaListaPartite("U15");
-      } else if (campionatoSalvato === "Tutti") {
-        titolo.textContent = "Calendario U14 + U15";
-        caricaListaPartite();
-      } else {
-        titolo.textContent = "Calendario";
-        caricaListaPartite();
-      }
+    // --- 1. GESTIONE MENU PRINCIPALE ---
+    // Apri/chiudi menu principale
+    hamburgerBtn.addEventListener("click", () => {
+        menu.classList.toggle("hidden");
+    });
+
+    // Chiudi menu cliccando fuori (opzionale ma utile)
+    document.addEventListener("click", (e) => {
+        if (!menu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+            menu.classList.add("hidden");
+        }
+    });
+
+    // --- 2. FILTRO CAMPIONATO (RADIO BUTTONS) ---
+    // Ripristina selezione salvata o default "Tutti"
+    const campionatoSalvato = localStorage.getItem("campionatoSelezionato") || "Tutti";
+    
+    campRadios.forEach(radio => {
+        // Imposta lo stato iniziale del radio button
+        if (radio.value === campionatoSalvato) {
+            radio.checked = true;
+        }
+
+        // Evento al cambio selezione
+        radio.addEventListener("change", (e) => {
+            const selezione = e.target.value;
+            filtraPartite(selezione, titolo);
+            
+            // Chiudi il menu dopo la scelta per migliorare la UX
+            setTimeout(() => menu.classList.add("hidden"), 200);
+        });
+    });
+
+    // --- 3. FILTRO PARTITE PASSATE ---
+    // Ripristina stato salvato
+    if (localStorage.getItem("excludePast") === "true") {
+        togglePast.checked = true;
+    }
+
+    togglePast.addEventListener("change", () => {
+        localStorage.setItem("excludePast", togglePast.checked ? "true" : "false");
+        const attuale = localStorage.getItem("campionatoSelezionato") || "Tutti";
+        caricaListaPartite(attuale !== "Tutti" ? attuale : null);
+    });
+
+    // --- 4. TEMA (DARK/LIGHT MODE) ---
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+        toggleTheme1.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    }
+
+    toggleTheme1.addEventListener("click", () => {
+        const isDark = document.body.classList.toggle("dark-mode");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        toggleTheme1.innerHTML = isDark ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
+    });
+
+    // --- 5. ADMIN & LOGIN ---
+    if (typeof createAdminPopup === "function") {
+        createAdminPopup(); // Inizializza il popup se la funzione esiste
+    }
+
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    if (isAdmin && adminBtn) {
+        adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+    }
+
+    if (adminBtn) {
+        adminBtn.addEventListener("click", () => {
+            menu.classList.add("hidden");
+            if (localStorage.getItem("isAdmin") === "true") {
+                if (confirm("Vuoi uscire dalla modalità Admin?")) {
+                    localStorage.setItem("isAdmin", "false");
+                    localStorage.setItem("AdminPassword", "");
+                    location.reload(); // Ricarica per aggiornare i permessi
+                }
+            } else {
+                const popup = document.getElementById("adminPopup");
+                if (popup) {
+                    popup.classList.remove("hidden");
+                    document.getElementById("adminPassword").value = "";
+                    document.getElementById("adminPassword").focus();
+                }
+            }
+        });
+    }
+
+    // --- 6. CARICAMENTO INIZIALE DATI ---
+    // Applica il filtro iniziale in base al salvataggio o al parametro URL
+    filtraPartite(campionatoSalvato, titolo);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
