@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Statistiche Avanzate Roster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 14px; }
+    th, td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #ddd; }
+    th { background-color: #007bff; color: white; cursor: pointer; user-select: none; }
+    th:hover { background-color: #0056b3; }
+    .col-nome { text-align: left; min-width: 150px; }
+    tr:hover { background-color: #f1f1f1; cursor: pointer; }
+    .update-btn { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+    .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
+    th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
+    th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
+    .pts-bold { color: #007bff; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <div class="header-container">
+    <h2>Statistiche Polismile A</h2>
+    <button class="update-btn" onclick="forzaAggiornamento()">Aggiorna Dati</button>
+  </div>
+
+  <div id="loading" class="loading">Calcolo statistiche in corso...</div>
+
+  <table id="roster-table" style="display:none;">
+    <thead>
+      <tr>
+        <th onclick="gestisciClickOrdinamento('Numero Maglia')">#</th>
+        <th class="col-nome" onclick="gestisciClickOrdinamento('Cognome')">Giocatore</th>
+        <th onclick="gestisciClickOrdinamento('partite')">PG</th>
+        <th onclick="gestisciClickOrdinamento('punti')">PTS</th>
+        <th onclick="gestisciClickOrdinamento('tl')">TL</th>
+        <th onclick="gestisciClickOrdinamento('t2')">T2</th>
+        <th onclick="gestisciClickOrdinamento('t3')">T3</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+
+  <script src="common.js?v=1.0.87"></script>
+  <script>
+    //const urlBase = "https://script.google.com/macros/s/AKfycbxbXnHTn9ODioPfLLrMV9zVeRJ1TiQ9tnLMLPj6rmIosdqSW21opDXoWaZ-Y2bMMuWhgA/exec";
+    let datiFinali = [];
+    let statoOrdine = JSON.parse(localStorage.getItem("statoOrdineStats")) || { colonna: 'punti', ascendente: false };
+
+    async function inizializzaDati() {
+      const cacheRoster = localStorage.getItem("datiRoster");
+      const cacheStats = localStorage.getItem("datiTutteLeStats");
+
+      let roster, stats;
+
+      if (cacheRoster && cacheStats) {
+        roster = JSON.parse(cacheRoster);
+        stats = JSON.parse(cacheStats);
+      } else {
+        try {
+          const [resRoster, resStats] = await Promise.all([
+            fetch(url + "?sheet=Roster"),
+            fetch(url + "?getAllStats=1")
+          ]);
+          roster = await resRoster.json();
+          stats = await resStats.json();
+          localStorage.setItem("datiRoster", JSON.stringify(roster));
+          localStorage.setItem("datiTutteLeStats", JSON.stringify(stats));
+        } catch (e) {
+          document.getElementById("loading").innerText = "Errore nel caricamento dati dal server.";
+          return;
+        }
+      }
+	  console.log("Dati Stats ricevuti:", stats);
+      elaboraStatistiche(roster, stats);
+    }
+
+    function elaboraStatistiche(roster, stats) {
+      datiFinali = roster.map((player, index) => {
+        // Filtriamo le azioni per giocatore (usando Nome + Cognome o Numero)
+        const azioniGiocatore = stats.statisticheGiocatori.filter(s => 
+          s.giocatore === player.Nome + " " + player.Cognome || 
+          (s.numero == player["Numero Maglia"] && s.giocatore.includes(player.Cognome))
+        );
+        
+        const matchIds = [...new Set(azioniGiocatore.map(s => s.matchId))];
+        
+        let puntiTotali = 0, tl = 0, t2 = 0, t3 = 0;
+        
+        azioniGiocatore.forEach(s => {
+          try {
+            // Decodifica il campo dettagli {"1":x, "2":y, "3":z}
+            const dettagli = JSON.parse(s.dettagli || "{}");
+            
+            const nTL = parseInt(dettagli["1"]) || 0;
+            const nT2 = parseInt(dettagli["2"]) || 0;
+            const nT3 = parseInt(dettagli["3"]) || 0;
+
+            tl += nTL;
+            t2 += nT2;
+            t3 += nT3;
+            puntiTotali += (nTL * 1) + (nT2 * 2) + (nT3 * 3);
+          } catch (e) {
+            console.error("Errore parsing dettagli per", player.Cognome, s.dettagli);
+          }
+        });
+
+        return {
+          ...player,
+          indiceOriginale: index,
+          partite: matchIds.length,
+          punti: puntiTotali,
+          tl: tl,
+          t2: t2,
+          t3: t3
+        };
+      });
+
+      applicaOrdinamento();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("table-body");
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("roster-table").style.display = "table";
+      tbody.innerHTML = ""; 
+
+      datiFinali.forEach((p) => {
+        const row = document.createElement("tr");
+        row.onclick = () => { window.location.href = `anagrafica.html?player=${p.indiceOriginale}`; };
+        
+        row.innerHTML = `
+          <td><strong>${p["Numero Maglia"]}</strong></td>
+          <td class="col-nome">${p.Cognome} ${p.Nome}</td>
+          <td>${p.partite}</td>
+          <td class="pts-bold">${p.punti}</td>
+          <td>${p.tl}</td>
+          <td>${p.t2}</td>
+          <td>${p.t3}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function gestisciClickOrdinamento(colonna) {
+      if (statoOrdine.colonna === colonna) {
+        statoOrdine.ascendente = !statoOrdine.ascendente;
+      } else {
+        statoOrdine.colonna = colonna;
+        // Se è testo (Cognome) allora Ascendente, se è numero (PTS, ecc) allora Descendente
+        statoOrdine.ascendente = (colonna === 'Cognome'); 
+      }
+      localStorage.setItem("statoOrdineStats", JSON.stringify(statoOrdine));
+      applicaOrdinamento();
+    }
+
+    function applicaOrdinamento() {
+      datiFinali.sort((a, b) => {
+        let vA = a[statoOrdine.colonna];
+        let vB = b[statoOrdine.colonna];
+        
+        // Gestione icone header
+        aggiornaIconeHeader();
+
+        if (typeof vA === 'string') {
+          return statoOrdine.ascendente ? vA.localeCompare(vB) : vB.localeCompare(vA);
+        }
+        return statoOrdine.ascendente ? vA - vB : vB - vA;
+      });
+      renderTable();
+    }
+
+    function aggiornaIconeHeader() {
+      const headers = document.querySelectorAll('th');
+      const mappatura = {
+        'Numero Maglia': '#', 'Cognome': 'Giocatore', 'partite': 'PG',
+        'punti': 'PTS', 'tl': 'TL', 't2': 'T2', 't3': 'T3'
+      };
+      headers.forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.innerText.includes(mappatura[statoOrdine.colonna])) {
+          th.classList.add(statoOrdine.ascendente ? 'sort-asc' : 'sort-desc');
+        }
+      });
+    }
+
+    function forzaAggiornamento() {
+      localStorage.removeItem("datiRoster");
+      localStorage.removeItem("datiTutteLeStats");
+      location.reload();
+    }
+
+    inizializzaDati();
+  </script>
+</body>
+</html>
