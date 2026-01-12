@@ -16,14 +16,22 @@
     <button id="hamburgerBtn">☰</button>
     <nav id="menu" class="hidden">
       <ul>
-        <li class="has-submenu">
-          <i class="fas fa-trophy"></i> Campionato ▾
-          <ul class="submenu hidden">
-            <li class="campionato-item" data-campionato="U14">U14</li>
-            <li class="campionato-item" data-campionato="U15">U15</li>
-            <li class="campionato-item" data-campionato="Tutti">*Tutti*</li>
-          </ul>
-        </li>
+        <li style="border-bottom: 1px solid #eee; padding: 10px 20px;">
+          <span style="font-weight: bold; display: block; margin-bottom: 10px;">
+            <i class="fas fa-trophy"></i> Seleziona Campionato
+          </span>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <label class="radio-container">
+              <input type="radio" name="camp" value="U14" class="camp-radio"> U14
+            </label>
+            <label class="radio-container">
+              <input type="radio" name="camp" value="U15" class="camp-radio"> U15
+            </label>
+            <label class="radio-container">
+              <input type="radio" name="camp" value="Tutti" class="camp-radio"> Tutti
+            </label>
+          </div>
+        </li>		
         <li>
           <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="togglePast" />
@@ -52,8 +60,8 @@
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.85"></script>
-  <script src="calendario.js?v=1.0.85"></script>
+  <script src="common.js?v=1.0.87"></script>
+  <script src="calendario.js?v=1.0.87"></script>
 
 </body>
 </html>
