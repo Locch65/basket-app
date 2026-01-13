@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Polismile Basket App</title>
-    <script src="common.js?v=1.0.87"></script>
+    <script src="common.js?v=1.0.88"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -157,10 +157,10 @@
     </header>
 	
     <div class="menu-grid">
-        <div class="menu-button" onclick="mostraPopup()">
+        <a href="roster.html" class="menu-button">
             <i class="fas fa-users"></i>
-            <span style="font-weight:bold; font-size: 1rem;">Roster</span>
-        </div>
+            <span style="font-weight:bold; font-size: 1rem;">Roster & Statistiche</span>
+        </a>
 
         <a href="calendario.html" class="menu-button">
             <i class="fas fa-calendar-alt"></i>
@@ -171,12 +171,12 @@
             <i class="fas fa-broadcast-tower"></i>
             <span id="live-text">Live</span>
         </div>
+        
         <div class="menu-button" onclick="mostraPopup()">
             <i class="fas fa-trophy"></i>
             <span style="font-weight:bold; font-size: 1rem;">Classifiche</span>
         </div>
     </div>
-
     <div id="customPopup">
         <div class="popup-content">
             <i class="fas fa-tools" style="font-size: 3rem; color: var(--primary);"></i>
