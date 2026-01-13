@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -6,13 +5,27 @@
   <title>Statistiche Avanzate Roster</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    body { font-family: Arial, sans-serif; margin: 10px; background: #f5f5f5; }
+    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0px; }
+    
+    .filters-container { 
+      background: #fff; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin-bottom: 6px; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+      display: flex; 
+      gap: 20px; 
+      flex-wrap: wrap;
+    }
+    .filter-group { display: flex; align-items: center; gap: 10px; }
+    .filter-group label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
     table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 14px; }
     th, td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #ddd; }
     th { background-color: #007bff; color: white; cursor: pointer; user-select: none; }
     th:hover { background-color: #0056b3; }
-    .col-nome { text-align: left; min-width: 150px; }
+    .col-nome { text-align: left; min-width: 100px; }
     tr:hover { background-color: #f1f1f1; cursor: pointer; }
     .update-btn { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
     .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
@@ -24,8 +37,23 @@
 <body>
 
   <div class="header-container">
-    <h2>Statistiche Polismile A</h2>
+    <h2>Polismile A</h2>
     <button class="update-btn" onclick="forzaAggiornamento()">Aggiorna Dati</button>
+  </div>
+
+  <div class="filters-container">
+    <div class="filter-group">
+      <strong>Categoria:</strong>
+      <label><input type="radio" name="catFilter" value="Tutti" checked onclick="applicaFiltriECalcoli()"> Tutti</label>
+      <label><input type="radio" name="catFilter" value="U14" onclick="applicaFiltriECalcoli()"> U14</label>
+      <label><input type="radio" name="catFilter" value="U15" onclick="applicaFiltriECalcoli()"> U15</label>
+    </div>
+    
+    <div class="filter-group">
+      <strong>Visualizzazione:</strong>
+      <label><input type="radio" name="calcType" value="Totale" checked onclick="applicaFiltriECalcoli()"> Totale</label>
+      <label><input type="radio" name="calcType" value="Media" onclick="applicaFiltriECalcoli()"> Media</label>
+    </div>
   </div>
 
   <div id="loading" class="loading">Calcolo statistiche in corso...</div>
@@ -47,8 +75,8 @@
 
   <script src="common.js?v=1.0.87"></script>
   <script>
-    //const urlBase = "https://script.google.com/macros/s/AKfycbxbXnHTn9ODioPfLLrMV9zVeRJ1TiQ9tnLMLPj6rmIosdqSW21opDXoWaZ-Y2bMMuWhgA/exec";
-    let datiFinali = [];
+    let datiOriginali = []; 
+    let datiFinali = [];    
     let statoOrdine = JSON.parse(localStorage.getItem("statoOrdineStats")) || { colonna: 'punti', ascendente: false };
 
     async function inizializzaDati() {
@@ -75,48 +103,59 @@
           return;
         }
       }
-	  console.log("Dati Stats ricevuti:", stats);
-      elaboraStatistiche(roster, stats);
+      mappaAzioniGiocatori(roster, stats);
     }
 
-    function elaboraStatistiche(roster, stats) {
-      datiFinali = roster.map((player, index) => {
-        // Filtriamo le azioni per giocatore (usando Nome + Cognome o Numero)
+    function mappaAzioniGiocatori(roster, stats) {
+      datiOriginali = roster.map((player, index) => {
         const azioniGiocatore = stats.statisticheGiocatori.filter(s => 
           s.giocatore === player.Nome + " " + player.Cognome || 
           (s.numero == player["Numero Maglia"] && s.giocatore.includes(player.Cognome))
         );
-        
-        const matchIds = [...new Set(azioniGiocatore.map(s => s.matchId))];
-        
-        let puntiTotali = 0, tl = 0, t2 = 0, t3 = 0;
-        
-        azioniGiocatore.forEach(s => {
-          try {
-            // Decodifica il campo dettagli {"1":x, "2":y, "3":z}
-            const dettagli = JSON.parse(s.dettagli || "{}");
-            
-            const nTL = parseInt(dettagli["1"]) || 0;
-            const nT2 = parseInt(dettagli["2"]) || 0;
-            const nT3 = parseInt(dettagli["3"]) || 0;
-
-            tl += nTL;
-            t2 += nT2;
-            t3 += nT3;
-            puntiTotali += (nTL * 1) + (nT2 * 2) + (nT3 * 3);
-          } catch (e) {
-            console.error("Errore parsing dettagli per", player.Cognome, s.dettagli);
-          }
-        });
-
         return {
           ...player,
           indiceOriginale: index,
-          partite: matchIds.length,
-          punti: puntiTotali,
-          tl: tl,
-          t2: t2,
-          t3: t3
+          azioni: azioniGiocatore
+        };
+      });
+      applicaFiltriECalcoli();
+    }
+
+    function applicaFiltriECalcoli() {
+      const categoria = document.querySelector('input[name="catFilter"]:checked').value;
+      const tipoCalcolo = document.querySelector('input[name="calcType"]:checked').value;
+
+      datiFinali = datiOriginali.map(player => {
+        // CORREZIONE: Controllo robusto sul matchId trasformandolo sempre in stringa
+        const azioniFiltrate = player.azioni.filter(a => {
+          const id = a.matchId ? String(a.matchId) : "";
+          if (categoria === "Tutti") return id.includes("U14") || id.includes("U15");
+          return id.includes(categoria);
+        });
+        
+        const matchIds = [...new Set(azioniFiltrate.map(s => s.matchId))];
+        let tl = 0, t2 = 0, t3 = 0, puntiTotali = 0;
+        
+        azioniFiltrate.forEach(s => {
+          try {
+            const dettagli = JSON.parse(s.dettagli || "{}");
+            tl += parseInt(dettagli["1"]) || 0;
+            t2 += parseInt(dettagli["2"]) || 0;
+            t3 += parseInt(dettagli["3"]) || 0;
+          } catch (e) {}
+        });
+
+        puntiTotali = (tl * 1) + (t2 * 2) + (t3 * 3);
+        const pg = matchIds.length;
+        const divisore = (tipoCalcolo === "Media" && pg > 0) ? pg : 1;
+
+        return {
+          ...player,
+          partite: pg,
+          punti: tipoCalcolo === "Media" ? (puntiTotali / divisore).toFixed(1) : puntiTotali,
+          tl: tipoCalcolo === "Media" ? (tl / divisore).toFixed(1) : tl,
+          t2: tipoCalcolo === "Media" ? (t2 / divisore).toFixed(1) : t2,
+          t3: tipoCalcolo === "Media" ? (t3 / divisore).toFixed(1) : t3
         };
       });
 
@@ -151,7 +190,6 @@
         statoOrdine.ascendente = !statoOrdine.ascendente;
       } else {
         statoOrdine.colonna = colonna;
-        // Se è testo (Cognome) allora Ascendente, se è numero (PTS, ecc) allora Descendente
         statoOrdine.ascendente = (colonna === 'Cognome'); 
       }
       localStorage.setItem("statoOrdineStats", JSON.stringify(statoOrdine));
@@ -163,7 +201,11 @@
         let vA = a[statoOrdine.colonna];
         let vB = b[statoOrdine.colonna];
         
-        // Gestione icone header
+        if (statoOrdine.colonna !== 'Cognome') {
+          vA = parseFloat(vA) || 0;
+          vB = parseFloat(vB) || 0;
+        }
+
         aggiornaIconeHeader();
 
         if (typeof vA === 'string') {
