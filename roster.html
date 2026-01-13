@@ -37,21 +37,21 @@
 <body>
 
   <div class="header-container">
-    <h2>Polismile A</h2>
+    <h2>Polismile A - U14</h2>
     <button class="update-btn" onclick="forzaAggiornamento()">Aggiorna Dati</button>
   </div>
 
   <div class="filters-container">
     <div class="filter-group">
-      <strong>Categoria:</strong>
-      <label><input type="radio" name="catFilter" value="Tutti" checked onclick="applicaFiltriECalcoli()"> Tutti</label>
+      <strong>Campionato:</strong>
       <label><input type="radio" name="catFilter" value="U14" onclick="applicaFiltriECalcoli()"> U14</label>
       <label><input type="radio" name="catFilter" value="U15" onclick="applicaFiltriECalcoli()"> U15</label>
+      <label><input type="radio" name="catFilter" value="Tutti" checked onclick="applicaFiltriECalcoli()"> Tutti</label>
     </div>
     
     <div class="filter-group">
-      <strong>Visualizzazione:</strong>
-      <label><input type="radio" name="calcType" value="Totale" checked onclick="applicaFiltriECalcoli()"> Totale</label>
+      <strong>Punti:</strong>
+      <label><input type="radio" name="calcType" value="Totale" checked onclick="applicaFiltriECalcoli()"> Totali</label>
       <label><input type="radio" name="calcType" value="Media" onclick="applicaFiltriECalcoli()"> Media</label>
     </div>
   </div>
@@ -73,7 +73,7 @@
     <tbody id="table-body"></tbody>
   </table>
 
-  <script src="common.js?v=1.0.87"></script>
+  <script src="common.js?v=1.0.88"></script>
   <script>
     let datiOriginali = []; 
     let datiFinali = [];    
