@@ -5,7 +5,6 @@
   <title>Statistiche Avanzate Roster</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  /* Disabilita la selezione del testo su tutta la pagina */
   * {
     -webkit-user-select: none;
     -ms-user-select: none;
@@ -21,7 +20,6 @@
     flex-direction: column;
   }
   
-  /* Header con Icona e Titolo */
   .header-container { 
     display: flex; 
     justify-content: space-between; 
@@ -58,10 +56,9 @@
     flex-wrap: wrap;
   }
 
-  /* CONTENITORE PER CENTRARE E RENDERE RESPONSIVA LA GRIGLIA */
   .table-container {
     width: 100%;
-    overflow-x: auto; /* Permette lo scorrimento laterale su schermi piccoli */
+    overflow-x: auto; 
     -webkit-overflow-scrolling: touch;
     background: #fff;
     border-radius: 8px;
@@ -72,12 +69,15 @@
     width: 100%; 
     border-collapse: collapse; 
     font-size: 14px; 
-    min-width: 400px; /* Evita che la tabella si schiacci troppo */
+    min-width: 400px; 
   }
 
   th, td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #ddd; }
-  th { background-color: #007bff; color: white; cursor: pointer; }
+  th { background-color: #007bff; color: white; cursor: pointer; white-space: nowrap; position: relative; }
   
+  th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
+  th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
+
   .col-nome { text-align: left; min-width: 120px; }
   .update-btn { 
     background: #28a745; 
@@ -89,6 +89,7 @@
   }
   
   .pts-bold { color: #007bff; font-weight: bold; }
+  .tfoot-totale { background-color: #e9f4ff; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -132,8 +133,10 @@
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
+      <tfoot id="table-foot"></tfoot>
     </table>
   </div>
+
   <script src="common.js?v=1.0.89"></script>
   <script>
     let datiOriginali = []; 
@@ -215,7 +218,8 @@
           punti: tipoCalcolo === "Media" ? (puntiTotali / divisore).toFixed(1) : puntiTotali,
           tl: tipoCalcolo === "Media" ? (tl / divisore).toFixed(1) : tl,
           t2: tipoCalcolo === "Media" ? (t2 / divisore).toFixed(1) : t2,
-          t3: tipoCalcolo === "Media" ? (t3 / divisore).toFixed(1) : t3
+          t3: tipoCalcolo === "Media" ? (t3 / divisore).toFixed(1) : t3,
+          matchIdsFiltrati: matchIds // Teniamo traccia degli ID per il totale squadra
         };
       });
 
@@ -224,11 +228,26 @@
 
     function renderTable() {
       const tbody = document.getElementById("table-body");
+      const tfoot = document.getElementById("table-foot");
       document.getElementById("loading").style.display = "none";
       document.getElementById("roster-table").style.display = "table";
+      
       tbody.innerHTML = ""; 
+      
+      let setPartiteSquadra = new Set();
+      let totPTS = 0, totTL = 0, totT2 = 0, totT3 = 0;
 
       datiFinali.forEach((p) => {
+        // Aggiungiamo i matchId di questa giocatrice al Set generale della squadra
+        if(p.matchIdsFiltrati) {
+          p.matchIdsFiltrati.forEach(id => setPartiteSquadra.add(id));
+        }
+        
+        totPTS += parseFloat(p.punti) || 0;
+        totTL += parseFloat(p.tl) || 0;
+        totT2 += parseFloat(p.t2) || 0;
+        totT3 += parseFloat(p.t3) || 0;
+
         const row = document.createElement("tr");
         row.onclick = () => { window.location.href = `anagrafica.html?player=${p.indiceOriginale}`; };
         
@@ -243,6 +262,21 @@
         `;
         tbody.appendChild(row);
       });
+
+      // Il numero di partite totali della squadra è la dimensione del Set (ID univoci)
+      const totPG_Squadra = setPartiteSquadra.size;
+
+      tfoot.innerHTML = `
+        <tr class="tfoot-totale">
+          <td></td>
+          <td class="col-nome">TOTALE</td>
+          <td>${totPG_Squadra}</td>
+          <td class="pts-bold">${totPTS.toFixed(totPTS % 1 === 0 ? 0 : 1)}</td>
+          <td>${totTL.toFixed(totTL % 1 === 0 ? 0 : 1)}</td>
+          <td>${totT2.toFixed(totT2 % 1 === 0 ? 0 : 1)}</td>
+          <td>${totT3.toFixed(totT3 % 1 === 0 ? 0 : 1)}</td>
+        </tr>
+      `;
     }
 
     function gestisciClickOrdinamento(colonna) {
@@ -266,13 +300,13 @@
           vB = parseFloat(vB) || 0;
         }
 
-        aggiornaIconeHeader();
-
         if (typeof vA === 'string') {
           return statoOrdine.ascendente ? vA.localeCompare(vB) : vB.localeCompare(vA);
         }
         return statoOrdine.ascendente ? vA - vB : vB - vA;
       });
+      
+      aggiornaIconeHeader();
       renderTable();
     }
 
@@ -284,7 +318,8 @@
       };
       headers.forEach(th => {
         th.classList.remove('sort-asc', 'sort-desc');
-        if (th.innerText.includes(mappatura[statoOrdine.colonna])) {
+        const testoPulito = th.innerText.replace(/[▲▼]/g, '').trim();
+        if (testoPulito === mappatura[statoOrdine.colonna]) {
           th.classList.add(statoOrdine.ascendente ? 'sort-asc' : 'sort-desc');
         }
       });
