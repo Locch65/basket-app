@@ -14,6 +14,12 @@
       display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
       background: #fff; padding: 60px 15px 20px 15px; box-sizing: border-box; width: 100%; overflow-y: auto;
     }
+	{
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none;     /* IE 10 e versioni successive */
+      user-select: none;         /* Standard (Chrome, Firefox, Opera) */
+      -webkit-touch-callout: none; /* Disabilita il menu contestuale su iOS (opzionale) */
+    }
     
     .player-header { display: flex; align-items: center; gap: 15px; width: 100%; margin-bottom: 15px; }
     .player-photo { width: 65px; height: 65px; object-fit: cover; border-radius: 50%; border: 2px solid #007bff; background: #eee; }
@@ -33,7 +39,7 @@
     th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
     th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
     
-    .match-id-sub { font-size: 10px; color: #888; margin-left: 5px; font-weight: normal; }
+    .id-col { color: #888; font-size: 10px; white-space: nowrap; }
     .date-col { color: #666; font-size: 11px; }
     
     .tfoot-totale { background-color: #e9f4ff; font-weight: bold; }
@@ -43,6 +49,7 @@
       position: absolute; top: 15px; left: 15px; z-index: 100; background: #007bff; color: white; 
       padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 13px;
     }
+    .loc-cell { font-size: 14px; width: 25px; }
   </style>
 </head>
 <body>
@@ -54,17 +61,38 @@
     <div class="swiper-pagination"></div>
   </div>
 
-  <script src="common.js?v=1.0.88"></script>
+  <script src="common.js?v=1.0.89"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <script>
     let datiOriginaliPartite = []; 
     let statoOrdineMatch = { colonna: 'PTS', ascendente: false };
 
-    function convertDriveLink(url) {
+    function normalizeUrl(url) {
+      if (!url) return "";
+      if (!/^https?:\/\//i.test(url)) return "https://" + url;
+      return url.trim();
+    }
+
+    function OLDconvertDriveLink(url) {
       if (!url) return "";
       let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
       return match && match[1] ? `https://drive.google.com/uc?id=${match[1]}` : url;
+    }
+
+    function convertDriveLink(url) {
+      if (!url) return "";
+      // Caso: /d/FILE_ID/
+      let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?id=${match[1]}`;
+      }
+      // Caso: id=FILE_ID
+      match = url.match(/id=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?id=${match[1]}`;
+      }
+      return url; // fallback
     }
 
     function applicaFiltriEGenera() {
@@ -108,7 +136,9 @@
             const dateB = new Date(partsB[2], partsB[1]-1, partsB[0]);
             return statoOrdineMatch.ascendente ? dateA - dateB : dateB - dateA;
         }
-        if (statoOrdineMatch.colonna !== 'MatchName') { vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0; }
+        if (statoOrdineMatch.colonna !== 'MatchName' && statoOrdineMatch.colonna !== 'Location' && statoOrdineMatch.colonna !== 'MatchIdDisplay') { 
+            vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0; 
+        }
         return statoOrdineMatch.ascendente ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
       });
 
@@ -125,10 +155,10 @@
 
       tbody.innerHTML = dati.map(p => `
         <tr>
+          <td class="loc-cell">${p.Location}</td>
+          <td class="id-col">${p.MatchIdDisplay}</td>
           <td class="date-col">${p.Data}</td>
-          <td style="text-align:left; padding-left:10px">
-            ${p.MatchName}<span class="match-id-sub">${p.MatchIdShort}</span>
-          </td>
+          <td style="text-align:left; padding-left:10px">${p.MatchName}</td>
           <td class="pts-bold">${p.PTS}</td>
           <td>${p.TL}</td>
           <td>${p.T2}</td>
@@ -138,6 +168,8 @@
 
       tfoot.innerHTML = `
         <tr class="tfoot-totale">
+          <td></td>
+          <td></td>
           <td></td>
           <td style="text-align:left; padding-left:10px">TOTALE</td>
           <td class="pts-bold">${tPTS}</td>
@@ -158,10 +190,6 @@
 
       if (cachePartite) {
         partiteInfo = JSON.parse(cachePartite);
-        fetch(url + "?sheet=Partite").then(res => res.json()).then(data => {
-            const freshData = Array.isArray(data) ? data : data.data;
-            localStorage.setItem("cache_partite", JSON.stringify(freshData));
-        }).catch(() => {});
       } else {
         try {
           const res = await fetch(url + "?sheet=Partite");
@@ -181,22 +209,30 @@
         ).map(p => {
           const d = JSON.parse(p.dettagli || "{}");
           const idStr = String(p.matchId || "");
-          const matchIdShort = idStr.includes(" ") ? idStr.split(" ")[1] : idStr;
+          
+          // Gestione Prefisso (U14 o U15) + Numero
+          const prefisso = idStr.includes("U14") ? "U14 " : (idStr.includes("U15") ? "U15 " : "");
+          const matchIdNum = idStr.includes(" ") ? idStr.split(" ")[1] : idStr;
+          const matchIdDisplay = prefisso + matchIdNum;
           
           const infoGara = partiteInfo.find(m => String(m.matchId) === idStr);
-          let nomeGara = "Gara " + matchIdShort;
+          let nomeGara = "Gara";
           let dataGara = "--/--";
+          let loc = "";
 
           if (infoGara) {
-            nomeGara = infoGara.squadraA.includes("Polismile") ? infoGara.squadraB : infoGara.squadraA;
+            const isCasa = infoGara.squadraA.toUpperCase().includes("POLISMILE A");
+            loc = isCasa ? "🏠" : "🚌";
+            nomeGara = isCasa ? infoGara.squadraB : infoGara.squadraA;
             dataGara = infoGara.data || "--/--";
           }
 
           return {
             matchIdFull: idStr,
             Data: dataGara,
+            Location: loc,
             MatchName: nomeGara,
-            MatchIdShort: matchIdShort,
+            MatchIdDisplay: matchIdDisplay,
             PTS: (parseInt(d["1"])||0) + (parseInt(d["2"])||0)*2 + (parseInt(d["3"])||0)*3,
             TL: parseInt(d["1"])||0, T2: parseInt(d["2"])||0, T3: parseInt(d["3"])||0
           };
@@ -204,9 +240,12 @@
 
         datiOriginaliPartite[idx] = mData;
 
+        // Normalizza e converte il link della foto
+        const img = normalizeUrl(convertDriveLink((player.Foto || "").trim()));
+
         slide.innerHTML = `
           <div class="player-header">
-            <img src="${convertDriveLink(player.Foto)}" class="player-photo" onerror="this.src='https://via.placeholder.com/65'" />
+            <img src="${player.Foto}" class="player-photo" />
             <div class="player-info">
               <h2>#${player["Numero Maglia"]} - ${player.Cognome} ${player.Nome}</h2>
             </div>
@@ -222,8 +261,10 @@
           <table id="table-${idx}">
             <thead>
               <tr>
+                <th onclick="gestisciOrdinamentoMatch('Location', ${idx})">L</th>
+                <th onclick="gestisciOrdinamentoMatch('MatchIdDisplay', ${idx})">ID</th>
                 <th onclick="gestisciOrdinamentoMatch('Data', ${idx})">Data</th>
-                <th onclick="gestisciOrdinamentoMatch('MatchName', ${idx})">Gara</th>
+                <th onclick="gestisciOrdinamentoMatch('MatchName', ${idx})">Avversaria</th>
                 <th onclick="gestisciOrdinamentoMatch('PTS', ${idx})">PTS</th>
                 <th onclick="gestisciOrdinamentoMatch('TL', ${idx})">TL</th>
                 <th onclick="gestisciOrdinamentoMatch('T2', ${idx})">T2</th>
