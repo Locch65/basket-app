@@ -4,41 +4,101 @@
   <meta charset="UTF-8">
   <title>Statistiche Avanzate Roster</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial, sans-serif; margin: 10px; background: #f5f5f5; }
-    .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0px; }
-    
-    .filters-container { 
-      background: #fff; 
-      padding: 15px; 
-      border-radius: 8px; 
-      margin-bottom: 6px; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-      display: flex; 
-      gap: 20px; 
-      flex-wrap: wrap;
-    }
-    .filter-group { display: flex; align-items: center; gap: 10px; }
-    .filter-group label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+<style>
+  /* Disabilita la selezione del testo su tutta la pagina */
+  * {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
 
-    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 14px; }
-    th, td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #ddd; }
-    th { background-color: #007bff; color: white; cursor: pointer; user-select: none; }
-    th:hover { background-color: #0056b3; }
-    .col-nome { text-align: left; min-width: 100px; }
-    tr:hover { background-color: #f1f1f1; cursor: pointer; }
-    .update-btn { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-    .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
-    th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
-    th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
-    .pts-bold { color: #007bff; font-weight: bold; }
-  </style>
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 10px; 
+    background: #f5f5f5; 
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Header con Icona e Titolo */
+  .header-container { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 10px; 
+  }
+  
+  .brand-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .app-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+  }
+
+  .header-container h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  
+  .filters-container { 
+    background: #fff; 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin-bottom: 10px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    display: flex; 
+    gap: 20px; 
+    flex-wrap: wrap;
+  }
+
+  /* CONTENITORE PER CENTRARE E RENDERE RESPONSIVA LA GRIGLIA */
+  .table-container {
+    width: 100%;
+    overflow-x: auto; /* Permette lo scorrimento laterale su schermi piccoli */
+    -webkit-overflow-scrolling: touch;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 14px; 
+    min-width: 400px; /* Evita che la tabella si schiacci troppo */
+  }
+
+  th, td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #ddd; }
+  th { background-color: #007bff; color: white; cursor: pointer; }
+  
+  .col-nome { text-align: left; min-width: 120px; }
+  .update-btn { 
+    background: #28a745; 
+    color: white; 
+    border: none; 
+    padding: 6px 12px; 
+    border-radius: 5px; 
+    font-size: 12px;
+  }
+  
+  .pts-bold { color: #007bff; font-weight: bold; }
+</style>
 </head>
 <body>
 
   <div class="header-container">
-    <h2>Polismile A - U14</h2>
-    <button class="update-btn" onclick="forzaAggiornamento()">Aggiorna Dati</button>
+    <div class="brand-section">
+      <img src="icon-192.png" alt="Logo" class="app-icon">
+      <h2>Polismile A - U14</h2>
+    </div>
+    <button class="update-btn" onclick="forzaAggiornamento()">Aggiorna</button>
   </div>
 
   <div class="filters-container">
@@ -58,22 +118,23 @@
 
   <div id="loading" class="loading">Calcolo statistiche in corso...</div>
 
-  <table id="roster-table" style="display:none;">
-    <thead>
-      <tr>
-        <th onclick="gestisciClickOrdinamento('Numero Maglia')">#</th>
-        <th class="col-nome" onclick="gestisciClickOrdinamento('Cognome')">Giocatore</th>
-        <th onclick="gestisciClickOrdinamento('partite')">PG</th>
-        <th onclick="gestisciClickOrdinamento('punti')">PTS</th>
-        <th onclick="gestisciClickOrdinamento('tl')">TL</th>
-        <th onclick="gestisciClickOrdinamento('t2')">T2</th>
-        <th onclick="gestisciClickOrdinamento('t3')">T3</th>
-      </tr>
-    </thead>
-    <tbody id="table-body"></tbody>
-  </table>
-
-  <script src="common.js?v=1.0.88"></script>
+  <div class="table-container">
+    <table id="roster-table" style="display:none;">
+      <thead>
+        <tr>
+          <th onclick="gestisciClickOrdinamento('Numero Maglia')">#</th>
+          <th class="col-nome" onclick="gestisciClickOrdinamento('Cognome')">Giocatore</th>
+          <th onclick="gestisciClickOrdinamento('partite')">PG</th>
+          <th onclick="gestisciClickOrdinamento('punti')">PTS</th>
+          <th onclick="gestisciClickOrdinamento('tl')">TL</th>
+          <th onclick="gestisciClickOrdinamento('t2')">T2</th>
+          <th onclick="gestisciClickOrdinamento('t3')">T3</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+  <script src="common.js?v=1.0.89"></script>
   <script>
     let datiOriginali = []; 
     let datiFinali = [];    
@@ -126,7 +187,6 @@
       const tipoCalcolo = document.querySelector('input[name="calcType"]:checked').value;
 
       datiFinali = datiOriginali.map(player => {
-        // CORREZIONE: Controllo robusto sul matchId trasformandolo sempre in stringa
         const azioniFiltrate = player.azioni.filter(a => {
           const id = a.matchId ? String(a.matchId) : "";
           if (categoria === "Tutti") return id.includes("U14") || id.includes("U15");
