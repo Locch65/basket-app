@@ -8,143 +8,244 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f5f5f5;
-      overflow-x: hidden; /* Evita micro-scroll laterali */
-    }
-    .swiper {
-      width: 100%;
-      height: 100vh;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; overflow-x: hidden; }
+    .swiper { width: 100%; height: 100vh; }
     .swiper-slide {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      /* Fondamentale per evitare lo slittamento accumulato: */
-      box-sizing: border-box; 
-      width: 100%;
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+      background: #fff; padding: 60px 15px 20px 15px; box-sizing: border-box; width: 100%; overflow-y: auto;
     }
-    .player-photo {
-      width: 200px;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-bottom: 20px;
-      background: #eee; /* Placeholder grigio se l'immagine carica lenta */
+    
+    .player-header { display: flex; align-items: center; gap: 15px; width: 100%; margin-bottom: 15px; }
+    .player-photo { width: 65px; height: 65px; object-fit: cover; border-radius: 50%; border: 2px solid #007bff; background: #eee; }
+    .player-info h2 { margin: 0; font-size: 1.2rem; color: #333; }
+
+    .filters-container { 
+      background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; 
+      border: 1px solid #eee; display: flex; gap: 15px; flex-wrap: wrap; width: 100%; box-sizing: border-box;
+      font-size: 12px;
     }
-    .player-info {
-      text-align: center;
-    }
-    .player-info h2 {
-      margin: 5px 0;
-    }
-    /* Pulsante per tornare alla lista */
+    .filter-group { display: flex; align-items: center; gap: 8px; }
+    .filter-group strong { color: #007bff; }
+    
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 12px; }
+    th, td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #ddd; }
+    th { background-color: #007bff; color: white; cursor: pointer; white-space: nowrap; user-select: none; }
+    th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
+    th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
+    
+    .match-id-sub { font-size: 10px; color: #888; margin-left: 5px; font-weight: normal; }
+    .date-col { color: #666; font-size: 11px; }
+    
+    .tfoot-totale { background-color: #e9f4ff; font-weight: bold; }
+    .pts-bold { color: #007bff; font-weight: bold; }
+    
     .back-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      z-index: 10;
-      background: rgba(0,0,0,0.5);
-      color: white;
-      padding: 8px 15px;
-      border-radius: 20px;
-      text-decoration: none;
-      font-size: 14px;
+      position: absolute; top: 15px; left: 15px; z-index: 100; background: #007bff; color: white; 
+      padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 13px;
     }
   </style>
 </head>
 <body>
 
-  <a href="roster.html" class="back-btn">← Torna alla lista</a>
+  <a href="roster.html" class="back-btn">← Lista</a>
 
   <div class="swiper">
-    <div class="swiper-wrapper" id="roster-container">
-      </div>
+    <div class="swiper-wrapper" id="roster-container"></div>
     <div class="swiper-pagination"></div>
-    <div class="swiper-button-prev"></div>
-    <div class="swiper-button-next"></div>
   </div>
 
+  <script src="common.js?v=1.0.88"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <script>
-    function normalizeUrl(url) {
-      if (!url) return "";
-      if (!/^https?:\/\//i.test(url)) return "https://" + url;
-      return url.trim();
-    }
+    let datiOriginaliPartite = []; 
+    let statoOrdineMatch = { colonna: 'PTS', ascendente: false };
 
     function convertDriveLink(url) {
       if (!url) return "";
       let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        return `https://drive.google.com/uc?id=${match[1]}`;
-      }
-      return url;
+      return match && match[1] ? `https://drive.google.com/uc?id=${match[1]}` : url;
     }
 
-    function caricaRoster() {
+    function applicaFiltriEGenera() {
+      const slides = document.querySelectorAll('.swiper-slide');
+      datiOriginaliPartite.forEach((partite, idx) => {
+        const slide = slides[idx];
+        if(!slide) return;
+        const cat = slide.querySelector('input[name="catFilter-' + idx + '"]:checked').value;
+        
+        let filtrate = partite.filter(p => {
+          if (cat === "Tutti") return p.matchIdFull.includes("U14") || p.matchIdFull.includes("U15");
+          return p.matchIdFull.includes(cat);
+        });
+        renderizzaTabellaMatch(idx, filtrate);
+      });
+    }
+
+    function gestisciOrdinamentoMatch(colonna, slideIndex) {
+      if (statoOrdineMatch.colonna === colonna) {
+        statoOrdineMatch.ascendente = !statoOrdineMatch.ascendente;
+      } else {
+        statoOrdineMatch.colonna = colonna;
+        statoOrdineMatch.ascendente = false;
+      }
+      applicaFiltriEGenera();
+    }
+
+    function renderizzaTabellaMatch(slideIndex, dati) {
+      const tbody = document.getElementById(`tbody-${slideIndex}`);
+      const tfoot = document.getElementById(`tfoot-${slideIndex}`);
+      const headers = document.querySelectorAll(`#table-${slideIndex} th`);
+      if(!tbody) return;
+
+      dati.sort((a, b) => {
+        let vA = a[statoOrdineMatch.colonna], vB = b[statoOrdineMatch.colonna];
+        if (statoOrdineMatch.colonna === 'Data') {
+            // Ordinamento date (GG/MM/AAAA)
+            const partsA = vA.split('/');
+            const partsB = vB.split('/');
+            const dateA = new Date(partsA[2], partsA[1]-1, partsA[0]);
+            const dateB = new Date(partsB[2], partsB[1]-1, partsB[0]);
+            return statoOrdineMatch.ascendente ? dateA - dateB : dateB - dateA;
+        }
+        if (statoOrdineMatch.colonna !== 'MatchName') { vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0; }
+        return statoOrdineMatch.ascendente ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
+      });
+
+      headers.forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        const onclickAttr = th.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(`'${statoOrdineMatch.colonna}'`)) {
+          th.classList.add(statoOrdineMatch.ascendente ? 'sort-asc' : 'sort-desc');
+        }
+      });
+
+      let tPTS = 0, tTL = 0, tT2 = 0, tT3 = 0;
+      dati.forEach(p => { tPTS += p.PTS; tTL += p.TL; tT2 += p.T2; tT3 += p.T3; });
+
+      tbody.innerHTML = dati.map(p => `
+        <tr>
+          <td class="date-col">${p.Data}</td>
+          <td style="text-align:left; padding-left:10px">
+            ${p.MatchName}<span class="match-id-sub">${p.MatchIdShort}</span>
+          </td>
+          <td class="pts-bold">${p.PTS}</td>
+          <td>${p.TL}</td>
+          <td>${p.T2}</td>
+          <td>${p.T3}</td>
+        </tr>
+      `).join('');
+
+      tfoot.innerHTML = `
+        <tr class="tfoot-totale">
+          <td></td>
+          <td style="text-align:left; padding-left:10px">TOTALE</td>
+          <td class="pts-bold">${tPTS}</td>
+          <td>${tTL}</td>
+          <td>${tT2}</td>
+          <td>${tT3}</td>
+        </tr>
+      `;
+    }
+
+    async function caricaRoster() {
       const container = document.getElementById("roster-container");
+      const roster = JSON.parse(localStorage.getItem("datiRoster") || "[]");
+      const stats = JSON.parse(localStorage.getItem("datiTutteLeStats") || "{}").statisticheGiocatori || [];
       
-      // Recupero dati da localStorage salvati da roster.html
-      const datiSalvati = localStorage.getItem("datiRoster");
-      
-      if (!datiSalvati) {
-        container.innerHTML = "<div class='swiper-slide'><h2>Dati non trovati. Torna alla lista.</h2></div>";
-        return;
+      let partiteInfo = [];
+      const cachePartite = localStorage.getItem("cache_partite");
+
+      if (cachePartite) {
+        partiteInfo = JSON.parse(cachePartite);
+        fetch(url + "?sheet=Partite").then(res => res.json()).then(data => {
+            const freshData = Array.isArray(data) ? data : data.data;
+            localStorage.setItem("cache_partite", JSON.stringify(freshData));
+        }).catch(() => {});
+      } else {
+        try {
+          const res = await fetch(url + "?sheet=Partite");
+          const data = await res.json();
+          partiteInfo = Array.isArray(data) ? data : data.data;
+          localStorage.setItem("cache_partite", JSON.stringify(partiteInfo));
+        } catch (e) { console.error(e); }
       }
 
-      const roster = JSON.parse(datiSalvati);
-      const frag = document.createDocumentFragment();
-
-      roster.forEach(player => {
+      roster.forEach((player, idx) => {
         const slide = document.createElement("div");
         slide.classList.add("swiper-slide");
         
-        // Conversione corretta del link foto
-        const imgUrl = normalizeUrl(convertDriveLink((player.Foto || "").trim()));
-        
+        const mData = stats.filter(s => 
+          s.giocatore === player.Nome + " " + player.Cognome || 
+          (s.numero == player["Numero Maglia"] && s.giocatore.includes(player.Cognome))
+        ).map(p => {
+          const d = JSON.parse(p.dettagli || "{}");
+          const idStr = String(p.matchId || "");
+          const matchIdShort = idStr.includes(" ") ? idStr.split(" ")[1] : idStr;
+          
+          const infoGara = partiteInfo.find(m => String(m.matchId) === idStr);
+          let nomeGara = "Gara " + matchIdShort;
+          let dataGara = "--/--";
+
+          if (infoGara) {
+            nomeGara = infoGara.squadraA.includes("Polismile") ? infoGara.squadraB : infoGara.squadraA;
+            dataGara = infoGara.data || "--/--";
+          }
+
+          return {
+            matchIdFull: idStr,
+            Data: dataGara,
+            MatchName: nomeGara,
+            MatchIdShort: matchIdShort,
+            PTS: (parseInt(d["1"])||0) + (parseInt(d["2"])||0)*2 + (parseInt(d["3"])||0)*3,
+            TL: parseInt(d["1"])||0, T2: parseInt(d["2"])||0, T3: parseInt(d["3"])||0
+          };
+        });
+
+        datiOriginaliPartite[idx] = mData;
+
         slide.innerHTML = `
-          <img src="${player.Foto}" alt="${player.Nome}" class="player-photo" />
-          <div class="player-info">
-            <h2>#${player["Numero Maglia"] || "00"}</h2>
-            <h2>${player.Nome} ${player.Cognome}</h2>
+          <div class="player-header">
+            <img src="${convertDriveLink(player.Foto)}" class="player-photo" onerror="this.src='https://via.placeholder.com/65'" />
+            <div class="player-info">
+              <h2>#${player["Numero Maglia"]} - ${player.Cognome} ${player.Nome}</h2>
+            </div>
           </div>
+          <div class="filters-container">
+            <div class="filter-group">
+              <strong>Campionato:</strong>
+              <label><input type="radio" name="catFilter-${idx}" value="U14" onclick="applicaFiltriEGenera()"> U14</label>
+              <label><input type="radio" name="catFilter-${idx}" value="U15" onclick="applicaFiltriEGenera()"> U15</label>
+              <label><input type="radio" name="catFilter-${idx}" value="Tutti" checked onclick="applicaFiltriEGenera()"> Tutti</label>
+            </div>
+          </div>
+          <table id="table-${idx}">
+            <thead>
+              <tr>
+                <th onclick="gestisciOrdinamentoMatch('Data', ${idx})">Data</th>
+                <th onclick="gestisciOrdinamentoMatch('MatchName', ${idx})">Gara</th>
+                <th onclick="gestisciOrdinamentoMatch('PTS', ${idx})">PTS</th>
+                <th onclick="gestisciOrdinamentoMatch('TL', ${idx})">TL</th>
+                <th onclick="gestisciOrdinamentoMatch('T2', ${idx})">T2</th>
+                <th onclick="gestisciOrdinamentoMatch('T3', ${idx})">T3</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-${idx}"></tbody>
+            <tfoot id="tfoot-${idx}"></tfoot>
+          </table>
         `;
-        frag.appendChild(slide);
+        container.appendChild(slide);
       });
 
-      container.replaceChildren(frag);
+      applicaFiltriEGenera();
 
-      // Gestione indice per posizionamento iniziale
-      const urlParams = new URLSearchParams(window.location.search);
-      const playerIndex = urlParams.get('player');
-
-      // Inizializzazione Swiper
       new Swiper('.swiper', {
-        direction: 'horizontal',
-        initialSlide: playerIndex ? parseInt(playerIndex) : 0,
-        loop: false,
-        slidesPerView: 1,
-        centeredSlides: true,
-        spaceBetween: 0,
+        initialSlide: parseInt(new URLSearchParams(window.location.search).get('player')) || 0,
         pagination: { el: '.swiper-pagination', clickable: true },
-        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-        keyboard: { enabled: true },
-        speed: 400,
-        observer: true,
-        observeParents: true
+        keyboard: { enabled: true }
       });
     }
 
-    // Esecuzione al caricamento della pagina
     caricaRoster();
   </script>
 </body>
