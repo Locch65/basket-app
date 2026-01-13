@@ -1,7 +1,8 @@
 // common.js - Funzioni e variabili condivise
 const url = 
-"https://script.google.com/macros/s/AKfycbx6PhFjEvG85LtS_VJHN0QUWbpx_0PynviQmK273IDRLKsp0vBxN-1TjzlviKvBiPmwQA/exec"
+"https://script.google.com/macros/s/AKfycbw2_Fc16irIpvzFI4rTwXp85LF3qnPvgcMFrCdgYBDMy_ZO_NpQPrNabK_SoSrjhlL_NA/exec"
 
+//"https://script.google.com/macros/s/AKfycbx6PhFjEvG85LtS_VJHN0QUWbpx_0PynviQmK273IDRLKsp0vBxN-1TjzlviKvBiPmwQA/exec"
 //"https://script.google.com/macros/s/AKfycbzwDJ4W1r9Wh10gDRaOc4IF0vF-GIjFiZKFxBvHrVxWHu6J4coHVpagaQx4PPK-y6gjbQ/exec"
 //"https://script.google.com/macros/s/AKfycbwQ7Bt5ZuivxMTcmYKpIGWA-_ChjCB9FuMWgd8DYegDIf9x_PNX2Lt9w625HuDSBHzDpg/exec"
 //"https://script.google.com/macros/s/AKfycbxH2mdeKSWbYOnFBxBvT5KAmx83RiYC2tq5t0a7WaXOnnUA_RgPAh2smBQ0Xvsw-UQbSQ/exec"
@@ -170,6 +171,7 @@ function extractYouTubeId(input) {
 
 function extractYoutubeTime(input) {
   try {
+	if (input === "") return 0;  
     const urlObj = new URL(input);
     if (urlObj.searchParams.has("t")) {
       const t = urlObj.searchParams.get("t");
