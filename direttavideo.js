@@ -2,17 +2,18 @@ let LIVE_OFFSET = 5;
 let REFRESH_TIME = 300;
 
 // Inizializzazione con supporto al tracciamento dei cambiamenti
-let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
-  const [nome, cognome] = nomeCompleto.split(" ");
-  return {
-    numero: numeriMaglia[index],
-    displayName: `${cognome} ${nome}`,
-    punteggio: 0,
-    contatori: {1:0, 2:0, 3:0},
-    stato: "Out",
-    lastPunteggio: 0 // Per rilevare cambiamenti
-  };
-});
+//let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
+//  const [nome, cognome] = nomeCompleto.split(" ");
+//  return {
+//    numero: numeriMaglia[index],
+//    displayName: `${cognome} ${nome}`,
+//    punteggio: 0,
+//    contatori: {1:0, 2:0, 3:0},
+//    stato: "Out",
+//    lastPunteggio: 0 // Per rilevare cambiamenti
+//  };
+//});
+let giocatoriObj = [];
 
 let player;
 let timelineInterval;
@@ -34,6 +35,38 @@ const teamA = localStorage.getItem("teamA"); // ATTENZIONE: da leggere da google
 const teamB = localStorage.getItem("teamB");
 
 initTeamNames();
+
+function inizializzaGiocatoriConvocati() {
+  const stringaConvocati = localStorage.getItem("convocazioni");
+
+  giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
+    const [nome, cognome] = nomeCompleto.split(" ");
+    return {
+      numero: numeriMaglia[index],
+      displayName: `${cognome} ${nome}`,
+      punteggio: 0,
+      contatori: {1:0, 2:0, 3:0},
+      stato: "Out",
+      lastPunteggio: 0 
+    };
+  }).filter(g => {
+    // Se la lista convocati è vuota, li teniamo tutti
+    if (!stringaConvocati || stringaConvocati.trim() === "" || stringaConvocati === "[ALL]") {
+      return true;
+    }
+    
+    // Trasformiamo la stringa in array e confrontiamo i numeri
+    // 1. Rimuoviamo eventuali parentesi quadre [ ]
+    // 2. Rimuoviamo tutti i tipi di apici (singoli ' e doppi ")
+    const stringaPulita = stringaConvocati.replace(/[\[\]'" ]/g, "");
+    
+    // 3. Creiamo l'array dividendo per virgola
+    const convocatiIds = stringaPulita.split(",");	const isConvocato = convocatiIds.includes(String(g.numero));
+    return convocatiIds.includes(String(g.numero));
+  });
+  
+  console.log("Giocatori pronti (filtrati):", giocatoriObj);
+}
 
 window.onYouTubeIframeAPIReady = function () {
   console.log("YouTube API Ready");
@@ -422,6 +455,30 @@ function processEventBuffer() {
 let tickCounter = 0;
 
 async function tickTimeline() {
+    // Se c'è il player, gestiamo la parte video
+    if (player && typeof player.getCurrentTime === "function") {
+        checkLiveStatus();
+    } else {
+        // Logica di fallback se non c'è il video: 
+        // usiamo l'orario reale del computer per far scorrere gli eventi live
+        const oraAttuale = new Date();
+        const vHH = String(oraAttuale.getHours()).padStart(2, '0');
+        const vMM = String(oraAttuale.getMinutes()).padStart(2, '0');
+        const vSS = String(oraAttuale.getSeconds()).padStart(2, '0');
+        orarioVisualizzatoFormattato = `${vHH}:${vMM}:${vSS}`;
+    }
+
+    tickCounter++;
+
+    // Carica i dati dal server ogni 5 tick (circa 1.5 secondi)
+    if (tickCounter % 5 === 0) {
+        await caricaDatiPartita(matchId);
+    }
+    
+    processEventBuffer(); // Gestisce la visualizzazione dei punti nel tempo
+}
+
+async function OLDtickTimeline() {
     // Se il player non è pronto, non fare nulla
     if (!player || typeof player.getCurrentTime !== "function") return;
 
@@ -665,6 +722,12 @@ window.addEventListener("resize", () => {
     }
 }, { passive: true });
 
+function avviaTickSenzaVideo() {
+    if (timelineInterval) clearInterval(timelineInterval);
+    // Avviamo subito il primo tick per non aspettare 300ms
+    tickTimeline(); 
+    timelineInterval = setInterval(tickTimeline, REFRESH_TIME);
+}
 
 function init() {
 	
@@ -675,14 +738,24 @@ function init() {
     // Carichiamo i dati freschi dal server prima di mostrare il video
     caricaAnagraficaSingolaPartita(matchId).then(() => {
             
+      inizializzaGiocatoriConvocati();
+	  
       videoId = localStorage.getItem("videoId");
       matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
 
       // Crea il player (questo poi chiamerà onPlayerReady in automatico)
-      if (videoId) {
+      if (videoId && videoId !== "null" && videoId !== "") {
+        // Se c'è un video, creiamo il player (che chiamerà tickTimeline al caricamento)
         creaIlPlayer(videoId);
-      }            
-            
+      } else {
+        // Se NON c'è un video, nascondiamo lo spinner e avviamo il tick manualmente
+        const videoSpinner = document.getElementById("video-loading");
+        if (videoSpinner) videoSpinner.classList.add("hidden");
+        
+        console.log("Nessun video trovato, avvio tickTimeline per sole statistiche.");
+        avviaTickSenzaVideo();
+      }
+	  
       console.log("Timeline avviata per il match:", matchId);
     });
   }	
