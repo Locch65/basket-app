@@ -333,6 +333,18 @@ body.dark-mode #menu {
   transition: background 0.2s;
 }
 
+#menu ul li a {
+  text-decoration: none;
+  color: inherit;
+  font-size: 18px; /* Adattalo alla dimensione del tuo menu */
+  display: flex;
+  align-items: center;
+}
+
+#menu ul li a:hover {
+  color: #27ae60; /* Cambia colore al passaggio del mouse */
+}
+
 body.dark-mode #menu li {
   border-bottom-color: #333;
 }
@@ -449,16 +461,16 @@ body.dark-mode .campionato.U15 {
 }
 
 
-#listaPartite.loadingOLD { /* ATTENZIONE in quale file serve */
-
-  text-align: center;
-  font-weight: bold;
-  color: #27ae60; /* verde o colore a scelta */
-  animation: blink 1s infinite;
-}
 #listaPartite.loading {
-  animation: none; 
+  display: flex;          /* Attiva flexbox */
+  justify-content: center; /* Centra orizzontalmente */
+  align-items: center;     /* Centra verticalmente */
+  min-height: 200px;      /* Altezza minima per vedere la centratura verticale */
+  width: 100%;            /* Occupa tutta la larghezza disponibile */
+  text-align: center;
   color: #7f8c8d;
+  font-weight: bold;
+  animation: blink 1s infinite; /* Opzionale: ripristina il lampeggio se desiderato */
 }
 
 @keyframes blink {

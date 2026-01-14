@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Statistiche Avanzate Roster</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
   * {
     -webkit-user-select: none;
@@ -20,19 +21,24 @@
     flex-direction: column;
   }
   
-  .header-container { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 10px; 
-  }
-  
+    .header-container { 
+      display: flex; align-items: center; justify-content: space-between; 
+      margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+   
   .brand-section {
     display: flex;
     align-items: center;
     gap: 10px;
   }
 
+.home-btn { 
+  text-decoration: none; 
+  color: #007bff; 
+  font-size: 24px; /* Dimensione dell'icona */
+  display: flex; 
+  align-items: center; 
+}
   .app-icon {
     width: 32px;
     height: 32px;
@@ -96,6 +102,9 @@
 
   <div class="header-container">
     <div class="brand-section">
+<a href="index.html" class="home-btn" aria-label="Home">
+  <i class="fas fa-home"></i>
+</a>
       <img src="icon-192.png" alt="Logo" class="app-icon">
       <h2>Polismile A - U14</h2>
     </div>
@@ -112,7 +121,7 @@
     
     <div class="filter-group">
       <strong>Punti:</strong>
-      <label><input type="radio" name="calcType" value="Totale" checked onclick="applicaFiltriECalcoli()"> Totali</label>
+      <label><input type="radio" name="calcType" value="Totale" checked onclick="applicaFiltriECalcoli()"> Somma</label>
       <label><input type="radio" name="calcType" value="Media" onclick="applicaFiltriECalcoli()"> Media</label>
     </div>
   </div>
@@ -269,7 +278,7 @@
       tfoot.innerHTML = `
         <tr class="tfoot-totale">
           <td></td>
-          <td class="col-nome">TOTALE</td>
+          <td class="col-nome">TOTALE / MEDIA</td>
           <td>${totPG_Squadra}</td>
           <td class="pts-bold">${totPTS.toFixed(totPTS % 1 === 0 ? 0 : 1)}</td>
           <td>${totTL.toFixed(totTL % 1 === 0 ? 0 : 1)}</td>

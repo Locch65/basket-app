@@ -8,59 +8,81 @@ function parseItalianDate(dateStr, timeStr) {
       return new Date(anno, mese - 1, giorno, ore, minuti);
 }
 
-function OLD_OKcaricaListaPartite(filtroCampionato = null) {
-/**
- * Funzione principale per caricare le partite.
- * Gestisce la cache immediata e decide se ridisegnare la lista o aggiornare i dati.
- */
+// Funzione aggiornata per gestire la cache e l'ottimizzazione rete
+function caricaListaPartite(filtroCampionato = null) {
     const container = document.getElementById("listaPartite");
     const cacheDati = localStorage.getItem("cache_partite");
 
-    // 1. Caricamento immediato dalla Cache (se disponibile)
+    // 1. Uso immediato della cache se disponibile per velocità istantanea
     if (cacheDati) {
         try {
             const datiLocali = JSON.parse(cacheDati);
             container.classList.remove("loading");
             renderizzaPartite(datiLocali, filtroCampionato);
+            console.log("Dati caricati dalla cache locale.");
         } catch (e) {
             console.error("Errore lettura cache:", e);
         }
     }
 
-    // 2. Fetch dei dati aggiornati da Google Sheets
+    // 2. Caricamento dal server solo se la cache è vuota o se richiesto esplicitamente
+    if (!cacheDati) {
+        fetchPartiteDalServer(filtroCampionato);
+    }
+}
+
+function fetchPartiteDalServer(filtroCampionato) {
+    const container = document.getElementById("listaPartite");
+    container.classList.add("loading");
+
     fetch(url + "?sheet=Partite")
         .then(res => res.json())
         .then(data => {
-            container.classList.remove("loading");
             const partite = Array.isArray(data) ? data : data.data;
-            if (!Array.isArray(partite)) return;
-
-            // Salva i nuovi dati in cache per il prossimo reload
+            // Aggiorna la cache con i nuovi dati freschi
             localStorage.setItem("cache_partite", JSON.stringify(partite));
-
-            // Se il filtro è attivo o la lista è vuota, eseguiamo un render completo.
-            // Altrimenti aggiorniamo chirurgicamente i punteggi/live.
-            if (container.querySelector('.match-card')) {
-                // Se la lista esiste già, aggiorniamo solo i dati sensibili senza "blink"
-                aggiornaDatiSenzaBlink(partite);
-            } else {
-                renderizzaPartite(partite, filtroCampionato);
-            }
-
-            // Gestione Refresh Automatico
-            const almenoUnaLive = partite.some(p => p.isLive === "true" || p.isLive === true);
-            startRefreshAutomatico(almenoUnaLive, filtroCampionato);
+            container.classList.remove("loading");
+            renderizzaPartite(partite, filtroCampionato);
         })
         .catch(err => {
-            container.classList.remove("loading");
-            if (container.children.length === 0) {
-                container.textContent = "Errore di connessione.";
+            console.error("Errore fetch, provo a usare la cache:", err);
+            
+            // Tenta di recuperare i dati dalla cache se il server fallisce
+            const cacheDati = localStorage.getItem("cache_partite");
+            if (cacheDati) {
+                const datiLocali = JSON.parse(cacheDati);
+                container.classList.remove("loading");
+                renderizzaPartite(datiLocali, filtroCampionato);
+                // Opzionale: mostra un piccolo avviso che i dati sono offline
+                console.warn("Visualizzazione dati in modalità offline (cache)");
+            } else {
+                container.innerHTML = "Errore: server non raggiungibile e nessuna cache disponibile.";
+                container.classList.remove("loading");
             }
-            console.error(err);
         });
 }
 
-function caricaListaPartite(filtroCampionato = null) {
+// Funzione dedicata al recupero dati dal server
+function OLDfetchPartiteDalServer(filtroCampionato) {
+    const container = document.getElementById("listaPartite");
+    container.classList.add("loading");
+
+    fetch(url + "?sheet=Partite")
+        .then(res => res.json())
+        .then(data => {
+            const partite = Array.isArray(data) ? data : data.data;
+            // Salva i nuovi dati in cache per il prossimo accesso
+            localStorage.setItem("cache_partite", JSON.stringify(partite));
+            container.classList.remove("loading");
+            renderizzaPartite(partite, filtroCampionato);
+        })
+        .catch(err => {
+            console.error("Errore fetch:", err);
+            container.innerHTML = "Errore nel caricamento dati.";
+        });
+}
+
+function OLDcaricaListaPartite(filtroCampionato = null) {
     const container = document.getElementById("listaPartite");
     
     // --- NUOVA LOGICA FILTRO LIVE ---
@@ -395,6 +417,7 @@ function init() {
         localStorage.setItem("excludePast", togglePast.checked ? "true" : "false");
         const attuale = localStorage.getItem("campionatoSelezionato") || "Tutti";
         caricaListaPartite(attuale !== "Tutti" ? attuale : null);
+        menu.classList.add("hidden");
     });
 
     // --- 4. TEMA (DARK/LIGHT MODE) ---
@@ -408,6 +431,7 @@ function init() {
         const isDark = document.body.classList.toggle("dark-mode");
         localStorage.setItem("theme", isDark ? "dark" : "light");
         toggleTheme1.innerHTML = isDark ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
+        menu.classList.add("hidden");
     });
 
     // --- 5. ADMIN & LOGIN ---
@@ -439,6 +463,21 @@ function init() {
             }
         });
     }
+    // Gestione del bottone Aggiorna
+    document.getElementById("updateBtn").addEventListener("click", () => {
+        const container = document.getElementById("listaPartite");
+        
+        // 1. Svuota la cache locale
+        localStorage.removeItem("cache_partite"); 
+        
+        // 2. Ripristina il testo di caricamento e la classe "loading"
+        container.innerHTML = "Caricamento Calendario...";
+        container.classList.add("loading");
+        
+        // 3. Recupera il valore del filtro attuale e forza il fetch dal server
+        const filtroAttuale = document.querySelector('input[name="camp"]:checked').value;
+        fetchPartiteDalServer(filtroAttuale);
+    });	
 
     // --- 6. CARICAMENTO INIZIALE DATI ---
     // Applica il filtro iniziale in base al salvataggio o al parametro URL
