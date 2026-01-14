@@ -14,7 +14,6 @@ let scoreB = 0;
 let isAdmin = false;
 let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
 let matchId = null;
-let matchId = null;
 let teamA = "";
 let teamB = "";
 let isLive = false;
@@ -1673,6 +1672,7 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
 
 
 
