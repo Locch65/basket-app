@@ -155,9 +155,9 @@
 
       tbody.innerHTML = dati.map(p => `
         <tr>
-          <td class="loc-cell">${p.Location}</td>
-          <td class="id-col">${p.MatchIdDisplay}</td>
           <td class="date-col">${p.Data}</td>
+          <td class="id-col">${p.MatchIdDisplay}</td>
+          <td class="loc-cell">${p.Location}</td>
           <td style="text-align:left; padding-left:10px">${p.MatchName}</td>
           <td class="pts-bold">${p.PTS}</td>
           <td>${p.TL}</td>
@@ -165,7 +165,6 @@
           <td>${p.T3}</td>
         </tr>
       `).join('');
-
       tfoot.innerHTML = `
         <tr class="tfoot-totale">
           <td></td>
@@ -261,9 +260,9 @@
           <table id="table-${idx}">
             <thead>
               <tr>
-                <th onclick="gestisciOrdinamentoMatch('Location', ${idx})">L</th>
-                <th onclick="gestisciOrdinamentoMatch('MatchIdDisplay', ${idx})">ID</th>
                 <th onclick="gestisciOrdinamentoMatch('Data', ${idx})">Data</th>
+                <th onclick="gestisciOrdinamentoMatch('MatchIdDisplay', ${idx})">ID</th>
+                <th onclick="gestisciOrdinamentoMatch('Location', ${idx})">L</th>
                 <th onclick="gestisciOrdinamentoMatch('MatchName', ${idx})">Avversaria</th>
                 <th onclick="gestisciOrdinamentoMatch('PTS', ${idx})">PTS</th>
                 <th onclick="gestisciOrdinamentoMatch('TL', ${idx})">TL</th>
@@ -273,8 +272,7 @@
             </thead>
             <tbody id="tbody-${idx}"></tbody>
             <tfoot id="tfoot-${idx}"></tfoot>
-          </table>
-        `;
+          </table>        `;
         container.appendChild(slide);
       });
 
