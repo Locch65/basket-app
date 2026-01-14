@@ -1,83 +1,3 @@
-// -----------------------------------------------------------------------------------
-// Comando per webserver locale:
-//  py -m http.server 8000 --directory C:\Users\locch\Desktop\Basket\basket-app-main.1.0.61
-//
-// Comando per attivare pagina web:
-//  http://localhost:8000/match.html
-//
-// -----------------------------------------------------------------------------------
-// TODO List:
-//
-//  Index.html
-//     - 
-//
-//  Roster.html
-//    - FATTO: mostrare tabella con "#, Nome, Punti Totali, Punti da 1, da 2, da 3, Media per Partita, #Partite"
-//    - FATTO: le intestazioni delle colonne della tabella sono bottoni che permettono il sort
-//
-//  Anagrafica.html
-//    - FATTO: visualizzare dettaglio statistiche per partita
-//
-//
-//  Calendario.html
-//    - FATTO: abilitare update automatico punteggi solo se c'è una partita live
-//    - FATTO: aggiungere in hamburger menu la voce Administrator, deve permettere la lettura e memorizzazione della password.
-//    - FATTO: quando si seleziona una partita, se è stato fatto login come Administrator va alla pagina match.html, altrimenti a direttavideo.html
-//    - FATTO: visualizzare i dati del calendario nella cache mentre accede a google sheets per fare il refresh
-//    - FATTO: mettere U14, U15, TUtti allo stesso livello non nel sottomenu Campionato
-//    - FATTO: Aggiungere in hamburger le voci: "Home" che porta index.html
-//
-//    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
-//
-//  Match.html
-//    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 
-//    - FATTO: un utente remoto su altro device non vede modificare il punteggio della partita ma solo quello del giocatore
-//    - FATTO: quando non esistono punteggi per un una partita, creare un giocare fittizio "Polismile A", e assegnare tutti i punti a lui.
-//    - FATTO: sistemare i font su browser, sono troppo grandi. i bottoni si sovrappongoni
-//    - FATTO: inserire hamburger menu con le voci: "Go Live", "Salva", "Annulla", "Calendario", "Impostazioni", 
-//    - FATTO: Salvare APIKey in locale non su GitHub
-//    - FATTO: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
-//    - FATTO: inoltre, ogni volta che fa il refresh della pagina verifica l'esistenza del video per mostrare il bottone
-//    - FATTO: leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
-//    - FATTO: sincronizzare messaggi punteggi con video
-//
-//    - all'inizializzazione della pagina caricaDatiPartita viene chiamata 2 volte
-//    - inserire bottoni +/- per ritardare la visualizzazione dei messaggi (solo Admin). devono modificare il valore di oraInizioDiretta. i client devono leggere continuamente il valore
-//    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
-//    - inserire hamburger menu con le voci: "Home", che porta a index.html
-//    - leggere lista giocatori da Google Sheet
-//    - password Admin da crittografare
-//    - su display grandi non è bella da vedere, cambiare dimensione font e bottoni
-//    - NICE TO HAVE: implementare dark mode
-//
-//  DirettaVideo.html
-//    - FATTO: inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
-//    - FATTO: simulazione OPPO: eliminare la scrollbar orizzontale
-//    - FATTO: inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
-//    - FATTO: inserire indicazioni del quarto attuale
-//    - FATTO: nella lista mettere solo i convocati e non tutti quelli del DB
-//
-//    - bug: il toast del canestro segnato non compare
-//    - ridurre font-side hud-score quando si cellulare
-//
-//    - i client non devono fare polling ma usare notifiche realtime da Firebase
-//
-//    - NICE TO HAVE: implementare funzione Highlights per vedere solo il video in prossimità del canestro.
-//
-//  Impostazioni. html (SERVE?)
-//    - pagina dedicata per abilitare/disabilitare, settare:
-//       - Dark Mode (toggle)
-//       - refresh rate dei punteggi live (di default 5 secondi)
-//
-//
-//
-//  VARIE:
-//    - cambiare i loop di lettura ogni 5 secondi con una implementazioni a eventi con un server realtime (notifica push)
-//
-//
-// -----------------------------------------------------------------------------------
-
-
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
@@ -87,9 +7,11 @@ const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
 const FILES_TO_CACHE = [
   "./index.html?v=" + SW_VERSION,
-  "./calendaio.html?v=" + SW_VERSION,
+  "./calendario.html?v=" + SW_VERSION,
   "./match.html?v=" + SW_VERSION,
   "./direttavideo.html?v=" + SW_VERSION,
+  "./roster.html?v=" + SW_VERSION,
+  "./anagrafica.html?v=" + SW_VERSION,
   
   "./calendario.css?v=" + SW_VERSION,
   "./match.css?v=" + SW_VERSION,
