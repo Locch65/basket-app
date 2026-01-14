@@ -7,50 +7,131 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; overflow-x: hidden; }
-    .swiper { width: 100%; height: 100vh; }
-    .swiper-slide {
-      display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
-      background: #fff; padding: 60px 15px 20px 15px; box-sizing: border-box; width: 100%; overflow-y: auto;
-    }
-	{
-      -webkit-user-select: none; /* Safari */
-      -ms-user-select: none;     /* IE 10 e versioni successive */
-      user-select: none;         /* Standard (Chrome, Firefox, Opera) */
-      -webkit-touch-callout: none; /* Disabilita il menu contestuale su iOS (opzionale) */
-    }
-    
-    .player-header { display: flex; align-items: center; gap: 15px; width: 100%; margin-bottom: 15px; }
-    .player-photo { width: 65px; height: 65px; object-fit: cover; border-radius: 50%; border: 2px solid #007bff; background: #eee; }
-    .player-info h2 { margin: 0; font-size: 1.2rem; color: #333; }
+<style>
+  /* --- Layout Generale --- */
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    background: #f5f5f5; 
+    overflow-x: hidden; 
+    -webkit-user-select: none;
+    user-select: none;
+  }
 
-    .filters-container { 
-      background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; 
-      border: 1px solid #eee; display: flex; gap: 15px; flex-wrap: wrap; width: 100%; box-sizing: border-box;
-      font-size: 12px;
-    }
-    .filter-group { display: flex; align-items: center; gap: 8px; }
-    .filter-group strong { color: #007bff; }
-    
-    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 12px; }
-    th, td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #ddd; }
-    th { background-color: #007bff; color: white; cursor: pointer; white-space: nowrap; user-select: none; }
-    th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
-    th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
-    
-    .id-col { color: #888; font-size: 10px; white-space: nowrap; }
-    .date-col { color: #666; font-size: 11px; }
-    
-    .tfoot-totale { background-color: #e9f4ff; font-weight: bold; }
-    .pts-bold { color: #007bff; font-weight: bold; }
-    
-    .back-btn {
-      position: absolute; top: 15px; left: 15px; z-index: 100; background: #007bff; color: white; 
-      padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 13px;
-    }
-    .loc-cell { font-size: 14px; width: 25px; }
-  </style>
+  .swiper { width: 100%; height: 100vh; }
+  
+  .swiper-slide {
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    justify-content: flex-start;
+    background: #fff; 
+    padding: 60px 10px 20px 10px; /* Ridotto padding laterale */
+    box-sizing: border-box; 
+    width: 100%; 
+    overflow-y: auto;
+  }
+
+  .player-header { display: flex; align-items: center; gap: 15px; width: 100%; margin-bottom: 15px; }
+  .player-photo { width: 65px; height: 65px; object-fit: cover; border-radius: 50%; border: 2px solid #007bff; background: #eee; }
+  .player-info h2 { margin: 0; font-size: 1.2rem; color: #333; }
+
+  /* --- Filtri --- */
+  .filters-container { 
+    background: #f9f9f9; 
+    padding: 8px; 
+    border-radius: 8px; 
+    margin-bottom: 15px; 
+    border: 1px solid #eee; 
+    display: flex; 
+    gap: 10px; 
+    flex-wrap: wrap; 
+    width: 100%; 
+    box-sizing: border-box;
+    font-size: 11px;
+  }
+  .filter-group { display: flex; align-items: center; gap: 5px; }
+  .filter-group strong { color: #007bff; }
+
+  /* --- Tabella Ultra-Compatta per Oppo --- */
+  table {
+    width: 100%;
+    table-layout: fixed; /* Obbliga il browser a rispettare le larghezze */
+    border-collapse: collapse;
+    font-size: 11px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+
+  /* Reset e base per tutte le celle */
+  th, td { 
+    padding: 8px 1px !important; 
+    text-align: center; 
+    border-bottom: 1px solid #ddd;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  th { 
+    background-color: #007bff; 
+    color: white; 
+    font-size: 10px !important; /* Forza intestazioni piccole */
+    white-space: nowrap;
+  }
+
+  /* --- Dimensionamento Colonne --- */
+  
+/* 1. Data */
+.date-col, th:nth-child(1) { 
+    width: 52px !important; 
+    /* color: #666;  <-- RIMOSSO per non cambiare il colore del testo */
+}
+
+/* 2. ID */
+.id-col, th:nth-child(2) { 
+    width: 55px !important; 
+    /* color: #888;  <-- RIMOSSO */
+    white-space: normal !important; 
+    line-height: 1.1;
+}
+
+  /* 3. Location (Casetta/Bus) */
+  .loc-cell, th:nth-child(3) { width: 22px !important; }
+
+/* Colonna Avversaria: permette il ritorno a capo */
+td:nth-child(4), th:nth-child(4) { 
+  width: auto !important; 
+  text-align: left; 
+  padding-left: 4px !important;
+  font-size: 11px; /* Leggermente più piccolo aiuta il layout */
+  
+  /* Queste tre righe attivano il ritorno a capo */
+  white-space: normal !important; 
+  word-wrap: break-word;
+  line-height: 1.1;
+}
+  /* 5-8. Statistiche (PTS, TL, T2, T3) */
+  th:nth-last-child(1), td:nth-last-child(1),
+  th:nth-last-child(2), td:nth-last-child(2),
+  th:nth-last-child(3), td:nth-last-child(3),
+  th:nth-last-child(4), td:nth-last-child(4) {
+    width: 30px !important;
+    font-size: 10px;
+  }
+
+  /* --- Utility --- */
+  .tfoot-totale { background-color: #e9f4ff; font-weight: bold; }
+  .pts-bold { color: #007bff; font-weight: bold; }
+  
+  .back-btn {
+    position: absolute; top: 15px; left: 15px; z-index: 100; 
+    background: #007bff; color: white; 
+    padding: 6px 12px; border-radius: 20px; 
+    text-decoration: none; font-size: 13px;
+  }
+
+  th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
+  th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
+</style>
 </head>
 <body>
 
@@ -61,7 +142,7 @@
     <div class="swiper-pagination"></div>
   </div>
 
-  <script src="common.js?v=1.0.89"></script>
+  <script src="common.js?v=1.0.90"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <script>
@@ -155,10 +236,10 @@
 
       tbody.innerHTML = dati.map(p => `
         <tr>
-          <td class="date-col">${p.Data}</td>
-          <td class="id-col">${p.MatchIdDisplay}</td>
+          <td class="date-col">${p.Data.substring(0, 6) + p.Data.slice(-2)}</td>
+<td class="id-col" style="line-height: 1.1;">${p.MatchIdDisplay.replace(' ', '<br>')}</td>
           <td class="loc-cell">${p.Location}</td>
-          <td style="text-align:left; padding-left:10px">${p.MatchName}</td>
+<td class="avversaria-cell">${p.MatchName}</td>
           <td class="pts-bold">${p.PTS}</td>
           <td>${p.TL}</td>
           <td>${p.T2}</td>

@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.89";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.90";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -13,6 +13,7 @@ let score = 0;
 let scoreB = 0;
 let isAdmin = false;
 let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
+let matchId = null;
 let matchId = null;
 let teamA = "";
 let teamB = "";

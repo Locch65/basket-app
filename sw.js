@@ -16,7 +16,7 @@
 //    - FATTO: le intestazioni delle colonne della tabella sono bottoni che permettono il sort
 //
 //  Anagrafica.html
-//    - visualizzare dettaglio statistiche per partita
+//    - FATTO: visualizzare dettaglio statistiche per partita
 //
 //
 //  Calendario.html
@@ -25,8 +25,8 @@
 //    - FATTO: quando si seleziona una partita, se è stato fatto login come Administrator va alla pagina match.html, altrimenti a direttavideo.html
 //    - FATTO: visualizzare i dati del calendario nella cache mentre accede a google sheets per fare il refresh
 //    - FATTO: mettere U14, U15, TUtti allo stesso livello non nel sottomenu Campionato
+//    - FATTO: Aggiungere in hamburger le voci: "Home" che porta index.html
 //
-//    - Aggiungere in hamburger le voci: "Home" che porta index.html
 //    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //
 //  Match.html
@@ -81,7 +81,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.89"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.90"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
