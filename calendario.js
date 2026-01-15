@@ -82,49 +82,6 @@ function OLDfetchPartiteDalServer(filtroCampionato) {
         });
 }
 
-function OLDcaricaListaPartite(filtroCampionato = null) {
-    const container = document.getElementById("listaPartite");
-    
-    // --- NUOVA LOGICA FILTRO LIVE ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const filterLiveOnly = urlParams.get('live') === 'true';
-    const titolo = document.querySelector("h1");
-    // --------------------------------
-
-    const cacheDati = localStorage.getItem("cache_partite");
-
-    if (cacheDati) {
-        try {
-            let datiLocali = JSON.parse(cacheDati);
-            
-            // Applichiamo il filtro se siamo in modalità live
-            if (filterLiveOnly) {
-                datiLocali = datiLocali.filter(p => p.isLive === "true" || p.isLive === true);
-                if (titolo) titolo.textContent = "Partite in Diretta";
-            }
-            
-            container.classList.remove("loading");
-            renderizzaPartite(datiLocali, filtroCampionato);
-        } catch (e) { console.error(e); }
-    }
-
-    fetch(url + "?sheet=Partite")
-        .then(res => res.json())
-        .then(data => {
-            container.classList.remove("loading");
-            let partite = Array.isArray(data) ? data : data.data;
-
-            // Applichiamo lo stesso filtro ai dati freschi dal server
-            if (filterLiveOnly) {
-                partite = partite.filter(p => p.isLive === "true" || p.isLive === true);
-                if (titolo) titolo.textContent = "Partite in Diretta";
-            }
-
-            localStorage.setItem("cache_partite", JSON.stringify(partite));
-            renderizzaPartite(partite, filtroCampionato);
-        });
-}
-
 function renderizzaPartite(partite, filtroCampionato) {
 /**
  * Ricostruisce l'intero DOM della lista.
@@ -133,9 +90,18 @@ function renderizzaPartite(partite, filtroCampionato) {
     const container = document.getElementById("listaPartite");
     const oggi = new Date();
     const excludePast = document.getElementById("togglePast").checked;
+	const isAdmin = localStorage.getItem("isAdmin") === "true"; // Controllo se è admin
     
     let partiteFiltrate = partite;
 
+    // Se NON è admin, mostra SOLO U14 e U15, escludendo tutto il resto (es. Amichevoli o test)
+    if (!isAdmin) {
+        partiteFiltrate = partiteFiltrate.filter(p => {
+            const mId = String(p.matchId || "");
+            return mId.includes("U14") || mId.includes("U15");
+        });
+    }
+	
     // Filtro per Campionato
     if (filtroCampionato && filtroCampionato !== "Tutti") {
         partiteFiltrate = partiteFiltrate.filter(p =>

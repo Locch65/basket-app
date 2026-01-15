@@ -215,23 +215,35 @@
 		
         function checkLiveStatus() {
             const btnLive = document.getElementById("btn-live");
-			const txtLive = document.getElementById("live-text");
-
+            const txtLive = document.getElementById("live-text");
+            const isAdmin = localStorage.getItem("isAdmin") === "true"; // Recuperiamo il ruolo
+        
             fetch(url + "?sheet=Partite")
                 .then(res => res.json())
                 .then(data => {
                     let partite = Array.isArray(data) ? data : data.data;
-                    // Troviamo la prima partita che è effettivamente live
-                    const match = partite.find(p => p.isLive === "true" || p.isLive === true);
-
+        
+                    // Cerchiamo la partita live, ma aggiungiamo il controllo sul matchId se non è admin
+                    const match = partite.find(p => {
+                        const isMatchLive = (p.isLive === "true" || p.isLive === true);
+                        
+                        if (isAdmin) {
+                            return isMatchLive; // L'admin vede tutto ciò che è live
+                        } else {
+                            // L'utente vede il live SOLO se è U14 o U15
+                            const mId = String(p.matchId || "");
+                            const isAuthorized = mId.includes("U14") || mId.includes("U15");
+                            return isMatchLive && isAuthorized;
+                        }
+                    });
+        
                     if (match) {
                         liveMatchData = match;
-                        // Imposta il testo su tre righe usando <br>
                         txtLive.innerHTML = `${match.squadraA}<br>vs<br>${match.squadraB}`;
                         btnLive.classList.replace("live-off", "live-active");
                     } else {
                         liveMatchData = null;
-						txtLive.innerHTML = "Live";
+                        txtLive.innerHTML = "Live";
                         btnLive.classList.replace("live-active", "live-off");
                     }
                 })
@@ -240,7 +252,7 @@
                     liveMatchData = null;
                     btnLive.classList.replace("live-active", "live-off");
                 });
-        }
+        }		
 		
         // Avvia il controllo subito e poi ogni 5 secondi
         checkLiveStatus();
