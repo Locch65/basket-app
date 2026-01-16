@@ -27,6 +27,7 @@ let orarioVisualizzatoFormattato = null;
 let fullMatchHistory = []; // Qui salviamo tutto il liveData ricevuto
 let videoId = null;
 let matchStartTime = 0;
+let matchIsLive = false;
 let isReviewMode = false;
 
 const hudLabel = document.getElementById("hud-label");
@@ -215,7 +216,7 @@ async function caricaDatiPartita(mId) {
     // 1. Estrazione dati dai nuovi campi indicati
     const rows = data.statisticheGiocatori || [];
     const dettagli = data.dettagliGara || {};
-    const matchIsLive = dettagli.isLive;
+    matchIsLive = dettagli.isLive;
 	oraInizioDiretta = dettagli.oraInizioDiretta;
 	isUserLive = matchIsLive;
 
@@ -233,7 +234,7 @@ async function caricaDatiPartita(mId) {
         try {
           g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}');
         } catch (e) {}
-      } else if (r.giocatore === "Squadra B" && !matchIsLive) {
+      } else if (r.giocatore === "Squadra B" && !matchIsLive && ! isReviewMode) { // in ReviewMode il punteggio e' calcolato in base al tempo visualizzato
         punteggioB = parseInt(r.punti, 10) || 0;
       }
     });
@@ -439,9 +440,13 @@ function processEventBuffer() {
         //document.getElementById('hud-score').textContent = `${eventoCorrente.punteggioA} - ${eventoCorrente.punteggioB}`;
         punteggioA =  eventoCorrente.punteggioA;
 		punteggioB = eventoCorrente.punteggioB;
-		updateScoreboard(isUserLive);
-		if (isUserLive && secondiVisualizzati - eventoCorrente.secondiReali < 1 ) {
-			showBasketToast(GetCognome(eventoCorrente.idGiocatore), eventoCorrente.puntiRealizzati);
+        updateScoreboard(matchIsLive || isReviewMode);
+		if ((isUserLive || isReviewMode) && secondiVisualizzati - eventoCorrente.secondiReali < 1 ) {
+			tmpId = GetCognome(eventoCorrente.idGiocatore);
+			if (tmpId === "") {
+				tmpId = (teamA === "Polismile A") ? teamB : teamA;
+			}
+			showBasketToast(tmpId, eventoCorrente.puntiRealizzati);
 		}
 
     }
