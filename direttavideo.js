@@ -27,6 +27,7 @@ let orarioVisualizzatoFormattato = null;
 let fullMatchHistory = []; // Qui salviamo tutto il liveData ricevuto
 let videoId = null;
 let matchStartTime = 0;
+let isReviewMode = false;
 
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
@@ -258,11 +259,11 @@ async function caricaDatiPartita(mId) {
 
     isFirstLoad = false;
 
-    updateScoreboard(matchIsLive);
-    if (!matchIsLive) {
-      renderPlayerList();
-    } else {
+    updateScoreboard(matchIsLive || isReviewMode);
+    if (matchIsLive || isReviewMode) {
       renderPlayerListLive();
+    } else {
+      renderPlayerList();
     }
 
     // Restituiamo i dati se servisse usarli altrove
