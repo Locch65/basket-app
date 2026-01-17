@@ -261,13 +261,25 @@ h1 {
 #controlsB.left { margin-right: auto; }
 #controlsB.right { margin-left: auto; }
 
+.ordinamenti-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0px;
+  flex-shrink: 0; /* Impedisce ai bottoni di rimpicciolirsi troppo */
+}
+
 /* Ordinamenti */
 #ordinamenti {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: flex-start; /* Allinea tutto a sinistra */
+  justify-content: flex-start; /* Allinea a sinistra */
+  flex-wrap: nowrap;           /* Impedisce di andare a capo */
   gap: 4px;
-  margin-top: 0px;   /* riduce lo spazio sopra */
+  margin-top: 10px;
+  overflow-x: auto;            /* Se lo schermo è minuscolo, permette lo scroll orizzontale invece di rompere il layout */
+  width: 100%;
 }
 
 /* Bottone Convocazioni */
@@ -286,22 +298,47 @@ h1 {
   background-color: #0056b3;
 }
 
-.clock-display {
-    margin-left: auto;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.5rem; /* Ridotto leggermente rispetto a prima */
-    font-weight: bold;
-    color: #2c3e50;
-    padding: 4px 10px;
-    background-color: #f8f9fa;
-    border: 2px solid #3498db;
-    border-radius: 8px;
-    min-width: 110px;
-    text-align: center;
-    white-space: nowrap; /* Impedisce che l'orario vada a capo */
+#clock-container {
+  display: flex;
+  flex-direction: row; /* Forza orologio e + - sulla stessa riga */
+  align-items: center;
+  gap: 5px;
+  margin-left: 0px;
+  flex-shrink: 0;
 }
 
-#ordinamenti button {
+/* Rimuovi eventuali larghezze fisse che potrebbero nascondere il contenuto */
+.clock-display {
+    min-width: 90px;
+    text-align: center;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    /* Rimosso flex o altro che potrebbe creare conflitti */
+}
+
+.time-controls {
+    display: flex;
+    flex-direction: row; /* Mette il + sopra il - */
+	gap: 2px;
+    justify-content: center;
+}
+
+.btn-time {
+    width: 28px;         /* Leggermente più grandi per facilitare il tocco */
+    height: 28px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+#OLDordinamenti button {
   font-size: 1.6rem;      /* testo più grande */
   padding: 14px 22px;     /* più spazio interno */
   border-radius: 6px;     /* angoli arrotondati */
@@ -311,6 +348,12 @@ h1 {
   border: 1px solid #ccc;
   margin-top: 0px;   /* riduce lo spazio sopra */
   transition: background-color 0.3s ease;
+}
+#ordinamenti button {
+  white-space: nowrap; /* Evita che il testo nel bottone vada a capo */
+  margin: 0;           /* Rimuoviamo il margin per usare solo il gap del contenitore */
+  padding: 8px 12px;   /* Leggermente ridotto per favorire l'allineamento */
+  font-size: 14px;     /* Dimensione base più sicura */
 }
 
 #ordinamenti button:hover {
@@ -887,24 +930,35 @@ h1 {
     margin: 0; 
   }
 
-  /* 6. Bottoni di Ordinamento e Convocazioni */
   #ordinamenti {
-    gap: 2px;
+    justify-content: space-between; /* Su mobile distribuisce meglio lo spazio */
   }
+
   #ordinamenti button {
-    font-size: 12px;
+    font-size: 14px;    /* Leggermente più piccolo per stare in riga */
     padding: 6px 8px;
-    margin: 2px;
-    border-radius: 4px;
   }
+  
+  .btn-time {
+        width: 32px;
+        height: 32px;
+        font-size: 1.6rem  !important;
+    }
+    
+	
   .clock-display {
-        font-size: 0.9rem; /* Dimensione ridotta per il cellulare */
-        min-width: 85px;   /* Riduce l'ingombro orizzontale */
+        font-size: 1.1rem; /* Dimensione ridotta per il cellulare */
+        min-width: 70px;   /* Riduce l'ingombro orizzontale */
         padding: 2px 6px;  /* Riduce lo spazio interno */
         border-width: 1px; /* Bordo più sottile per non appesantire */
         margin-left: 5px;  /* Meno spazio dal bottone precedente se lo schermo è strettissimo */
   }
 	
+  .OLDclock-display {
+    font-size: 14px;
+    min-width: 60px;
+  }
+  
   /* 7. Giocatori (la parte più importante per Admin) */
   .giocatore {
     font-size: 14px;

@@ -155,7 +155,7 @@ html, body {
   left: 50%;               /* Sposta il bordo sinistro al centro */
   transform: translateX(-75%); /* Lo trasla indietro del 50% della sua larghezza per centrarlo perfettamente */
   
-  font-size: 2.0rem !important; /* Font ridotto (era 2.5rem) */
+  font-size: 1.6rem !important; /* Font ridotto (era 2.5rem) */
   font-weight: 900 !important;
   padding: 3px 6px !important; /* Padding leggermente ridotto */
   

@@ -41,10 +41,10 @@
 //    - FATTO: leggere OraInizioDirettaYoutube attraverso l'API e memorizzarla nel DB
 //    - FATTO: sincronizzare messaggi punteggi con video
 //    - FATTO: inserire hamburger menu con le voci: "Home", che porta a index.html
+//    - FATTO: inserire bottoni +/- per ritardare la visualizzazione dei messaggi (solo Admin). devono modificare il valore di oraInizioDiretta. i client devono leggere continuamente il valore
 //
 //    - BUG: se metto la partia live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
 //    - all'inizializzazione della pagina caricaDatiPartita viene chiamata 2 volte
-//    - inserire bottoni +/- per ritardare la visualizzazione dei messaggi (solo Admin). devono modificare il valore di oraInizioDiretta. i client devono leggere continuamente il valore
 //    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
 //    - leggere lista giocatori da Google Sheet
 //    - password Admin da crittografare

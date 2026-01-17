@@ -72,13 +72,21 @@
         </div>
       </div>
     </div>
+	
 
     <div id="ordinamenti">
       <div class="ordinamenti-left">
-        <button><i class="fas fa-arrow-up"></i> Numero</button>
-        <button><i class="fas fa-arrow-up"></i> Cognome</button>
-        <button><i class="fas fa-arrow-up"></i> Punteggio</button>
-		<span id="digitalClock" class="clock-display">00:00:00</span>
+        <button><i class="fas fa-arrow-up"></i> #</button>
+        <button><i class="fas fa-arrow-up"></i> Nome</button>
+        <button><i class="fas fa-arrow-up"></i> Score</button>
+        <div id="clock-container" >
+            <span id="digitalClock" class="clock-display">00:00</span>
+            
+            <div class="time-controls" >
+                <button class="btn-time" onclick="modificaOraInizioDiretta(-1)">-</button>
+                <button class="btn-time" onclick="modificaOraInizioDiretta(1)">+</button>
+            </div>
+        </div>
       </div>
     </div>
 
@@ -92,8 +100,8 @@
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.90"></script>
-  <script src="match.js?v=1.0.90"></script>
+  <script src="common.js?v=1.0.91"></script>
+  <script src="match.js?v=1.0.91"></script>
   <script>
   
   //window.addEventListener("beforeunload", function (event) {

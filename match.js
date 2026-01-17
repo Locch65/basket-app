@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.90";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.91";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -40,6 +40,42 @@ const giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
     stato: "Out"
   };
 });
+
+/**
+ * Modifica l'ora di inizio o il timestamp
+ * @param {number} incremento - Può essere +1 o -1
+ */
+function modificaOraInizioDiretta(delta) {
+// 2. Converti HH:MM:SS in secondi totali
+    if (!isAdmin) return;
+
+    const parti = oraInizioDiretta.split(":");
+    let secondiTotali = (+parti[0]) * 3600 + (+parti[1]) * 60 + (+parti[2]);
+
+    // 3. Applica la modifica
+    secondiTotali += delta;
+
+    // Evita valori negativi
+    if (secondiTotali < 0) secondiTotali = 0;
+
+    // 4. Riconverti in formato HH:MM:SS
+    const ore = Math.floor(secondiTotali / 3600).toString().padStart(2, '0');
+    const minuti = Math.floor((secondiTotali % 3600) / 60).toString().padStart(2, '0');
+    const secondi = (secondiTotali % 60).toString().padStart(2, '0');
+
+    oraInizioDiretta = `${ore}:${minuti}:${secondi}`;
+	
+    // Salviamo il nuovo valore
+    localStorage.setItem("oraInizioDiretta", oraInizioDiretta);
+    
+    console.log("Nuovo Start Time impostato:", oraInizioDiretta);
+
+    
+    // Se sei Admin, potresti voler inviare questo aggiornamento al server/DB
+    if (isAdmin) {
+        salvaDatiPartita(); // La tua funzione esistente per salvare su Google Sheets
+    }
+}
 
 function calcolaOraInizioDirettaYoutube() {
     console.log("Eseguo il calcolo dell'ora dall'URL inserito...");
