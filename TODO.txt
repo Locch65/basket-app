@@ -43,12 +43,15 @@
 //    - FATTO: inserire hamburger menu con le voci: "Home", che porta a index.html
 //    - FATTO: inserire bottoni +/- per ritardare la visualizzazione dei messaggi (solo Admin). devono modificare il valore di oraInizioDiretta. i client devono leggere continuamente il valore
 //
-//    - BUG: se metto la partia live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
+//
+//    - durante una partita live, tornando indietro (Calendario o Home non ricordo), sono spariti le variabili in localstorage (urlyoutube in particolare)
+//    - ristrutture UI: usare al meglio display grandi
+//    - BUG: se metto la partita live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
 //    - all'inizializzazione della pagina caricaDatiPartita viene chiamata 2 volte
 //    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
 //    - leggere lista giocatori da Google Sheet
 //    - password Admin da crittografare
-//    - su display grandi non è bella da vedere, cambiare dimensione font e bottoni
+// 
 //    - NICE TO HAVE: implementare dark mode
 //
 //  DirettaVideo.html
@@ -57,14 +60,16 @@
 //    - FATTO: inserire punteggio e ultimo marcatore in sovraimpressione (quando in orizzontale)
 //    - FATTO: inserire indicazioni del quarto attuale
 //    - FATTO: nella lista mettere solo i convocati e non tutti quelli del DB
+//    - FATTO: ridurre font-side hud-score quando si cellulare
 //
-//    - bug: il toast del canestro segnato non compare
-//    - ridurre font-side hud-score quando si cellulare
+//    - lo stato In/Out non è storicizzato. Nella review della partita mostra l'ultimo stato noto.
+//    - NICE TO HAVE: inserire percentuale tiri libero 
+//    - bug: il toast del canestro segnato non compare sempre, ingrandirlo su display grandi. Inserire il toast per In/Out giocatori
 //    - nella riproduzione di una partita live, lo stato In/Out dei giocatori è l'ultimo disponibile, non c'e' storico. ANche per il quarto attuale.
 //
+//    - NICE TO HAVE: implementare funzione Highlights per spostare il video in prossimità del canestro.
 //    - i client non devono fare polling ma usare notifiche realtime da Firebase
 //
-//    - NICE TO HAVE: implementare funzione Highlights per vedere solo il video in prossimità del canestro.
 //
 //  Impostazioni. html (SERVE?)
 //    - pagina dedicata per abilitare/disabilitare, settare:
