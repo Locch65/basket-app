@@ -30,8 +30,8 @@ function GetCognome(idGiocatore) {
   // nell'array numeriMaglia
   const index = numeriMaglia.findIndex(n => String(n) === String(idGiocatore));
 
-  // 2. Se l'ID non viene trovato, restituiamo una stringa vuota o un placeholder
-  if (index === -1) return "";
+  // 2. Se l'ID non viene trovato, restituiamo il nome della squadra avversaria
+  if (index === -1) return ((teamA === "Polismile A") ? teamB : teamA);
 
   // 3. Recuperiamo la stringa completa (es: "N. Cognome") dall'array giocatoriA
   const nomeCompleto = giocatoriA[index];

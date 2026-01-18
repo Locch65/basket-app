@@ -100,7 +100,7 @@ html, body {
 
 
 /* Container principale */
-.highlights-container {
+.highlights-containerOLD {
   display: flex;
   align-items: center;
   background: #222;
@@ -110,6 +110,27 @@ html, body {
   gap: 15px;
   width: 100%;
   box-sizing: border-box;
+}
+.highlights-container {
+  display: flex;
+  align-items: center;
+  background: #222;
+  padding: 5px 15px; /* Aumentato leggermente il padding verticale */
+  margin: 10px 0;
+  border-radius: 8px;
+  gap: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 60px; /* Assicura spazio per le due righe */
+}
+
+.highlight-placeholder {
+  flex-grow: 1;
+  text-align: right;
+  color: #aaa;
+  font-size: 0.85rem;
+  line-height: 1.2; /* Migliora la leggibilità su due righe */
+  white-space: pre-line; /* Permette il ritorno a capo con \n */
 }
 
 /* Stato Spento (Grigio) */

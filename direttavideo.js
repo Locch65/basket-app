@@ -1,20 +1,7 @@
 let LIVE_OFFSET = 5;
 let REFRESH_TIME = 300;
 
-// Inizializzazione con supporto al tracciamento dei cambiamenti
-//let giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
-//  const [nome, cognome] = nomeCompleto.split(" ");
-//  return {
-//    numero: numeriMaglia[index],
-//    displayName: `${cognome} ${nome}`,
-//    punteggio: 0,
-//    contatori: {1:0, 2:0, 3:0},
-//    stato: "Out",
-//    lastPunteggio: 0 // Per rilevare cambiamenti
-//  };
-//});
 let giocatoriObj = [];
-
 let player;
 let timelineInterval;
 let punteggioA = 0;
@@ -224,7 +211,7 @@ async function caricaDatiPartita(mId) {
 
     generaHistory(data.liveData);
 	
-    //inizializzaHighlights(); ATTEnzione da continuare
+	//controllaDisponibilitaHighlights(); //ATTEnzione da continuare
 
     const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
     
@@ -447,9 +434,6 @@ function processEventBuffer() {
         updateScoreboard(matchIsLive || isReviewMode);
 		if ((isUserLive || isReviewMode) && secondiVisualizzati - eventoCorrente.secondiReali < 1 ) {
 			tmpId = GetCognome(eventoCorrente.idGiocatore);
-			if (tmpId === "") {
-				tmpId = (teamA === "Polismile A") ? teamB : teamA;
-			}
 			showBasketToast(tmpId, eventoCorrente.puntiRealizzati);
 		}
 
@@ -576,14 +560,18 @@ function toggleHighlights() {
     if (isShowing) {
         controls.classList.remove('show');
         btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
+		currentHighlightIndex = -1;
     } else {
         controls.classList.add('show');
         btnToggle.classList.replace('btn-toggle-off', 'btn-toggle-on');
+		inizializzaHighlights();
     }
 }
 
 // Da chiamare quando fullMatchHistory viene popolata
 function inizializzaHighlights() {
+	if (currentHighlightIndex >= 0) return;
+	
     if (fullMatchHistory && fullMatchHistory.length > 0) {
         highlightsAvailable = true;
         currentHighlightIndex = 0; // Punta al primo evento
@@ -632,12 +620,40 @@ function aggiornaUIHighlight() {
     const evento = fullMatchHistory[currentHighlightIndex];
 
     if (evento) {
-        // Supponendo che i tuoi eventi abbiano proprietà come 'minuto', 'descrizione' o 'punteggio'
-        // Adatta queste chiavi in base alla struttura reale dei tuoi dati
-        const descrizione = evento.descrizione || `Evento al ${evento.time || '---'}`;
-        const punteggio = evento.score ? `[${evento.score}]` : "";
+        // Formattazione Evento Corrente (Riga 1)
+        const timestamp = `${evento.timestampReale || '---'}`;
+        const giocatore = GetCognome(evento.idGiocatore);	
+        const punteggio = evento.puntiRealizzati ? `+${evento.puntiRealizzati}` : "";
+        let rigaCorrente = `===>  (${currentHighlightIndex + 1}/${fullMatchHistory.length}) ${punteggio} ${giocatore} - ${timestamp}`;
+
+        // Formattazione Evento Successivo (Riga 2)
+        let rigaSuccessiva = "";
+        if (currentHighlightIndex < fullMatchHistory.length - 1) {
+            const nextEv = fullMatchHistory[currentHighlightIndex + 1];
+            const nextTs = `${nextEv.timestampReale || '---'}`;
+            const nextGio = GetCognome(nextEv.idGiocatore);
+            const nextPt = nextEv.puntiRealizzati ? `+${nextEv.puntiRealizzati}` : "";
+            //rigaSuccessiva = `\nPROSSIMO: ${nextPt} ${nextGio} - ${nextTs}`;
+            rigaSuccessiva = `\n 	${nextPt} ${nextGio} - ${nextTs}`;
+        } else {
+            rigaSuccessiva = `\nFINE HIGHLIGHTS`;
+        }
         
-        label.innerText = `(${currentHighlightIndex + 1}/${fullMatchHistory.length}) ${punteggio} ${descrizione}`;
+        // Inserimento del testo con ritorno a capo
+        label.innerText = rigaCorrente + rigaSuccessiva;
+    }
+}
+
+function OLDaggiornaUIHighlight() {
+    const label = document.getElementById('highlight-label');
+    const evento = fullMatchHistory[currentHighlightIndex];
+
+    if (evento) {
+        const timestamp = `${evento.timestampReale || '---'}`;
+		const giocatore = GetCognome(evento.idGiocatore);	
+        const punteggio = evento.puntiRealizzati ? `+${evento.puntiRealizzati}` : "";
+        
+        label.innerText = `(${currentHighlightIndex + 1}/${fullMatchHistory.length}) ${punteggio} ${giocatore} - ${timestamp}`;
         
         // ESEMPIO: Se vuoi che il video salti al momento dell'evento:
         // if (evento.videoTime) saltaAlMinuto(evento.videoTime);
