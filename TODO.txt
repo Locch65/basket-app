@@ -17,6 +17,7 @@
 //
 //  Anagrafica.html
 //    - FATTO: visualizzare dettaglio statistiche per partita
+//    - ingrandire i font
 //
 //
 //  Calendario.html
