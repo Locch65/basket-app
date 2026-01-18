@@ -29,6 +29,8 @@ let videoId = null;
 let matchStartTime = 0;
 let matchIsLive = false;
 let isReviewMode = false;
+let currentHighlightIndex = -1; // -1 significa che nessun highlight è ancora selezionato
+let highlightsAvailable = false; // Di default la sezione è nascosta
 
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
@@ -221,6 +223,8 @@ async function caricaDatiPartita(mId) {
 	isUserLive = matchIsLive;
 
     generaHistory(data.liveData);
+	
+    //inizializzaHighlights(); ATTEnzione da continuare
 
     const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
     
@@ -548,6 +552,97 @@ function scambiaPosizioniHUD() {
 
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
+// Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
+function controllaDisponibilitaHighlights() {
+	if (fullMatchHistory.length === 0) return;
+    
+	highlightsAvailable = true;
+
+    const section = document.getElementById('highlights-section');
+    if (highlightsAvailable) {
+        section.style.display = "flex";
+    } else {
+        section.style.display = "none";
+    }
+}
+
+// Funzione per il bottone Toggle (gestisce l'apparizione dei comandi interni)
+function toggleHighlights() {
+    const btnToggle = document.getElementById('toggle-highlights');
+    const controls = document.getElementById('highlights-controls');
+    
+    const isShowing = controls.classList.contains('show');
+    
+    if (isShowing) {
+        controls.classList.remove('show');
+        btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
+    } else {
+        controls.classList.add('show');
+        btnToggle.classList.replace('btn-toggle-off', 'btn-toggle-on');
+    }
+}
+
+// Da chiamare quando fullMatchHistory viene popolata
+function inizializzaHighlights() {
+    if (fullMatchHistory && fullMatchHistory.length > 0) {
+        highlightsAvailable = true;
+        currentHighlightIndex = 0; // Punta al primo evento
+        controllaDisponibilitaHighlights(); // Mostra la sezione
+        aggiornaUIHighlight(); // Mostra il primo evento nel placeholder
+    }
+}
+
+function gestisciHighlight(azione) {
+    if (!fullMatchHistory || fullMatchHistory.length === 0) {
+        console.warn("Nessun evento disponibile in fullMatchHistory");
+        return;
+    }
+
+    switch(azione) {
+        case 'start':
+            currentHighlightIndex = 0;
+            break;
+            
+        case 'prev':
+            if (currentHighlightIndex > 0) {
+                currentHighlightIndex--;
+            } else {
+                currentHighlightIndex = 0; // Rimani sul primo
+            }
+            break;
+            
+        case 'next':
+            if (currentHighlightIndex < fullMatchHistory.length - 1) {
+                currentHighlightIndex++;
+            } else {
+                currentHighlightIndex = fullMatchHistory.length - 1; // Rimani sull'ultimo
+            }
+            break;
+            
+        case 'end':
+            currentHighlightIndex = fullMatchHistory.length - 1;
+            break;
+    }
+
+    aggiornaUIHighlight();
+}
+
+function aggiornaUIHighlight() {
+    const label = document.getElementById('highlight-label');
+    const evento = fullMatchHistory[currentHighlightIndex];
+
+    if (evento) {
+        // Supponendo che i tuoi eventi abbiano proprietà come 'minuto', 'descrizione' o 'punteggio'
+        // Adatta queste chiavi in base alla struttura reale dei tuoi dati
+        const descrizione = evento.descrizione || `Evento al ${evento.time || '---'}`;
+        const punteggio = evento.score ? `[${evento.score}]` : "";
+        
+        label.innerText = `(${currentHighlightIndex + 1}/${fullMatchHistory.length}) ${punteggio} ${descrizione}`;
+        
+        // ESEMPIO: Se vuoi che il video salti al momento dell'evento:
+        // if (evento.videoTime) saltaAlMinuto(evento.videoTime);
+    }
+}
 function updateScoreboard(matchIsLive) {
   const scoreEl = document.getElementById("game-score");
   //const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);

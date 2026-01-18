@@ -98,6 +98,71 @@ html, body {
 
 #ytplayer { width: 100%; height: 100%; border: 0; display: block; }
 
+
+/* Container principale */
+.highlights-container {
+  display: flex;
+  align-items: center;
+  background: #222;
+  padding: 2px 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  gap: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Stato Spento (Grigio) */
+.btn-toggle-off {
+  background-color: #444 !important;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Stato Acceso (Arancione o Blu acceso) */
+.btn-toggle-on {
+  background-color: #f39c12 !important; /* Arancione per evidenziare che è attivo */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Gestione visibilità */
+.hidden-controls {
+  display: none; /* Nasconde tutto il blocco */
+  align-items: center;
+  gap: 15px;
+  flex-grow: 1;
+}
+
+.hidden-controls.show {
+  display: flex; /* Lo mostra quando ha la classe .show */
+}
+
+/* Stile bottoni interni (sempre blu) */
+.highlights-buttons { display: flex; gap: 8px; }
+.highlights-buttons button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.highlight-placeholder {
+  flex-grow: 1;
+  text-align: right;
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
 /* 2. HUD OVERLAY (SOPRA IL VIDEO) */
 #hud-overlay_OLD {
   padding: 20px;
@@ -214,7 +279,7 @@ html, body {
 }
 
 .clock-badge {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: #eee;
   background-color: rgba(0, 0, 0, 0.6) !important;
@@ -434,7 +499,7 @@ html, body {
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
-  padding: 15px 18px; 
+  padding: 4px 12px; 
   border-bottom: 1px solid #222;
   transition: all 0.5s ease-in-out;
 }
@@ -451,7 +516,7 @@ html, body {
   text-align: left; 
 }
 
-.player-name { font-size: 1.4rem; font-weight: 600; }
+.player-name { font-size: 1.8rem; font-weight: 600; }
 
 .player-stats { 
   font-family: monospace; 
@@ -464,7 +529,7 @@ html, body {
 .player-points { 
   font-weight: 900; 
   color: #fff; 
-  font-size: 1.5rem; 
+  font-size: 1.8rem; 
   margin-left: 12px; 
   border-left: 1px solid #444; 
   padding-left: 12px; 
@@ -495,4 +560,12 @@ html, body {
     font-size: 0.75rem;
     padding: 3px 8px;
   }
+}
+@media (min-width: 481px) and (max-width: 1000px) {
+  .team-labels { font-size: 2.0rem; padding: 0 0px; }
+  .clock-badge {
+    font-size: 1.2rem;
+    padding: 3px 8px;
+  }
+
 }

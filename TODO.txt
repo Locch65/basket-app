@@ -9,6 +9,51 @@
 // TODO List:
 //
 //  Index.html
+//
+//  Roster.html
+//
+//  Anagrafica.html
+//    - ingrandire i font
+//
+//  Calendario.html
+//    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
+//
+//  Match.html
+//    - BUG: durante una partita live, tornando indietro (Calendario o Home non ricordo), sono spariti le variabili in localstorage (urlyoutube in particolare)
+//    - ristrutture UI: usare al meglio display grandi
+//    - BUG: se metto la partita live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
+//    - all'inizializzazione della pagina caricaDatiPartita viene chiamata 2 volte
+//    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
+//    - leggere lista giocatori da Google Sheet
+//    - password Admin da crittografare
+// 
+//    - NICE TO HAVE: implementare dark mode
+//
+//  DirettaVideo.html
+//    - lo stato In/Out non è storicizzato. Nella review della partita mostra l'ultimo stato noto. ANche per il quarto attuale.
+//    - NICE TO HAVE: inserire percentuale tiri libero 
+//    - bug: il toast del canestro segnato non compare sempre, ingrandirlo su display grandi. Inserire il toast per In/Out giocatori
+//
+//    - su iphone vanno in errore le statistiche. però funzionano quelle di roster.html. probabilmente è la wait fetch
+//    - NICE TO HAVE: implementare funzione Highlights per spostare il video in prossimità del canestro.
+//    - i client non devono fare polling ma usare notifiche realtime da Firebase
+//
+//  Impostazioni. html (SERVE?)
+//    - pagina dedicata per abilitare/disabilitare, settare:
+//       - Dark Mode (toggle)
+//       - refresh rate dei punteggi live (di default 5 secondi)
+//
+//  VARIE:
+//    - cambiare i loop di lettura ogni 5 secondi con una implementazioni a eventi con un server realtime (notifica push)
+//
+//
+// -----------------------------------------------------------------------------------
+
+
+// -----------------------------------------------------------------------------------
+// TODO List:
+//
+//  Index.html
 //     - 
 //
 //  Roster.html
@@ -17,7 +62,6 @@
 //
 //  Anagrafica.html
 //    - FATTO: visualizzare dettaglio statistiche per partita
-//    - ingrandire i font
 //
 //
 //  Calendario.html
@@ -27,8 +71,6 @@
 //    - FATTO: visualizzare i dati del calendario nella cache mentre accede a google sheets per fare il refresh
 //    - FATTO: mettere U14, U15, TUtti allo stesso livello non nel sottomenu Campionato
 //    - FATTO: Aggiungere in hamburger le voci: "Home" che porta index.html
-//
-//    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //
 //  Match.html
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 
@@ -44,17 +86,6 @@
 //    - FATTO: inserire hamburger menu con le voci: "Home", che porta a index.html
 //    - FATTO: inserire bottoni +/- per ritardare la visualizzazione dei messaggi (solo Admin). devono modificare il valore di oraInizioDiretta. i client devono leggere continuamente il valore
 //
-//
-//    - durante una partita live, tornando indietro (Calendario o Home non ricordo), sono spariti le variabili in localstorage (urlyoutube in particolare)
-//    - ristrutture UI: usare al meglio display grandi
-//    - BUG: se metto la partita live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
-//    - all'inizializzazione della pagina caricaDatiPartita viene chiamata 2 volte
-//    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
-//    - leggere lista giocatori da Google Sheet
-//    - password Admin da crittografare
-// 
-//    - NICE TO HAVE: implementare dark mode
-//
 //  DirettaVideo.html
 //    - FATTO: inserire lista giocatori con relativi punti e punteggio partita sotto al video (quando in verticale)
 //    - FATTO: simulazione OPPO: eliminare la scrollbar orizzontale
@@ -62,25 +93,5 @@
 //    - FATTO: inserire indicazioni del quarto attuale
 //    - FATTO: nella lista mettere solo i convocati e non tutti quelli del DB
 //    - FATTO: ridurre font-side hud-score quando si cellulare
-//
-//    - lo stato In/Out non è storicizzato. Nella review della partita mostra l'ultimo stato noto.
-//    - NICE TO HAVE: inserire percentuale tiri libero 
-//    - bug: il toast del canestro segnato non compare sempre, ingrandirlo su display grandi. Inserire il toast per In/Out giocatori
-//    - nella riproduzione di una partita live, lo stato In/Out dei giocatori è l'ultimo disponibile, non c'e' storico. ANche per il quarto attuale.
-//
-//    - NICE TO HAVE: implementare funzione Highlights per spostare il video in prossimità del canestro.
-//    - i client non devono fare polling ma usare notifiche realtime da Firebase
-//
-//
-//  Impostazioni. html (SERVE?)
-//    - pagina dedicata per abilitare/disabilitare, settare:
-//       - Dark Mode (toggle)
-//       - refresh rate dei punteggi live (di default 5 secondi)
-//
-//
-//
-//  VARIE:
-//    - cambiare i loop di lettura ogni 5 secondi con una implementazioni a eventi con un server realtime (notifica push)
-//
 //
 // -----------------------------------------------------------------------------------

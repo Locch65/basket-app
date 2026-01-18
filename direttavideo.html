@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="direttavideo.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
   <div class="video-container">
@@ -38,6 +39,21 @@
       <div id="game-score" class="main-score">0 - 0</div>
 	  <span id="game-period" class="period-box-mini hidden"></span>
     </div>
+<div id="highlights-section" class="highlights-container" style="display: none;">
+  <button id="toggle-highlights" class="btn-toggle-off" onclick="toggleHighlights()">
+    <i class="fas fa-star"></i> Highlights
+  </button>
+
+  <div id="highlights-controls" class="hidden-controls">
+    <div class="highlights-buttons">
+      <button onclick="gestisciHighlight('start')"><i class="fas fa-fast-backward"></i></button>
+      <button onclick="gestisciHighlight('prev')"><i class="fas fa-step-backward"></i></button>
+      <button onclick="gestisciHighlight('next')"><i class="fas fa-step-forward"></i></button>
+      <button onclick="gestisciHighlight('end')"><i class="fas fa-fast-forward"></i></button>
+    </div>
+    <div id="highlight-label" class="highlight-placeholder">Seleziona...</div>
+  </div>
+</div>
     <div id="players-grid">
         <div class="loading-container">
             <img src="icon-192.png" class="spinner-icon" alt="Caricamento...">
