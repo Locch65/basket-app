@@ -22,7 +22,7 @@ let highlightsAvailable = false; // Di default la sezione è nascosta
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
 const matchId = urlParams.get("matchId");
-const teamA = localStorage.getItem("teamA"); // ATTENZIONE: da leggere da google sheet in funzione del matchId
+const teamA = localStorage.getItem("teamA");
 const teamB = localStorage.getItem("teamB");
 
 initTeamNames();
@@ -83,8 +83,8 @@ function creaIlPlayer(vId) {
     if (!vId) return;
     
     player = new YT.Player('ytplayer', {
-        height: '100%', // ATTENZIONE: serve? nella vecchia versione non c'era
-        width: '100%',  // ATTENZIONE: serve? nella vecchia versione non c'era
+        height: '100%', 
+        width: '100%',  
         videoId: vId,
         playerVars: {
             'autoplay': 1,
@@ -476,22 +476,6 @@ async function tickTimeline() {
     processEventBuffer(); // Gestisce la visualizzazione dei punti nel tempo
 }
 
-async function OLDtickTimeline() {
-    // Se il player non è pronto, non fare nulla
-    if (!player || typeof player.getCurrentTime !== "function") return;
-
-    checkLiveStatus();           // Controlla se l'utente è in diretta
-
-    // Incrementiamo sempre il contatore
-    tickCounter++;
-
-    // L'operatore modulo (%) restituisce 0 ogni volta che tickCounter è un multiplo di 5
-    if (tickCounter % 5 === 0) {
-        await caricaDatiPartita(matchId);
-    }
-    processEventBuffer();        // Gestisce i toast dei canestri
-}
-
 function initTeamNames() {
   const elA = document.getElementById("label-team-A");
   const elB = document.getElementById("label-team-B");
@@ -540,8 +524,8 @@ function scambiaPosizioniHUD() {
 
 function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
-// Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
 function controllaDisponibilitaHighlights() {
+// Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
 	if (highlightsAvailable == false) return;
 	
 	if (fullMatchHistory.length === 0) return;
@@ -556,131 +540,160 @@ function controllaDisponibilitaHighlights() {
     }
 }
 
-// Funzione per il bottone Toggle (gestisce l'apparizione dei comandi interni)
 function toggleHighlights() {
     const btnToggle = document.getElementById('toggle-highlights');
     const controls = document.getElementById('highlights-controls');
     
-    const isShowing = controls.classList.contains('show');
+    // Toggle restituisce true se ha aggiunto la classe, false se l'ha rimossa
+    const isNowVisible = controls.classList.toggle('show');
     
-    if (isShowing) {
-        controls.classList.remove('show');
-        btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
-		currentHighlightIndex = -1;
-    } else {
-        controls.classList.add('show');
+    if (isNowVisible) {
+        // APERTURA
         btnToggle.classList.replace('btn-toggle-off', 'btn-toggle-on');
-		inizializzaHighlights();
+        inizializzaHighlights();
+    } else {
+        // CHIUSURA
+        btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
+        currentHighlightIndex = -1;
+        // Opzionale: se vuoi resettare il testo quando chiudi
+        document.getElementById('highlight-label').innerText = ""; 
     }
 }
 
-// Da chiamare quando fullMatchHistory viene popolata
+
 function inizializzaHighlights() {
-	if (currentHighlightIndex >= 0) return;
-	
+    // Rimosso il controllo if (currentHighlightIndex >= 0) per permettere il reset
     if (fullMatchHistory && fullMatchHistory.length > 0) {
         highlightsAvailable = true;
-        currentHighlightIndex = 0; // Punta al primo evento
-        controllaDisponibilitaHighlights(); // Mostra la sezione
-        aggiornaUIHighlight(); // Mostra il primo evento nel placeholder
+        currentHighlightIndex = -1; // Indichiamo che siamo prima del primo evento
+        controllaDisponibilitaHighlights();
+        aggiornaUIHighlight(); 
     }
 }
 
+
 function gestisciHighlight(azione) {
-    if (!fullMatchHistory || fullMatchHistory.length === 0) {
-        console.warn("Nessun evento disponibile in fullMatchHistory");
-        return;
-    }
+    if (!fullMatchHistory || fullMatchHistory.length === 0) return;
 
     switch(azione) {
         case 'start':
-            currentHighlightIndex = 0;
+            currentHighlightIndex = -1; // Torna alla schermata iniziale
             break;
-            
         case 'prev':
-            if (currentHighlightIndex > 0) {
+            if (currentHighlightIndex > -1) {
                 currentHighlightIndex--;
-            } else {
-                currentHighlightIndex = 0; // Rimani sul primo
             }
             break;
-            
         case 'next':
             if (currentHighlightIndex < fullMatchHistory.length - 1) {
                 currentHighlightIndex++;
-            } else {
-                currentHighlightIndex = fullMatchHistory.length - 1; // Rimani sull'ultimo
             }
             break;
-            
         case 'end':
             currentHighlightIndex = fullMatchHistory.length - 1;
             break;
     }
-
     aggiornaUIHighlight();
 }
 
+
 function aggiornaUIHighlight() {
     const label = document.getElementById('highlight-label');
-    const evento = fullMatchHistory[currentHighlightIndex];
+    if (!label) return;
 
-    if (evento) {
-        // Formattazione Evento Corrente (Riga 1)
-        const timestamp = `${evento.timestampReale || '---'}`;
-        const giocatore = GetCognome(evento.idGiocatore);	
-        const punteggio = evento.puntiRealizzati ? `+${evento.puntiRealizzati}` : "";
-        let rigaCorrente = `===>  (${currentHighlightIndex + 1}/${fullMatchHistory.length}) ${punteggio} ${giocatore} - ${timestamp}`;
+    // Formattazione per mantenere le colonne allineate tra loro
+    const formattaRiga = (prefisso, punti, cognome, tempo) => {
+        const pStr = punti ? `+${punti}` : "  "; 
+        const cStr = cognome.substring(0, 12).padEnd(12, ' ');
+        // Qui non aggiungiamo spazi all'inizio, ci pensa il CSS ad allineare a destra
+        return `${prefisso} ${pStr} ${cStr} - ${tempo}`;
+    };
 
-        // Formattazione Evento Successivo (Riga 2)
-        let rigaSuccessiva = "";
-        if (currentHighlightIndex < fullMatchHistory.length - 1) {
-            const nextEv = fullMatchHistory[currentHighlightIndex + 1];
-            const nextTs = `${nextEv.timestampReale || '---'}`;
-            const nextGio = GetCognome(nextEv.idGiocatore);
-            const nextPt = nextEv.puntiRealizzati ? `+${nextEv.puntiRealizzati}` : "";
-            //rigaSuccessiva = `\nPROSSIMO: ${nextPt} ${nextGio} - ${nextTs}`;
-            rigaSuccessiva = `\n 	${nextPt} ${nextGio} - ${nextTs}`;
-        } else {
-            rigaSuccessiva = `\nFINE HIGHLIGHTS`;
+    // --- CASO -1: INIZIO DIRETTA ---
+    if (currentHighlightIndex === -1) {
+        const tempoDiretta = oraInizioDiretta || "00:00:00";
+        let riga1 = `===> INIZIO DIRETTA - ${tempoDiretta}`;
+        let riga2 = "";
+
+        if (matchStartTime > 0) {
+			const orarioPartita = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime);
+            riga2 = `\nINIZIO PARTITA - ${orarioPartita}`;
+        } else if (fullMatchHistory.length > 0) {
+            const ev = fullMatchHistory[0];
+            riga2 = "\n" + formattaRiga(" ", ev.puntiRealizzati, GetCognome(ev.idGiocatore), ev.timestampReale || '00:00:00');
         }
         
-        // Inserimento del testo con ritorno a capo
-        label.innerText = rigaCorrente + rigaSuccessiva;
-		// sposta il video al minuto dell'evento.
-		if (currentHighlightIndex === 0) {
-		  player.seekTo(matchStartTime, true);
-		}
-		else {
-		  const secondiVisualizzati = hmsToSeconds(oraInizioDiretta);
-		  const secondiEvento = hmsToSeconds(evento.timestampReale);
-		  const diffSecondi = secondiEvento - secondiVisualizzati;
-		  if (diffSecondi > 0) {
-            console.log(`SeekTo: ${evento.timestampReale} -> Differenza: ${diffSecondi} sec da ${oraInizioDiretta}`);
-		    player.seekTo(diffSecondi, true);
-		  }
-		}
-        player.playVideo();
-
-		
+        label.innerText = riga1 + riga2;
+        player.seekTo(0, true);
+        return;
     }
-}
 
-function OLDaggiornaUIHighlight() {
-    const label = document.getElementById('highlight-label');
     const evento = fullMatchHistory[currentHighlightIndex];
-
     if (evento) {
-        const timestamp = `${evento.timestampReale || '---'}`;
-		const giocatore = GetCognome(evento.idGiocatore);	
-        const punteggio = evento.puntiRealizzati ? `+${evento.puntiRealizzati}` : "";
-        
-        label.innerText = `(${currentHighlightIndex + 1}/${fullMatchHistory.length}) ${punteggio} ${giocatore} - ${timestamp}`;
-        
-        // ESEMPIO: Se vuoi che il video salti al momento dell'evento:
-        // if (evento.videoTime) saltaAlMinuto(evento.videoTime);
+        let riga1 = "";
+        if (matchStartTime > 0 && currentHighlightIndex === 0) {
+            const orarioPartita = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime);
+            riga1 = `===> INIZIO PARTITA - ${orarioPartita}`;
+        } else {
+            const contatore = `(${currentHighlightIndex + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
+            riga1 = formattaRiga(`===> ${contatore}`, evento.puntiRealizzati, GetCognome(evento.idGiocatore), evento.timestampReale || '00:00:00');
+        }
+
+        let riga2 = "";
+        if (currentHighlightIndex < fullMatchHistory.length - 1) {
+            const next = fullMatchHistory[currentHighlightIndex + 1];
+            riga2 = "\n" + formattaRiga(" ", next.puntiRealizzati, GetCognome(next.idGiocatore), next.timestampReale || '00:00:00');
+        } else {
+            riga2 = "\nFINE HIGHLIGHTS - --:--:--";
+        }
+
+        label.innerText = riga1 + riga2;
+        eseguiSeekHighlight(evento);
     }
 }
+
+function eseguiSeekHighlight(evento) {
+    if (currentHighlightIndex === -1) {
+        // Torna all'inizio assoluto del video
+        player.seekTo(0, true);
+    } else if (matchStartTime > 0 && currentHighlightIndex === 0) {
+        // Salta al tempo d'inizio partita salvato (palla a due)
+        player.seekTo(matchStartTime, true);
+    } else if (evento) {
+        // Logica standard per gli highlights (canestri)
+        const secondiInizioVideo = hmsToSeconds(oraInizioDiretta);
+        const secondiEvento = hmsToSeconds(evento.timestampReale);
+        const diffSecondi = secondiEvento - secondiInizioVideo;
+        
+        if (diffSecondi > 0) {
+            player.seekTo(diffSecondi, true);
+        }
+    }
+    player.playVideo();
+}
+function OLDeseguiSeekHighlight(evento) {
+    if (currentHighlightIndex === -1) {
+        // Torna all'inizio assoluto del video
+        player.seekTo(0, true);
+    } else if (matchStartTime > 0 && currentHighlightIndex === 0) {
+        // Se siamo al primo "evento" e abbiamo un tempo di inizio partita
+        // Visualizziamo "INIZIO PARTITA" e saltiamo al matchStartTime
+        document.getElementById('highlight-label').innerText = "===> INIZIO PARTITA\nPROSSIMO: " + GetCognome(fullMatchHistory[0].idGiocatore);
+        player.seekTo(matchStartTime, true);
+    } else {
+        // Logica standard per gli highlights successivi
+        const secondiInizioVideo = hmsToSeconds(oraInizioDiretta);
+        const secondiEvento = hmsToSeconds(evento.timestampReale);
+        const diffSecondi = secondiEvento - secondiInizioVideo;
+        
+        if (diffSecondi > 0) {
+            player.seekTo(diffSecondi, true);
+        }
+    }
+    player.playVideo();
+}
+
+
 function updateScoreboard(matchIsLive) {
   const scoreEl = document.getElementById("game-score");
   //const puntiA = giocatoriObj.reduce((acc, g) => acc + g.punteggio, 0);

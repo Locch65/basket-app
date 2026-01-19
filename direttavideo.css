@@ -116,7 +116,7 @@ html, body {
   align-items: center;
   background: #222;
   padding: 5px 15px; /* Aumentato leggermente il padding verticale */
-  margin: 10px 0;
+  margin: 4px 0;
   border-radius: 8px;
   gap: 15px;
   width: 100%;
@@ -167,21 +167,52 @@ html, body {
   display: flex; /* Lo mostra quando ha la classe .show */
 }
 
+#highlights-controls {
+    display: none;
+    flex-direction: row;
+    width: 100%;
+}
+/* Stato quando clicchi: visibile */
+#highlights-controls.show {
+    display: flex !important; /* Forza l'apparizione */
+}
+
 /* Stile bottoni interni (sempre blu) */
 .highlights-buttons { display: flex; gap: 8px; }
 .highlights-buttons button {
+  display: flex;
   background-color: #007bff;
   color: white;
   border: none;
   padding: 8px 12px;
   border-radius: 4px;
 }
-
+.highlights-buttonsNEW {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+    /* Se vuoi che anche i bottoni stiano a destra scommenta la riga sotto: */
+    /* justify-content: flex-end; */
+}
 .highlight-placeholder {
   flex-grow: 1;
   text-align: right;
   color: #aaa;
   font-size: 0.85rem;
+}
+
+/* Il testo degli eventi attaccato al bordo destro */
+#highlight-label {
+    display: block;
+    width: 100%;
+    text-align: right;              /* Spinge il testo contro il bordo destro */
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre;               /* Fondamentale per mantenere l'incolonnamento */
+    padding-right: 15px;            /* Distanza minima dal bordo fisico per estetica */
+    box-sizing: border-box;
+    line-height: 1.2;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000; /* Migliora la leggibilità sopra il video */
 }
 
 /* 2. HUD OVERLAY (SOPRA IL VIDEO) */

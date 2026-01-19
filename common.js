@@ -54,6 +54,17 @@ function hmsToSeconds(hms) {
     return (h * 3600) + (m * 60) + s;
 }
 
+function aggiungiSecondiAOrario(orarioStr, secondiDaAggiungere) {
+    if (!orarioStr) return "00:00:00";
+    let totalSeconds = hmsToSeconds(orarioStr) + parseInt(secondiDaAggiungere || 0);
+    
+    // Riconversione in HH:MM:SS
+    let h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+    let m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+    let s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
+
 function getLiveStartTimeById(youtubeUrl, apiKey) {
     // 
     // Accetta l'URL di un video YouTube e restituisce l'ora di inizio reale.
