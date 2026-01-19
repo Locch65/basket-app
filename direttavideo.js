@@ -173,6 +173,7 @@ function generaHistory(liveDataDalBackend) {
                 punteggioB: 0
             };
         });
+		highlightsAvailable = false;
         return; // Usciamo dalla funzione
     }
 	
@@ -191,6 +192,7 @@ function generaHistory(liveDataDalBackend) {
             punteggioB: scoreB
         };
     });
+	highlightsAvailable = true;
 }
 
 // Aggiungiamo 'async' per gestire l'attesa del server
@@ -210,8 +212,10 @@ async function caricaDatiPartita(mId) {
 	isUserLive = matchIsLive;
 
     generaHistory(data.liveData);
+highlightsAvailable = false;//ATTEnzione da continuare. Al momento disabilitiamo la funzione
+
 	
-	//controllaDisponibilitaHighlights(); //ATTEnzione da continuare
+	controllaDisponibilitaHighlights(); 
 
     const currentVideoTime = player && typeof player.getCurrentTime === "function" ? player.getCurrentTime() : 0;
     
@@ -538,9 +542,11 @@ function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.use
 
 // Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
 function controllaDisponibilitaHighlights() {
+	if (highlightsAvailable == false) return;
+	
 	if (fullMatchHistory.length === 0) return;
     
-	highlightsAvailable = true;
+	//highlightsAvailable = true;
 
     const section = document.getElementById('highlights-section');
     if (highlightsAvailable) {
@@ -641,6 +647,22 @@ function aggiornaUIHighlight() {
         
         // Inserimento del testo con ritorno a capo
         label.innerText = rigaCorrente + rigaSuccessiva;
+		// sposta il video al minuto dell'evento.
+		if (currentHighlightIndex === 0) {
+		  player.seekTo(matchStartTime, true);
+		}
+		else {
+		  const secondiVisualizzati = hmsToSeconds(oraInizioDiretta);
+		  const secondiEvento = hmsToSeconds(evento.timestampReale);
+		  const diffSecondi = secondiEvento - secondiVisualizzati;
+		  if (diffSecondi > 0) {
+            console.log(`SeekTo: ${evento.timestampReale} -> Differenza: ${diffSecondi} sec da ${oraInizioDiretta}`);
+		    player.seekTo(diffSecondi, true);
+		  }
+		}
+        player.playVideo();
+
+		
     }
 }
 
