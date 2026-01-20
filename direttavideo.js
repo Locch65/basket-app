@@ -217,6 +217,21 @@ function caricaDatiPartita(mId) {
       return response.json();
     })
     .then(function(data) {
+
+      // 2. Calcoliamo la fine e stampiamo in console
+      const endTime = performance.now();
+      const duration = (endTime - startTime).toFixed(2); // Arrotonda a 2 decimali
+	  // Aggiornamento della label HTML
+      const timeLabel = document.getElementById("fetch-time");
+      if (timeLabel) {
+        timeLabel.textContent = duration;
+        
+        // Opzionale: cambia colore se è troppo lenta (es. > 500ms)
+        timeLabel.style.color = duration > 2000 ? "#ff4d4d" : "#888";
+      }
+      console.log("CaricaDatiPartita() " + duration + " ms");
+
+
       // 1. Estrazione dati
       const rows = data.statisticheGiocatori || [];
       const dettagli = data.dettagliGara || {};
@@ -275,19 +290,6 @@ function caricaDatiPartita(mId) {
       } else {
         renderPlayerList();
       }
-
-      // 2. Calcoliamo la fine e stampiamo in console
-      const endTime = performance.now();
-      const duration = (endTime - startTime).toFixed(2); // Arrotonda a 2 decimali
-	  // Aggiornamento della label HTML
-      const timeLabel = document.getElementById("fetch-time");
-      if (timeLabel) {
-        timeLabel.textContent = duration;
-        
-        // Opzionale: cambia colore se è troppo lenta (es. > 500ms)
-        timeLabel.style.color = duration > 500 ? "#ff4d4d" : "#888";
-      }
-      console.log("CaricaDatiPartia() " + duration + " ms");
 
       // IMPORTANTE: Reset del flag alla fine del successo
       isFetching = false;
@@ -574,8 +576,8 @@ async function tickTimeline() {
 
     tickCounter++;
 
-    // Carica i dati dal server ogni 5 tick (circa 1.5 secondi)
-    if (tickCounter % 5 === 0) {
+    // Carica i dati dal server ogni 7 tick (circa 2.1 secondi)
+    if (tickCounter % 7 === 0) {
         //await caricaDatiPartita(matchId);
         caricaDatiPartita(matchId);
     }

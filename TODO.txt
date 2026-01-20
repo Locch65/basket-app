@@ -22,7 +22,6 @@
 //    - BUG: durante una partita live, tornando indietro (Calendario o Home non ricordo), sono spariti le variabili in localstorage (urlyoutube in particolare)
 //    - ristrutture UI: usare al meglio display grandi
 //    - BUG: se metto la partita live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
-//    - all'inizializzazione della pagina caricaDatiPartita viene chiamata 2 volte
 //    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
 //    - leggere lista giocatori da Google Sheet
 //    - password Admin da crittografare

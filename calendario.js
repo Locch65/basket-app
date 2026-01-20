@@ -35,9 +35,17 @@ function fetchPartiteDalServer(filtroCampionato) {
     const container = document.getElementById("listaPartite");
     container.classList.add("loading");
 
+    // 1. Facciamo partire il cronometro
+    const startTime = performance.now();
+
     fetch(url + "?sheet=Partite")
         .then(res => res.json())
         .then(data => {
+            // 2. Calcoliamo la fine e stampiamo in console
+            const endTime = performance.now();
+            const duration = (endTime - startTime).toFixed(2); // Arrotonda a 2 decimali
+            console.log("fetchPartiteDalServer() " + duration + " ms");
+
             const partite = Array.isArray(data) ? data : data.data;
             // Aggiorna la cache con i nuovi dati freschi
             localStorage.setItem("cache_partite", JSON.stringify(partite));

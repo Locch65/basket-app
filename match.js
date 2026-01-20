@@ -1418,10 +1418,25 @@ function caricaDatiPartita(matchId) {
   const url_1 = url + "?sheet=Statistiche&matchId=" + encodeURIComponent(matchId);
   console.log("URL: " + url_1);
 
+  // 1. Facciamo partire il cronometro
+  const startTime = performance.now();
+
   fetch(url_1)
     .then(res => res.json())
     .then(data => { // 'data' ora è l'oggetto { dettagliGara, statisticheGiocatori }
       console.log("Dati caricati:", data);
+
+      // 2. Calcoliamo la fine e stampiamo in console
+      const endTime = performance.now();
+      const duration = (endTime - startTime).toFixed(2); // Arrotonda a 2 decimali
+	  // Aggiornamento della label HTML
+      const timeLabel = document.getElementById("fetch-time");
+      if (timeLabel) {
+        timeLabel.textContent = duration;
+        
+        // Opzionale: cambia colore se è troppo lenta (es. > 500ms)
+        timeLabel.style.color = duration > 2000 ? "#ff4d4d" : "#888";
+      }
 
       // 1. GESTIONE DATI PARTITA
       if (data.dettagliGara) {
