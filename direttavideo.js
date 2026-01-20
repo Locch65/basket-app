@@ -19,6 +19,7 @@ let isReviewMode = false;
 let currentHighlightIndex = -1; // -1 significa che nessun highlight è ancora selezionato
 let highlightsAvailable = false; // Di default la sezione è nascosta
 let isAdmin = false;
+let isFetching = false; // Impedisce chiamate sovrapposte
 
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
@@ -196,8 +197,111 @@ function generaHistory(liveDataDalBackend) {
 	highlightsAvailable = true;
 }
 
+function caricaDatiPartita(mId) {
+  if (!mId) return;
+  
+  // Se una chiamata è già in corso, esci subito
+  if (isFetching) {
+    console.log("Caricamento in corso... salto questo tick.");
+    return;
+  }
+
+  isFetching = true;
+
+  // 1. Facciamo partire il cronometro
+  const startTime = performance.now();
+  
+  fetch(url + "?matchId=" + encodeURIComponent(mId))
+    .then(function(response) {
+      if (!response.ok) throw new Error("Errore network");
+      return response.json();
+    })
+    .then(function(data) {
+      // 1. Estrazione dati
+      const rows = data.statisticheGiocatori || [];
+      const dettagli = data.dettagliGara || {};
+      matchIsLive = dettagli.isLive;
+      oraInizioDiretta = dettagli.oraInizioDiretta;
+      isUserLive = matchIsLive;
+
+      generaHistory(data.liveData);
+      if (isAdmin === false) {
+        highlightsAvailable = false; //ATTEnzione da continuare. Al momento disabilitiamo la funzione
+      }
+      
+      controllaDisponibilitaHighlights(); 
+
+      // 2. Aggiornamento giocatori
+      rows.forEach(function(r) {
+        const g = giocatoriObj.find(function(x) { 
+          return String(x.numero) === String(r.numero); 
+        });
+        if (g) {
+          const nuoviPunti = parseInt(r.punti, 10) || 0;
+          g.punteggio = nuoviPunti;
+          g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
+          try {
+            g.contatori = JSON.parse(r.dettagli || '{"1":0,"2":0,"3":0}');
+          } catch (e) {}
+      } else if (r.giocatore === "Squadra B" && !matchIsLive && ! isReviewMode) { // in ReviewMode il punteggio e' calcolato in base al tempo visualizzato
+          punteggioB = parseInt(r.punti, 10) || 0;
+        }
+      });
+
+    // GESTIONE QUARTO/PERIODO
+    const periodo = data.dettagliGara?.statoPartita;
+      const hudPeriodEl = document.getElementById("hud-period");
+      const gamePeriodEl = document.getElementById("game-period");
+
+      [hudPeriodEl, gamePeriodEl].forEach(function(el) {
+        if (el && periodo) {
+          el.textContent = periodo;
+          el.classList.remove("hidden");
+          if (periodo.toLowerCase().includes("terminata")) {
+            el.style.backgroundColor = "#666";
+            el.style.borderColor = "#999";
+          } else {
+            el.style.backgroundColor = "#ff0000";
+            el.style.borderColor = "#ff4d4d";
+          }
+        }
+      });
+
+      isFirstLoad = false;
+
+      updateScoreboard(matchIsLive || isReviewMode);
+      if (matchIsLive || isReviewMode) {
+        renderPlayerListLive();
+      } else {
+        renderPlayerList();
+      }
+
+      // 2. Calcoliamo la fine e stampiamo in console
+      const endTime = performance.now();
+      const duration = (endTime - startTime).toFixed(2); // Arrotonda a 2 decimali
+	  // Aggiornamento della label HTML
+      const timeLabel = document.getElementById("fetch-time");
+      if (timeLabel) {
+        timeLabel.textContent = duration;
+        
+        // Opzionale: cambia colore se è troppo lenta (es. > 500ms)
+        timeLabel.style.color = duration > 500 ? "#ff4d4d" : "#888";
+      }
+      console.log("CaricaDatiPartia() " + duration + " ms");
+
+      // IMPORTANTE: Reset del flag alla fine del successo
+      isFetching = false;
+    })
+    .catch(function(err) {
+      document.getElementById("players-grid").innerHTML = "Errore nel caricamento dati.";
+      console.error("Errore nel caricamento dati partita:", err);
+      // IMPORTANTE: Reset del flag anche in caso di errore
+      isFetching = false;
+    });
+}
+
 // Aggiungiamo 'async' per gestire l'attesa del server
-async function caricaDatiPartita(mId) {
+async function OLDcaricaDatiPartita(mId) {
   if (!mId) return;
 
   try {
@@ -472,7 +576,8 @@ async function tickTimeline() {
 
     // Carica i dati dal server ogni 5 tick (circa 1.5 secondi)
     if (tickCounter % 5 === 0) {
-        await caricaDatiPartita(matchId);
+        //await caricaDatiPartita(matchId);
+        caricaDatiPartita(matchId);
     }
     
     processEventBuffer(); // Gestisce la visualizzazione dei punti nel tempo
