@@ -18,6 +18,7 @@ let matchIsLive = false;
 let isReviewMode = false;
 let currentHighlightIndex = -1; // -1 significa che nessun highlight è ancora selezionato
 let highlightsAvailable = false; // Di default la sezione è nascosta
+let isAdmin = false;
 
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
@@ -212,7 +213,8 @@ async function caricaDatiPartita(mId) {
 	isUserLive = matchIsLive;
 
     generaHistory(data.liveData);
-highlightsAvailable = false;//ATTEnzione da continuare. Al momento disabilitiamo la funzione
+	if (isAdmin === false)
+      highlightsAvailable = false;//ATTEnzione da continuare. Al momento disabilitiamo la funzione
 
 	
 	controllaDisponibilitaHighlights(); 
@@ -543,20 +545,31 @@ function controllaDisponibilitaHighlights() {
 function toggleHighlights() {
     const btnToggle = document.getElementById('toggle-highlights');
     const controls = document.getElementById('highlights-controls');
-    
+    const label = document.getElementById('highlight-label');
+	
     // Toggle restituisce true se ha aggiunto la classe, false se l'ha rimossa
     const isNowVisible = controls.classList.toggle('show');
     
     if (isNowVisible) {
         // APERTURA
         btnToggle.classList.replace('btn-toggle-off', 'btn-toggle-on');
+        // Mostriamo la label solo se i controlli sono aperti
+        if (label) {
+            label.style.display = 'block';
+            label.innerText = "Seleziona un'azione"; // Testo iniziale per evitare buchi
+        }
         inizializzaHighlights();
     } else {
         // CHIUSURA
         btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
+		label.style.display = 'none';  // <--- NASCONDE LA LABEL
         currentHighlightIndex = -1;
-        // Opzionale: se vuoi resettare il testo quando chiudi
-        document.getElementById('highlight-label').innerText = ""; 
+
+        // Nascondiamo la label quando chiudiamo i controlli
+        if (label) {
+            label.style.display = 'none';
+            label.innerText = ""; 
+        }
     }
 }
 
@@ -596,8 +609,65 @@ function gestisciHighlight(azione) {
     aggiornaUIHighlight();
 }
 
-
 function aggiornaUIHighlight() {
+    const label = document.getElementById('highlight-label');
+    if (!label) return;
+
+    // Helper per formattare la riga con spaziature fisse
+    const formattaRiga = (prefisso, punti, cognome, tempo) => {
+        const pStr = punti ? `+${punti}` : "  "; 
+        const cStr = (cognome || "").substring(0, 12).padEnd(12, ' ');
+        return `${prefisso} ${pStr} ${cStr} - ${tempo}`;
+    };
+
+    // --- CASO -1: INIZIO DIRETTA ---
+    if (currentHighlightIndex === -1) {
+        const tempoDiretta = oraInizioDiretta || "00:00:00";
+        let rigaPre = "INIZIO STREAMING".padEnd(25, ' '); 
+        let rigaCur = `===> (0/${fullMatchHistory.length})   -- INIZIO DIRETTA - ${tempoDiretta}`;
+        let rigaPost = "";
+
+        if (fullMatchHistory.length > 0) {
+            const next = fullMatchHistory[0];
+            rigaPost = formattaRiga("    ", next.puntiRealizzati, GetCognome(next.idGiocatore), next.timestampReale);
+        }
+
+        label.innerText = `${rigaPre}\n${rigaCur}\n${rigaPost}`;
+        player.seekTo(0, true);
+        return;
+    }
+
+    // --- CASO EVENTI REALI ---
+    const evento = fullMatchHistory[currentHighlightIndex];
+    if (evento) {
+        // 1. Riga Precedente
+        let riga1 = "";
+        if (currentHighlightIndex === 0) {
+            riga1 = "    " + "INIZIO DIRETTA".padEnd(20, ' ') + " - " + (oraInizioDiretta || "00:00:00");
+        } else {
+            const prev = fullMatchHistory[currentHighlightIndex - 1];
+            riga1 = formattaRiga("    ", prev.puntiRealizzati, GetCognome(prev.idGiocatore), prev.timestampReale);
+        }
+
+        // 2. Riga Corrente (con freccia e contatore)
+        const contatore = `(${currentHighlightIndex + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
+        const riga2 = formattaRiga(`===> ${contatore}`, evento.puntiRealizzati, GetCognome(evento.idGiocatore), evento.timestampReale);
+
+        // 3. Riga Successiva
+        let riga3 = "";
+        if (currentHighlightIndex < fullMatchHistory.length - 1) {
+            const next = fullMatchHistory[currentHighlightIndex + 1];
+            riga3 = formattaRiga("    ", next.puntiRealizzati, GetCognome(next.idGiocatore), next.timestampReale);
+        } else {
+            riga3 = "    " + "FINE HIGHLIGHTS".padEnd(20, ' ') + " - --:--:--";
+        }
+
+        label.innerText = `${riga1}\n${riga2}\n${riga3}`;
+        eseguiSeekHighlight(evento);
+    }
+}
+
+function OLD2aggiornaUIHighlight() {
     const label = document.getElementById('highlight-label');
     if (!label) return;
 
@@ -660,10 +730,13 @@ function eseguiSeekHighlight(evento) {
         // Salta al tempo d'inizio partita salvato (palla a due)
         player.seekTo(matchStartTime, true);
     } else if (evento) {
+
+        const input = document.getElementById('highlight-duration');     
+        const SHIFT_VIDEO_TIME = input ? parseInt(input.value) : 10; // Ritorna 10 se il campo è vuoto
         // Logica standard per gli highlights (canestri)
         const secondiInizioVideo = hmsToSeconds(oraInizioDiretta);
         const secondiEvento = hmsToSeconds(evento.timestampReale);
-        const diffSecondi = secondiEvento - secondiInizioVideo;
+        const diffSecondi = secondiEvento - secondiInizioVideo - SHIFT_VIDEO_TIME;
         
         if (diffSecondi > 0) {
             player.seekTo(diffSecondi, true);
@@ -882,6 +955,8 @@ function avviaTickSenzaVideo() {
 }
 
 function init() {
+
+  isAdmin = localStorage.getItem("isAdmin");
 	
   const urlParams = new URLSearchParams(window.location.search);
   const currentMatchId = urlParams.get("matchId");

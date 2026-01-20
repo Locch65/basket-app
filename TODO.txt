@@ -30,12 +30,12 @@
 //    - NICE TO HAVE: implementare dark mode
 //
 //  DirettaVideo.html
+//    - durante gli highlights quando si sposta il cursore aggiornare il punteggio e non lasciarlo a quello finale
 //    - lo stato In/Out non è storicizzato. Nella review della partita mostra l'ultimo stato noto. ANche per il quarto attuale.
 //    - NICE TO HAVE: inserire percentuale tiri libero 
 //    - bug: il toast del canestro segnato non compare sempre, ingrandirlo su display grandi. Inserire il toast per In/Out giocatori
 //
 //    - su iphone vanno in errore le statistiche. però funzionano quelle di roster.html. probabilmente è la wait fetch
-//    - NICE TO HAVE: implementare funzione Highlights per spostare il video in prossimità del canestro.
 //    - i client non devono fare polling ma usare notifiche realtime da Firebase
 //
 //  Impostazioni. html (SERVE?)
@@ -93,5 +93,6 @@
 //    - FATTO: inserire indicazioni del quarto attuale
 //    - FATTO: nella lista mettere solo i convocati e non tutti quelli del DB
 //    - FATTO: ridurre font-side hud-score quando si cellulare
+//    - FATTO: implementare funzione Highlights per spostare il video in prossimità del canestro.
 //
 // -----------------------------------------------------------------------------------

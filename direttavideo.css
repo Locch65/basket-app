@@ -100,18 +100,8 @@ html, body {
 
 
 /* Container principale */
+
 .highlights-containerOLD {
-  display: flex;
-  align-items: center;
-  background: #222;
-  padding: 2px 15px;
-  margin: 10px 0;
-  border-radius: 8px;
-  gap: 15px;
-  width: 100%;
-  box-sizing: border-box;
-}
-.highlights-container {
   display: flex;
   align-items: center;
   background: #222;
@@ -124,6 +114,26 @@ html, body {
   min-height: 60px; /* Assicura spazio per le due righe */
 }
 
+.highlights-container {
+  display: flex;
+  flex-direction: column; /* Label sempre sotto i bottoni */
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
+  background: #222;
+  border-radius: 8px;
+  margin: 1px 0;
+  box-sizing: border-box;
+}
+.highlights-top-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
 .highlight-placeholder {
   flex-grow: 1;
   text-align: right;
@@ -132,6 +142,15 @@ html, body {
   line-height: 1.2; /* Migliora la leggibilità su due righe */
   white-space: pre-line; /* Permette il ritorno a capo con \n */
 }
+
+  /* Regolazioni per il bottone Highlights (Stella) */
+  #toggle-highlights {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    flex-shrink: 0; /* Impedisce al bottone di rimpicciolirsi troppo */
+  }
+
 
 /* Stato Spento (Grigio) */
 .btn-toggle-off {
@@ -168,17 +187,28 @@ html, body {
 }
 
 #highlights-controls {
+  display: flex;
+  align-items: center;
+}
+#highlights-controlsOLD {
     display: none;
     flex-direction: row;
     width: 100%;
 }
 /* Stato quando clicchi: visibile */
+#highlights-controls.hidden-controls {
+  display: none;
+}
 #highlights-controls.show {
     display: flex !important; /* Forza l'apparizione */
 }
 
 /* Stile bottoni interni (sempre blu) */
-.highlights-buttons { display: flex; gap: 8px; }
+.highlights-buttons {
+  display: flex;
+  gap: 5px;
+}
+.highlights-buttonsOLD { display: flex; gap: 8px; }
 .highlights-buttons button {
   display: flex;
   background-color: #007bff;
@@ -187,13 +217,7 @@ html, body {
   padding: 8px 12px;
   border-radius: 4px;
 }
-.highlights-buttonsNEW {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 5px;
-    /* Se vuoi che anche i bottoni stiano a destra scommenta la riga sotto: */
-    /* justify-content: flex-end; */
-}
+
 .highlight-placeholder {
   flex-grow: 1;
   text-align: right;
@@ -203,6 +227,16 @@ html, body {
 
 /* Il testo degli eventi attaccato al bordo destro */
 #highlight-label {
+  display: none; /* Nasconde la label all'avvio */
+  width: 100%;
+  text-align: right;
+  color: #ffcc00;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  min-height: 1.2em;
+  white-space: pre;               /* Fondamentale per mantenere l'incolonnamento */
+}
+#highlight-labelOLD {
     display: block;
     width: 100%;
     text-align: right;              /* Spinge il testo contro il bordo destro */
@@ -213,6 +247,41 @@ html, body {
     line-height: 1.2;
     color: #fff;
     text-shadow: 1px 1px 2px #000; /* Migliora la leggibilità sopra il video */
+}
+
+/* Stile per il contenitore dell'input */
+.highlight-duration-container {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 0 5px;
+  margin-left: 5px;
+  border: 1px solid #444;
+}
+
+#highlight-duration {
+  width: 35px; /* Molto stretto per contenere 2 cifre */
+  background: transparent;
+  border: none;
+  color: #ffcc00;
+  font-weight: bold;
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 2px 0;
+}
+
+/* Rimuove le freccette standard degli input number per risparmiare spazio */
+#highlight-duration::-webkit-inner-spin-button,
+#highlight-duration::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.highlight-duration-container span {
+  font-size: 0.7rem;
+  color: #aaa;
+  margin-left: 2px;
 }
 
 /* 2. HUD OVERLAY (SOPRA IL VIDEO) */
@@ -611,6 +680,41 @@ html, body {
   .clock-badge {
     font-size: 0.75rem;
     padding: 3px 8px;
+  }
+/* Riduciamo i margini del contenitore */
+  .highlights-container {
+    padding: 8px 4px;
+    gap: 4px;
+  }
+
+  /* Forza i 5 bottoni (Stella + 4 navigazione) sulla stessa riga */
+  .highlights-top-row {
+    justify-content: space-between; /* Distribuisce lo spazio tra toggle e controlli */
+    gap: 4px; 
+  }
+
+  /* I 4 bottoni di navigazione */
+  .highlights-buttons {
+    gap: 3px;
+  }
+
+  .highlights-buttons button {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+  }
+  
+  #highlight-duration {
+    width: 30px;
+    font-size: 0.8rem;
+  }
+
+  /* La label sotto sfrutta tutto lo spazio */
+  #highlight-label {
+    font-size: 0.85rem;
+    margin-top: 4px;
+    white-space: pre; /* Fondamentale: permette al testo lungo di andare a capo */
+    line-height: 1.2;
+    padding: 0 10px;
   }
 }
 @media (min-width: 481px) and (max-width: 1000px) {
