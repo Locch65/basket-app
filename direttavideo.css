@@ -510,7 +510,7 @@ html, body {
 /* 4. SCOREBOARD E LISTA GIOCATORI */
 .scoreboard { 
   text-align: center; 
-  padding: 20px 10px; 
+  padding: 4px 10px; 
   background: #1a1a1a; 
   border-bottom: 1px solid #333; 
 }
@@ -723,5 +723,39 @@ html, body {
     font-size: 1.2rem;
     padding: 3px 8px;
   }
+/* Ingrandisce i bottoni di navigazione (prev, next, ecc.) */
+  .highlights-buttons button {
+    padding: 12px 18px;
+    font-size: 1.2rem;
+  }
 
+  /* Ingrandisce il bottone Highlights (Stella) */
+  #toggle-highlights {
+    padding: 12px 18px;
+    font-size: 1.1rem;
+  }
+
+  /* Ingrandisce la label con le 3 righe degli eventi */
+  #highlight-label {
+    font-size: 1.15rem;   /* Font decisamente più grande */
+    line-height: 1.4;     /* Aumenta lo spazio tra le 3 righe per leggibilità */
+    margin-top: 10px;
+    padding: 0 15px;
+  }
+
+  /* Ingrandisce il selettore della durata */
+  #highlight-duration {
+    width: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .highlight-duration-container span {
+    font-size: 0.9rem;
+  }
+
+  /* Opzionale: aumenta il padding del contenitore generale */
+  .highlights-container {
+    padding: 15px;
+    gap: 12px;
+  }
 }

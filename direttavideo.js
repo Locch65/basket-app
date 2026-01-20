@@ -685,7 +685,7 @@ function inizializzaHighlights() {
     // Rimosso il controllo if (currentHighlightIndex >= 0) per permettere il reset
     if (fullMatchHistory && fullMatchHistory.length > 0) {
         highlightsAvailable = true;
-        currentHighlightIndex = -1; // Indichiamo che siamo prima del primo evento
+        currentHighlightIndex = (matchStartTime > 0) ? -2 : -1;; // Indichiamo che siamo prima del primo evento
         controllaDisponibilitaHighlights();
         aggiornaUIHighlight(); 
     }
@@ -693,139 +693,158 @@ function inizializzaHighlights() {
 
 
 function gestisciHighlight(azione) {
-    if (!fullMatchHistory || fullMatchHistory.length === 0) return;
+    if (!fullMatchHistory) return;
+
+    // Se c'è l'orario partita, il limite minimo è -2, altrimenti -1
+    const minIndex = (matchStartTime > 0) ? -2 : -1;
+    const maxIndex = fullMatchHistory.length;
 
     switch(azione) {
         case 'start':
-            currentHighlightIndex = -1; // Torna alla schermata iniziale
+            currentHighlightIndex = minIndex;
             break;
         case 'prev':
-            if (currentHighlightIndex > -1) {
+            if (currentHighlightIndex > minIndex) {
                 currentHighlightIndex--;
             }
             break;
         case 'next':
-            if (currentHighlightIndex < fullMatchHistory.length - 1) {
+            if (currentHighlightIndex < maxIndex) {
                 currentHighlightIndex++;
             }
             break;
         case 'end':
-            currentHighlightIndex = fullMatchHistory.length - 1;
+            currentHighlightIndex = maxIndex;
             break;
     }
     aggiornaUIHighlight();
 }
-
 function aggiornaUIHighlight() {
     const label = document.getElementById('highlight-label');
     if (!label) return;
 
-    // Helper per formattare la riga con spaziature fisse
-    const formattaRiga = (prefisso, punti, cognome, tempo) => {
-        const pStr = punti ? `+${punti}` : "  "; 
-        const cStr = (cognome || "").substring(0, 12).padEnd(12, ' ');
-        return `${prefisso} ${pStr} ${cStr} - ${tempo}`;
-    };
+    const timeline = [];
 
-    // --- CASO -1: INIZIO DIRETTA ---
-    if (currentHighlightIndex === -1) {
-        const tempoDiretta = oraInizioDiretta || "00:00:00";
-        let rigaPre = "INIZIO STREAMING".padEnd(25, ' '); 
-        let rigaCur = `===> (0/${fullMatchHistory.length})   -- INIZIO DIRETTA - ${tempoDiretta}`;
-        let rigaPost = "";
+    // 1. INIZIO DIRETTA
+    timeline.push({ 
+        tipo: 'DIRETTA', 
+        testo: `INIZIO DIRETTA - ${oraInizioDiretta || "00:00:00"}`, 
+        seek: 0 
+    });
 
-        if (fullMatchHistory.length > 0) {
-            const next = fullMatchHistory[0];
-            rigaPost = formattaRiga("    ", next.puntiRealizzati, GetCognome(next.idGiocatore), next.timestampReale);
-        }
-
-        label.innerText = `${rigaPre}\n${rigaCur}\n${rigaPost}`;
-        player.seekTo(0, true);
-        return;
+    // 2. INIZIO PARTITA (Solo se matchStartTime > 0)
+    if (matchStartTime > 0) {
+        timeline.push({ 
+            tipo: 'PARTITA', 
+            testo: `INIZIO PARTITA - ${aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime)}`, 
+            seek: matchStartTime 
+        });
     }
 
-    // --- CASO EVENTI REALI ---
-    const evento = fullMatchHistory[currentHighlightIndex];
-    if (evento) {
-        // 1. Riga Precedente
-        let riga1 = "";
-        if (currentHighlightIndex === 0) {
-            riga1 = "    " + "INIZIO DIRETTA".padEnd(20, ' ') + " - " + (oraInizioDiretta || "00:00:00");
+    // 3. EVENTI REALI
+    fullMatchHistory.forEach((ev, idx) => {
+        const contatore = `(${idx + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
+        const pStr = ev.puntiRealizzati ? `+${ev.puntiRealizzati}` : "  ";
+        const cStr = GetCognome(ev.idGiocatore).substring(0, 12).padEnd(12, ' ');
+        timeline.push({
+            tipo: 'EVENTO',
+            testo: `${contatore} ${pStr} ${cStr} - ${ev.timestampReale || '00:00:00'}`,
+            seek: ev,
+            isEventoReale: true
+        });
+    });
+
+    // 4. FINE DIRETTA
+    // Calcoliamo la durata del video e l'orario reale di fine
+    const durataVideo = typeof player.getDuration === 'function' ? player.getDuration() : 0;
+    const orarioFine = durataVideo > 0 ? aggiungiSecondiAOrario(oraInizioDiretta, durataVideo) : "--:--:--";
+    
+    timeline.push({ 
+        tipo: 'FINE', 
+        testo: `FINE DIRETTA   - ${orarioFine}`, 
+        seek: durataVideo 
+    });
+
+    // --- CALCOLO vIndex (Indice Visuale) ---
+    const minIndex = (matchStartTime > 0) ? -2 : -1;
+    const vIndex = currentHighlightIndex - minIndex;
+
+    const getRiga = (index, isCorrente) => {
+        if (index < 0 || index >= timeline.length) return "";
+        return (isCorrente ? "===> " : "     ") + timeline[index].testo;
+    };
+
+    // --- AGGIORNAMENTO UI ---
+    label.innerText = [
+        getRiga(vIndex - 1, false), 
+        getRiga(vIndex, true), 
+        getRiga(vIndex + 1, false)
+    ].filter(r => r !== "").join("\n");
+
+    // --- ESECUZIONE SEEK ---
+    const attuale = timeline[vIndex];
+    if (attuale) {
+        if (attuale.isEventoReale) {
+            eseguiSeekHighlight(attuale.seek);
         } else {
-            const prev = fullMatchHistory[currentHighlightIndex - 1];
-            riga1 = formattaRiga("    ", prev.puntiRealizzati, GetCognome(prev.idGiocatore), prev.timestampReale);
+            // Per Inizio Diretta, Inizio Partita e Fine Diretta
+            player.seekTo(attuale.seek, true);
         }
-
-        // 2. Riga Corrente (con freccia e contatore)
-        const contatore = `(${currentHighlightIndex + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
-        const riga2 = formattaRiga(`===> ${contatore}`, evento.puntiRealizzati, GetCognome(evento.idGiocatore), evento.timestampReale);
-
-        // 3. Riga Successiva
-        let riga3 = "";
-        if (currentHighlightIndex < fullMatchHistory.length - 1) {
-            const next = fullMatchHistory[currentHighlightIndex + 1];
-            riga3 = formattaRiga("    ", next.puntiRealizzati, GetCognome(next.idGiocatore), next.timestampReale);
-        } else {
-            riga3 = "    " + "FINE HIGHLIGHTS".padEnd(20, ' ') + " - --:--:--";
-        }
-
-        label.innerText = `${riga1}\n${riga2}\n${riga3}`;
-        eseguiSeekHighlight(evento);
     }
 }
 
-function OLD2aggiornaUIHighlight() {
+function OLDaggiornaUIHighlight() {
     const label = document.getElementById('highlight-label');
     if (!label) return;
 
-    // Formattazione per mantenere le colonne allineate tra loro
-    const formattaRiga = (prefisso, punti, cognome, tempo) => {
-        const pStr = punti ? `+${punti}` : "  "; 
-        const cStr = cognome.substring(0, 12).padEnd(12, ' ');
-        // Qui non aggiungiamo spazi all'inizio, ci pensa il CSS ad allineare a destra
-        return `${prefisso} ${pStr} ${cStr} - ${tempo}`;
-    };
+    const timeline = [];
 
-    // --- CASO -1: INIZIO DIRETTA ---
-    if (currentHighlightIndex === -1) {
-        const tempoDiretta = oraInizioDiretta || "00:00:00";
-        let riga1 = `===> INIZIO DIRETTA - ${tempoDiretta}`;
-        let riga2 = "";
+    // 1. INIZIO DIRETTA (Sempre presente)
+    timeline.push({ tipo: 'DIRETTA', testo: `INIZIO DIRETTA - ${oraInizioDiretta || "00:00:00"}`, seek: 0 });
 
-        if (matchStartTime > 0) {
-			const orarioPartita = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime);
-            riga2 = `\nINIZIO PARTITA - ${orarioPartita}`;
-        } else if (fullMatchHistory.length > 0) {
-            const ev = fullMatchHistory[0];
-            riga2 = "\n" + formattaRiga(" ", ev.puntiRealizzati, GetCognome(ev.idGiocatore), ev.timestampReale || '00:00:00');
-        }
-        
-        label.innerText = riga1 + riga2;
-        player.seekTo(0, true);
-        return;
+    // 2. INIZIO PARTITA (Solo se matchStartTime > 0)
+    if (matchStartTime > 0) {
+        timeline.push({ 
+            tipo: 'PARTITA', 
+            testo: `INIZIO PARTITA - ${aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime)}`, 
+            seek: matchStartTime 
+        });
     }
 
-    const evento = fullMatchHistory[currentHighlightIndex];
-    if (evento) {
-        let riga1 = "";
-        if (matchStartTime > 0 && currentHighlightIndex === 0) {
-            const orarioPartita = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime);
-            riga1 = `===> INIZIO PARTITA - ${orarioPartita}`;
-        } else {
-            const contatore = `(${currentHighlightIndex + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
-            riga1 = formattaRiga(`===> ${contatore}`, evento.puntiRealizzati, GetCognome(evento.idGiocatore), evento.timestampReale || '00:00:00');
-        }
+    // 3. EVENTI REALI
+    fullMatchHistory.forEach((ev, idx) => {
+        const contatore = `(${idx + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
+        const pStr = ev.puntiRealizzati ? `+${ev.puntiRealizzati}` : "  ";
+        const cStr = GetCognome(ev.idGiocatore).substring(0, 12).padEnd(12, ' ');
+        timeline.push({
+            tipo: 'EVENTO',
+            testo: `${contatore} ${pStr} ${cStr} - ${ev.timestampReale || '00:00:00'}`,
+            seek: ev,
+            isEventoReale: true
+        });
+    });
 
-        let riga2 = "";
-        if (currentHighlightIndex < fullMatchHistory.length - 1) {
-            const next = fullMatchHistory[currentHighlightIndex + 1];
-            riga2 = "\n" + formattaRiga(" ", next.puntiRealizzati, GetCognome(next.idGiocatore), next.timestampReale || '00:00:00');
-        } else {
-            riga2 = "\nFINE HIGHLIGHTS - --:--:--";
-        }
+    // 4. FINE DIRETTA
+    timeline.push({ tipo: 'FINE', testo: `FINE DIRETTA   - --:--:--`, seek: null });
 
-        label.innerText = riga1 + riga2;
-        eseguiSeekHighlight(evento);
+    // --- CALCOLO vIndex ---
+    // Adesso vIndex è semplicemente la distanza dal valore minimo
+    const minIndex = (matchStartTime > 0) ? -2 : -1;
+    const vIndex = currentHighlightIndex - minIndex;
+
+    const getRiga = (index, isCorrente) => {
+        if (index < 0 || index >= timeline.length) return "";
+        return (isCorrente ? "===> " : "     ") + timeline[index].testo;
+    };
+
+    label.innerText = [getRiga(vIndex - 1, false), getRiga(vIndex, true), getRiga(vIndex + 1, false)]
+                        .filter(r => r !== "").join("\n");
+
+    // --- SEEK ---
+    const attuale = timeline[vIndex];
+    if (attuale && attuale.seek !== null) {
+        if (attuale.isEventoReale) eseguiSeekHighlight(attuale.seek);
+        else player.seekTo(attuale.seek, true);
     }
 }
 
@@ -851,28 +870,6 @@ function eseguiSeekHighlight(evento) {
     }
     player.playVideo();
 }
-function OLDeseguiSeekHighlight(evento) {
-    if (currentHighlightIndex === -1) {
-        // Torna all'inizio assoluto del video
-        player.seekTo(0, true);
-    } else if (matchStartTime > 0 && currentHighlightIndex === 0) {
-        // Se siamo al primo "evento" e abbiamo un tempo di inizio partita
-        // Visualizziamo "INIZIO PARTITA" e saltiamo al matchStartTime
-        document.getElementById('highlight-label').innerText = "===> INIZIO PARTITA\nPROSSIMO: " + GetCognome(fullMatchHistory[0].idGiocatore);
-        player.seekTo(matchStartTime, true);
-    } else {
-        // Logica standard per gli highlights successivi
-        const secondiInizioVideo = hmsToSeconds(oraInizioDiretta);
-        const secondiEvento = hmsToSeconds(evento.timestampReale);
-        const diffSecondi = secondiEvento - secondiInizioVideo;
-        
-        if (diffSecondi > 0) {
-            player.seekTo(diffSecondi, true);
-        }
-    }
-    player.playVideo();
-}
-
 
 function updateScoreboard(matchIsLive) {
   const scoreEl = document.getElementById("game-score");
