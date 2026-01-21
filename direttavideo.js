@@ -1,5 +1,6 @@
 let LIVE_OFFSET = 5;
 let REFRESH_TIME = 300;
+let ACCEPTABLE_DELAY_FOR_TOAST = 2; // secondi di ritardo accettabili per visualizzare il toast del punto realizzato
 
 let giocatoriObj = [];
 let player;
@@ -240,9 +241,9 @@ function caricaDatiPartita(mId) {
       isUserLive = matchIsLive;
 
       generaHistory(data.liveData);
-      if (isAdmin === false) {
-        highlightsAvailable = false; //ATTEnzione da continuare. Al momento disabilitiamo la funzione
-      }
+      //if (isAdmin === false) {
+      //  highlightsAvailable = false; //ATTEnzione da continuare. Al momento disabilitiamo la funzione
+      //}
       
       controllaDisponibilitaHighlights(); 
 
@@ -544,11 +545,10 @@ function processEventBuffer() {
         punteggioA =  eventoCorrente.punteggioA;
 		punteggioB = eventoCorrente.punteggioB;
         updateScoreboard(matchIsLive || isReviewMode);
-		if ((isUserLive || isReviewMode) && secondiVisualizzati - eventoCorrente.secondiReali < 1 ) {
+		if ((isUserLive || isReviewMode) && secondiVisualizzati - eventoCorrente.secondiReali < ACCEPTABLE_DELAY_FOR_TOAST ) {
 			tmpId = GetCognome(eventoCorrente.idGiocatore);
 			showBasketToast(tmpId, eventoCorrente.puntiRealizzati);
 		}
-
     }
 	else {
 		// se non ci sono eventi da visualizzare è perchè siamo ancora "0 - 0"
@@ -592,7 +592,6 @@ function initTeamNames() {
   if (elB) elB.textContent = teamB;
 }
 
-
 // Variabile globale per tenere traccia della posizione attuale (0, 1 o 2)
 let hudPositionIndex = 1; // Partiamo dal 50% (centro)
 
@@ -631,7 +630,7 @@ function scambiaPosizioniHUD() {
   }
 }
 
-function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+//function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
 function controllaDisponibilitaHighlights() {
 // Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
@@ -639,8 +638,6 @@ function controllaDisponibilitaHighlights() {
 	
 	if (fullMatchHistory.length === 0) return;
     
-	//highlightsAvailable = true;
-
     const section = document.getElementById('highlights-section');
     if (highlightsAvailable) {
         section.style.display = "flex";
@@ -666,6 +663,7 @@ function toggleHighlights() {
             label.innerText = "Seleziona un'azione"; // Testo iniziale per evitare buchi
         }
         inizializzaHighlights();
+		isReviewMode = true;
     } else {
         // CHIUSURA
         btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
@@ -677,9 +675,9 @@ function toggleHighlights() {
             label.style.display = 'none';
             label.innerText = ""; 
         }
+		isReviewMode = false;
     }
 }
-
 
 function inizializzaHighlights() {
     // Rimosso il controllo if (currentHighlightIndex >= 0) per permettere il reset
@@ -690,7 +688,6 @@ function inizializzaHighlights() {
         aggiornaUIHighlight(); 
     }
 }
-
 
 function gestisciHighlight(azione) {
     if (!fullMatchHistory) return;
@@ -719,6 +716,7 @@ function gestisciHighlight(azione) {
     }
     aggiornaUIHighlight();
 }
+
 function aggiornaUIHighlight() {
     const label = document.getElementById('highlight-label');
     if (!label) return;
@@ -743,15 +741,18 @@ function aggiornaUIHighlight() {
 
     // 3. EVENTI REALI
     fullMatchHistory.forEach((ev, idx) => {
-        const contatore = `(${idx + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
-        const pStr = ev.puntiRealizzati ? `+${ev.puntiRealizzati}` : "  ";
-        const cStr = GetCognome(ev.idGiocatore).substring(0, 12).padEnd(12, ' ');
-        timeline.push({
-            tipo: 'EVENTO',
-            testo: `${contatore} ${pStr} ${cStr} - ${ev.timestampReale || '00:00:00'}`,
-            seek: ev,
-            isEventoReale: true
-        });
+		if (ev.timestampReale !=='00:00:00') {
+		  // se ci sono eventi con tempo nullo, ignorali. Succede quando non ci sono eventi reali e fullMatchHistory viene inizializzato con tutti i convocati
+          const contatore = `(${idx + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
+          const pStr = ev.puntiRealizzati ? `+${ev.puntiRealizzati}` : "  ";
+          const cStr = GetCognome(ev.idGiocatore).substring(0, 12).padEnd(12, ' ');
+          timeline.push({
+              tipo: 'EVENTO',
+              testo: `${contatore} ${pStr} ${cStr} - ${ev.timestampReale || '00:00:00'}`,
+              seek: ev,
+              isEventoReale: true
+          });
+		}
     });
 
     // 4. FINE DIRETTA
@@ -786,6 +787,7 @@ function aggiornaUIHighlight() {
     if (attuale) {
         if (attuale.isEventoReale) {
             eseguiSeekHighlight(attuale.seek);
+			
         } else {
             // Per Inizio Diretta, Inizio Partita e Fine Diretta
             player.seekTo(attuale.seek, true);
@@ -793,69 +795,8 @@ function aggiornaUIHighlight() {
     }
 }
 
-function OLDaggiornaUIHighlight() {
-    const label = document.getElementById('highlight-label');
-    if (!label) return;
-
-    const timeline = [];
-
-    // 1. INIZIO DIRETTA (Sempre presente)
-    timeline.push({ tipo: 'DIRETTA', testo: `INIZIO DIRETTA - ${oraInizioDiretta || "00:00:00"}`, seek: 0 });
-
-    // 2. INIZIO PARTITA (Solo se matchStartTime > 0)
-    if (matchStartTime > 0) {
-        timeline.push({ 
-            tipo: 'PARTITA', 
-            testo: `INIZIO PARTITA - ${aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime)}`, 
-            seek: matchStartTime 
-        });
-    }
-
-    // 3. EVENTI REALI
-    fullMatchHistory.forEach((ev, idx) => {
-        const contatore = `(${idx + 1}/${fullMatchHistory.length})`.padEnd(7, ' ');
-        const pStr = ev.puntiRealizzati ? `+${ev.puntiRealizzati}` : "  ";
-        const cStr = GetCognome(ev.idGiocatore).substring(0, 12).padEnd(12, ' ');
-        timeline.push({
-            tipo: 'EVENTO',
-            testo: `${contatore} ${pStr} ${cStr} - ${ev.timestampReale || '00:00:00'}`,
-            seek: ev,
-            isEventoReale: true
-        });
-    });
-
-    // 4. FINE DIRETTA
-    timeline.push({ tipo: 'FINE', testo: `FINE DIRETTA   - --:--:--`, seek: null });
-
-    // --- CALCOLO vIndex ---
-    // Adesso vIndex è semplicemente la distanza dal valore minimo
-    const minIndex = (matchStartTime > 0) ? -2 : -1;
-    const vIndex = currentHighlightIndex - minIndex;
-
-    const getRiga = (index, isCorrente) => {
-        if (index < 0 || index >= timeline.length) return "";
-        return (isCorrente ? "===> " : "     ") + timeline[index].testo;
-    };
-
-    label.innerText = [getRiga(vIndex - 1, false), getRiga(vIndex, true), getRiga(vIndex + 1, false)]
-                        .filter(r => r !== "").join("\n");
-
-    // --- SEEK ---
-    const attuale = timeline[vIndex];
-    if (attuale && attuale.seek !== null) {
-        if (attuale.isEventoReale) eseguiSeekHighlight(attuale.seek);
-        else player.seekTo(attuale.seek, true);
-    }
-}
-
 function eseguiSeekHighlight(evento) {
-    if (currentHighlightIndex === -1) {
-        // Torna all'inizio assoluto del video
-        player.seekTo(0, true);
-    } else if (matchStartTime > 0 && currentHighlightIndex === 0) {
-        // Salta al tempo d'inizio partita salvato (palla a due)
-        player.seekTo(matchStartTime, true);
-    } else if (evento) {
+	if (evento) {
 
         const input = document.getElementById('highlight-duration');     
         const SHIFT_VIDEO_TIME = input ? parseInt(input.value) : 10; // Ritorna 10 se il campo è vuoto
@@ -994,8 +935,8 @@ function renderPlayerListLive() {
   }).join('');
 }
 
-// --- FUNZIONI FULLSCREEN ---
 function requestFullscreen() {
+  // --- FUNZIONI FULLSCREEN ---
   // Seleziona il contenitore del video o l'intero documento se preferisci
   const el = document.querySelector(".video-container") || document.documentElement;
 
@@ -1018,8 +959,8 @@ function exitFullscreen() {
   }
 }
 
-// --- GESTORE ORIENTAMENTO INTEGRATO ---
 function gestisciRotazione() {
+  // --- GESTORE ORIENTAMENTO INTEGRATO ---
   // Metodo moderno
   if (window.screen && screen.orientation) {
     const type = screen.orientation.type;
