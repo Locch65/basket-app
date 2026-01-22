@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.93";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.94";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -1327,15 +1327,13 @@ function aggiornaTitoli() {
 }
 
 
-function salvaEventoLive(idGiocatore, puntiRealizzati, timestampReale, team) {
+function OLDsalvaEventoLive(idGiocatore, puntiRealizzati, timestampReale, team) {
     // 
     // Invia un evento di punteggio live al backend utilizzando FormData.
     // @param {string} idGiocatore - L'ID del giocatore (es. "Cognome_Nome").
     // @param {number} puntiRealizzati - I punti segnati (1, 2 o 3).
     // 
 
-	//const ultimaAzione = g.history[g.history.length - 1];
-    //const timestampReale = ultimaAzione.ora;
 
     if (!matchId) {
         console.error("Errore: matchId non trovato.");

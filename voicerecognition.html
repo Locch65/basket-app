@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basket Voice Assistant - Turiddu Edition</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #121212; color: white; margin: 0; padding: 20px; }
+        #status-indicator { width: 50px; height: 50px; border-radius: 50%; background: red; margin: 20px; transition: 0.3s; border: 3px solid white; }
+        .active { background: #00ff00 !important; box-shadow: 0 0 20px #00ff00; }
+        #video-container { position: relative; width: 320px; height: 240px; border-radius: 15px; overflow: hidden; background: #333; }
+        video { transform: scaleX(-1); width: 100%; height: 100%; object-fit: cover; }
+        #log { width: 90%; max-width: 400px; background: #222; padding: 15px; border-radius: 10px; height: 150px; overflow-y: auto; margin-top: 20px; font-size: 0.9em; }
+        .points-entry { color: #00ff00; border-bottom: 1px solid #333; padding: 5px 0; }
+        button { padding: 15px 30px; font-size: 1em; border-radius: 30px; border: none; background: #ff6600; color: white; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Basket Score Assistant</h1>
+    
+    <div id="video-container">
+        <video id="webcam" autoplay playsinline></video>
+    </div>
+
+    <div id="status-indicator"></div>
+    <p id="instruction">Premi Start e guarda lo schermo per segnare i punti</p>
+
+    <button id="startBtn">ATTIVA SISTEMA</button>
+
+    <div id="log">
+        <div style="color: #888;">Log attività...</div>
+    </div>
+
+    <script type="module">
+        import { FaceDetector, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest";
+
+        const video = document.getElementById("webcam");
+        const statusIndicator = document.getElementById("status-indicator");
+        const log = document.getElementById("log");
+        const startBtn = document.getElementById("startBtn");
+        
+        let faceDetector;
+        let isUserLooking = false;
+        let recognition;
+
+        // 1. Inizializza Face Detector
+        async function initFaceDetection() {
+            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm");
+            faceDetector = await FaceDetector.createFromOptions(vision, {
+                baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite` },
+                runningMode: "VIDEO"
+            });
+            startCamera();
+        }
+
+        // 2. Avvia la Webcam
+        async function startCamera() {
+            const constraints = { video: { width: 320, height: 240 } };
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = stream;
+            video.addEventListener("loadeddata", predictWebcam);
+        }
+
+        // 3. Loop di rilevamento volto
+        async function predictWebcam() {
+            const startTimeMs = performance.now();
+            const detections = faceDetector.detectForVideo(video, startTimeMs).detections;
+
+            if (detections.length > 0) {
+                isUserLooking = true;
+                statusIndicator.classList.add("active");
+            } else {
+                isUserLooking = false;
+                statusIndicator.classList.remove("active");
+            }
+            window.requestAnimationFrame(predictWebcam);
+        }
+
+        // 4. Configura Riconoscimento Vocale
+        function initVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'it-IT';
+            recognition.continuous = true;
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+                
+                // IMPORTANTE: Processa solo se l'utente sta guardando
+                if (isUserLooking) {
+                    processCommand(transcript);
+                } else {
+                    console.log("Comando ignorato: non stai guardando lo schermo.");
+                }
+            };
+
+            recognition.onend = () => recognition.start(); // Restart automatico
+            recognition.start();
+        }
+
+        // 5. Analisi del comando e Risposta vocale
+        function processCommand(text) {
+            // Regex per catturare "Nome" e "Numero" (es: "Rossi 2")
+            const regex = /([a-zàèìòù]+)\s+(\d+)/i;
+            const match = text.match(regex);
+
+            if (match) {
+                const player = match[1];
+                const points = match[2];
+                const time = new Date().toLocaleTimeString();
+
+                // Log visivo
+                const entry = document.createElement("div");
+                entry.className = "points-entry";
+                entry.innerHTML = `<strong>${time}</strong> - ${player}: +${points} punti`;
+                log.prepend(entry);
+
+                // Feedback Vocale (Sintesi)
+                speakFeedback(`Confermato, ${player} ha segnato ${points} punti.`);
+            }
+        }
+
+        function speakFeedback(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.lang = 'it-IT';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Avvio al click
+        startBtn.addEventListener("click", () => {
+            initFaceDetection();
+            initVoiceRecognition();
+            startBtn.style.display = "none";
+            speakFeedback("Sistema attivato. Ti ascolto, Turiddu.");
+        });
+
+    </script>
+</body>
+</html>
+

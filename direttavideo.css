@@ -285,6 +285,16 @@ html, body {
 }
 
 /* 2. HUD OVERLAY (SOPRA IL VIDEO) */
+#hud-video-time {
+  pointer-events: auto !important; /* Permette il click sull'elemento */
+  cursor: pointer;                 /* Cursore interattivo */
+}
+
+#basket-toast {
+  pointer-events: auto !important; /* Permette il click sull'elemento */
+  cursor: pointer;                 /* Cursore interattivo */
+}
+
 #hud-overlay_OLD {
   padding: 20px;
   display: flex;

@@ -54,6 +54,14 @@ function hmsToSeconds(hms) {
     return (h * 3600) + (m * 60) + s;
 }
 
+function secondsToHms(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+    return (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+}
+
 function aggiungiSecondiAOrario(orarioStr, secondiDaAggiungere) {
     if (!orarioStr) return "00:00:00";
     let totalSeconds = hmsToSeconds(orarioStr) + parseInt(secondiDaAggiungere || 0);
@@ -271,4 +279,50 @@ function createAdminPopup() {
       closePopup();
     }
   }, { passive: true });
+}
+
+
+function salvaEventoLive(idGiocatore, puntiRealizzati, timestampReale, team) {
+    // 
+    // Invia un evento di punteggio live al backend utilizzando FormData.
+    // @param {string} idGiocatore - L'ID del giocatore (es. "Cognome_Nome").
+    // @param {number} puntiRealizzati - I punti segnati (1, 2 o 3).
+    // 
+
+
+    if (!matchId) {
+        console.error("Errore: matchId non trovato.");
+        return;
+    }
+
+    // 1. Creazione dell'oggetto FormData
+    const formData = new FormData();
+    
+    // 2. Aggiunta dei parametri (il backend leggerà questi tramite e.parameter)
+    formData.append("live", "1"); // Attiva il blocco live nel doPost
+    formData.append("matchId", matchId);
+    formData.append("idGiocatore", idGiocatore);
+    formData.append("puntiRealizzati", puntiRealizzati);
+    formData.append("squadra", team);
+    
+    // Timestamp reale
+    //const timestampReale = new Date().toLocaleTimeString('it-IT');
+    formData.append("timestampReale", timestampReale);
+
+    // Ora video (calcolata se hai una funzione o un timer attivo)
+    const oraVideo = typeof getCurrentGameTime === 'function' ? getCurrentGameTime() : "00:00:00";
+    formData.append("oraVideo", oraVideo);
+
+    // 3. Invio della richiesta fetch
+    fetch(url, {
+        method: "POST",
+        mode: "no-cors", // Cruciale per Google Apps Script
+        body: formData   // Passiamo direttamente l'oggetto FormData
+    })
+    .then(() => {
+        console.log(`[LIVE] Inviato con successo: ${idGiocatore} +${puntiRealizzati}`);
+    })
+    .catch(error => {
+        console.error("Errore nell'invio FormData live:", error);
+    });
 }
