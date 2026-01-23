@@ -1,4 +1,5 @@
 let isAdmin = localStorage.getItem("isAdmin") === "true";
+let ordineCalendario = "desc";
 
 let refreshInterval = null; // Gestisce il loop di aggiornamento
 
@@ -18,7 +19,7 @@ function caricaListaPartite(filtroCampionato = null) {
         try {
             const datiLocali = JSON.parse(cacheDati);
             container.classList.remove("loading");
-            renderizzaPartite(datiLocali, filtroCampionato);
+            renderizzaPartite(datiLocali, filtroCampionato, ordineCalendario);
             console.log("Dati caricati dalla cache locale.");
         } catch (e) {
             console.error("Errore lettura cache:", e);
@@ -50,7 +51,7 @@ function fetchPartiteDalServer(filtroCampionato) {
             // Aggiorna la cache con i nuovi dati freschi
             localStorage.setItem("cache_partite", JSON.stringify(partite));
             container.classList.remove("loading");
-            renderizzaPartite(partite, filtroCampionato);
+            renderizzaPartite(partite, filtroCampionato, ordineCalendario);
         })
         .catch(err => {
             console.error("Errore fetch, provo a usare la cache:", err);
@@ -60,7 +61,7 @@ function fetchPartiteDalServer(filtroCampionato) {
             if (cacheDati) {
                 const datiLocali = JSON.parse(cacheDati);
                 container.classList.remove("loading");
-                renderizzaPartite(datiLocali, filtroCampionato);
+                renderizzaPartite(datiLocali, filtroCampionato, ordineCalendario);
                 // Opzionale: mostra un piccolo avviso che i dati sono offline
                 console.warn("Visualizzazione dati in modalità offline (cache)");
             } else {
@@ -82,7 +83,7 @@ function OLDfetchPartiteDalServer(filtroCampionato) {
             // Salva i nuovi dati in cache per il prossimo accesso
             localStorage.setItem("cache_partite", JSON.stringify(partite));
             container.classList.remove("loading");
-            renderizzaPartite(partite, filtroCampionato);
+            renderizzaPartite(partite, filtroCampionato, ordineCalendario);
         })
         .catch(err => {
             console.error("Errore fetch:", err);
@@ -90,7 +91,111 @@ function OLDfetchPartiteDalServer(filtroCampionato) {
         });
 }
 
-function renderizzaPartite(partite, filtroCampionato) {
+function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
+    /**
+     * Ricostruisce l'intero DOM della lista.
+     * @param {string} ordine - 'asc' per cronologico, 'desc' per il più recente prima.
+     */
+    const container = document.getElementById("listaPartite");
+    const oggi = new Date();
+    const excludePast = document.getElementById("togglePast").checked;
+    const isAdmin = localStorage.getItem("isAdmin") === "true"; 
+    
+    let partiteFiltrate = partite;
+
+    // Se NON è admin, mostra SOLO U14 e U15
+    if (!isAdmin) {
+        partiteFiltrate = partiteFiltrate.filter(p => {
+            const mId = String(p.matchId || "");
+            return mId.includes("U14") || mId.includes("U15");
+        });
+    }
+    
+    // Filtro per Campionato
+    if (filtroCampionato && filtroCampionato !== "Tutti") {
+        partiteFiltrate = partiteFiltrate.filter(p =>
+            String(p.matchId ?? "").includes(filtroCampionato)
+        );
+    }
+
+    // Filtro per partite passate
+    if (excludePast) {
+        const oggiMezzanotte = new Date();
+        oggiMezzanotte.setHours(0, 0, 0, 0);
+        partiteFiltrate = partiteFiltrate.filter(p => {
+            const dataP = parseItalianDate(p.data, p.orario);
+            dataP.setHours(0, 0, 0, 0);
+            return dataP >= oggiMezzanotte;
+        });
+    }
+
+    // --- NUOVO ORDINAMENTO DINAMICO ---
+    partiteFiltrate.sort((a, b) => {
+        const dataA = parseItalianDate(a.data, a.orario);
+        const dataB = parseItalianDate(b.data, b.orario);
+        
+        return ordine === 'desc' ? dataB - dataA : dataA - dataB;
+    });
+
+    const frag = document.createDocumentFragment();
+
+    partiteFiltrate.forEach(p => {
+        let cat = String(p.matchId).includes("U14") ? "U14" : String(p.matchId).includes("U15") ? "U15" : "Altro";
+        let mIdPulito = String(p.matchId).replace("U14 ", "").replace("U15 ", "").trim();
+
+        const card = document.createElement("div");
+        card.classList.add("match-card");
+        card.setAttribute("data-matchid", p.matchId);
+
+        if (p.isLive === "true" || p.isLive === true) card.classList.add("live-border");
+        
+        const dataPartita = parseItalianDate(p.data, p.orario);
+        if (dataPartita < oggi) card.classList.add("past");
+
+        const giorni = ["Dom.", "Lun.", "Mar.", "Mer.", "Gio.", "Ven.", "Sab."];
+        const giornoSett = giorni[dataPartita.getDay()];
+
+        card.innerHTML = `
+            <div class="match-top">
+                <span class="campionato ${cat}">${cat}</span>
+                <span class="match-id">${mIdPulito}</span>
+                <span class="data">${giornoSett} ${p.data}</span>
+                <span class="orario">${p.orario}</span>
+            </div>
+            <div class="match-middle"><span class="luogo">${p.luogo}</span></div>
+            <div class="match-bottom">
+                <span class="teamA"><span class="team-name">${p.squadraA}</span> <strong>${p.punteggioA ?? "-"}</strong></span>
+                <span class="vs">vs</span>
+                <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
+            </div>`;
+        
+        if (p.casaTrasferta === "Casa") card.querySelector(".teamA .team-name").classList.add("highlight");
+        else if (p.casaTrasferta === "Trasferta") card.querySelector(".teamB .team-name").classList.add("highlight");
+
+        card.onclick = () => {
+            localStorage.setItem("matchId", p.matchId);
+            localStorage.setItem("teamA", p.squadraA);
+            localStorage.setItem("teamB", p.squadraB);
+            localStorage.setItem("puntiSquadraA", p.punteggioA || 0);
+            localStorage.setItem("puntiSquadraB", p.punteggioB || 0);
+            localStorage.setItem("convocazioni", p.convocazioni || "");
+            localStorage.setItem("videoURL", p.videoURL || "");
+            localStorage.setItem("videoId", extractYouTubeId(p.videoURL));
+            localStorage.setItem("matchStartTime", extractYoutubeTime(p.videoURL));
+            localStorage.setItem("oraInizioDiretta", p.oraInizioDiretta || "");
+            localStorage.setItem("isLive", p.isLive || false);
+            localStorage.setItem("statoPartita", p.statoPartita || "");
+            
+            window.location.href = (localStorage.getItem("isAdmin") === "true") ? "match.html" : "direttavideo.html?matchId=" + encodeURIComponent(p.matchId);
+        };
+
+        frag.appendChild(card);
+    });
+
+    container.replaceChildren(frag);
+}
+
+function OLDrenderizzaPartite(partite, filtroCampionato) {
 /**
  * Ricostruisce l'intero DOM della lista.
  * Da usare al caricamento o quando si cambia filtro (U14/U15).
@@ -270,75 +375,6 @@ function startRefreshAutomatico(attiva, filtro) {
   }
 }
 
-function createAdminLoginPopup() {
-  const adminBtn = document.getElementById("adminBtn");
-  const popup = document.getElementById("adminPopup");
-  
-  // Elementi interni al popup
-  const okBtn = document.getElementById("adminOkBtn");
-  const cancelBtn = document.getElementById("adminCancelBtn");
-  const pwdInput = document.getElementById("adminPassword");
-
-  // Controllo fondamentale: se manca il tasto del menu o il popup, non possiamo fare nulla
-  if (!adminBtn || !popup) {
-    console.error("Errore: adminBtn o adminPopup non trovati.");
-    return;
-  }
-
-  // 1. Gestione tasto Admin/Logout nel Menu (SEMPRE ATTIVO)
-  adminBtn.onclick = (e) => {
-    e.preventDefault();
-    if (isAdmin) {
-      if (confirm("Vuoi uscire dalla modalità Admin?")) {
-        login("logout");
-        document.getElementById("menu").classList.add("hidden");
-      }
-    } else {
-      popup.classList.remove("hidden");
-      if (pwdInput) {
-        pwdInput.value = "";
-        setTimeout(() => pwdInput.focus(), 100);
-      }
-    }
-  };
-
-  // 2. Gestione bottoni interni (se esistono nel DOM)
-  if (okBtn) {
-    okBtn.onclick = (e) => {
-      e.stopPropagation();
-      const password = pwdInput ? pwdInput.value : "";
-      if (password) {
-        login(password);
-        popup.classList.add("hidden");
-        const menu = document.getElementById("menu");
-        if (menu) menu.classList.add("hidden");
-      }
-    };
-  }
-
-  if (cancelBtn) {
-    cancelBtn.onclick = (e) => {
-      e.stopPropagation();
-      popup.classList.add("hidden");
-    };
-  }
-
-  if (pwdInput) {
-    pwdInput.onkeypress = (e) => {
-      if (e.key === "Enter" && okBtn) {
-        okBtn.onclick(e);
-      }
-    };
-  }
-
-  // Chiudi cliccando fuori dal contenuto bianco del popup
-  popup.onclick = (e) => {
-    if (e.target === popup) {
-      popup.classList.add("hidden");
-    }
-  };
-}
-
 function init() {
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const menu = document.getElementById("menu");
@@ -347,6 +383,7 @@ function init() {
     const titolo = document.querySelector("h1");
     const adminBtn = document.getElementById("adminBtn");
     const campRadios = document.querySelectorAll('.camp-radio');
+	const selectOrdine = document.getElementById("selectOrdine");
 
     // --- 1. GESTIONE MENU PRINCIPALE ---
     // Apri/chiudi menu principale
@@ -380,7 +417,30 @@ function init() {
             setTimeout(() => menu.classList.add("hidden"), 200);
         });
     });
+	
+    // Gestione del cambio ordine di visualizzazione
+    if (selectOrdine) {
+        // Ripristina stato salvato
+        ordineCalendario = localStorage.getItem("ordineCalendario") || "asc";
 
+        // Imposta il valore iniziale basandosi sulla variabile globale già esistente
+        selectOrdine.value = ordineCalendario;
+    
+        selectOrdine.addEventListener("change", (e) => {
+            ordineCalendario = e.target.value;
+            
+            // Recupera il filtro campionato attuale per ri-renderizzare correttamente
+            const filtroAttuale = document.querySelector('input[name="camp"]:checked')?.value || "Tutti";
+
+            // 👉 Memorizza il campionato selezionato
+            localStorage.setItem("ordineCalendario", ordineCalendario);
+            
+            // Carica la lista (userà la cache se disponibile, ma con il nuovo ordine)
+            caricaListaPartite(filtroAttuale);
+            menu.classList.add("hidden");
+        });
+    }
+	
     // --- 3. FILTRO PARTITE PASSATE ---
     // Ripristina stato salvato
     if (localStorage.getItem("excludePast") === "true") {

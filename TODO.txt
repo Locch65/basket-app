@@ -17,7 +17,6 @@
 //
 //  Calendario.html
 //    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
-//    - inserire la possibilita di ordinare il calendario in ordine ascendente/discendente per data
 //
 //  Match.html
 //    - BUG: durante una partita live, tornando indietro (Calendario o Home non ricordo), sono spariti le variabili in localstorage (urlyoutube in particolare)
@@ -37,8 +36,7 @@
 //    - ingrandire toast su display grandi. Inserire il toast per In/Out giocatori
 //    - lo stato In/Out non è storicizzato. Nella review della partita mostra l'ultimo stato noto. ANche per il quarto attuale.
 //    - inserire percentuale tiri libero 
-//    - Highlight anche in orizzontale
-//    - BUG: in orizzontale non va piu' in fullscreen, rimane la barra sopra e sotto
+//    - NICE TO HAVE: Highlight anche in orizzontale
 //
 //    - i client non devono fare polling ma usare notifiche realtime da Firebase
 //
@@ -75,6 +73,7 @@
 //    - FATTO: visualizzare i dati del calendario nella cache mentre accede a google sheets per fare il refresh
 //    - FATTO: mettere U14, U15, TUtti allo stesso livello non nel sottomenu Campionato
 //    - FATTO: Aggiungere in hamburger le voci: "Home" che porta index.html
+//    - FATTO; inserire la possibilita di ordinare il calendario in ordine ascendente/discendente per data
 //
 //  Match.html
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 

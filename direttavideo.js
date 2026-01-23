@@ -1007,30 +1007,28 @@ function exitFullscreen() {
   }
 }
 
-function gestisciRotazione() {
-  // --- GESTORE ORIENTAMENTO INTEGRATO ---
-  // Metodo moderno
-  if (window.screen && screen.orientation) {
-    const type = screen.orientation.type;
-    if (type.includes("landscape")) {
-      requestFullscreen();
-    } else {
-      exitFullscreen();
+
+// Gestisci Fullscreen in landscape
+window.screen.orientation.addEventListener("change", function() {
+  if (window.screen.orientation.type.startsWith("portrait")) {
+    // Se siamo in verticale e il fullscreen è attivo, lo chiudiamo
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
     }
-  } 
-  // Fallback per dispositivi che non supportano screen.orientation
-  else {
-    const orientation = window.orientation; // 90 o -90 è landscape
-    if (Math.abs(orientation) === 90) {
-      requestFullscreen();
-    } else {
-      exitFullscreen();
+  } else if (window.screen.orientation.type.startsWith("landscape")) {
+    // Opzionale: attiva fullscreen quando ruoti in orizzontale
+    const elem = document.querySelector(".video-container");
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
     }
   }
-}
-
-// Ascolta il cambio di orientamento
-window.addEventListener("orientationchange", gestisciRotazione, { passive: true });
+}, { passive: true });
 
 // Opzionale: aggiungi un controllo anche al resize per sicurezza su alcuni Android
 window.addEventListener("resize", () => {

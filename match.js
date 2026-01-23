@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SCRIPT
 // =====================
-const SCRIPT_VERSION = "1.0.94";  // Aggiorna questo numero ad ogni modifica
+const SCRIPT_VERSION = "1.0.95";  // Aggiorna questo numero ad ogni modifica
 
 let convocazioni = "";
 let puntiSquadraA = 0;
@@ -591,6 +591,13 @@ function login(pwd) {
       menuUl.appendChild(liConv);
       menuUl.appendChild(liYoutube);
       menuUl.appendChild(liGoLive);
+	  
+	  // 2. SPOSTA IL LOGOUT ALLA FINE
+      // Cerchiamo il LI che contiene il bottone adminBtn (Logout)
+      const liLogout = adminBtn.closest("li");
+      if (liLogout) {
+        menuUl.appendChild(liLogout); // In JS, appendChild su un elemento già esistente lo SPOSTA alla fine
+      }
 
       // Eventi
       document.getElementById("menuConvocazioniBtn").onclick = () => {
@@ -637,76 +644,6 @@ function abilitaClickQuarto() {
     rettangoloQuarto.classList.remove("admin-clickable");
     rettangoloQuarto.onclick = null;
   }
-}
-
-// Ricordati di chiamare abilitaClickQuartoAdmin() subito dopo che isAdmin diventa true
-function createAdminLoginPopup() {
-  const adminBtn = document.getElementById("adminBtn1");
-  const popup = document.getElementById("adminPopup");
-  
-  // Elementi interni al popup
-  const okBtn = document.getElementById("adminOkBtn");
-  const cancelBtn = document.getElementById("adminCancelBtn");
-  const pwdInput = document.getElementById("adminPassword");
-
-  // Controllo fondamentale: se manca il tasto del menu o il popup, non possiamo fare nulla
-  if (!adminBtn || !popup) {
-    console.error("Errore: adminBtn o adminPopup non trovati.");
-    return;
-  }
-
-  // 1. Gestione tasto Admin/Logout nel Menu (SEMPRE ATTIVO)
-  adminBtn.onclick = (e) => {
-    e.preventDefault();
-    if (isAdmin) {
-      if (confirm("Vuoi uscire dalla modalità Admin?")) {
-        login("logout");
-        document.getElementById("menu").classList.add("hidden");
-      }
-    } else {
-      popup.classList.remove("hidden");
-      if (pwdInput) {
-        pwdInput.value = "";
-        setTimeout(() => pwdInput.focus(), 100);
-      }
-    }
-  };
-
-  // 2. Gestione bottoni interni (se esistono nel DOM)
-  if (okBtn) {
-    okBtn.onclick = (e) => {
-      e.stopPropagation();
-      const password = pwdInput ? pwdInput.value : "";
-      if (password) {
-        login(password);
-        popup.classList.add("hidden");
-        const menu = document.getElementById("menu");
-        if (menu) menu.classList.add("hidden");
-      }
-    };
-  }
-
-  if (cancelBtn) {
-    cancelBtn.onclick = (e) => {
-      e.stopPropagation();
-      popup.classList.add("hidden");
-    };
-  }
-
-  if (pwdInput) {
-    pwdInput.onkeypress = (e) => {
-      if (e.key === "Enter" && okBtn) {
-        okBtn.onclick(e);
-      }
-    };
-  }
-
-  // Chiudi cliccando fuori dal contenuto bianco del popup
-  popup.onclick = (e) => {
-    if (e.target === popup) {
-      popup.classList.add("hidden");
-    }
-  };
 }
 
 function showSquadraBPopup() {
@@ -1682,9 +1619,35 @@ function init() {
     });
   }
 
-// Assicurati che la funzione createAdminLoginPopup() sia presente 
-// per gestire l'apertura del popup quando si clicca sul nuovo adminBtn nel menu
-  // ATTENZIONE: chiama match.html
+
+  // --- 5. ADMIN & LOGIN ---
+  if (typeof createAdminPopup === "function") {
+      createAdminPopup(); // Inizializza il popup se la funzione esiste
+  }
+
+  // 2. Collega manualmente i bottoni del popup creato da common.js alla logica di match.js
+  const popup = document.getElementById("adminPopup");
+  const adminConfirmBtn = document.getElementById("confirmAdmin");
+  const adminCancelBtn = document.getElementById("closeAdmin");
+  const adminPasswordInput = document.getElementById("adminPassword");
+  
+  if (adminConfirmBtn) {
+      adminConfirmBtn.onclick = () => {
+          const pwd = adminPasswordInput.value;
+          if (pwd) {
+              login(pwd); // Chiama la funzione login() definita in match.js
+              document.getElementById("adminPopup").classList.add("hidden");
+          }
+      };
+  }
+  
+  if (adminCancelBtn) {
+      adminCancelBtn.onclick = () => {
+          document.getElementById("adminPopup").classList.add("hidden");
+      };
+  }
+
+
   isAdmin = localStorage.getItem("isAdmin");
   AdminPassword = localStorage.getItem("AdminPassword");
   if (isAdmin) {
@@ -1701,15 +1664,20 @@ function init() {
         document.getElementById("menu").classList.add("hidden");
       }
     } else {
-      popup.classList.remove("hidden");
-      if (pwdInput) {
-        pwdInput.value = "";
-        setTimeout(() => pwdInput.focus(), 100);
+      const popup = document.getElementById("adminPopup");
+      if (popup) {
+          popup.classList.remove("hidden");
+          document.getElementById("adminPassword").value = "";
+          document.getElementById("adminPassword").focus();
       }
+      //popup.classList.remove("hidden");
+      //if (pwdInput) {
+      //  pwdInput.value = "";
+      //  setTimeout(() => pwdInput.focus(), 100);
+      //}
     }
   };
 
-  //createAdminLoginPopup();
   aggiornaTitoli();
   renderGiocatori(giocatoriObj);
   aggiornaScoreboard();

@@ -26,15 +26,21 @@ html, body {
 
 /* Quando lo schermo è in LANDSCAPE (Orizzontale) */
 @media (orientation: landscape) {
-  .video-container { 
+  .video-container:fullscreen { 
     width: 100vw; 
     height: 100vh; 
     aspect-ratio: auto; 
+  }
+  /* Per compatibilità con browser basati su Webkit (Chrome, Edge, Safari) */
+  .video-container:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
   }
   
   /* Nasconde la lista giocatori e le statistiche per dare tutto lo spazio al video */
   .players-list-container, 
   .stats-section,
+  #debug-info,
   .scoreboard { 
     display: none !important; 
   }
@@ -45,8 +51,15 @@ html, body {
   }
 }
 
+
 /* Quando lo schermo è in PORTRAIT (Verticale) */
 @media (orientation: portrait) {
+  .video-container {
+    width: 100vw;
+    aspect-ratio: 16 / 9;
+    height: auto; /* Torna alla dimensione normale */
+  }
+  
   .stats-section {
     display: block; /* Mostra la sezione statistiche solo qui */
   }
