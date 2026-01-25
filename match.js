@@ -1192,7 +1192,7 @@ function aggiornaScoreboard() {
     scoreboard.classList.add("flash");
     
     if (typeof isMobile === "function" && isMobile()) { 
-      navigator.vibrate(100); 
+      if (navigator.vibrate) navigator.vibrate(100); // Funziona solo su Android/Chrome
     }
     setTimeout(() => scoreboard.classList.remove("flash"), 500);
   }

@@ -303,7 +303,7 @@ function caricaDatiPartita(mId) {
       isFetching = false;
     })
     .catch(function(err) {
-      document.getElementById("players-grid").innerHTML = "Errore nel caricamento dati.";
+      document.getElementById("players-grid").innerHTML = "Errore: " + err;
       console.error("Errore nel caricamento dati partita:", err);
       // IMPORTANTE: Reset del flag anche in caso di errore
       isFetching = false;
@@ -874,16 +874,13 @@ function updateScoreboard(matchIsLive) {
     currentScore = (teamA === "Polismile A") ? `${punteggioA} - ${punteggioB}` : `${punteggioB} - ${punteggioA}`;
   }
   
-  //const currentScore = (teamA === "Polismile A") ? `${puntiA} - ${punteggioB}` : `${punteggioB} - ${puntiA}`;
-  // const currentScore = (teamA === "Polismile A") ? `${punteggioA} - ${punteggioB}` : `${punteggioB} - ${punteggioA}`;
-
   // Aggiorna l'HUD in alto nel video
   const scoreText = document.getElementById("score-text");
   if (scoreText) scoreText.textContent = currentScore;
   
   if (currentScore !== lastScoreStr) {
     if (isMobile()) { 
-	  navigator.vibrate(100);
+      if (navigator.vibrate) navigator.vibrate(100); // Funziona solo su Android/Chrome
 	}
 	  
     scoreEl.textContent = currentScore;
@@ -1048,7 +1045,7 @@ function avviaTickSenzaVideo() {
 function sendSyncTime() {
   console.log("SendSyncTime() chiamata");
   if (isMobile()) { 
-    navigator.vibrate(100);
+      if (navigator.vibrate) navigator.vibrate(100); // Funziona solo su Android/Chrome
   }
   
   // Logica futura qui
@@ -1065,7 +1062,7 @@ function showSyncTime(events) {
   if (eventosync) {
     isSyncPending = true;
     if (isMobile()) { 
-      navigator.vibrate(100);
+      if (navigator.vibrate) navigator.vibrate(100); // Funziona solo su Android/Chrome
     }
 
     showBasketToast("SYNC: " + eventosync.timestampReale, 0);
