@@ -147,12 +147,21 @@
             from { transform: translateY(50px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+		.app-version {
+          text-align: center;
+          font-size: 0.8rem;
+          color: #666;
+          margin-top: auto; /* Lo spinge verso il basso se il contenitore è flex */
+          padding-bottom: 15px;
+          letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Polismile Basket U14</h1>
+        <div class="app-version">Versione 1.0.96</div>
         <img src="icon-192.png" alt="Logo Polismile" class="header-logo">
     </header>
 	
