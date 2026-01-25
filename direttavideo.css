@@ -22,68 +22,39 @@ html, body {
   overflow: hidden;
 }
 
-/* Nascondi il tasto di default */
-#btn-ios-fullscreen {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10000;
-    background: rgba(39, 174, 96, 0.9); /* Verde Polismile */
-    color: white;
-    border: none;
-    padding: 15px 25px;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    cursor: pointer;
-}
 
 /* Gestione visibilità sezioni in base all'orientamento */
 
 /* Quando lo schermo è in LANDSCAPE (Orizzontale) */
-/* Rileva quando il telefono è in orizzontale */
-@media screen and (orientation: landscape) and (max-device-width: 932px) {
-  
-  /* 1. Forza il body a non scrollare */
-  html, body {
-    overflow: hidden;
-    height: 100vh;
-  }
+@media (orientation: landscape) and (max-width: 932px) {
+    /* 1. Mostra il tasto quando ruota */
 
-  /* 2. Il contenitore video deve coprire tutto */
-  .video-container {
-    position: fixed; /* Si sovrappone a tutto */
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background: #000;
-  }
+/* iPhone Landscape Fix — riduce l’altezza del video per compensare la barra di Safari */
+    .video-container {
+        height: 80vh !important;   /* Prova 80, 78, 75 finché non ti piace */
+        width: 100vw !important;
+        aspect-ratio: unset !important; /* Disattiva il vincolo 16:9 */
+    }
 
-  /* 3. Nascondi la sezione statistiche e altri elementi fuori dal video */
-  #players-grid, 
-  .stats-section, 
-  #debug-info,
-  header, 
-  footer {
-    display: none !important;
-  }
+    #ytplayer {
+        height: 100% !important;
+        width: 100% !important;
+    }
 
-  /* 4. Assicurati che l'iframe di YouTube riempia il container */
-  #ytplayer {
-    width: 100% !important;
-    height: 100% !important;
-  }
+    /* Elementi da nascondere sempre in landscape su mobile per pulizia */
+    #players-grid, 
+    #debug-info, 
+    header, 
+    #stats-section { 
+        display: none !important; 
+    }
 
-  /* 5. Opzionale: Nascondi la barra di stato/navigazione di iOS (Safe Area) */
-  body {
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  }
+    /* Assicurati che lo score sia visibile sopra il video */
+    #hud-overlay {
+        z-index: 10001; /* Sopra il video e sopra il contenitore fullscreen */
+    }
 }
+
 /* Quando lo schermo è in PORTRAIT (Verticale) */
 @media (orientation: portrait) {
   .video-container {
