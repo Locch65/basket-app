@@ -79,6 +79,7 @@ function onPlayerReady() {
     videoSpinner.classList.add("hidden");
   }
 
+  player.mute(); // se il video non è muto, su iphone non va l'autoplay
   player.seekTo(matchStartTime, true);
   player.playVideo();
   tickTimeline();
