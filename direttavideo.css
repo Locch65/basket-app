@@ -35,6 +35,16 @@ html, body {
   .video-container:-webkit-full-screen {
     width: 100vw;
     height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;	
+	background: #000;
+  }
+  /* Nascondi il resto della pagina (scroll, liste, footer) */
+  body {
+    overflow: hidden;
+    height: 100vh;
   }
   
   /* Nasconde la lista giocatori e le statistiche per dare tutto lo spazio al video */

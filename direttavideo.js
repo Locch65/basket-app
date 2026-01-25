@@ -1006,6 +1006,20 @@ function exitFullscreen() {
 }
 
 
+function toggleIOSFullscreen() {
+  const container = document.querySelector('.video-container');
+  
+  if (window.orientation === 90 || window.orientation === -90) {
+    // Prova ad attivare il fullscreen nativo (funziona meglio se l'utente tocca lo schermo)
+    if (container.webkitRequestFullscreen) {
+      container.webkitRequestFullscreen();
+    }
+  }
+}
+
+// Ascolta il cambio di orientamento
+window.addEventListener("orientationchange", toggleIOSFullscreen);
+
 // Gestisci Fullscreen in landscape
 window.screen.orientation.addEventListener("change", function() {
   if (window.screen.orientation.type.startsWith("portrait")) {
