@@ -644,7 +644,17 @@ function controllaDisponibilitaHighlights() {
     }
 }
 
+function entraInFullscreen() {
+    let elem = document.querySelector(".video-container");
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { // Versione per Safari iPhone
+        elem.webkitRequestFullscreen();
+    }
+}
+
 function toggleHighlights() {
+	
     const btnToggle = document.getElementById('toggle-highlights');
     const controls = document.getElementById('highlights-controls');
     const label = document.getElementById('highlight-label');
@@ -1014,6 +1024,7 @@ function toggleIOSFullscreen() {
     if (container.webkitRequestFullscreen) {
       container.webkitRequestFullscreen();
     }
+	entraInFullscreen();
   }
 }
 
