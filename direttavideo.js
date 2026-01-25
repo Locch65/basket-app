@@ -643,8 +643,22 @@ function controllaDisponibilitaHighlights() {
         section.style.display = "none";
     }
 }
-
 function entraInFullscreen() {
+    const container = document.querySelector('.video-container');
+    const btn = document.getElementById('btn-ios-fullscreen');
+
+    if (container.requestFullscreen) {
+        container.requestFullscreen();
+    } else if (container.webkitRequestFullscreen) {
+        // Questa è la riga vitale per iPhone
+        container.webkitRequestFullscreen();
+    }
+    
+    // Nascondi il tasto dopo il click per non coprire il video
+    if (btn) btn.style.display = 'none';
+}
+
+function OLDentraInFullscreen() {
     let elem = document.querySelector(".video-container");
     if (elem.requestFullscreen) {
         elem.requestFullscreen();
@@ -1016,7 +1030,7 @@ function exitFullscreen() {
 }
 
 
-function toggleIOSFullscreen() {
+function OLDtoggleIOSFullscreen() {
   const container = document.querySelector('.video-container');
   
   if (window.orientation === 90 || window.orientation === -90) {
@@ -1027,7 +1041,14 @@ function toggleIOSFullscreen() {
 	entraInFullscreen();
   }
 }
-
+function toggleIOSFullscreen() {
+  if (window.orientation === 90 || window.orientation === -90) {
+        // Un piccolo timeout aiuta Safari a ricalcolare gli spazi
+        setTimeout(() => {
+            window.scrollTo(0, 1);
+        }, 300);
+    }
+}
 // Ascolta il cambio di orientamento
 window.addEventListener("orientationchange", toggleIOSFullscreen);
 

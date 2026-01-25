@@ -25,7 +25,7 @@
 //    - BUG: se metto la partita live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
 //    - leggere lista giocatori da Google Sheet
 //    - password Admin da crittografare
-//    - TESTARE: Autosync del tempo se il calcolo automatico del tempo di inizio diretta fallisce
+//    - Autosync rendere piuù chiara l'attivazione della funzione con un tasto dedicato
 // 
 //    - NICE TO HAVE: implementare dark mode
 //    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
