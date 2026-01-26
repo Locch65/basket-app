@@ -10,26 +10,26 @@
 </head>
 <body>
   <h1>Calendario</h1>
-    <button id="updateBtn" style="position: absolute; top: 20px; right: 10px; background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 14px; z-index: 10;">
-        <i class="fas fa-sync-alt"></i> Aggiorna
-    </button>
+  
+  <button id="updateBtn" class="btn-update">
+    <i class="fas fa-sync-alt"></i> Aggiorna
+  </button>
 
-  <!-- Hamburger Menu -->
   <div id="hamburgerMenu">
     <button id="hamburgerBtn">☰</button>
     <nav id="menu" class="hidden">
       <ul>
-        <li style="border-bottom: 1px solid #eee; padding: 10px 20px;">
-          <a href="index.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; font-weight: bold;">
-            <i class="fas fa-home" style="color: #27ae60;"></i> Home
+        <li>
+          <a href="index.html" class="menu-link-home">
+            <i class="fas fa-home icon-home"></i> Home
           </a>
-        </li>	  
-		
-        <li style="border-bottom: 1px solid #eee; padding: 10px 20px;">
-          <span style="font-weight: bold; display: block; margin-bottom: 10px;">
+        </li>	
+        
+        <li>
+          <span class="menu-section-title">
             <i class="fas fa-trophy"></i> Campionato
           </span>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="filter-group-vertical">
             <label class="radio-container">
               <input type="radio" name="camp" value="U14" class="camp-radio"> U14
             </label>
@@ -41,29 +41,33 @@
             </label>
           </div>
         </li>
+
         <li>
-          <label style="cursor: pointer; display: flex; font-size: 1.2rem; align-items: center; gap: 8px;">
+          <label class="menu-label-flex">
             <i class="fas fa-sort"></i>
             <span>Ordine:</span>
-            <select id="selectOrdine" style="background: #333; color: white; border: 1px solid #555; border-radius: 4px; padding: 2px 5px; font-size: 1rem;">
+            <select id="selectOrdine" class="select-dark">
               <option value="desc">Più recenti</option>
               <option value="asc">Cronologico</option>
             </select>
           </label>
         </li>		
+
         <li>
-          <label style="cursor: pointer; display: flex; font-size: 1.2rem; align-items: center; gap: 8px;">
+          <label class="menu-label-flex">
             <input type="checkbox" id="togglePast" />
             Escludi Terminate
           </label>
         </li>
+
         <li>
-          <button id="toggleTheme1" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; padding:0; display:flex; align-items:center; gap:8px;">
+          <button id="toggleTheme1" class="btn-menu-flat">
             <i class="fas fa-moon"></i> Dark Mode
           </button>
         </li>
+
         <li>
-          <button id="adminBtn" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; padding:0; display:flex; align-items:center; gap:8px;">
+          <button id="adminBtn" class="btn-menu-flat">
             <i class="fas fa-user-shield"></i> Admin
           </button>
         </li>
@@ -71,24 +75,14 @@
     </nav>
   </div>
 
-  <!-- Contenitore partite -->
   <div id="listaPartite" class="loading">Caricamento Calendario...</div>
-  
+
   </div>
 
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.97"></script>
-  <script src="calendario.js?v=1.0.97"></script>
-
+  <script src="common.js?v=1.0.98"></script>
+  <script src="calendario.js?v=1.0.98"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-

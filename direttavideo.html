@@ -37,10 +37,10 @@
           <span id="label-team-B">SQUADRA B</span>
         </div>
       <div id="game-score" class="main-score">0 - 0</div>
-	  <span id="game-period" class="period-box-mini hidden"></span>
+      <span id="game-period" class="period-box-mini hidden"></span>
     </div>
-    <div id="highlights-section" class="highlights-container" style="display: none;">
-      
+
+    <div id="highlights-section" class="highlights-container hidden-section">
       <div id="highlight-label" class="highlight-placeholder"></div>
       <div class="highlights-top-row">
         <button id="toggle-highlights" class="btn-toggle-off" onclick="toggleHighlights()">
@@ -53,36 +53,31 @@
             <button onclick="gestisciHighlight('prev')"><i class="fas fa-step-backward"></i></button>
             <button onclick="gestisciHighlight('next')"><i class="fas fa-step-forward"></i></button>
             <button onclick="gestisciHighlight('end')"><i class="fas fa-fast-forward"></i></button>
-			<div class="highlight-duration-container">
+            <div class="highlight-duration-container">
               <input type="number" id="highlight-duration" value="10" min="1" max="60">
               <span>s</span>
             </div>
           </div>
         </div>
       </div>
-    
     </div>
+
     <div id="players-grid">
         <div class="loading-container">
             <img src="icon-192.png" class="spinner-icon" alt="Caricamento...">
             <p>Caricamento statistiche...</p>
         </div>
-    </div>  </div>
-  <div id="debug-info" style="text-align: center; font-size: 12px; color: #888; margin-top: 10px;">
+    </div> 
+  </div>
+
+  <div id="debug-info" class="debug-footer">
     Tempo risposta server: <span id="fetch-time">0</span> ms
   </div>
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.97"></script>
-  <script src="direttavideo.js?v=1.0.97"></script>
-
+  <script src="common.js?v=1.0.98"></script>
+  <script src="direttavideo.js?v=1.0.98"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
-
-
-
-
-
-

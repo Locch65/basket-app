@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Polismile Basket App</title>
-    <script src="common.js?v=1.0.97"></script>
+    <script src="common.js?v=1.0.98"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        html {
+          font-size: 62.5%; 
+        }
+	
         :root {
             --bg-color: #121212;
             --primary: #27ae60;
@@ -17,6 +21,7 @@
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+			font-size: 1.6rem;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -27,7 +32,7 @@
         }
 
         header {
-            padding: 20px;
+            padding: 2.0rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -36,22 +41,22 @@
 
         h1 {
             margin: 0;
-            font-size: 1.3rem;
+            font-size: 2.0rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .header-logo {
-            width: 64px;
-            height: 64px;
+            width: 6.4rem;
+            height: 6.4rem;
             object-fit: contain;
         }
 		
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 20px;
+            gap: 1.5rem;
+            padding: 2.0rem;
             flex-grow: 1;
         }
 
@@ -64,7 +69,7 @@
             align-items: center;
             justify-content: center;
 			text-align: center;
-            padding: 10px;
+            padding: 1.0rem;
             text-decoration: none;
             color: white;
             transition: all 0.3s ease;
@@ -73,21 +78,21 @@
         }
 
         .menu-button i {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 3.8rem;
+            margin-bottom: 1.0rem;
             color: var(--primary);
         }
         /* Stile per il testo su più righe */
         #live-text { 
             font-weight: bold; 
-            font-size: 0.9rem; 
+            font-size: 1.4rem; 
             line-height: 1.2; /* Riduce lo spazio tra le righe */
             display: block;
         }
 		
         .menu-button span {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.6rem;
         }
 
         /* --- STATO LIVE ATTIVO --- */
@@ -129,8 +134,8 @@
             background-color: var(--card-color);
             border: 2px solid var(--primary);
             border-radius: 20px;
-            padding: 30px;
-            width: 80%; max-width: 300px;
+            padding: 3.0rem;
+            width: 80%; max-width: 30.0rem;
             text-align: center;
             animation: slideUp 0.3s ease-out;
         }
@@ -138,21 +143,21 @@
         .popup-btn {
             background-color: var(--primary);
             color: white; border: none;
-            padding: 12px 40px; border-radius: 10px;
+            padding: 1.2rem 4.0rem; border-radius: 10px;
             font-weight: bold; cursor: pointer;
-            text-transform: uppercase; margin-top: 20px;
+            text-transform: uppercase; margin-top: 2.0rem;
         }
 
         @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
+            from { transform: translateY(5.0rem); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
 		.app-version {
           text-align: center;
-          font-size: 0.8rem;
+          font-size: 1.2rem;
           color: #666;
           margin-top: auto; /* Lo spinge verso il basso se il contenitore è flex */
-          padding-bottom: 15px;
+          padding-bottom: 1.5rem;
           letter-spacing: 1px;
         }
     </style>
@@ -161,19 +166,19 @@
 
     <header>
         <h1>Polismile Basket U14</h1>
-        <div class="app-version">Versione 1.0.97</div>
+        <div class="app-version">Versione 1.0.98</div>
         <img src="icon-192.png" alt="Logo Polismile" class="header-logo">
     </header>
 	
     <div class="menu-grid">
         <a href="roster.html" class="menu-button">
             <i class="fas fa-users"></i>
-            <span style="font-weight:bold; font-size: 1rem;">Roster & Statistiche</span>
+            <span style="font-weight:bold; font-size: 1.5rem;">Roster & Statistiche</span>
         </a>
 
         <a href="calendario.html" class="menu-button">
             <i class="fas fa-calendar-alt"></i>
-            <span style="font-weight:bold; font-size: 1rem;">Calendario</span>
+            <span style="font-weight:bold; font-size: 1.5rem;">Calendario</span>
         </a>
 
         <div id="btn-live" class="menu-button live-off" onclick="GotoLive()">
@@ -183,12 +188,12 @@
         
         <div class="menu-button" onclick="mostraPopup()">
             <i class="fas fa-trophy"></i>
-            <span style="font-weight:bold; font-size: 1rem;">Classifiche</span>
+            <span style="font-weight:bold; font-size: 1.5rem;">Classifiche</span>
         </div>
     </div>
     <div id="customPopup">
         <div class="popup-content">
-            <i class="fas fa-tools" style="font-size: 3rem; color: var(--primary);"></i>
+            <i class="fas fa-tools" style="font-size: 5rem; color: var(--primary);"></i>
             <p>Pagina ancora in costruzione</p>
             <button class="popup-btn" onclick="chiudiPopup()">OK</button>
         </div>
