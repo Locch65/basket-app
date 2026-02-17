@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="it">
+
 <head>
   <meta charset="UTF-8">
   <title>Statistiche Basket</title>
@@ -10,6 +11,7 @@
   <meta name="theme-color" content="#2c3e50">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
   <div id="hamburgerMenu">
     <button id="hamburgerBtn">☰</button>
@@ -25,10 +27,10 @@
         </li>
       </ul>
     </nav>
-  </div>  <!-- Intestazione -->
+  </div> <!-- Intestazione -->
   <div id="header">
 
-	<!-- Bottone Admin -->
+    <!-- Bottone Admin -->
     <div id="adminButtonContainer">
       <!-- Nuovo bottone Video -->
       <button id="videoBtn" class="btn-video-default">Video</button>
@@ -36,8 +38,8 @@
 
 
     <div id="teamNames">
-	  <label id="teamA" class="squadra-label" >Squadra A</label>
-      <label id="teamB" class="squadra-label" >Squadra B</label>
+      <label id="teamA" class="squadra-label">Squadra A</label>
+      <label id="teamB" class="squadra-label">Squadra B</label>
     </div>
     <div id="scoreboard">
       <div id="punteggioNumerico">
@@ -64,20 +66,20 @@
         </div>
       </div>
     </div>
-	
+
 
     <div id="ordinamenti">
       <div class="ordinamenti-left">
         <button><i class="fas fa-arrow-up"></i> #</button>
         <button><i class="fas fa-arrow-up"></i> Nome</button>
         <button><i class="fas fa-arrow-up"></i> Score</button>
-        <div id="clock-container" >
-            <span id="digitalClock" class="clock-display">00:00</span>
-            
-            <div class="time-controls" >
-                <button class="btn-time" onclick="modificaOraInizioDiretta(-1)">-</button>
-                <button class="btn-time" onclick="modificaOraInizioDiretta(1)">+</button>
-            </div>
+        <div id="clock-container">
+          <span id="digitalClock" class="clock-display">00:00</span>
+
+          <div class="time-controls">
+            <button class="btn-time" onclick="modificaOraInizioDiretta(-1)">-</button>
+            <button class="btn-time" onclick="modificaOraInizioDiretta(1)">+</button>
+          </div>
         </div>
       </div>
     </div>
@@ -96,51 +98,36 @@
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.98"></script>
-  <script src="match.js?v=1.0.98"></script>
+  <script src="common.js?v=1.0.05"></script>
+  <script src="match.js?v=1.0.105"></script>
   <script>
-  
-  //window.addEventListener("beforeunload", function (event) {
-  //  // Mostra la finestra di conferma
-  //  if (isAdmin) {
-  //    salvaDatiPartita();
-  //    event.preventDefault();
-  //    event.returnValue = "Vuoi salvare i dati prima di uscire o ricaricare?";
-  //    // ⚠️ Nota: il messaggio personalizzato non sempre viene mostrato,
-  //    // ma la finestra di conferma appare comunque.
-	//}
-  //});
-  
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").then((reg) => {
-      console.log("Service Worker registrato");
-    });
 
-    // Quando un nuovo SW prende controllo, ricarica la pagina automaticamente
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (!window.__reloadedOnce) {
-        window.__reloadedOnce = true;
-        window.location.reload();
-      }
-    });
-  }
-</script>
+    //window.addEventListener("beforeunload", function (event) {
+    //  // Mostra la finestra di conferma
+    //  if (isAdmin) {
+    //    saveToServerMatchData();
+    //    event.preventDefault();
+    //    event.returnValue = "Vuoi salvare i dati prima di uscire o ricaricare?";
+    //    // ⚠️ Nota: il messaggio personalizzato non sempre viene mostrato,
+    //    // ma la finestra di conferma appare comunque.
+    //}
+    //});
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").then((reg) => {
+        console.log("Service Worker registrato");
+      });
+
+      // Quando un nuovo SW prende controllo, ricarica la pagina automaticamente
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!window.__reloadedOnce) {
+          window.__reloadedOnce = true;
+          window.location.reload();
+        }
+      });
+    }
+  </script>
 
 </body>
+
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

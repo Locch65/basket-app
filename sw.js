@@ -1,7 +1,7 @@
 // =====================
 // VERSIONE SERVICE WORKER
 // =====================
-const SW_VERSION = "1.0.98"; // incrementa sempre ad ogni release
+const SW_VERSION = "1.0.105"; // incrementa sempre ad ogni release
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
@@ -12,16 +12,16 @@ const FILES_TO_CACHE = [
   "./direttavideo.html?v=" + SW_VERSION,
   "./roster.html?v=" + SW_VERSION,
   "./anagrafica.html?v=" + SW_VERSION,
-  
+
   "./calendario.css?v=" + SW_VERSION,
   "./match.css?v=" + SW_VERSION,
   "./direttavideo.css?v=" + SW_VERSION,
-  
+
   "./calendaio.js?v=" + SW_VERSION,
   "./match.js?v=" + SW_VERSION,
   "./direttavideo.js?v=" + SW_VERSION,
   "./common.js?v=" + SW_VERSION,
-  
+
   "./icon-192.png",
   "./icon-512.png"
 ];

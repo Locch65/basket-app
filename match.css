@@ -1,35 +1,57 @@
-body { 
-  font-family: Arial, sans-serif; 
-  margin: 10px; 
-  display: flex; 
-  flex-direction: column; 
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
   font-size: 14px;
 
   /* Proprietà standard per disabilitare la selezione del testo */
   user-select: none;
-    
+
   /* Prefissi per la massima compatibilità cross-browser */
-  -webkit-user-select: none; /* Per Chrome, Safari, iOS */
-  -moz-user-select: none;    /* Per Firefox */
-  -ms-user-select: none;     /* Per Edge, IE */
+  -webkit-user-select: none;
+  /* Per Chrome, Safari, iOS */
+  -moz-user-select: none;
+  /* Per Firefox */
+  -ms-user-select: none;
+  /* Per Edge, IE */
 }
 
-h1 { 
-  color: #2c3e50; 
-  font-size: 28px; 
-  margin-left: 60px; /* sposta il titolo a destra del bottone */
+h1 {
+  color: #2c3e50;
+  font-size: 28px;
+  margin-left: 60px;
+  /* sposta il titolo a destra del bottone */
   margin-top: 8px;
 }
 
-#header { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  margin-bottom: 20px; 
+.no-select {
+  /* Impedisce la selezione del testo */
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* Impedisce il menu contestuale e il "callout" su iOS/Android */
+  -webkit-touch-callout: none;
+
+  /* Evita il feedback visivo grigio al tocco su alcuni browser */
+  -webkit-tap-highlight-color: transparent;
+}
+
+#header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
   gap: 20px;
 }
+
 /* --- STILE HAMBURGER MENU (stile calendario) --- */
-#hamburgerMenu {
+/* #hamburgerMenu {
   position: absolute;
   top: 10px;
   left: 10px;
@@ -43,82 +65,12 @@ h1 {
   cursor: pointer;
   color: #2c3e50;
   padding: 5px 10px;
-}
+} */
 
-#menu {
-  position: absolute;
-  top: 50px;
-  left: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  width: 200px;
-  z-index: 1000;
-}
 
-#menu.hidden {
-  display: none;
-}
-
-#menu ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-#menu li {
-  padding: 12px 15px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  font-size: 18px;
-  color: #333;
-  display: flex;
-  align-items: center;
-  transition: background 0.2s;
-}
-
-#menu li:hover {
-  background-color: #f5f5f5;
-}
-
-#menu li:last-child {
-  border-bottom: none;
-}
-
-/* Reset dello stile per i bottoni e i link nel menu */
-#menu ul li button, 
-#menu ul li a {
-    width: 100%;
-    background: none;
-    border: none;
-    color: #333; /* Grigio scuro, come le altre voci del menu */
-    text-align: left;
-    font-size: 18px; /* Uniformato a #menu li */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0; /* Rimuoviamo il padding qui perché lo ha già il genitore LI */
-    font-family: inherit;
-    text-decoration: none;
-}
-
-/* Gestione icone */
-#menu ul li i {
-    width: 25px;
-    text-align: center;
-    color: #2c3e50; /* Colore bluastro scuro per le icone */
-}
-
-/* Hover: cambiamo solo il colore del testo se lo sfondo diventa chiaro */
-#menu li:hover button, 
-#menu li:hover a {
-    color: #000;
-}
 
 /* Reset stile bottone admin dentro il menu */
-#adminBtn1 {
+/* #adminBtn1 {
   background: none !important;
   border: none !important;
   color: inherit !important;
@@ -128,45 +80,17 @@ h1 {
   width: 100%;
   text-align: left;
   cursor: pointer;
-}
+} */
 
-#menu i {
-  margin-right: 10px;
-  width: 20px;
-  text-align: center;
-}
-
-
-/* Stile base bottone video */
-#videoBtn {
-    padding: 10px 20px;
-	font-size: 1.6rem;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-/* Stato Default: BLU */
-.btn-video-default {
-    background-color: #3498db;
-	display: none;
-}
-
-.btn-video-default:hover {
-    background-color: #2980b9;
-}
 
 /* Stato Live: ROSSO */
 .btn-live-active {
-    background-color: #e74c3c;
-    animation: pulse-red 2s infinite;
+  background-color: #e74c3c;
+  animation: pulse-red 2s infinite;
 }
 
 .btn-live-active:hover {
-    background-color: #c0392b;
+  background-color: #c0392b;
 }
 
 
@@ -188,9 +112,11 @@ h1 {
 
 
 #scoreboard {
-  position: relative; /* Necessario per il posizionamento del quarto */
+  position: relative;
+  /* Necessario per il posizionamento del quarto */
   display: flex;
-  justify-content: center; /* Centra il punteggioNumerico */
+  justify-content: center;
+  /* Centra il punteggioNumerico */
   align-items: center;
   width: 100%;
   min-height: 80px;
@@ -206,67 +132,90 @@ h1 {
 }
 
 #scoreboard.flash {
-  color: #27ae60;           /* verde evidenziato */
-  transform: scale(1.2);    /* leggermente più grande */
+  color: #27ae60;
+  /* verde evidenziato */
+  transform: scale(1.2);
+  /* leggermente più grande */
 }
 
 /* Stile per l'indicazione del quarto/stato attuale */
 #periodoAttuale {
   position: relative;
-  margin-left: 25px;      /* Aumentato lo spazio dal punteggio */
-  font-size: 24px;        /* Font molto più grande */
-  color: #ffffff;         /* Testo bianco */
-  background: red;    /* Sfondo rosso */
-  padding: 8px 15px;      /* Più spazio interno */
-  border: 3px solid #c0392b; /* Bordino rosso scuro più evidente */
-  border-radius: 10px;    /* Angoli più arrotondati */
+  margin-left: 25px;
+  /* Aumentato lo spazio dal punteggio */
+  font-size: 24px;
+  /* Font molto più grande */
+  color: #ffffff;
+  /* Testo bianco */
+  background: red;
+  /* Sfondo rosso */
+  padding: 8px 15px;
+  /* Più spazio interno */
+  border: 3px solid #c0392b;
+  /* Bordino rosso scuro più evidente */
+  border-radius: 10px;
+  /* Angoli più arrotondati */
   text-transform: uppercase;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.2); /* Ombra per profondità */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  /* Ombra per profondità */
 }
 
 /* Se la partita è terminata, possiamo cambiare colore in grigio */
 #periodoAttuale.terminata {
-  background: #7f8c8d !important;   /* Grigio scuro */
-  border-color: #34495e !important; /* Bordino grigio ancora più scuro */
-  color: #ecf0f1 !important;        /* Testo quasi bianco */
+  background: #7f8c8d !important;
+  /* Grigio scuro */
+  border-color: #34495e !important;
+  /* Bordino grigio ancora più scuro */
+  color: #ecf0f1 !important;
+  /* Testo quasi bianco */
 }
 
-#contenuto { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 5px; 
+#contenuto {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 #topControls {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 5px;   /* riduce lo spazio sotto la sezione sopra */
+  margin-bottom: 5px;
+  /* riduce lo spazio sotto la sezione sopra */
   border-bottom: 2px solid #ccc;
 }
 
 /* Contenitore dei controlli */
 #controlsB {
-  display: flex;
-  gap: 10px;
+  display: flex;
+  gap: 10px;
   align-items: center;
 }
 
 #controlsB .punteggio {
-  font-size: 36px;   /* ingrandisce il testo */
-  font-weight: bold; /* mantiene il grassetto */
-  margin-left: 12px; /* spazio rispetto al bottone Undo */
+  font-size: 36px;
+  /* ingrandisce il testo */
+  font-weight: bold;
+  /* mantiene il grassetto */
+  margin-left: 12px;
+  /* spazio rispetto al bottone Undo */
 }
 
-#controlsB.left { margin-right: auto; }
-#controlsB.right { margin-left: auto; }
+#controlsB.left {
+  margin-right: auto;
+}
+
+#controlsB.right {
+  margin-left: auto;
+}
 
 .ordinamenti-left {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 0px;
-  flex-shrink: 0; /* Impedisce ai bottoni di rimpicciolirsi troppo */
+  flex-shrink: 0;
+  /* Impedisce ai bottoni di rimpicciolirsi troppo */
 }
 
 /* Ordinamenti */
@@ -274,17 +223,21 @@ h1 {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start; /* Allinea a sinistra */
-  flex-wrap: nowrap;           /* Impedisce di andare a capo */
+  justify-content: flex-start;
+  /* Allinea a sinistra */
+  flex-wrap: nowrap;
+  /* Impedisce di andare a capo */
   gap: 4px;
   margin-top: 10px;
-  overflow-x: auto;            /* Se lo schermo è minuscolo, permette lo scroll orizzontale invece di rompere il layout */
+  overflow-x: auto;
+  /* Se lo schermo è minuscolo, permette lo scroll orizzontale invece di rompere il layout */
   width: 100%;
 }
 
 /* Bottone Convocazioni */
 #ordinamenti .convocazioni-btn {
-  margin-left: auto;   /* spinge il bottone a destra */
+  margin-left: auto;
+  /* spinge il bottone a destra */
   background-color: #007BFF;
   color: white;
   border: none;
@@ -300,7 +253,8 @@ h1 {
 
 #clock-container {
   display: flex;
-  flex-direction: row; /* Forza orologio e + - sulla stessa riga */
+  flex-direction: row;
+  /* Forza orologio e + - sulla stessa riga */
   align-items: center;
   gap: 5px;
   margin-left: 0px;
@@ -309,86 +263,87 @@ h1 {
 
 /* Rimuovi eventuali larghezze fisse che potrebbero nascondere il contenuto */
 .clock-display {
-    min-width: 90px;
-    text-align: center;
-    border: 2px solid #3498db;
-    border-radius: 8px;
-    font-size: 1.8rem;   /* Orologio molto più visibile */
-	margin-left: 100px;
-    padding: 5px 10px;
+  min-width: 90px;
+  text-align: center;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  font-size: 1.8rem;
+  /* Orologio molto più visibile */
+  margin-left: 100px;
+  padding: 5px 10px;
 
 
-    /* Rimosso flex o altro che potrebbe creare conflitti */
+  /* Rimosso flex o altro che potrebbe creare conflitti */
 }
 
 .time-controls {
-    display: flex;
-    flex-direction: row; /* Mette il + sopra il - */
-	gap: 2px;
-    justify-content: center;
+  display: flex;
+  flex-direction: row;
+  /* Mette il + sopra il - */
+  gap: 2px;
+  justify-content: center;
 }
 
 .btn-time {
-    width: 28px;         /* Leggermente più grandi per facilitare il tocco */
-    height: 28px ;
-    font-size: 2.4rem !important;
-    font-weight: bold;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-	margin-left: 8px !important;
+  width: 28px;
+  /* Leggermente più grandi per facilitare il tocco */
+  height: 28px;
+  font-size: 2.4rem !important;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: 8px !important;
 }
 
-#OLDordinamenti button {
-  font-size: 1.6rem;      /* testo più grande */
-  padding: 14px 22px;     /* più spazio interno */
-  border-radius: 6px;     /* angoli arrotondati */
-  margin: 6px;            /* spazio tra i bottoni */
-  cursor: pointer;
-  background-color: #eee; /* colore di sfondo */
-  border: 1px solid #ccc;
-  margin-top: 0px;   /* riduce lo spazio sopra */
-  transition: background-color 0.3s ease;
-}
 #ordinamenti button {
-  white-space: nowrap; /* Evita che il testo nel bottone vada a capo */
-  margin: 0;           /* Rimuoviamo il margin per usare solo il gap del contenitore */
-  padding: 8px 12px;   /* Leggermente ridotto per favorire l'allineamento */
-  font-size: 1.4rem;     /* Dimensione base più sicura */
+  white-space: nowrap;
+  /* Evita che il testo nel bottone vada a capo */
+  margin: 0;
+  /* Rimuoviamo il margin per usare solo il gap del contenitore */
+  padding: 8px 12px;
+  /* Leggermente ridotto per favorire l'allineamento */
+  font-size: 1.4rem;
+  /* Dimensione base più sicura */
 }
 
 #ordinamenti button:hover {
-  background-color: #ddd; /* effetto hover */
+  background-color: #ddd;
+  /* effetto hover */
 }
 
 
 
-.giocatore { 
+.giocatore {
   cursor: pointer;
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 8px; 
-  font-size: 1.6rem;       /* testo più grande */
-  padding: 18px;         /* più spazio interno */
-  border-radius: 12px;   /* angoli più morbidi */
-  border: 2px solid #ccc; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 1.6rem;
+  /* testo più grande */
+  padding: 18px;
+  /* più spazio interno */
+  border-radius: 12px;
+  /* angoli più morbidi */
+  border: 2px solid #ccc;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  will-change: transform; /* hint per performance */
+  will-change: transform;
+  /* hint per performance */
 }
 
-.giocatore.in { 
-  background-color: #c8e6c9; 
-  border: 2px solid #2e7d32; 
+.giocatore.in {
+  background-color: #c8e6c9;
+  border: 2px solid #2e7d32;
   box-shadow: 0 0 8px rgba(46, 125, 50, 0.6);
 }
 
-.giocatore.out { 
+.giocatore.out {
   background-color: #ffffff;
   border: 2px solid #999999;
   box-shadow: 0 0 8px rgba(153, 153, 153, 0.4);
@@ -396,12 +351,29 @@ h1 {
 
 /* Animazione shake */
 @keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-5px); }
-  40% { transform: translateX(5px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-5px);
+  }
+
+  40% {
+    transform: translateX(5px);
+  }
+
+  60% {
+    transform: translateX(-5px);
+  }
+
+  80% {
+    transform: translateX(5px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .giocatore.shake {
@@ -446,6 +418,7 @@ h1 {
   font-size: 28px;
   padding: 10px 18px;
   border-radius: 6px;
+  min-width: 5rem;
   cursor: pointer;
   color: red;
   font-weight: bold;
@@ -470,21 +443,30 @@ h1 {
 }
 
 @keyframes pulse {
-  from { background-color: yellow; }
-  to   { background-color: transparent; }
+  from {
+    background-color: yellow;
+  }
+
+  to {
+    background-color: transparent;
+  }
 }
 
 
 #playerPopup {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.2);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: center;
-  align-items: flex-start;   /* 👈 sposta in alto */
+  align-items: flex-start;
+  /* 👈 sposta in alto */
   z-index: 9999;
-  overflow-y: auto;          /* utile se il contenuto è alto */
+  overflow-y: auto;
+  /* utile se il contenuto è alto */
 }
 
 #playerPopup .popup-content {
@@ -495,39 +477,49 @@ h1 {
   font-size: 48px;
   width: 100%;
   max-width: 800px;
-  margin-top: 200px;          /* 👈 distanza dal bordo superiore */
+  margin-top: 200px;
+  /* 👈 distanza dal bordo superiore */
 }
+
 #playerPopup .popup-content h2 {
   font-size: 3.4rem;
   margin-bottom: 16px;
-  white-space: nowrap;      /* evita che vada a capo */
+  white-space: nowrap;
+  /* evita che vada a capo */
   overflow: hidden;
-  text-overflow: ellipsis;  /* se troppo lungo, mostra "..." */
-  max-width: 100%;          /* usa tutta la larghezza disponibile */
+  text-overflow: ellipsis;
+  /* se troppo lungo, mostra "..." */
+  max-width: 100%;
+  /* usa tutta la larghezza disponibile */
 }
 
 /* Se vuoi che il cognome abbia ancora più spazio rispetto al numero */
 #playerPopup .popup-content h2 .numero {
   display: inline-block;
-  min-width: 60px;          /* spazio fisso per il numero */
+  min-width: 60px;
+  /* spazio fisso per il numero */
 }
+
 #playerPopup .popup-content h2 .cognome {
   font-size: 4.2rem;
-  width: calc(100% - 20px); /* tutto il resto della riga per il cognome */
+  width: calc(100% - 20px);
+  /* tutto il resto della riga per il cognome */
   text-align: left;
 }
 
 
 /* Bottoni incremento → verde */
 #playerPopup .btn-inc {
-  background-color: #4CAF50;   /* verde */
+  background-color: #4CAF50;
+  /* verde */
   color: white;
   border: none;
 }
 
 /* Bottoni decremento → rosso chiaro */
 #playerPopup .btn-dec {
-  background-color: #f28b82;   /* rosso chiaro */
+  background-color: #f28b82;
+  /* rosso chiaro */
   color: white;
   border: none;
 }
@@ -548,9 +540,12 @@ h1 {
 #playerPopup button {
   font-size: 2.2rem;
   margin: 6px;
-  padding: 12px 0;        /* spazio verticale uniforme */
-  width: 100px;            /* larghezza fissa */
-  height: 80px;           /* altezza fissa */
+  padding: 12px 0;
+  /* spazio verticale uniforme */
+  width: 100px;
+  /* larghezza fissa */
+  height: 80px;
+  /* altezza fissa */
   border-radius: 8px;
   cursor: pointer;
   text-align: center;
@@ -576,11 +571,13 @@ h1 {
 
 #giocatori-out {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* massimo 2 colonne */
+  grid-template-columns: repeat(2, 1fr);
+  /* massimo 2 colonne */
   gap: 10px;
 }
 
-#out-col1, #out-col2 {
+#out-col1,
+#out-col2 {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -591,23 +588,17 @@ h1 {
   position: absolute;
   top: 75px;
   right: 10px;
-  display: flex;          /* attiva il flexbox */
-  flex-direction: column; /* impila i bottoni in verticale */
-  gap: 5px;               /* spazio tra i bottoni */
+  display: flex;
+  /* attiva il flexbox */
+  flex-direction: column;
+  /* impila i bottoni in verticale */
+  gap: 5px;
+  /* spazio tra i bottoni */
 }
 
-.popup {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 9999; /* 👈 porta il popup sopra tutto */
-}
 
-.popup.hidden { display: none; }
 
-.popup-content {
+/* .popup-content {
   background: #fff;
   padding: 35px;
   border-radius: 12px;
@@ -615,8 +606,9 @@ h1 {
   font-size: 1.5rem;
   width: 90%;
   max-width: 500px;
-  z-index: 10000; /* 👈 opzionale, per sicurezza */
-}
+  z-index: 10000;
+  /* 👈 opzionale, per sicurezza */
+} */
 
 /* Input password nel popup */
 #adminPassword {
@@ -627,147 +619,44 @@ h1 {
 }
 
 /* Bottoni nel popup */
-#adminOkBtn, #adminCancelBtn {
+#adminOkBtn,
+#adminCancelBtn {
   font-size: 1.4rem;
   padding: 12px 22px;
   margin: 10px;
   border-radius: 8px;
 }
 
-/* Overlay scuro */
-.convocazioniPopup-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  z-index: 10000;
-  overflow-y: auto;
-}
 
-/* Contenuto del popup */
-.convocazioniPopup-content {
-  background: #fff;
-  padding: 25px;
-  border-radius: 12px;
-  text-align: left;
-  width: 100%;
-  max-width: 600px;
-  margin-top: 10px;
-}
-
-/* Titolo */
-.convocazioniPopup-content h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-/* Lista giocatori */
-.convocazioniPopup-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 20px 0;
-}
-
-.convocazioniPopup-item {
-  padding: 2px 10px; /* Gap minimo tra i nomi */
-  margin: 0;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #eee;
-}
-
-/* Checkbox più grandi */
-.convocazioniPopup-item input[type="checkbox"] {
-  width: 32px;            /* larghezza maggiore */
-  height: 32px;           /* altezza maggiore */
-  cursor: pointer;
-}
-
-/* Nomi giocatori più grandi */
-.convocazioniPopup-item label {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  cursor: pointer;
-  font-size: 16px;
-}
-.conv-num {
-  display: inline-block;
-  width: 30px;      /* Spazio fisso per il numero (es. "5" o "18") */
-  text-align: right;
-  margin-right: 15px;
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.conv-name {
-  flex: 1;          /* Il nome inizia sempre dopo i 30px del numero */
-  text-align: left;
-}
-
-/* Contenitore bottoni in orizzontale */
-.convocazioniPopup-buttons {
-  display: flex;
-  justify-content: center; /* centrati orizzontalmente */
-  gap: 20px;               /* spazio tra i bottoni */
-  margin-top: 20px;
-}
-/* Bottoni */
-/* --- 12. Convocazioni Popup (AGGIORNATO) --- */
-
-/* Bottone CONFERMA (Uguale a Salva/OK) */
-.convocazioniPopup-confirmBtn,
-  .convocazioniPopup-closeBtn {
-    font-size: 1.4rem !important; /* Come i popup Admin */
-    padding: 12px 22px !important;
-    min-width: 100px;
-    margin: 10px 5px;
-    font-weight: bold;
-    border-radius: 8px;
-    display: inline-block;
-  }
-
-  .convocazioniPopup-confirmBtn {
-    background-color: #4CAF50;
-    color: white;
-  }
-
-  .convocazioniPopup-closeBtn {
-    background-color: #f28b82;
-    color: white;
-  }
-
-.hidden {
-    display: none !important;
-}
 
 .squadra-box {
   display: flex;
   justify-content: space-between;
-  align-items: center;   /* centra verticalmente */
+  align-items: center;
+  /* centra verticalmente */
   border: 2px solid #1a237e;
   background-color: #2196f3;
   color: #fff;
-  padding: 10px 20px;    /* più spazio interno */
+  padding: 10px 20px;
+  /* più spazio interno */
   border-radius: 8px;
   margin: 10px 0;
   cursor: pointer;
 }
 
 .squadra-box:hover {
-  background-color: #1976d2;       /* blu più scuro al passaggio del mouse */
+  background-color: #1976d2;
+  /* blu più scuro al passaggio del mouse */
 }
 
 
 .squadraB-left {
   display: flex;
   flex-direction: column;
-  justify-content: center;   /* centra verticalmente */
-  margin-right: 30px;        /* più spazio sulla destra */
+  justify-content: center;
+  /* centra verticalmente */
+  margin-right: 30px;
+  /* più spazio sulla destra */
 }
 
 .squadraB-right button {
@@ -775,24 +664,30 @@ h1 {
 }
 
 #titoloB {
-  font-size: 2rem;           /* titolo più grande */
+  font-size: 2rem;
+  /* titolo più grande */
   font-weight: bold;
   margin: 0;
   margin-right: 20px;
-  text-align: center;        /* centrato rispetto al box */
+  text-align: center;
+  /* centrato rispetto al box */
   color: #fff;
 }
 
 #squadraBPopup {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.2);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: center;
-  align-items: flex-start;   /* sposta in alto */
+  align-items: flex-start;
+  /* sposta in alto */
   z-index: 9999;
-  overflow-y: auto;          /* utile se il contenuto è alto */
+  overflow-y: auto;
+  /* utile se il contenuto è alto */
 }
 
 #squadraBPopup .popup-content {
@@ -803,7 +698,8 @@ h1 {
   font-size: 24px;
   width: 100%;
   max-width: 800px;
-  margin-top: 200px;          /* distanza dal bordo superiore */
+  margin-top: 200px;
+  /* distanza dal bordo superiore */
 }
 
 #squadraBPopup .popup-content h2 {
@@ -862,303 +758,42 @@ h1 {
 }
 
 
-/* ======================================== */
-/* MEDIA QUERY PER SCHERMI PICCOLI (MOCKUP) */
-/* ======================================== */
-@media (max-width: 450px) {
 
-  #header { 
-    gap: 10px;
-	margin-bottom: 5px;
-  }
-
-  /* 1. Body: riduce il font base e i margini */
-  body {
-    font-size: 12px;
-    margin: 4px; 
-  }
-
-  #contenuto { 
-    gap: 5px; 
-  }
-
-  /* 2. Intestazione */
-  .squadra-label {
-    font-size: 14px;      /* Ridotto ulteriormente da 16px a 14px */
-    padding: 6px 4px;     /* Ridotto il padding laterale */
-    width: 120px;         /* Ridotto per farle stare affiancate senza sovrapposizioni */
-    border-radius: 6px;
-    white-space: nowrap;  /* Impedisce al testo di andare a capo */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Se il nome è troppo lungo, mette i puntini */
-  }
-
-  /* Spostamento del titolo per non coprire il menu */
-  h1 {
-    font-size: 18px;
-    margin-left: 0;       /* Rimuoviamo il margine fisso */
-    text-align: center;   /* Centriamo il titolo dell'app */
-    width: 100%;
-    margin-top: 40px;     /* Diamo spazio sopra per l'hamburger menu */
-  }
-
-  /* Gestione del contenitore dei nomi delle squadre */
-  #teamNames {
-    gap: 8px;             /* Riduciamo lo spazio tra le due etichette */
-    justify-content: center;
-    margin-top: 10px;
-  }
-  
-  /* 4. Scoreboard */
-  #scoreboard {
-    font-size: 32px;
-    min-height: 50px;
-  }
-  
-  #periodoAttuale {
-    font-size: 12px;      /* Dimensione bilanciata per mobile */
-    margin-left: 10px;
-    padding: 2px 4px;
-    border-width: 2px;
-	border-radius: 4px;
-    left: auto;           /* Fondamentale: annulla il vecchio left: 5px */
-  }
-  #periodoAttuale.terminata {
-	  font-size: 14px;
-  }
-  /* 5. Controlli top (Undo/Punteggio Squadra B) */
-  #controlsB .punteggio {
-    font-size: 16px; 
-    margin-left: 6px;
-  }
-  .undo {
-    font-size: 12px; 
-    padding: 3px 6px; 
-    margin: 0; 
-  }
-
-  #ordinamenti {
-    justify-content: space-between; /* Su mobile distribuisce meglio lo spazio */
-  }
-
-  #ordinamenti button {
-    font-size: 14px;    /* Leggermente più piccolo per stare in riga */
-    padding: 6px 8px;
-  }
-  
-  .btn-time {
-        width: 32px;
-        height: 32px;
-        font-size: 1.6rem  !important;
-		margin-left: 0px !important;
-
-    }
-    
-	
-  .clock-display {
-        font-size: 1.1rem; /* Dimensione ridotta per il cellulare */
-        min-width: 70px;   /* Riduce l'ingombro orizzontale */
-        padding: 2px 6px;  /* Riduce lo spazio interno */
-        border-width: 1px; /* Bordo più sottile per non appesantire */
-        margin-left: 5px;  /* Meno spazio dal bottone precedente se lo schermo è strettissimo */
-  }
-	
-  .OLDclock-display {
-    font-size: 14px;
-    min-width: 60px;
-  }
-  
-  /* 7. Giocatori (la parte più importante per Admin) */
-  .giocatore {
-    font-size: 14px;
-    padding: 6px 8px; 
-    margin-bottom: 2px; /* RIDUZIONE GAP TRA CARDS IN */
-    border-radius: 8px;
-  }
-
-  .nome {
-    gap: 4px; 
-    flex: none;
-  }
-
-  .numero {
-    font-size: 14px; 
-    min-width: 20px; 
-  }
-
-  .cognome {
-    font-size: 16px; 
-    min-width: 70px; 
-    max-width: 80px; 
-  }
-
-  /* 8. Bottoni Tiro (+1, +2, +3) */
-  .tiro {
-    margin: 0; 
-    padding: 3px 6px; 
-    font-size: 14px;
-    border-radius: 4px;
-  }
-  
-  /* 9. Punteggio Giocatore */
-  .punteggio .totale {
-    font-size: 16px; 
-  }
-  .punteggio .dettagli {
-    font-size: 12px; 
-    margin-left: 2px; 
-  }
-
-
-  /* 10. Menu Hamburger e pulsante Video/Admin */
-  #hamburgerMenu {
-    gap: 10px;
-  }
-  #hamburgerBtn {
-    padding: 4px 8px;
-    font-size: 1.2rem;
-  }
-  #videoBtn, #adminBtn1 {
-    padding: 4px 8px;
-    font-size: 12px;
-    border-radius: 4px;
-  }
-  #adminButtonContainer {
-    top: 40px;
-    right: 5px;
-  }
-
-  /* 11. Popup del Giocatore (playerPopup) */
-  #playerPopup .popup-content {
-    margin-top: 50px;
-    padding: 15px;
-  }
-  #playerPopup .popup-content h2 {
-    font-size: 24px;
-  }
-  #playerPopup .popup-content h2 .numero {
-    min-width: 40px;
-  }
-  #playerPopup .popup-content h2 .cognome {
-    font-size: 28px;
-  }
-  #playerPopup .btn-inc,
-  #playerPopup .btn-dec,
-  #playerPopup button {
-    font-size: 18px;
-    width: 50px;
-    height: 40px;
-    padding: 4px 0;
-    margin: 4px;
-  }
-  #playerPopup button.close-btn {
-    padding: 8px;
-    margin-top: 20px;
-    font-size: 16px;
-  }
-
-  /* 12. Convocazioni Popup */
-  .convocazioniPopup-item label {
-    font-size: 18px;
-  }
-  .convocazioniPopup-item input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-  }
-.convocazioniPopup-confirmBtn,
-  .convocazioniPopup-closeBtn {
-    font-size: 1.4rem !important; /* Come i popup Admin */
-    padding: 12px 22px !important;
-    min-width: 100px;
-    margin: 10px 5px;
-    font-weight: bold;
-    border-radius: 8px;
-    display: inline-block;
-  }
-
-  .convocazioniPopup-confirmBtn {
-    background-color: #4CAF50;
-    color: white;
-  }
-
-  .convocazioniPopup-closeBtn {
-    background-color: #f28b82;
-    color: white;
-  }
-  
-  /* Assicurati che il contenitore dei bottoni li centri bene */
-  .convocazioniPopup-content div:last-child {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
-  }  
-  
-  /* 13. Grid dei giocatori "out" e giocatori "in" */
-  #giocatori-out {
-    grid-template-columns: repeat(2, 1fr); /* RIPRISTINATO: Due colonne per massimizzare lo spazio */
-    gap: 2px; 
-  }
-  #giocatori-in {
-    gap: 4px; 
-  }
-  
-  /* NUOVE REGOLE PER SQUADRA B BOX */
-  .squadra-box {
-    padding: 6px 10px; 
-    margin: 4px 0;     
-  }
-  
-  #titoloB {
-    font-size: 1.2rem; 
-  }
-  
-  .squadraB-right {
-      display: flex; 
-      gap: 3px; 
-      align-items: center;
-  }
-  
-  .squadraB-right button {
-    font-size: 12px; 
-    padding: 3px 6px; 
-    margin-left: 0;   
-  }
-  
-  .squadraB-left {
-    margin-right: 10px; 
-  }
-}
 
 /* ======================================== */
 /* MEDIA QUERY PER TABLET (600px)           */
 /* ======================================== */
-@media (min-width: 451px) and (max-width: 1000px) {
-  
+@media (min-width: 411px) and (max-width: 1000px) {
+
   /* --- ORDINAMENTI E CLOCK PIÙ GRANDI --- */
   #ordinamenti {
-    gap: 18px;           /* Più spazio tra i bottoni */
+    gap: 18px;
+    /* Più spazio tra i bottoni */
     margin: 4px 0;
   }
 
   #ordinamenti button {
-    font-size: 1.4rem;   /* Ingrandisce il testo dei bottoni #, Nome, Score */
-    padding: 12px 20px;  /* Area di tocco più comoda */
+    font-size: 1.4rem;
+    /* Ingrandisce il testo dei bottoni #, Nome, Score */
+    padding: 12px 20px;
+    /* Area di tocco più comoda */
     border-radius: 8px;
   }
 
   .clock-display {
-    font-size: 1.8rem;   /* Orologio molto più visibile */
+    font-size: 1.8rem;
+    /* Orologio molto più visibile */
     min-width: 120px;
     padding: 5px 10px;
-	margin-left: 100px;
+    margin-left: 100px;
   }
 
   .btn-time {
-    width: 40px;         /* Bottoni + e - del clock più grandi */
+    width: 40px;
+    /* Bottoni + e - del clock più grandi */
     height: 40px;
     font-size: 2.2rem;
-	margin-left: 20px !important;
+    margin-left: 20px !important;
 
   }
 
@@ -1168,42 +803,50 @@ h1 {
   }
 
   .squadra-label {
-    font-size: 24px;     /* Nomi squadre in alto più grandi */
+    font-size: 24px;
+    /* Nomi squadre in alto più grandi */
     width: 200px;
   }
-  
+
   /* Gap minimo tra i badge per ottimizzare lo spazio */
-  #giocatori-in, #giocatori-out {
+  #giocatori-in,
+  #giocatori-out {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2px; /* Spazio ridottissimo tra i badge */
+    gap: 2px;
+    /* Spazio ridottissimo tra i badge */
   }
 
   .giocatore {
-    width: 100%; /* Occupa tutta la larghezza dello schermo */
-    padding: 6px 10px; /* Altezza del badge molto contenuta */
+    width: 100%;
+    /* Occupa tutta la larghezza dello schermo */
+    padding: 6px 10px;
+    /* Altezza del badge molto contenuta */
     margin: 0;
     box-sizing: border-box;
-    border-radius: 4px; /* Angoli meno arrotondati per un look più compatto */
+    border-radius: 4px;
+    /* Angoli meno arrotondati per un look più compatto */
   }
 
   /* Font nomi e numeri ridimensionati */
   .numero {
-    font-size: 26px; 
+    font-size: 26px;
     min-width: 30px;
   }
 
   .cognome {
-    font-size: 28px; 
+    font-size: 28px;
     min-width: 130px;
     max-width: 180px;
   }
 
   /* --- BOTTONI +1, +2, +3: DIMENSIONE MEDIA --- */
   .tiro {
-    padding: 8px 16px; /* Misura intermedia, cliccabile ma non enorme */
-    font-size: 18px;    /* Leggibile ma proporzionato */
+    padding: 8px 16px;
+    /* Misura intermedia, cliccabile ma non enorme */
+    font-size: 18px;
+    /* Leggibile ma proporzionato */
     font-weight: bold;
     margin: 0 2px;
     min-width: 45px;
@@ -1228,8 +871,10 @@ h1 {
 
   /* --- SQUADRA B BOX (TABLET) --- */
   .squadra-box {
-    width: 100%;       /* Occupa tutta la larghezza come i badge giocatori */
-    padding: 12px 15px; /* Più spazio interno */
+    width: 100%;
+    /* Occupa tutta la larghezza come i badge giocatori */
+    padding: 12px 15px;
+    /* Più spazio interno */
     margin: 8px 0;
     box-sizing: border-box;
     display: flex;
@@ -1238,18 +883,22 @@ h1 {
   }
 
   #titoloB {
-    font-size: 1.6rem; /* Nome Squadra B più leggibile */
+    font-size: 1.6rem;
+    /* Nome Squadra B più leggibile */
   }
 
   /* Bottoni Squadra B (+1, +2, +3) */
   .squadraB-right {
     display: flex;
-    gap: 8px; /* Più spazio tra i bottoni */
+    gap: 8px;
+    /* Più spazio tra i bottoni */
   }
 
   .squadraB-right button {
-    padding: 10px 18px; /* Bottoni più grandi e facili da toccare */
-    font-size: 18px;    /* Font coerente con i bottoni dei giocatori */
+    padding: 10px 18px;
+    /* Bottoni più grandi e facili da toccare */
+    font-size: 18px;
+    /* Font coerente con i bottoni dei giocatori */
     font-weight: bold;
     min-width: 50px;
     border-radius: 6px;

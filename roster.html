@@ -1,118 +1,159 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
   <meta charset="UTF-8">
   <title>Statistiche Avanzate Roster</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-  html {
-    font-size: 62.5%; 
-  }
-  * {
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-  }
+  <style>
+    html {
+      font-size: 62.5%;
+    }
 
-  body { 
-    font-family: Arial, sans-serif; 
-	font-size: 1.6rem;
-    margin: 1.0rem; 
-    background: #f5f5f5; 
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .header-container { 
-    display: flex; align-items: center; justify-content: space-between; 
-    margin-bottom: 1.5rem; background: #fff; padding: 1.0rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-   
-  .brand-section {
-    display: flex;
-    align-items: center;
-    gap: 1.0rem;
-  }
+    * {
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
 
-  .home-btn { 
-    text-decoration: none; 
-    color: #007bff; 
-    font-size: 2.4rem; /* Dimensione dell'icona */
-    display: flex; 
-    align-items: center; 
-  }
-  .app-icon {
-    width: 3.2re,;
-    height: 3.2rem;
-    object-fit: contain;
-  }
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 1.6rem;
+      margin: 1.0rem;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+    }
 
-  .header-container h2 {
-    margin: 0;
-    font-size: 1.6rem;
-    color: #333;
-  }
-  
-  .filters-container { 
-    background: #fff; 
-    padding: 1.5rem; 
-    border-radius: 8px; 
-    margin-bottom: 1.0rem; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-    display: flex; 
-    gap: 2.0rem; 
-    flex-wrap: wrap;
-  }
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      background: #fff;
+      padding: 1.0rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
 
-  .table-container {
-    width: 100%;
-    overflow-x: auto; 
-    -webkit-overflow-scrolling: touch;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 1.0rem;
+    }
 
-  table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    min-width: 0 !important; /* Rimuove il limite dei 400px */
-    table-layout: fixed; /* Fondamentale: forza le colonne a rispettare le larghezze */
-  }
+    .home-btn {
+      text-decoration: none;
+      color: #007bff;
+      font-size: 2.4rem;
+      /* Dimensione dell'icona */
+      display: flex;
+      align-items: center;
+    }
 
-  th, td { 
-    padding: 1.0rem 0.2rem !important; /* Forza un padding minimo */
-    text-align: center; 
-    border-bottom: 1px solid #ddd; 
-  }
-  th { background-color: #007bff; color: white; font-size: 1.2rem; cursor: pointer; white-space: nowrap; position: relative; }
-  
-  th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
-  th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
+    .app-icon {
+      width: 3.2re, ;
+      height: 3.2rem;
+      object-fit: contain;
+    }
 
-  .col-nome { 
-    text-align: left; 
-    width: 9.0rem !important;    /* Forza la larghezza a 90px */
-    max-width: 9.0rem !important; 
-    min-width: 0 !important;   /* Rimuove ogni limite minimo precedente */    white-space: nowrap; 
-    overflow: hidden;
-    text-overflow: ellipsis; 
-  }
-  .update-btn { 
-    background: #28a745; 
-    color: white; 
-    border: none; 
-    padding: 0.6rem 1.2rem; 
-    border-radius: 5px; 
-    font-size: 1.4rem;
-  }
-  
-  .pts-bold { color: #007bff; font-weight: bold; }
-  .tfoot-totale { background-color: #e9f4ff; font-weight: bold; }
-</style>
+    .header-container h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      color: #333;
+    }
+
+    .filters-container {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.0rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 2.0rem;
+      flex-wrap: wrap;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 0 !important;
+      /* Rimuove il limite dei 400px */
+      table-layout: fixed;
+      /* Fondamentale: forza le colonne a rispettare le larghezze */
+    }
+
+    th,
+    td {
+      padding: 1.0rem 0.2rem !important;
+      /* Forza un padding minimo */
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    th.sort-asc::after {
+      content: " ▲";
+      font-size: 0.7em;
+    }
+
+    th.sort-desc::after {
+      content: " ▼";
+      font-size: 0.7em;
+    }
+
+    .col-nome {
+      text-align: left;
+      width: 9.0rem !important;
+      /* Forza la larghezza a 90px */
+      max-width: 9.0rem !important;
+      min-width: 0 !important;
+      /* Rimuove ogni limite minimo precedente */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .update-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 5px;
+      font-size: 1.4rem;
+    }
+
+    .pts-bold {
+      color: #007bff;
+      font-weight: bold;
+    }
+
+    .tfoot-totale {
+      background-color: #e9f4ff;
+      font-weight: bold;
+    }
+  </style>
 </head>
+
 <body>
 
   <div class="header-container">
@@ -123,9 +164,9 @@
       <img src="icon-192.png" alt="Logo" class="app-icon">
       <h2>Polismile A - U14</h2>
     </div>
-<button id="updateBtn" class="update-btn" onclick="forzaAggiornamento()">
-  <i class="fas fa-sync-alt"></i> Aggiorna
-</button>
+    <button id="updateBtn" class="update-btn" onclick="forzaAggiornamento()">
+      <i class="fas fa-sync-alt"></i> Aggiorna
+    </button>
   </div>
 
   <div class="filters-container">
@@ -135,7 +176,7 @@
       <label><input type="radio" name="catFilter" value="U15" onclick="applicaFiltriECalcoli()"> U15</label>
       <label><input type="radio" name="catFilter" value="Tutti" checked onclick="applicaFiltriECalcoli()"> Tutti</label>
     </div>
-    
+
     <div class="filter-group">
       <strong>Punti:</strong>
       <label><input type="radio" name="calcType" value="Totale" checked onclick="applicaFiltriECalcoli()"> Somma</label>
@@ -163,10 +204,10 @@
     </table>
   </div>
 
-  <script src="common.js?v=1.0.98"></script>
+  <script src="common.js?v=1.0.105"></script>
   <script>
-    let datiOriginali = []; 
-    let datiFinali = [];    
+    let datiOriginali = [];
+    let datiFinali = [];
     let statoOrdine = JSON.parse(localStorage.getItem("statoOrdineStats")) || { colonna: 'punti', ascendente: false };
 
     async function inizializzaDati() {
@@ -175,31 +216,38 @@
 
       let roster, stats;
 
+      // 1. Tentativo di caricamento da Cache
       if (cacheRoster && cacheStats) {
-        roster = JSON.parse(cacheRoster);
-        stats = JSON.parse(cacheStats);
-      } else {
         try {
-          const [resRoster, resStats] = await Promise.all([
-            fetch(url + "?sheet=Roster"),
-            fetch(url + "?getAllStats=1")
-          ]);
-          roster = await resRoster.json();
-          stats = await resStats.json();
-          localStorage.setItem("datiRoster", JSON.stringify(roster));
-          localStorage.setItem("datiTutteLeStats", JSON.stringify(stats));
+          roster = JSON.parse(cacheRoster);
+          stats = JSON.parse(cacheStats);
         } catch (e) {
-          document.getElementById("loading").innerText = "Errore nel caricamento dati dal server.";
-          return;
+          console.error("Errore parsing cache, svuoto...", e);
+          localStorage.removeItem("datiRoster");
+          localStorage.removeItem("datiTutteLeStats");
         }
       }
+
+      
+      // 2. Se non abbiamo i dati (o la cache era corrotta), scarichiamo dal server
+      if (!roster || !stats) {
+
+        const dati = await aggiornaDatiRosterEStats();
+        if (dati) {
+            roster = dati.roster;
+            stats = dati.stats;
+        }
+
+      }
+
+      // 3. Passaggio alla mappatura (ora stats ha la chiave statisticheGiocatori)
       mappaAzioniGiocatori(roster, stats);
     }
 
     function mappaAzioniGiocatori(roster, stats) {
       datiOriginali = roster.map((player, index) => {
-        const azioniGiocatore = stats.statisticheGiocatori.filter(s => 
-          s.giocatore === player.Nome + " " + player.Cognome || 
+        const azioniGiocatore = stats.statisticheGiocatori.filter(s =>
+          s.giocatore === player.Nome + " " + player.Cognome ||
           (s.numero == player["Numero Maglia"] && s.giocatore.includes(player.Cognome))
         );
         return {
@@ -221,17 +269,17 @@
           if (categoria === "Tutti") return id.includes("U14") || id.includes("U15");
           return id.includes(categoria);
         });
-        
+
         const matchIds = [...new Set(azioniFiltrate.map(s => s.matchId))];
         let tl = 0, t2 = 0, t3 = 0, puntiTotali = 0;
-        
+
         azioniFiltrate.forEach(s => {
           try {
-            const dettagli = JSON.parse(s.dettagli || "{}");
-            tl += parseInt(dettagli["1"]) || 0;
-            t2 += parseInt(dettagli["2"]) || 0;
-            t3 += parseInt(dettagli["3"]) || 0;
-          } catch (e) {}
+            const contatori = JSON.parse(s.contatori || "{}");
+            tl += parseInt(contatori["1"]) || 0;
+            t2 += parseInt(contatori["2"]) || 0;
+            t3 += parseInt(contatori["3"]) || 0;
+          } catch (e) { }
         });
 
         puntiTotali = (tl * 1) + (t2 * 2) + (t3 * 3);
@@ -257,18 +305,18 @@
       const tfoot = document.getElementById("table-foot");
       document.getElementById("loading").style.display = "none";
       document.getElementById("roster-table").style.display = "table";
-      
-      tbody.innerHTML = ""; 
-      
+
+      tbody.innerHTML = "";
+
       let setPartiteSquadra = new Set();
       let totPTS = 0, totTL = 0, totT2 = 0, totT3 = 0;
 
       datiFinali.forEach((p) => {
         // Aggiungiamo i matchId di questa giocatrice al Set generale della squadra
-        if(p.matchIdsFiltrati) {
+        if (p.matchIdsFiltrati) {
           p.matchIdsFiltrati.forEach(id => setPartiteSquadra.add(id));
         }
-        
+
         totPTS += parseFloat(p.punti) || 0;
         totTL += parseFloat(p.tl) || 0;
         totT2 += parseFloat(p.t2) || 0;
@@ -276,7 +324,7 @@
 
         const row = document.createElement("tr");
         row.onclick = () => { window.location.href = `anagrafica.html?player=${p.indiceOriginale}`; };
-        
+
         row.innerHTML = `
           <td><strong>${p["Numero Maglia"]}</strong></td>
           <td class="col-nome">${p.Cognome} ${p.Nome.charAt(0)}.</td>
@@ -310,7 +358,7 @@
         statoOrdine.ascendente = !statoOrdine.ascendente;
       } else {
         statoOrdine.colonna = colonna;
-        statoOrdine.ascendente = (colonna === 'Cognome'); 
+        statoOrdine.ascendente = (colonna === 'Cognome');
       }
       localStorage.setItem("statoOrdineStats", JSON.stringify(statoOrdine));
       applicaOrdinamento();
@@ -320,7 +368,7 @@
       datiFinali.sort((a, b) => {
         let vA = a[statoOrdine.colonna];
         let vB = b[statoOrdine.colonna];
-        
+
         if (statoOrdine.colonna !== 'Cognome') {
           vA = parseFloat(vA) || 0;
           vB = parseFloat(vB) || 0;
@@ -331,7 +379,7 @@
         }
         return statoOrdine.ascendente ? vA - vB : vB - vA;
       });
-      
+
       aggiornaIconeHeader();
       renderTable();
     }
@@ -357,7 +405,11 @@
       location.reload();
     }
 
+    registerUserId();
+
     inizializzaDati();
+
   </script>
 </body>
+
 </html>

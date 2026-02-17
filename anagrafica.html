@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
   <meta charset="UTF-8">
   <title>Anagrafica Roster</title>
@@ -7,135 +8,202 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-<style>
-  html {
-    font-size: 62.5%; 
-  }
-  /* --- Layout Generale --- */
-  body { 
-    font-family: Arial, sans-serif; 
-    margin: 0; 
-    background: #f5f5f5; 
-    overflow-x: hidden; 
-    -webkit-user-select: none;
-    user-select: none;
-  }
+  <style>
+    html {
+      font-size: 62.5%;
+    }
 
-  .swiper { width: 100%; height: 100vh; }
-  
-  .swiper-slide {
-    display: flex; 
-    flex-direction: column; 
-    align-items: flex-start; 
-    justify-content: flex-start;
-    background: #fff; 
-    padding: 6.0rem 1.0rem 2.0rem 1.0rem;
-    box-sizing: border-box; 
-    width: 100%; 
-    overflow-y: auto;
-  }
+    /* --- Layout Generale --- */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
 
-  .player-header { display: flex; align-items: center; gap: 1.5rem; width: 100%; margin-bottom: 1.5rem; }
-  .player-photo { width: 6.5rem; height: 6.5rem; object-fit: cover; border-radius: 50%; border: 2px solid #007bff; background: #eee; }
-  .player-info h2 { margin: 0; font-size: 2.0rem; color: #333; }
+    .swiper {
+      width: 100%;
+      height: 100vh;
+    }
 
-  /* --- Filtri --- */
-  .filters-container { 
-    background: #f9f9f9; 
-    padding: 0.8rem; 
-    border-radius: 8px; 
-    margin-bottom: 1.2rem; 
-    border: 1px solid #eee; 
-    display: flex; 
-    gap: 1.0rem; 
-    flex-wrap: wrap; 
-    width: 100%; 
-    box-sizing: border-box;
-    font-size: 1.2rem;
-  }
-  .filter-group { display: flex; align-items: center; gap: 0.5rem; }
-  .filter-group strong { color: #007bff; }
+    .swiper-slide {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      background: #fff;
+      padding: 6.0rem 1.0rem 2.0rem 1.0rem;
+      box-sizing: border-box;
+      width: 100%;
+      overflow-y: auto;
+    }
 
-  /* --- Tabella Ultra-Compatta per Oppo --- */
-  table {
-    width: 100%;
-    table-layout: fixed; /* Obbliga il browser a rispettare le larghezze */
-    border-collapse: collapse;
-    font-size: 1.1rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  }
+    .player-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
 
-  /* Reset e base per tutte le celle */
-  th, td { 
-    padding: 0.8rem 0.1rem !important; 
-    text-align: center; 
-    border-bottom: 1px solid #ddd;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    .player-photo {
+      width: 6.5rem;
+      height: 6.5rem;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid #007bff;
+      background: #eee;
+    }
 
-  th { 
-    background-color: #007bff; 
-    color: white; 
-    font-size: 1.0rem !important; /* Forza intestazioni piccole */
-    white-space: nowrap;
-  }
+    .player-info h2 {
+      margin: 0;
+      font-size: 2.0rem;
+      color: #333;
+    }
 
-  /* --- Dimensionamento Colonne --- */
-  
-/* 1. Data */
-.date-col, th:nth-child(1) { 
-    width: 5.2rem !important; 
-    /* color: #666;  <-- RIMOSSO per non cambiare il colore del testo */
-}
+    /* --- Filtri --- */
+    .filters-container {
+      background: #f9f9f9;
+      padding: 0.8rem;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      border: 1px solid #eee;
+      display: flex;
+      gap: 1.0rem;
+      flex-wrap: wrap;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 1.2rem;
+    }
 
-/* 2. ID */
-.id-col, th:nth-child(2) { 
-    width: 5.5rem !important; 
-    /* color: #888;  <-- RIMOSSO */
-    white-space: normal !important; 
-    line-height: 1.1;
-}
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-  /* 3. Location (Casetta/Bus) */
-  .loc-cell, th:nth-child(3) { width: 2.2rem !important; }
+    .filter-group strong {
+      color: #007bff;
+    }
 
-/* Colonna Avversaria: permette il ritorno a capo */
-td:nth-child(4), th:nth-child(4) { 
-  width: auto !important; 
-  text-align: left; 
-  padding-left: 0.4rem !important;
-  font-size: 1.4rem; /* Leggermente più piccolo aiuta il layout */
-  
-  /* Queste tre righe attivano il ritorno a capo */
-  white-space: normal !important; 
-  word-wrap: break-word;
-  line-height: 1.1;
-}
-  /* 5-8. Statistiche (PTS, TL, T2, T3) */
-  th:nth-last-child(1), td:nth-last-child(1),
-  th:nth-last-child(2), td:nth-last-child(2),
-  th:nth-last-child(3), td:nth-last-child(3),
-  th:nth-last-child(4), td:nth-last-child(4) {
-    width: 3.0rem !important;
-    font-size: 1.4rem;
-  }
+    /* --- Tabella Ultra-Compatta per Oppo --- */
+    table {
+      width: 100%;
+      table-layout: fixed;
+      /* Obbliga il browser a rispettare le larghezze */
+      border-collapse: collapse;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
 
-  /* --- Utility --- */
-  .tfoot-totale { background-color: #e9f4ff; font-weight: bold; }
-  .pts-bold { color: #007bff; font-weight: bold; }
-  
-  .back-btn {
-    position: absolute; top: 1.5rem; left: 1.5rem; z-index: 100; 
-    background: #007bff; color: white; 
-    padding: 0.6rem 1.2rem; border-radius: 20px; 
-    text-decoration: none; font-size: 1.4rem;
-  }
+    /* Reset e base per tutte le celle */
+    th,
+    td {
+      padding: 0.8rem 0.1rem !important;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  th.sort-asc::after { content: " ▲"; font-size: 0.7em; }
-  th.sort-desc::after { content: " ▼"; font-size: 0.7em; }
-</style>
+    th {
+      background-color: #007bff;
+      color: white;
+      font-size: 1.0rem !important;
+      /* Forza intestazioni piccole */
+      white-space: nowrap;
+    }
+
+    /* --- Dimensionamento Colonne --- */
+
+    /* 1. Data */
+    .date-col,
+    th:nth-child(1) {
+      width: 5.2rem !important;
+      /* color: #666;  <-- RIMOSSO per non cambiare il colore del testo */
+    }
+
+    /* 2. ID */
+    .id-col,
+    th:nth-child(2) {
+      width: 5.5rem !important;
+      /* color: #888;  <-- RIMOSSO */
+      white-space: normal !important;
+      line-height: 1.1;
+    }
+
+    /* 3. Location (Casetta/Bus) */
+    .loc-cell,
+    th:nth-child(3) {
+      width: 2.2rem !important;
+    }
+
+    /* Colonna Avversaria: permette il ritorno a capo */
+    td:nth-child(4),
+    th:nth-child(4) {
+      width: auto !important;
+      text-align: left;
+      padding-left: 0.4rem !important;
+      font-size: 1.4rem;
+      /* Leggermente più piccolo aiuta il layout */
+
+      /* Queste tre righe attivano il ritorno a capo */
+      white-space: normal !important;
+      word-wrap: break-word;
+      line-height: 1.1;
+    }
+
+    /* 5-8. Statistiche (PTS, TL, T2, T3) */
+    th:nth-last-child(1),
+    td:nth-last-child(1),
+    th:nth-last-child(2),
+    td:nth-last-child(2),
+    th:nth-last-child(3),
+    td:nth-last-child(3),
+    th:nth-last-child(4),
+    td:nth-last-child(4) {
+      width: 3.0rem !important;
+      font-size: 1.4rem;
+    }
+
+    /* --- Utility --- */
+    .tfoot-totale {
+      background-color: #e9f4ff;
+      font-weight: bold;
+    }
+
+    .pts-bold {
+      color: #007bff;
+      font-weight: bold;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 100;
+      background: #007bff;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 1.4rem;
+    }
+
+    th.sort-asc::after {
+      content: " ▲";
+      font-size: 0.7em;
+    }
+
+    th.sort-desc::after {
+      content: " ▼";
+      font-size: 0.7em;
+    }
+  </style>
 </head>
+
 <body>
 
   <a href="roster.html" class="back-btn">← Lista</a>
@@ -145,23 +213,17 @@ td:nth-child(4), th:nth-child(4) {
     <div class="swiper-pagination"></div>
   </div>
 
-  <script src="common.js?v=1.0.98"></script>
+  <script src="common.js?v=1.0.105"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <script>
-    let datiOriginaliPartite = []; 
+    let datiOriginaliPartite = [];
     let statoOrdineMatch = { colonna: 'PTS', ascendente: false };
 
     function normalizeUrl(url) {
       if (!url) return "";
       if (!/^https?:\/\//i.test(url)) return "https://" + url;
       return url.trim();
-    }
-
-    function OLDconvertDriveLink(url) {
-      if (!url) return "";
-      let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-      return match && match[1] ? `https://drive.google.com/uc?id=${match[1]}` : url;
     }
 
     function convertDriveLink(url) {
@@ -183,9 +245,9 @@ td:nth-child(4), th:nth-child(4) {
       const slides = document.querySelectorAll('.swiper-slide');
       datiOriginaliPartite.forEach((partite, idx) => {
         const slide = slides[idx];
-        if(!slide) return;
+        if (!slide) return;
         const cat = slide.querySelector('input[name="catFilter-' + idx + '"]:checked').value;
-        
+
         let filtrate = partite.filter(p => {
           if (cat === "Tutti") return p.matchIdFull.includes("U14") || p.matchIdFull.includes("U15");
           return p.matchIdFull.includes(cat);
@@ -208,20 +270,20 @@ td:nth-child(4), th:nth-child(4) {
       const tbody = document.getElementById(`tbody-${slideIndex}`);
       const tfoot = document.getElementById(`tfoot-${slideIndex}`);
       const headers = document.querySelectorAll(`#table-${slideIndex} th`);
-      if(!tbody) return;
+      if (!tbody) return;
 
       dati.sort((a, b) => {
         let vA = a[statoOrdineMatch.colonna], vB = b[statoOrdineMatch.colonna];
         if (statoOrdineMatch.colonna === 'Data') {
-            // Ordinamento date (GG/MM/AAAA)
-            const partsA = vA.split('/');
-            const partsB = vB.split('/');
-            const dateA = new Date(partsA[2], partsA[1]-1, partsA[0]);
-            const dateB = new Date(partsB[2], partsB[1]-1, partsB[0]);
-            return statoOrdineMatch.ascendente ? dateA - dateB : dateB - dateA;
+          // Ordinamento date (GG/MM/AAAA)
+          const partsA = vA.split('/');
+          const partsB = vB.split('/');
+          const dateA = new Date(partsA[2], partsA[1] - 1, partsA[0]);
+          const dateB = new Date(partsB[2], partsB[1] - 1, partsB[0]);
+          return statoOrdineMatch.ascendente ? dateA - dateB : dateB - dateA;
         }
-        if (statoOrdineMatch.colonna !== 'MatchName' && statoOrdineMatch.colonna !== 'Location' && statoOrdineMatch.colonna !== 'MatchIdDisplay') { 
-            vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0; 
+        if (statoOrdineMatch.colonna !== 'MatchName' && statoOrdineMatch.colonna !== 'Location' && statoOrdineMatch.colonna !== 'MatchIdDisplay') {
+          vA = parseFloat(vA) || 0; vB = parseFloat(vB) || 0;
         }
         return statoOrdineMatch.ascendente ? (vA > vB ? 1 : -1) : (vA < vB ? 1 : -1);
       });
@@ -267,7 +329,7 @@ td:nth-child(4), th:nth-child(4) {
       const container = document.getElementById("roster-container");
       const roster = JSON.parse(localStorage.getItem("datiRoster") || "[]");
       const stats = JSON.parse(localStorage.getItem("datiTutteLeStats") || "{}").statisticheGiocatori || [];
-      
+
       let partiteInfo = [];
       const cachePartite = localStorage.getItem("cache_partite");
 
@@ -275,7 +337,15 @@ td:nth-child(4), th:nth-child(4) {
         partiteInfo = JSON.parse(cachePartite);
       } else {
         try {
-          const res = await fetch(url + "?sheet=Partite");
+          const params = new URLSearchParams({
+              sheet: "Partite",
+              userId: userId,
+              action: "Get Roster",
+              details: JSON.stringify(getDeviceData)
+          });
+
+          const res = await fetch(`${url}?${params.toString()}`);
+//          const res = await fetch(url + "?sheet=Partite");
           const data = await res.json();
           partiteInfo = Array.isArray(data) ? data : data.data;
           localStorage.setItem("cache_partite", JSON.stringify(partiteInfo));
@@ -285,19 +355,19 @@ td:nth-child(4), th:nth-child(4) {
       roster.forEach((player, idx) => {
         const slide = document.createElement("div");
         slide.classList.add("swiper-slide");
-        
-        const mData = stats.filter(s => 
-          s.giocatore === player.Nome + " " + player.Cognome || 
+
+        const mData = stats.filter(s =>
+          s.giocatore === player.Nome + " " + player.Cognome ||
           (s.numero == player["Numero Maglia"] && s.giocatore.includes(player.Cognome))
         ).map(p => {
-          const d = JSON.parse(p.dettagli || "{}");
+          const d = JSON.parse(p.contatori || "{}");
           const idStr = String(p.matchId || "");
-          
+
           // Gestione Prefisso (U14 o U15) + Numero
           const prefisso = idStr.includes("U14") ? "U14 " : (idStr.includes("U15") ? "U15 " : "");
           const matchIdNum = idStr.includes(" ") ? idStr.split(" ")[1] : idStr;
           const matchIdDisplay = prefisso + matchIdNum;
-          
+
           const infoGara = partiteInfo.find(m => String(m.matchId) === idStr);
           let nomeGara = "Gara";
           let dataGara = "--/--";
@@ -316,8 +386,8 @@ td:nth-child(4), th:nth-child(4) {
             Location: loc,
             MatchName: nomeGara,
             MatchIdDisplay: matchIdDisplay,
-            PTS: (parseInt(d["1"])||0) + (parseInt(d["2"])||0)*2 + (parseInt(d["3"])||0)*3,
-            TL: parseInt(d["1"])||0, T2: parseInt(d["2"])||0, T3: parseInt(d["3"])||0
+            PTS: (parseInt(d["1"]) || 0) + (parseInt(d["2"]) || 0) * 2 + (parseInt(d["3"]) || 0) * 3,
+            TL: parseInt(d["1"]) || 0, T2: parseInt(d["2"]) || 0, T3: parseInt(d["3"]) || 0
           };
         });
 
@@ -372,4 +442,5 @@ td:nth-child(4), th:nth-child(4) {
     caricaRoster();
   </script>
 </body>
+
 </html>

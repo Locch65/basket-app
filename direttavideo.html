@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
   <meta charset="UTF-8">
   <title>Polismile YouTube Live Stats</title>
@@ -7,46 +8,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- <link rel="stylesheet" href="match.css"> -->
   <link rel="stylesheet" href="direttavideo.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
+  <div id="hamburgerMenu">
+    <button id="hamburgerBtn">☰</button>
+    <nav id="menu" class="hidden">
+      <ul>
+        <li>
+          <a href="index.html" class="menu-link-home">
+            <i class="fas fa-home"></i> Home
+          </a>
+        </li>
+        <li><button id="menuConvocazioniBtn" onclick="gestisciConvocazioni()"><i class="fas fa-list-ul"></i>
+            Convocazioni</button></li>
+        <li><button id="youtubeBtn" onclick="gestisciDirettaYoutube()"><i class="fab fa-youtube"></i> Diretta
+            Youtube</button></li>
+        <li><button id="goLiveBtn" onclick="gestisciGoLive()"><i class="fas fa-broadcast-tower"></i> Go Live</button>
+        </li>
+        <div class="admin-only-menu-item">
+          <li class="menu-divider">Sort:</li>
+            <li class="menu-sort-item"><button onclick="setSortMode('numero')"><i class="fas fa-sort-numeric-down"></i> Number</button></li>
+            <li class="menu-sort-item"><button onclick="setSortMode('cognome')"><i class="fas fa-sort-alpha-down"></i> Name</button></li>
+            <li class="menu-sort-item"><button onclick="setSortMode('punti')"><i class="fas fa-star"></i> Score</button></li>        </div>
+        <li>
+          <button id="adminBtn">
+            <i class="fas fa-user-shield"></i> Admin
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
   <div class="video-container">
     <div id="video-loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Inizializzazione video...</p>
+      <div class="spinner"></div>
+      <p>Inizializzazione video...</p>
     </div>
     <div id="ytplayer"></div>
     <div id="hud-overlay">
-        <div id="hud-score" class="badge">
-            <span id="score-text">0 - 0</span>
-            <div id="hud-period" class="badge period-badge hidden">??</div>
-        </div>
-        <div class="time-container">
-          <div id="hud-video-time" class="badge clock-badge">00:00:00</div> 
-          <div id="hud-live-status" class="badge live-badge">●</div>
-        </div>
-        <div id="basket-toast" class="toast hidden"></div>
-    </div> 
+      <div id="hud-score" class="badge">
+        <span id="score-text">0 - 0</span>
+        <div id="hud-period" class="badge period-badge hidden">??</div>
+      </div>
+      <div class="time-container">
+        <div id="hud-video-time" class="badge clock-badge">00:00:00</div>
+        <div id="hud-live-status" class="badge live-badge">●</div>
+      </div>
+      <div id="basket-toast" class="toast hidden"></div>
+    </div>
   </div>
 
   <div id="stats-section" class="players-list-container">
     <div class="scoreboard">
       <div class="team-labels">
-          <span id="label-team-A">SQUADRA A</span>
-          <span id="label-team-B">SQUADRA B</span>
-        </div>
-      <div id="game-score" class="main-score">0 - 0</div>
-      <span id="game-period" class="period-box-mini hidden"></span>
+        <span id="label-team-A">SQUADRA A</span>
+        <span id="game-period" class="period-box-mini hidden"></span>
+        <span id="label-team-B">SQUADRA B</span>
+      </div>
+      <div class="score-container">
+          <span id="team-details-A" class="team-cumulative-details">[TL:0/0, T2:0, T3:0]</span>
+          <div id="game-score">0 - 0</div>
+          <span id="team-details-B" class="team-cumulative-details">[TL:0/0, T2:0, T3:0]</span>
+      </div>
     </div>
-
     <div id="highlights-section" class="highlights-container hidden-section">
       <div id="highlight-label" class="highlight-placeholder"></div>
       <div class="highlights-top-row">
         <button id="toggle-highlights" class="btn-toggle-off" onclick="toggleHighlights()">
           <i class="fas fa-star"></i> <span class="text-label">Highlights</span>
         </button>
-    
+
         <div id="highlights-controls" class="hidden-controls">
           <div class="highlights-buttons">
             <button onclick="gestisciHighlight('start')"><i class="fas fa-fast-backward"></i></button>
@@ -62,22 +96,42 @@
       </div>
     </div>
 
-    <div id="players-grid">
-        <div class="loading-container">
-            <img src="icon-192.png" class="spinner-icon" alt="Caricamento...">
-            <p>Caricamento statistiche...</p>
+    <div id="opponent-score-section" class="highlights-container">
+      <div class="highlights-top-row">
+      <div id="opponent" class="opponent-label">PUNTI SQUADRA B</div>
+        <div class="highlights-buttons">
+          <button id="btn-details" class="btn-details" onclick="NewShowPlayerPopup()">Details</button>
+          <button id="btn-opp-1" class="btn-score" onclick="IncrPuntiSquadraB(1)">+1</button>
+          <button id="btn-opp-2" class="btn-score" onclick="IncrPuntiSquadraB(2)">+2</button>
+          <button id="btn-opp-3" class="btn-score" onclick="IncrPuntiSquadraB(3)">+3</button>
+          <!-- <button class="btn-undo" onclick="gestisciPuntiAvversari('undo')"> -->
+          <!-- <i class="fas fa-undo"></i> -->
+          </button>
         </div>
-    </div> 
+      </div>
+    </div>
+
+    <div id="players-grid">
+      <div class="loading-container">
+        <img src="icon-192.png" class="spinner-icon" alt="Caricamento...">
+        <p>Caricamento statistiche...</p>
+      </div>
+    </div>
   </div>
 
   <div id="debug-info" class="debug-footer">
-    Tempo risposta server: <span id="fetch-time">0</span> ms
+    <div>Tempo risposta server: <span id="fetch-time">0</span> ms</div>
+    <div>Risoluzione: <span id="display-size">0x0</span> (DPR: <span id="display-dpr">1</span>)</div>
   </div>
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
-  <script src="common.js?v=1.0.98"></script>
-  <script src="direttavideo.js?v=1.0.98"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+  <script src="common.js?v=1.0.105"></script>
+  <script src="menus.js"></script>
+  <script src="direttavideo.js?v=1.0.105"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
+
 </html>

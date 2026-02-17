@@ -1,60 +1,58 @@
-body { 
-  font-family: Arial, sans-serif; 
-  margin: 10px; 
-  display: flex; 
-  flex-direction: column; 
-  font-size: 22px;
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 1.6rem;
+  margin: 1.6rem;
+  display: flex;
+  flex-direction: column;
 
   /* Proprietà standard per disabilitare la selezione del testo */
   user-select: none;
-    
+
   /* Prefissi per la massima compatibilità cross-browser */
-  -webkit-user-select: none; /* Per Chrome, Safari, iOS */
-  -moz-user-select: none;    /* Per Firefox */
-  -ms-user-select: none;     /* Per Edge, IE */
+  -webkit-user-select: none;
+  /* Per Chrome, Safari, iOS */
+  -moz-user-select: none;
+  /* Per Firefox */
+  -ms-user-select: none;
+  /* Per Edge, IE */
 }
 
 /* Rende l'intera parte superiore fissa */
-h1OLD {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: inherit; /* Segue il colore di sfondo del body (bianco o dark) */
-    margin: 0;
-    padding: 15px 50px; /* Spazio per il testo e per i bottoni ai lati */
-    z-index: 100; /* Sta sopra a tutto */
-    border-bottom: 1px solid rgba(0,0,0,0.1); /* Una sottile riga di separazione */
-    text-align: center; /* Centra il titolo */
-	
-  font-size: 18px; 
-	
-}
-h1 { 
+h1 {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 60px; /* Definiamo un'altezza precisa */
-  background-color: #fff; /* O lo sfondo che preferisci */
-  color: #2c3e50; 
-  font-size: 18px; 
-  margin: 0; /* Rimuovi il margin-top che avevi prima */
+  height: 6rem;
+  /* Definiamo un'altezza precisa */
+  background-color: #fff;
+  /* O lo sfondo che preferisci */
+  color: #2c3e50;
+  font-size: 1.7rem;
+  margin: 0;
+  /* Rimuovi il margin-top che avevi prima */
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Allinea il contenuto a sinistra */
-  padding-left: 60px;          /* Crea lo spazio esatto per l'hamburger menu (che è a left: 10px) */
+  justify-content: flex-start;
+  /* Allinea il contenuto a sinistra */
+  padding-left: 6rem;
+  /* Crea lo spazio esatto per l'hamburger menu (che è a left: 10px) */
   box-sizing: border-box;
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Opzionale: aggiunge un'ombra per profondità */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* Opzionale: aggiunge un'ombra per profondità */
 }
 
-#header { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  margin-bottom: 20px; 
-  gap: 20px;
+#header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 2rem;
 }
 
 /* 🌙 Dark Mode manuale */
@@ -64,12 +62,14 @@ body.dark-mode {
 }
 
 body.dark-mode h1 {
-  color: #27ae60;   /* verde acceso */
+  color: #27ae60;
+  /* verde acceso */
   background-color: #121212;
   border-bottom: 1px solid #333;
-  justify-content: flex-start; /* Rinforza l'allineamento a sinistra */
+  justify-content: flex-start;
+  /* Rinforza l'allineamento a sinistra */
 }
-  
+
 
 body.dark-mode .match-card {
   background-color: #1e1e1e;
@@ -86,7 +86,8 @@ body.dark-mode .match-middle {
   /* color: #64b5f6;   /* azzurro chiaro, elegante e leggibile */
 
   /* Variante 2: Verde chiaro */
-  color: #bbb;   verde tenue, richiama il tema sportivo */
+  color: #bbb;
+  /* verde tenue, richiama il tema sportivo */
 
   /* Variante 3: Arancione caldo */
   /* color: #ffb74d;   arancione chiaro, energico e ben visibile */
@@ -94,24 +95,6 @@ body.dark-mode .match-middle {
 
 body.dark-mode .match-bottom .vs {
   color: #ff5555;
-}
-
-/* Bottone Dark/Light Mode */
-#toggleTheme {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 1.2rem;
-  padding: 4px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  transition: background-color 0.3s ease;
-}
-
-#toggleTheme:hover {
-  background-color: #ddd;
 }
 
 #selectOrdine {
@@ -128,58 +111,33 @@ body.dark-mode #selectOrdine {
 /* Card */
 .match-card {
   width: 100%;
-  margin: 2px 0;
-  padding: 2px;
+  margin: 0.2rem 0;
+  padding: 0.2rem;
   background-color: #f5fff5;
   border-radius: 8px;
   border: 3px solid #27ae60;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: background-color 0.2s ease;
 
   /* 👇 aggiunte anti-scrollbar */
-  box-sizing: border-box;   /* include padding nel calcolo della larghezza */
-  overflow-x: hidden;       /* nasconde eventuali sforamenti */
+  box-sizing: border-box;
+  /* include padding nel calcolo della larghezza */
+  overflow-x: hidden;
+  /* nasconde eventuali sforamenti */
 }
 
 .match-card.past {
-      background-color: #f5f5f5;   /* grigio tenue */
-      border: 1px solid #999;
-      opacity: 0.7;
+  background-color: #f5f5f5;
+  /* grigio tenue */
+  border: 1px solid #999;
+  opacity: 0.7;
 }
 
 .match-card:hover {
   background-color: #efefef;
 }
 
-/* --- ANIMAZIONE LIVE POTENZIATA --- */
-.match-card.live-borderOLD {
-  /* Usiamo una variabile per il colore per gestirlo meglio nell'animazione */
-  --live-red: #ff0000;
-  
-  border: 4px solid var(--live-red) !important;
-  position: relative;
-  z-index: 10;
-  /* Applica l'animazione: nome, durata, ripetizione infinita */
-  animation: blink-red-intense 2.0s infinite ease-in-out !important;
-}
-@keyframes blink-red-intense {
-  0% {
-    border-color: #ff0000;
-    box-shadow: 0 0 5px #ff0000;
-    transform: scale(1);
-  }
-  50% {
-    border-color: #550000; /* Rosso molto scuro per creare contrasto */
-    box-shadow: 0 0 20px #ff0000;
-    transform: scale(1.01); /* Leggerissimo aumento di dimensione per l'effetto pulsante */
-  }
-  100% {
-    border-color: #ff0000;
-    box-shadow: 0 0 5px #ff0000;
-    transform: scale(1);
-  }
-}
 
 /* Solo il bordo lampeggia */
 .match-card.live-border {
@@ -188,9 +146,17 @@ body.dark-mode #selectOrdine {
 }
 
 @keyframes blink-border {
-  0% { border-color: #e74c3c; }
-  50% { border-color: transparent; }
-  100% { border-color: #e74c3c; }
+  0% {
+    border-color: #e74c3c;
+  }
+
+  50% {
+    border-color: transparent;
+  }
+
+  100% {
+    border-color: #e74c3c;
+  }
 }
 
 
@@ -198,33 +164,36 @@ body.dark-mode #selectOrdine {
 .match-top {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  font-size: 14px;
+  gap: 1.2rem;
+  font-size: 1.4rem;
   font-weight: bold;
   color: #555;
-  margin-bottom: 6px;
+  margin-bottom: 0.6rem;
 }
 
 .match-top .match-id {
-  margin-right: auto;   /* spinge il matchId tutto a sinistra */
+  margin-right: auto;
+  /* spinge il matchId tutto a sinistra */
 }
 
 .match-top .data {
-  font-size: 16px;    /* più grande rispetto al 14px di default */
+  font-size: 1.6rem;
+  /* più grande rispetto al 14px di default */
 }
 
 .match-top .casa {
   text-align: center;
-  font-size: 18px;
+  font-size: 1.8rem;
 }
 
 /* Riga 2: luogo al centro */
 .match-middle {
   display: flex;
-  justify-content: center;   /* 👈 centrato invece che a destra */
-  font-size: 13px;
+  justify-content: center;
+  /* 👈 centrato invece che a destra */
+  font-size: 1.3rem;
   color: #333;
-  margin-bottom: 4px;
+  margin-bottom: 0.4rem;
 
   /* anti-scrollbar */
   overflow-x: hidden;
@@ -245,18 +214,18 @@ body.dark-mode #selectOrdine {
   display: flex;
   justify-content: center;
   align-items: baseline;
-  gap: 12px;
-  font-size: 22px;
+  gap: 1.2rem;
+  font-size: 2.2rem;
   font-weight: bold;
 }
 
 /* Mantieni le tue definizioni e aggiungi queste proprietà */
 .match-bottom strong {
-  font-size: 20px;
+  font-size: 2.0rem;
   color: #000;
-  margin: 0 6px;
+  margin: 0 0.2rem;
   /* Fondamentali per l'animazione */
-  display: inline-block; 
+  display: inline-block;
   transition: color 0.3s;
 }
 
@@ -267,119 +236,131 @@ body.dark-mode #selectOrdine {
 
 @keyframes flash-yellow {
   0% {
-    color: #f1c40f; /* Giallo */
+    color: #f1c40f;
+    /* Giallo */
     transform: scale(1.3);
     text-shadow: 0 0 10px rgba(241, 196, 15, 0.8);
   }
+
   100% {
     color: inherit;
     transform: scale(1);
     text-shadow: none;
   }
 }
+
 .match-bottom .score {
-  font-size: 32px;     /* molto più grande */
+  font-size: 3.2rem;
+  /* molto più grande */
   font-weight: bold;
-  color: #000;         /* colore neutro */
-  margin: 0 8px;
+  color: #000;
+  /* colore neutro */
+  margin: 0 0.8rem;
 }
 
 .match-bottom .vs {
   color: #c00;
-  font-size: 24px;
+  font-size: 2.4rem;
 }
 
-.teamA strong, .teamB strong {
-  color: #27ae60;   /* verde evidenziato */
+.teamA strong,
+.teamB strong {
+  color: #27ae60;
+  /* verde evidenziato */
 }
 
 /* Evidenziazione squadra */
 .highlight {
-  background-color: #fbc02d; /* giallo caldo */
-  color: #000;               /* testo scuro per contrasto */
-  padding: 1px 2px;
+  background-color: #fbc02d;
+  /* giallo caldo */
+  color: #000;
+  /* testo scuro per contrasto */
+  padding: 0.1rem 0.2rem;
   border-radius: 4px;
 }
 
 /* Variante per dark mode */
 body.dark-mode .highlight {
-  background-color: #fbc02d; /* giallo caldo, visibile su sfondo scuro */
-  color: #212121;            /* testo grigio scuro per non essere troppo acceso */
+  background-color: #fbc02d;
+  /* giallo caldo, visibile su sfondo scuro */
+  color: #212121;
+  /* testo grigio scuro per non essere troppo acceso */
 }
 
 
 /* 📱 Smartphone */
 @media (max-width: 600px) {
   .match-bottom {
-    font-size: 16px;   /* ridotto rispetto a 22px */
-    flex-wrap: wrap;   /* 👈 consente di andare a capo se serve */
-    gap: 8px;
+    font-size: 1.6rem;
+    /* ridotto rispetto a 22px */
+    flex-wrap: wrap;
+    /* 👈 consente di andare a capo se serve */
+    gap: 0.2rem;
   }
 
   .match-bottom .score {
-    font-size: 22px;   /* più piccolo rispetto a 32px */
-    margin: 0 4px;
+    font-size: 2.2rem;
+    /* più piccolo rispetto a 32px */
+    margin: 0 0.4rem;
   }
 
   .match-bottom .vs {
-    font-size: 18px;   /* ridotto rispetto a 24px */
+    font-size: 1.4rem;
+    /* ridotto rispetto a 24px */
   }
 }
 
 /* --- NUOVO STILE HAMBURGER MENU (stile match.html) --- */
 #hamburgerMenu {
-  position: absolute;
-  top: 10px;
-  left: 10px;
+  position: fixed;
+  top: 1.0rem;
+  left: 1.0rem;
+  font-size: 2.0rem;
   z-index: 1100;
 }
 
-#hamburgerBtn, #OLDupdateBtn {
-  font-size: 30px;
+#hamburgerBtn {
+  font-size: 3.0rem;
   background: none;
   border: none;
   cursor: pointer;
   padding: 5px 10px;
-  color: #2c3e50; /* Colore scuro come in match */
+  color: #2c3e50;
+  /* Colore scuro come in match */
   position: fixed !important;
   z-index: 1001 !important;
-  top: 4px !important;
+  top: 0.4rem !important;
 }
 
-#OLDupdateBtn {
-    right: 10px;
-    top: 13px !important; /* Allineamento leggermente diverso per l'altezza del tasto */
-}
 /* Bottone Aggiorna */
 .btn-update {
-    position: fixed;
-    top: 1.0rem;
-    right: 0.2rem;
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.0rem;
-    z-index: 1001;
-    display: flex;
-    align-items: center;
-    gap: 1.1rem;
+  position: fixed;
+  top: 2.2rem;
+  right: 1.6rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
 }
-
 
 /* Menu a comparsa */
 #menu {
   position: absolute;
-  top: 45px;
+  top: 4.5rem;
   left: 0;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  min-width: 220px;
-  padding: 10px 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  min-width: 22.0rem;
+  padding: 1.0rem 0;
 }
 
 /* Dark mode compatibility per il menu */
@@ -396,7 +377,7 @@ body.dark-mode #menu {
 }
 
 #menu li {
-  padding: 12px 20px;
+  padding: 1.6rem 3.2rem;
   border-bottom: 1px solid #eee;
   transition: background 0.2s;
 }
@@ -404,13 +385,74 @@ body.dark-mode #menu {
 #menu ul li a {
   text-decoration: none;
   color: inherit;
-  font-size: 18px; /* Adattalo alla dimensione del tuo menu */
+  font-size: 1.8rem;
+  /* Adattalo alla dimensione del tuo menu */
   display: flex;
   align-items: center;
 }
 
 #menu ul li a:hover {
-  color: #27ae60; /* Cambia colore al passaggio del mouse */
+  color: #27ae60;
+  /* Cambia colore al passaggio del mouse */
+}
+
+.menu-link-home {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 1.28rem;
+  font-weight: bold;
+}
+
+.icon-home {
+  color: #27ae60;
+}
+
+.menu-section-title {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 1.6rem;
+}
+
+/* Gruppo Radio e Filtri */
+.filter-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.menu-label-flex {
+  cursor: pointer;
+  display: flex;
+  font-size: 1.92rem;
+  align-items: center;
+  gap: 1.28rem;
+}
+
+.select-dark {
+  background: #333;
+  color: white;
+  border: 0.1rem solid #555;
+  border-radius: 0.64rem;
+  padding: 0.32rem 0.8rem;
+  font-size: 1.6rem;
+}
+
+/* Bottoni Menu (Dark Mode, Admin) */
+.btn-menu-flat {
+  background: transparent; /* Rimosso l'eventuale grigio di default */
+  border: none;            /* Rimosso il bordo */
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 1.28rem;
+  outline: none;           /* Rimuove il bordo blu quando clicchi (opzionale) */
+  width: 100%;             /* Opzionale: rende l'area cliccabile ampia quanto la riga */
+  text-align: left;
 }
 
 body.dark-mode #menu li {
@@ -425,18 +467,14 @@ body.dark-mode #menu li:hover {
   background-color: #333;
 }
 
-/* Sottomenu Campionato */
-.submenuOLD {
-  margin-top: 10px;
-  padding-left: 15px !important;
-  border-left: 2px solid #3498db;
+.hidden {
+  display: none !important;
 }
 
-.hidden { display: none !important; }
-
 .campionato-item {
-  padding: 8px 12px;
-  border: 2px solid #27ae60;   /* bordo verde */
+  padding: 0.8rem 1.2rem;
+  border: 2px solid #27ae60;
+  /* bordo verde */
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
@@ -475,45 +513,25 @@ body.dark-mode .campionato-item:hover {
   background-color: #388e3c;
 }
 
-#toggleTheme1 {
-  font-size: 1.2rem;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  transition: background-color 0.3s ease;
-}
-
-#toggleTheme1:hover {
-  background-color: #ddd;
-}
-
-body.dark-mode #toggleTheme1 {
-  background-color: #333;
-  border: 1px solid #555;
-  color: #f0f0f0;
-}
-
-body.dark-mode #toggleTheme1:hover {
-  background-color: #444;
-}
 
 .campionato {
-  font-size: 1.2rem;      /* più grande */
+  font-size: 1.92rem;
+  /* più grande */
   font-weight: bold;
-  padding: 1px 3px;
+  padding: 0.1rem 0.3rem;
   border-radius: 4px;
-  margin-right: 5px;
+  margin-right: 0.5rem;
 }
 
 .campionato.U14 {
-  background-color: #3498db; /* verde */
+  background-color: #3498db;
+  /* verde */
   color: #fff;
 }
 
 .campionato.U15 {
-  background-color: #e67e22; /* arancione */
+  background-color: #e67e22;
+  /* arancione */
   color: #fff;
 }
 
@@ -529,29 +547,42 @@ body.dark-mode .campionato.U15 {
 }
 
 #listaPartite {
-  padding-top: 60px; /* Altezza h1 (60px) + un po' di margine (20px) */
+  padding-top: 4.4rem;
   width: 100%;
   box-sizing: border-box;
 }
 
 #listaPartite.loading {
-  display: flex;          /* Attiva flexbox */
-  justify-content: center; /* Centra orizzontalmente */
-  align-items: center;     /* Centra verticalmente */
-  min-height: 200px;      /* Altezza minima per vedere la centratura verticale */
+  display: flex;
+  /* Attiva flexbox */
+  justify-content: center;
+  /* Centra orizzontalmente */
+  align-items: center;
+  /* Centra verticalmente */
+  min-height: 20.0rem;
+  /* Altezza minima per vedere la centratura verticale */
   flex-direction: column;
-  gap: 15px;
+  gap: 1.5rem;
   text-align: center;
   color: #7f8c8d;
   font-weight: bold;
-  animation: blink 1s infinite; /* Opzionale: ripristina il lampeggio se desiderato */
+  animation: blink 1s infinite;
+  /* Opzionale: ripristina il lampeggio se desiderato */
 }
 
 
 @keyframes blink {
-  0%   { opacity: 1; }
-  50%  { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .error {
@@ -562,33 +593,58 @@ body.dark-mode .campionato.U15 {
 }
 
 @keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 
 .popup {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
 }
+
 .popup-content {
   background: white;
-  padding: 25px;
+  padding: 2.5rem;
   border-radius: 12px;
   text-align: center;
   width: 90%;
-  max-width: 350px;
+  max-width: 35.0rem;
   color: #333;
 }
+
 body.dark-mode .popup-content {
   background: #222;
   color: #eee;
 }
-.hidden { display: none !important; }
+
+.hidden {
+  display: none !important;
+}
+
+@media (min-width: 481px) and (max-width: 1000px) {
+  h1 {
+    font-size: 4.0rem;
+ }
+ 
+ #hamburgerBtn {
+    font-size: 3.5rem;
+  }
+} 

@@ -1,11 +1,17 @@
+
 :root { color-scheme: light dark; }
 
-/* 1. RESET E STRUTTURA BASE */
+html {
+  font-size: 62.5%; /* 1rem = 10px */
+}
+
+/* 2. Stili condivisi e reset */
 html, body {
-  overflow-x: hidden; 
-  width: 100%;
-  position: relative;
   margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
   background: #111;
   color: #eee;
   font-family: system-ui, sans-serif;
@@ -14,14 +20,562 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 3. Dimensione del testo base per l'utente */
+body {
+  font-size: 1.6rem; /* Testo base a 16px, facile da leggere */
+  flex-direction: column;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.no-select {
+  /* Impedisce la selezione del testo */
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* Impedisce il menu contestuale e il "callout" su iOS/Android */
+  -webkit-touch-callout: none;
+  
+  /* Evita il feedback visivo grigio al tocco su alcuni browser */
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* Mostra l'hamburger SOLO se il body ha la classe admin-mode */
+body.admin-mode #hamburgerMenu {
+    display: block;
+}
+body.admin-mode #hamburgerBtn {
+    display: block !important;
+}
+
+/* Sposta il video in basso di 60px (o quanto ti serve) solo per l'admin */
+body.admin-mode .video-container {
+    margin-top: 3rem; 
+    transition: margin-top 0.3s ease;
+}
+
+/* Assicurati che l'iframe dentro il container segua il posizionamento */
+body.admin-mode #player {
+    border: 2px solid var(--primary); /* Opzionale: un bordo per evidenziare la modalità admin */
+}
+
+/* Nasconde la sezione highlights quando il body ha la classe admin-mode */
+body.admin-mode #highlights-section {
+    display: none !important;
+}
+
+body.admin-mode .admin-only-menu-item {
+    display: block;
+}
+
+/* Riduce l'altezza e il font delle opzioni di ordinamento */
+#menu li.menu-sort-item {
+    padding: 0.6rem 1.5rem 0.6rem 3.5rem; /* Aumentata indentazione a sinistra (3.5rem) */
+    border-bottom: none; /* Rimuove la linea tra i sort per compattezza */
+}
+
+#menu li.menu-sort-item button {
+    font-size: 1.5rem; /* Font più piccolo */
+    color: #bbb;      /* Colore leggermente più tenue */
+}
+
+#menu li.menu-sort-item i {
+    font-size: 1.3rem; /* Icone più piccole */
+    width: 2rem;
+}
+
+/* Divisore del Sort più discreto */
+.menu-divider {
+    padding: 1.2rem 1.5rem 0.3rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.1rem;
+    color: #666;
+    border-top: 1px solid #333;
+}
+
+/* Di default (utente), nascondi i controlli della squadra avversaria */
+#opponent-score-section {
+    display: none !important;
+}
+#opponent-score-section.section-ready {
+    display: flex !important;
+}
+
+/* In modalità ADMIN */
+body.admin-mode {
+    display: flex !important; /* Mostra i punti avversari */
+}
+
+body.admin-mode #highlights-section {
+    display: none !important; /* Nasconde gli highlights */
+}
+
+
+
+/* --- STILI PER I BOTTONI PUNTEGGIO --- */
+.btn-score {
+    background-color: #007bff !important;
+    color: white;
+    font-weight: bold;
+    font-size: 1.8rem;
+    text-align: center;
+    padding: 0.8rem 1.2rem;
+    border-radius: 0.4rem;
+    border: none;
+    min-width: 4.5rem;
+    cursor: pointer;
+    /* Centratura perfetta */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.btn-undo {
+    background-color: #e74c3c !important;
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 0.4rem;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    /* Centratura perfetta */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.opponent-label {
+    flex-grow: 1;
+    color: #ffcc00; /* Giallo per risaltare */
+    font-weight: bold;
+    font-size: 1.7rem;
+    text-align: right;
+
+}
+
+/* --- STILE HAMBURGER MENU IN REM --- */
+#hamburgerMenu {
+  position: fixed;
+  top: 1rem;       /* 10px */
+  left: 1rem;      /* 10px */
+  z-index: 99999 !important;
+}
+
+#hamburgerBtn {
+  display: none;      /* Di default è nascosto */
+  font-size: 2rem;  /* 30px */
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #eee;
+  padding: 0rem 0rem; /* 5px 10px */
+  position: fixed;
+  top: 0.5rem;       /* 10px */
+}
+
+#menu {
+  position: absolute;
+  top: 2.2rem;       /* 50px */
+  left: 0;
+  background-color: #222;
+  border: 0.1rem solid #444; /* 1px */
+  border-radius: 0.8rem;     /* 8px */
+  box-shadow: 0 0.4rem 1.2rem rgba(0,0,0,0.5);
+  width: 20rem;              /* 200px */
+  z-index: 100000 !important;
+}
+
+#menu.hidden {
+  display: none;
+}
+
+#menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#menu li {
+  padding: 1.2rem 1.5rem; /* 12px 15px */
+  border-bottom: 0.1rem solid #333;
+  cursor: pointer;
+  font-size: 1.8rem;      /* 18px */
+  color: #eee;
+  display: flex;
+  align-items: center;
+}
+
+#menu li:hover {
+  background-color: #333;
+}
+
+#menu ul li button, 
+#menu ul li a {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #eee;
+    text-align: left;
+    font-size: 1.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* 10px */
+    padding: 0;
+    font-family: inherit;
+    text-decoration: none;
+}
+
+#menu ul li i {
+    width: 2.5rem; /* 25px */
+    text-align: center;
+    color: #3498db;
+}
+
 .video-container {
   position: relative;
   width: 100vw;
   aspect-ratio: 16 / 9;
   background: #000;
   overflow: hidden;
+  margin-top: 0;      /* Di default è attaccato al bordo */
+  transition: margin-top 0.3s ease;
+}
+body.user-mode .video-container {
+    margin-top: 0 !important;
 }
 
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  /* 👈 porta il popup sopra tutto */
+}
+
+.popup.hidden {
+  display: none;
+}
+
+/* Sfondo oscurato */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Aumentato per stare sopra a tutto */
+}
+
+/* Scatola del popup */
+.popup-content {
+    background: #ffffff !important;
+    color: #000000 !important;
+    width: 85%;
+    max-width: 38.0rem;
+    padding: 2.0rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    /* FONDAMENTALE: resetta il tema scuro per i controlli del browser */
+    color-scheme: light; 
+}
+
+/* Label nere e leggibili */
+.popup-content label {
+    color: #000000 !important;
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: .5rem;
+    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+/* Input di testo e Select (escluse checkbox) */
+.popup-content input[type="text"],
+.popup-content input[type="number"],
+.popup-content select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff !important;
+    color: #000 !important;
+    box-sizing: border-box;
+    display: block; /* Li mette uno sotto l'altro */
+}
+
+/* Fix specifico per le Checkbox */
+.popup-content input[type="checkbox"] {
+	-webkit-appearance: none; /* Rimuove lo stile di default su iOS/Chrome */
+    width: 2.2rem;      /* Dimensione fissa, non 100% */
+    height: 2.2rem;
+    margin-right: 1rem;
+    vertical-align: middle;
+      border: 1px solid #555;
+      border-radius: 4px;
+    accent-color: #2c3e50; /* Colore del segno di spunta */
+    cursor: pointer;
+    display: inline-block; /* Importante per stare di fianco al testo */
+    background-color: #fff !important;
+}
+
+.popup-content input[type="checkbox"]:checked {
+    background-color: #2c3e50 !important;
+}
+.popup-content input[type="checkbox"]:checked::after {
+    content: "✓";
+	color: white;
+    position: absolute;
+    left: .4rem;
+    top: -0.2rem;
+    font-size: 1.6rem;
+}
+
+/* Titoli */
+.popup-content h2 {
+    color: #000 !important;
+    margin-top: 0;
+    font-size: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+/* Footer di debug (ex stile inline) */
+.debug-footer {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+    margin-top: 1.6rem;
+    padding-bottom: 3.2rem;
+}
+
+/* Sezione Highlights (gestione visibilità) */
+.hidden-section {
+    display: none;
+}
+
+
+
+
+/* Overlay e Blocco Scroll */
+.player-popup-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  touch-action: none; /* Impedisce scroll trascinando l'overlay */
+}
+
+/* Card del Popup */
+.player-popup-content.dark-theme {
+  background: #222;
+  color: #eee;
+  width: 90%;
+  max-width: 420px;
+  max-height: 85vh;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid #444;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+  touch-action: auto; /* Permette interazioni interne */
+}
+
+.player-popup-content h2 {
+  margin: 0 0 1.2rem 0;
+  font-size: 2.4rem;
+  color: #ffcc00;
+  text-align: center;
+}
+
+/* Stile per il riepilogo del totale punti nel popup */
+.player-total-points {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #aaa;
+}
+
+.player-total-points strong {
+  color: #007bff;
+  font-size: 2.4rem;
+}
+
+/* Container principale: ora ha 3 colonne logiche (Gruppo TL, Bottone 2, Bottone 3) */
+.player-stats-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr; /* Il gruppo TL prende lo spazio necessario, gli altri si dividono il resto */
+    gap: 10px;
+    align-items: end;
+    width: 100%;
+}
+
+/* Il gruppo dei Tiri Liberi (Sbagliato + Segnato) */
+.group-tl-inline {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 165, 0, 0.12); /* Evidenziato arancio */
+    padding: 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    margin-bottom: -0.6rem;
+}
+
+/* Assicuriamoci che le colonne interne non siano troppo larghe */
+.grid-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+
+/* Colore arancione per il tasto +0 */
+.btn-tl-miss {
+    background-color: #ff8c00 !important;
+    color: white !important;
+}
+
+/* Ridimensiona leggermente i testi per far stare tutto su una riga nei telefoni piccoli */
+.stat-value span {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.grid-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.stat-value {
+  display: flex;
+  flex-direction: column;
+  height: 40px;
+  justify-content: center;
+  text-align: center;
+}
+
+.stat-value strong {
+  font-size: 1.6rem;
+  color: #ffcc00;
+}
+
+.btn-pts-action {
+  width: 100%;
+  padding: 12px 0;
+  background: #007bff;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Lista Eventi e Undo */
+.history-row-container {
+  display: flex;
+  gap: 10px;
+  height: 150px;
+  margin-bottom: 15px;
+  flex-shrink: 1; /* Permette alla lista di rimpicciolirsi su schermi bassi */
+}
+
+.events-scroll-list {
+  flex: 1;
+  overflow-y: auto;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  margin-top: 2rem;;
+  overscroll-behavior: none; /* Impedisce lo scroll al body */
+  -webkit-overflow-scrolling: touch;
+}
+
+.event-list-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid #222;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.event-list-item.selected { background: #0056b3; }
+
+.btn-undo-popup {
+  width: 60px;
+  background: #dc3545;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 2rem;
+  cursor: pointer;
+}
+
+/* Bottone Chiudi */
+.btn-close-popup {
+  width: 100%;
+  background: #444;
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Effetto feedback al click */
+.btn-feedback-active {
+  filter: brightness(1.5) scale(0.95);
+  transition: transform 0.1s;
+}
+
+/* Stile per i bottoni disabilitati (opzionale, se vorrai usarlo) */
+.btn-pts-action:active, .btn-undo-popup:active {
+  transform: scale(0.92);
+}
+
+
+.score-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.team-cumulative-details {
+    font-size: 1.7rem;
+    color: #aaa;
+    font-family: monospace;
+    white-space: nowrap;
+}
 
 /* Gestione visibilità sezioni in base all'orientamento */
 
@@ -96,7 +650,7 @@ html, body {
 
 .error-content p {
   color: white;
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
   font-weight: bold;
 }
 
@@ -104,8 +658,8 @@ html, body {
   background: #ff4d4d;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 1.0rem 2.0rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   font-weight: bold;
 }
@@ -116,29 +670,15 @@ html, body {
 
 
 /* Container principale */
-
-.highlights-containerOLD {
-  display: flex;
-  align-items: center;
-  background: #222;
-  padding: 5px 15px; /* Aumentato leggermente il padding verticale */
-  margin: 4px 0;
-  border-radius: 8px;
-  gap: 15px;
-  width: 100%;
-  box-sizing: border-box;
-  min-height: 60px; /* Assicura spazio per le due righe */
-}
-
 .highlights-container {
   display: flex;
   flex-direction: column; /* Label sempre sotto i bottoni */
   align-items: center;
-  gap: 4px;
-  padding: 10px;
+  gap: 0.4rem;
+  padding: 1.0rem;
   background: #222;
-  border-radius: 8px;
-  margin: 1px 0;
+  border-radius: 0.8rem;
+  margin: 0.1rem 0;
   box-sizing: border-box;
 }
 .highlights-top-row {
@@ -146,7 +686,7 @@ html, body {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 1.0rem;
   width: 100%;
 }
 
@@ -154,15 +694,15 @@ html, body {
   flex-grow: 1;
   text-align: right;
   color: #aaa;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   line-height: 1.2; /* Migliora la leggibilità su due righe */
   white-space: pre-line; /* Permette il ritorno a capo con \n */
 }
 
   /* Regolazioni per il bottone Highlights (Stella) */
   #toggle-highlights {
-    padding: 6px 8px;
-    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+    font-size: 1.36rem;
     white-space: nowrap;
     flex-shrink: 0; /* Impedisce al bottone di rimpicciolirsi troppo */
   }
@@ -173,8 +713,8 @@ html, body {
   background-color: #444 !important;
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
+  padding: 1.0rem 1.5rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   font-weight: bold;
 }
@@ -184,8 +724,8 @@ html, body {
   background-color: #f39c12 !important; /* Arancione per evidenziare che è attivo */
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
+  padding: 1.0rem 1.5rem;
+  border-radius: 0.5rem;
   cursor: pointer;
   font-weight: bold;
 }
@@ -194,7 +734,7 @@ html, body {
 .hidden-controls {
   display: none; /* Nasconde tutto il blocco */
   align-items: center;
-  gap: 15px;
+  gap: 1.5rem;
   flex-grow: 1;
 }
 
@@ -206,11 +746,7 @@ html, body {
   display: flex;
   align-items: center;
 }
-#highlights-controlsOLD {
-    display: none;
-    flex-direction: row;
-    width: 100%;
-}
+
 /* Stato quando clicchi: visibile */
 #highlights-controls.hidden-controls {
   display: none;
@@ -222,23 +758,23 @@ html, body {
 /* Stile bottoni interni (sempre blu) */
 .highlights-buttons {
   display: flex;
-  gap: 5px;
+  gap: 0.5rem;
 }
-.highlights-buttonsOLD { display: flex; gap: 8px; }
+
 .highlights-buttons button {
   display: flex;
   background-color: #007bff;
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.4rem;
 }
 
 .highlight-placeholder {
   flex-grow: 1;
   text-align: right;
   color: #aaa;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
 }
 
 /* Il testo degli eventi attaccato al bordo destro */
@@ -252,39 +788,53 @@ html, body {
   min-height: 1.2em;
   white-space: pre;               /* Fondamentale per mantenere l'incolonnamento */
 }
-#highlight-labelOLD {
+
+/* Stile base per le righe degli highlight */
+#highlight-label div {
     display: block;
-    width: 100%;
-    text-align: right;              /* Spinge il testo contro il bordo destro */
-    font-family: 'Courier New', Courier, monospace;
-    white-space: pre;               /* Fondamentale per mantenere l'incolonnamento */
-    padding-right: 15px;            /* Distanza minima dal bordo fisico per estetica */
-    box-sizing: border-box;
-    line-height: 1.2;
-    color: #fff;
-    text-shadow: 1px 1px 2px #000; /* Migliora la leggibilità sopra il video */
+    margin: 0;
+    padding: 1px 0;
+    text-decoration: none !important; /* Rimuove ogni sottolineatura */
+    line-height: 1.3;
+    white-space: nowrap; /* Evita che il testo vada a capo se lungo */
+}
+
+.highlight-squadra-a { color: #ffcc00; } /* Giallo Polismile */
+.highlight-squadra-b { color: #ff4d4d; } /* Rosso Avversari */
+.highlight-current { 
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.05); /* Un leggerissimo sfondo per dare profondità */
 }
 
 /* Stile per il contenitore dell'input */
 .highlight-duration-container {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 0 5px;
-  margin-left: 5px;
-  border: 1px solid #444;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #444;
+    padding: 0.32rem 1.28rem;
+    border-radius: 0.64rem;
+    color: white;
 }
 
 #highlight-duration {
-  width: 35px; /* Molto stretto per contenere 2 cifre */
+  width: 3.5rem; /* Molto stretto per contenere 2 cifre */
   background: transparent;
   border: none;
   color: #ffcc00;
   font-weight: bold;
   text-align: center;
-  font-size: 0.9rem;
-  padding: 2px 0;
+  font-size: 1.44rem;
+  padding: 0.2rem 0;
+}
+
+.highlight-duration-container input {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 5.6rem;
+    font-size: 2.24rem;
+    text-align: center;
 }
 
 /* Rimuove le freccette standard degli input number per risparmiare spazio */
@@ -295,9 +845,9 @@ html, body {
 }
 
 .highlight-duration-container span {
-  font-size: 0.7rem;
+  font-size: 1.12rem;
   color: #aaa;
-  margin-left: 2px;
+  margin-left: 0.2rem;
 }
 
 /* 2. HUD OVERLAY (SOPRA IL VIDEO) */
@@ -311,13 +861,6 @@ html, body {
   cursor: pointer;                 /* Cursore interattivo */
 }
 
-#hud-overlay_OLD {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  pointer-events: none; /* Permette di cliccare il video "attraverso" l'HUD */
-}
 #hud-overlay {
   position: absolute;
   top: 0;
@@ -336,49 +879,33 @@ html, body {
 .badge {
   background: rgba(0,0,0,.35);
   border: 1px solid rgba(108,255,108,.4);
-  border-radius: 6px;
-  padding: .2rem .6rem;
+  border-radius: 0.64rem;
+  padding: .32rem .96rem;
   backdrop-filter: blur(4px);
   font-family: monospace;
-}
-
-/* 1. Score HUD - Più piccolo, più in alto e più trasparente */
-#hud-scoreOLD {
-  font-size: 2.5rem !important; /* Molto più grande */
-  font-weight: 900 !important;
-  padding: 10px 20px !important;
-  background-color: rgba(0, 0, 0, 0.8) !important; /* Più scuro per risaltare */
-  color: #6CFF6C !important; /* Colore verde Polismile */
-  border: 2px solid #6CFF6C !important;
-  border-radius: 8px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-  
-  /* Assicura che il contenitore si adatti al testo grande */
-  display: inline-block;
-  min-width: 140px;
-  text-align: center;
-  white-space: nowrap; 
+  font-size: 2.24rem;
+  font-weight: bold;
 }
 
 /* 1. Score HUD - Centrato e con font ridotto */
 #hud-score {
   position: absolute;      /* Per poterlo posizionare con precisione nel video */
-  top: 2px;               /* Distanza dal bordo superiore */
+  top: 0.2rem;               /* Distanza dal bordo superiore */
   left: 50%;               /* Sposta il bordo sinistro al centro */
   transform: translateX(-75%); /* Lo trasla indietro del 50% della sua larghezza per centrarlo perfettamente */
   
-  font-size: 1.6rem !important; /* Font ridotto (era 2.5rem) */
+  font-size: 2.56rem !important; /* Font ridotto (era 2.5rem) */
   font-weight: 900 !important;
-  padding: 3px 6px !important; /* Padding leggermente ridotto */
+  padding: 0.3rem 0.6rem !important; /* Padding leggermente ridotto */
   
   background-color: rgba(0, 0, 0, 0.7) !important; /* Un po' più trasparente */
   color: #6CFF6C !important;
   border: 2px solid #6CFF6C !important;
-  border-radius: 6px;
+  border-radius: 0.6rem;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
   
   display: inline-block;
-  min-width: 10px;         /* Min-width ridotta per adattarsi al font più piccolo */
+  min-width: 1.0rem;         /* Min-width ridotta per adattarsi al font più piccolo */
   text-align: center;
   white-space: nowrap;
   z-index: 10;             /* Assicura che stia sopra altri elementi */
@@ -390,15 +917,15 @@ html, body {
   top: 50%;          /* Lo centra verticalmente rispetto allo score */
   left: 100%;        /* Lo sposta subito dopo la fine dello score */
   transform: translateY(-50%); /* Correzione per il centraggio verticale */
-  margin-left: 8px;  /* Crea un piccolo spazio tra score e periodo */
+  margin-left: 0.8rem;  /* Crea un piccolo spazio tra score e periodo */
   
-  font-size: 1.0rem;
+  font-size: 1.6rem;
   font-weight: bold;
   color: #fff;
   background-color: #ff0000; /* Rosso come nel tuo script */
   border: 1px solid #ff4d4d;
-  border-radius: 4px;
-  padding: 2px 2px;
+  border-radius: 0.4rem;
+  padding: 0.2rem 0.2rem;
   white-space: nowrap;
   z-index: 11;
 }
@@ -406,27 +933,15 @@ html, body {
 /* Contenitore per allinearli */
 .time-container {
     position: absolute;
-    top: 2px;
+    top: 0.2rem;
     left: 1%; /* Posiziona il gruppo in alto a destra */
     display: flex;
     align-items: center;
-    gap: 5px; /* Spazio tra orologio e pallino */
-}
-
-.clock-badgeOLD {
-  position: absolute;
-  top: 2px;
-  right: 10px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #eee;
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  z-index: 10;
+    gap: 0.5rem; /* Spazio tra orologio e pallino */
 }
 
 .clock-badge {
-  font-size: 1.2rem;
+  font-size: 1.92rem;
   font-weight: bold;
   color: #eee;
   background-color: rgba(0, 0, 0, 0.6) !important;
@@ -438,7 +953,7 @@ html, body {
 .live-badge {
     cursor: pointer !important;    /* Forza la manina del mouse */
 	pointer-events: auto !important; /* Forza la sensibilità al click */
-    padding: 2px 5px; /* Ridotto per stare bene a fianco dell'orario */
+    padding: 0.2rem 0.5rem; /* Ridotto per stare bene a fianco dell'orario */
     border-radius: 50%;
     font-weight: bold;
     display: flex;
@@ -468,49 +983,18 @@ html, body {
     100% { opacity: 1; }
 }
 
-.live-badgeOLD {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: transparent;
-  border: none;
-  padding: 5px 10px;
-  color: #ff4d4d;
-  font-size: 0.9rem;
-  font-weight: bold;
-}
-
-/* 3. Basket Flash - Versione 2 secondi al bordo inferiore */
-/* 3. Basket Flash - Versione equilibrata (2 secondi) */
-.toast_OLD {
-  position: absolute;
-  bottom: 5px;             /* Leggermente staccato dal bordo inferiore */
-  left: 50%;
-  transform: translateX(-50%);
-  background: transparent;
-  color: #6CFF6C;
-  font-weight: 900;
-  font-size: 1.8rem;       /* Dimensione ridotta per maggiore eleganza */
-  /* Ombra mantenuta per la leggibilità su ogni sfondo */
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 1), 0 0 15px rgba(108, 255, 108, 0.4); 
-  white-space: nowrap;
-  z-index: 10000;
-  pointer-events: none;
-  opacity: 0;
-  line-height: 1;
-}
 .toast {
   position: absolute;
-  bottom: 5px;
+  bottom: 0.5rem;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.85); /* Sfondo scuro semitrasparente */
   color: #6CFF6C; /* Verde acceso come i tuoi numeri */
-  padding: 2px 4px;
-  border-radius: 8px;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.8rem;
   border: 2px solid #6CFF6C;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.92rem;
   z-index: 10001; /* Sopra l'hud-overlay */
   transition: opacity 0.3s ease-in-out;
   white-space: nowrap;
@@ -536,34 +1020,49 @@ html, body {
 /* 4. SCOREBOARD E LISTA GIOCATORI */
 .scoreboard { 
   text-align: center; 
-  padding: 4px 10px; 
+  padding: 0rem 0.4rem; 
   background: #1a1a1a; 
   border-bottom: 1px solid #333; 
 }
 
-.main-score { font-size: 3.5rem; font-weight: 900; font-family: monospace; }
+.main-score { font-size: 5.6rem; font-weight: 900; font-family: monospace; }
 
 .team-labels {
   display: flex;
-  justify-content: space-between;
-  align-items: center; /* Allinea verticalmente nomi e bottoni */
+  justify-content: space-between; /* Distribuisce i tre elementi */
+  align-items: center;
   width: 100%;
-  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
+  font-size: 3rem;
+  position: relative; /* Utile per riferimenti futuri */
 }
+
+/* Stile specifico per il periodo centrato */
+#game-period {
+  flex: 0 1 auto;       /* Occupa solo lo spazio necessario */
+  margin: 0 1rem;       /* Margine minimo ai lati */
+  font-size: 1.8rem;    /* Dimensione ridotta rispetto ai nomi squadre */
+  background: #ff0000;  /* Rosso per visibilità */
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.4rem;
+  text-transform: uppercase;
+  min-width: fit-content; /* Si stringe attorno al testo (es. "1Q") */
+}
+
 /* Stile per il box del quarto */
 
 .period-badge {
   position: absolute;
-  /* Rimuovi top: 10px e left: 170px se presenti */
   top: 50%;           /* Centra verticalmente rispetto alla riga dello score */
   transform: translateY(-50%); 
   left: 105%;         /* Lo posiziona subito dopo la fine del box dello score */
   
-  font-size: 0.9rem;
+  font-size: 1.44rem;
   font-weight: bold;
   color: white;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: 0.4rem 1.0rem;
   border: 1px solid red;
   z-index: 10;
   white-space: nowrap; /* Evita che il testo vada a capo */
@@ -573,21 +1072,8 @@ html, body {
   font-weight: bold; /* Rende il testo in grassetto */
   /* Altri stili che potresti voler aggiungere per coerenza con l'HUD */
   text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.period-badgeOLD {
-  position: absolute;
-  top: 10px;        /* Allineato allo score */
-  left: 170px;      /* Posizionato a destra dello score (regola in base a min-width score) */
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: white;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border: 1px solid red;
-  z-index: 10;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.4rem;
 }
 
 #video-loading {
@@ -606,24 +1092,24 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0px;
+    padding: 0rem;
     width: 100%;
 }
 
 .spinner {
-    width: 40px;
-    height: 40px;
+    width: 4.0rem;
+    height: 4.0rem;
     border: 4px solid rgba(108, 255, 108, 0.1);
     border-left-color: #6CFF6C; /* Verde Polismile */
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-bottom: 15px;
+    margin-bottom: 1.5rem;
 }
 
 .spinner-icon {
-    width: 64px;          /* Dimensione ideale per l'icona 192px */
-    height: 64px;
-    margin-bottom: 15px;
+    width: 6.4rem;          /* Dimensione ideale per l'icona 192px */
+    height: 6.4rem;
+    margin-bottom: 1.5rem;
     animation: spin 2s linear infinite;
 }
 
@@ -634,154 +1120,677 @@ html, body {
 
 .loading-container p {
     color: #ff0000;
-    font-size: 0.9rem;
+    font-size: 1.44rem;
     font-family: sans-serif;
     margin: 0;
 }
 
 #label-team-A { text-align: left; flex: 1; color: #bbb; }
-#label-team-B { text-align: right; flex: 1; color: #bbb; }
+#label-team-B { text-align: right; flex: 1; color: #bbb;}
 
 .player-item { 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
-  padding: 4px 12px; 
+  padding: 0.4rem 1.2rem; 
   border-bottom: 1px solid #222;
   transition: all 0.5s ease-in-out;
 }
 
-.player-item.is-in { background: rgba(108, 255, 108, 0.05); border-left: 5px solid #6CFF6C; }
+.player-item.is-in { background: rgba(108, 255, 108, 0.05); border-left: 0.5rem solid #6CFF6C; }
 .player-item.is-out { opacity: 0.5; filter: grayscale(0.5); }
 
 .player-num { 
   color: #6CFF6C; 
   font-weight: 900; 
-  font-size: 1.5rem; 
+  font-size: 2.4rem; 
   display: inline-block; 
-  width: 3.5rem; 
+  width: 5.6rem; 
   text-align: left; 
 }
 
-.player-name { font-size: 1.8rem; font-weight: 600; }
+.player-name { font-size: 2.88rem; font-weight: 600; }
 
 .player-stats { 
   font-family: monospace; 
   color: #aaa; 
-  font-size: 0.9rem; 
+  font-size: 1.2rem; 
   display: flex; 
   align-items: center;
 }
 
 .player-points { 
-  font-weight: 900; 
-  color: #fff; 
-  font-size: 1.8rem; 
-  margin-left: 12px; 
-  border-left: 1px solid #444; 
-  padding-left: 12px; 
+  font-weight: bold; 
+  color: #ffcc00; 
+  font-size: 2.0rem; 
+  margin-left: 0.2rem; 
+  margin-right: 0.6rem; 
+  border-left: 0.1rem solid #444; 
+  padding-left: 1.2rem; 
   display: inline-block;
-  width: 5rem; 
+  width: 2rem; 
   text-align: right; 
+}
+
+.player-tiro { padding: 0.2rem .4rem; min-width: 7rem; min-height:2.5rem; font-weight: bold; font-size: 2.4rem;}
+
+/* Animazione del flash */
+@keyframes flash-animation {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(255, 204, 0, 0.4); } /* Giallo Polismile sfumato */
+  100% { background-color: transparent; }
+}
+
+/* La classe che il JS aggiunge alla riga */
+.row-highlight-flash {
+  animation: flash-animation 0.8s ease-out !important;
+}
+
+/* Animazione Pulse per il punteggio */
+@keyframes score-pulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.2); filter: brightness(1.5); color: #ffcc00; } /* Si ingrandisce e brilla */
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.pulse-animation {
+  display: inline-block; /* Necessario per permettere la trasformazione scale */
+  font-size: 3rem;
+  animation: score-pulse 0.6s ease-out;
+}
+
+/* Overlay scuro */
+.convocazioniPopup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 10000;
+  overflow-y: auto;
+}
+
+/* Contenuto del popup */
+.convocazioniPopup-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 10px;
+}
+
+/* Titolo */
+.convocazioniPopup-content h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: black;
+}
+
+/* Lista giocatori */
+.convocazioniPopup-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.convocazioniPopup-item {
+  padding: 2px 10px;
+  /* Gap minimo tra i nomi */
+  margin: 0;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+
+
+/* Forza checkbox bianche nel popup convocazioni */
+.convocazioniPopup-item input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border: 2px solid #555;
+  border-radius: 4px;
+  background-color: #fff !important;
+  /* <-- sfondo bianco */
+  cursor: pointer;
+  position: relative;
+}
+
+/* Segno di spunta */
+.convocazioniPopup-item input[type="checkbox"]:checked {
+  background-color: #2c3e50 !important;
+  border-color: #2c3e50;
+}
+
+.convocazioniPopup-item input[type="checkbox"]:checked::after {
+  content: "✓";
+  color: white;
+  position: absolute;
+  top: 0;
+  left: 6px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+
+
+
+
+/* Nomi giocatori più grandi */
+.convocazioniPopup-item label {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.conv-num {
+  display: inline-block;
+  width: 30px;
+  /* Spazio fisso per il numero (es. "5" o "18") */
+  text-align: right;
+  margin-right: 15px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.conv-name {
+  flex: 1;
+  /* Il nome inizia sempre dopo i 30px del numero */
+  text-align: left;
+  color: #000 !important;
+
+}
+
+/* Contenitore bottoni in orizzontale */
+.convocazioniPopup-buttons {
+  display: flex;
+  justify-content: center;
+  /* centrati orizzontalmente */
+  gap: 20px;
+  /* spazio tra i bottoni */
+  margin-top: 20px;
+}
+
+/* Bottoni */
+/* --- 12. Convocazioni Popup (AGGIORNATO) --- */
+
+/* Bottone CONFERMA (Uguale a Salva/OK) */
+.convocazioniPopup-confirmBtn,
+.convocazioniPopup-closeBtn {
+  font-size: 1.4rem !important;
+  /* Come i popup Admin */
+  padding: 12px 22px !important;
+  min-width: 100px;
+  margin: 10px 5px;
+  font-weight: bold;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.convocazioniPopup-confirmBtn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.convocazioniPopup-closeBtn {
+  background-color: #f28b82;
+  color: white;
+}
+
+/* ======================================== */
+/* MEDIA QUERY PER SCHERMI PICCOLI (MOCKUP) */
+/* ======================================== */
+@media (max-width: 480px) {
+
+  #header {
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+
+  /* 1. Body: riduce il font base e i margini */
+  body {
+    font-size: 12px;
+    margin: 4px;
+  }
+
+  #contenuto {
+    gap: 5px;
+  }
+
+  /* 2. Intestazione */
+  .squadra-label {
+    font-size: 14px;
+    /* Ridotto ulteriormente da 16px a 14px */
+    padding: 6px 4px;
+    /* Ridotto il padding laterale */
+    width: 120px;
+    /* Ridotto per farle stare affiancate senza sovrapposizioni */
+    border-radius: 6px;
+    white-space: nowrap;
+    /* Impedisce al testo di andare a capo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Se il nome è troppo lungo, mette i puntini */
+  }
+
+  /* Spostamento del titolo per non coprire il menu */
+  h1 {
+    font-size: 18px;
+    margin-left: 0;
+    /* Rimuoviamo il margine fisso */
+    text-align: center;
+    /* Centriamo il titolo dell'app */
+    width: 100%;
+    margin-top: 40px;
+    /* Diamo spazio sopra per l'hamburger menu */
+  }
+
+  /* Gestione del contenitore dei nomi delle squadre */
+  #teamNames {
+    gap: 8px;
+    /* Riduciamo lo spazio tra le due etichette */
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  /* 4. Scoreboard */
+  #scoreboard {
+    font-size: 32px;
+    min-height: 50px;
+  }
+
+  #periodoAttuale {
+    font-size: 12px;
+    /* Dimensione bilanciata per mobile */
+    margin-left: 10px;
+    padding: 2px 4px;
+    border-width: 2px;
+    border-radius: 4px;
+    left: auto;
+    /* Fondamentale: annulla il vecchio left: 5px */
+  }
+
+  #periodoAttuale.terminata {
+    font-size: 14px;
+  }
+
+  /* 5. Controlli top (Undo/Punteggio Squadra B) */
+  #controlsB .punteggio {
+    font-size: 16px;
+    margin-left: 6px;
+  }
+
+  .undo {
+    font-size: 12px;
+    padding: 3px 6px;
+    margin: 0;
+  }
+
+  #ordinamenti {
+    justify-content: space-between;
+    /* Su mobile distribuisce meglio lo spazio */
+  }
+
+  #ordinamenti button {
+    font-size: 14px;
+    /* Leggermente più piccolo per stare in riga */
+    padding: 6px 8px;
+  }
+
+  .btn-time {
+    width: 32px;
+    height: 32px;
+    font-size: 1.6rem !important;
+    margin-left: 0px !important;
+
+  }
+
+
+  .clock-display {
+    font-size: 1.1rem;
+    /* Dimensione ridotta per il cellulare */
+    min-width: 70px;
+    /* Riduce l'ingombro orizzontale */
+    padding: 2px 6px;
+    /* Riduce lo spazio interno */
+    border-width: 1px;
+    /* Bordo più sottile per non appesantire */
+    margin-left: 5px;
+    /* Meno spazio dal bottone precedente se lo schermo è strettissimo */
+  }
+
+  /* 7. Giocatori (la parte più importante per Admin) */
+  .giocatore {
+    font-size: 14px;
+    padding: 6px 8px;
+    margin-bottom: 2px;
+    /* RIDUZIONE GAP TRA CARDS IN */
+    border-radius: 8px;
+  }
+
+  .nome {
+    gap: 4px;
+    flex: none;
+  }
+
+  .numero {
+    font-size: 14px;
+    min-width: 20px;
+  }
+
+  .cognome {
+    font-size: 16px;
+    min-width: 70px;
+    max-width: 80px;
+  }
+
+  /* 8. Bottoni Tiro (+1, +2, +3) */
+  .tiro {
+    margin: 0;
+    padding: 3px 6px;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+
+  /* 9. Punteggio Giocatore */
+  .punteggio .totale {
+    font-size: 16px;
+  }
+
+  .punteggio .dettagli {
+    font-size: 12px;
+    margin-left: 2px;
+  }
+
+
+  /* 10. Menu Hamburger e pulsante Video/Admin */
+  #hamburgerMenu {
+    gap: 10px;
+  }
+
+  #hamburgerBtn {
+    padding: 4px 8px;
+    font-size: 1.2rem;
+  }
+
+  #videoBtn,
+  #adminBtn1 {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  #adminButtonContainer {
+    top: 40px;
+    right: 5px;
+  }
+
+  /* 11. Popup del Giocatore (playerPopup) */
+  #playerPopup .popup-content {
+    margin-top: 50px;
+    padding: 15px;
+  }
+
+  #playerPopup .popup-content h2 {
+    font-size: 24px;
+  }
+
+  #playerPopup .popup-content h2 .numero {
+    min-width: 40px;
+  }
+
+  #playerPopup .popup-content h2 .cognome {
+    font-size: 28px;
+  }
+
+  #playerPopup .btn-inc,
+  #playerPopup .btn-dec,
+  #playerPopup button {
+    font-size: 18px;
+    width: 50px;
+    height: 40px;
+    padding: 4px 0;
+    margin: 4px;
+  }
+
+  #playerPopup button.close-btn {
+    padding: 8px;
+    margin-top: 20px;
+    font-size: 16px;
+  }
+
+  /* 12. Convocazioni Popup */
+  .convocazioniPopup-item label {
+    font-size: 18px;
+  }
+
+  /* Checkbox popup Convocazioni – versione mobile */
+  .convocazioniPopup-item input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    background-color: #fff !important;
+    /* sfondo bianco */
+    cursor: pointer;
+    position: relative;
+  }
+
+  .convocazioniPopup-item input[type="checkbox"]:checked {
+    background-color: #1f77e7 !important;
+    border-color: #2c3e50;
+  }
+
+  .convocazioniPopup-item input[type="checkbox"]:checked::after {
+    content: "✓";
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 4px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+
+  .convocazioniPopup-confirmBtn,
+  .convocazioniPopup-closeBtn {
+    font-size: 1.4rem !important;
+    /* Come i popup Admin */
+    padding: 12px 22px !important;
+    min-width: 100px;
+    margin: 10px 5px;
+    font-weight: bold;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .convocazioniPopup-confirmBtn {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  .convocazioniPopup-closeBtn {
+    background-color: #f28b82;
+    color: white;
+  }
+
+  
+  /* Assicurati che il contenitore dei bottoni li centri bene */
+  .convocazioniPopup-content div:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  /* 13. Grid dei giocatori "out" e giocatori "in" */
+  #giocatori-out {
+    grid-template-columns: repeat(2, 1fr);
+    /* RIPRISTINATO: Due colonne per massimizzare lo spazio */
+    gap: 2px;
+  }
+
+  #giocatori-in {
+    gap: 4px;
+  }
+
+  /* NUOVE REGOLE PER SQUADRA B BOX */
+  .squadra-box {
+    padding: 6px 10px;
+    margin: 4px 0;
+  }
+
+  #titoloB {
+    font-size: 1.2rem;
+  }
+
+  .squadraB-right {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .squadraB-right button {
+    font-size: 12px;
+    padding: 3px 6px;
+    margin-left: 0;
+  }
+
+  .squadraB-left {
+    margin-right: 10px;
+  }
 }
 
 /* 5. OTTIMIZZAZIONE SMARTPHONE */
 @media (max-width: 480px) {
-  .scoreboard { padding: 10px 5px; }
-  .team-labels { font-size: 1.3rem; padding: 0 0px; }
-  .main-score { font-size: 2.0rem; line-height: 1; }
-  .player-item { padding: 4px 12px; }
-  .player-num { font-size: 1.2rem; width: 2.8rem; }
-  .player-name { font-size: 1.1rem; }
-  .player-points { font-size: 1.2rem; width: 4rem; padding-left: 8px; margin-left: 8px; }
+  /*.scoreboard { padding: 1.0rem 0.5rem; }*/
+  .pulse-animation { font-size: 2.4rem;}
+
+  .team-cumulative-details { font-size: 0.9rem; }
+  .team-labels { font-size: 2rem; padding: 0 0rem; }
+  .highlights-container {
+    padding: 1.5rem 7rem ;
+    gap: 1.2rem;
+  }
+
+  .main-score { font-size: 3.2rem; line-height: 1; }
+  .player-item { padding: 0.4rem 0.6rem; }
+  .player-num { font-size: 1.6rem; width: 3.6rem; }
+  .player-name { font-size: 1.76rem; }
+  /*.player-points { font-weight: bold; text-align: right; color: #ffcc00; font-size: 2rem; width: 3rem; padding-left: 0.2rem; margin-left: 0.2rem; }*/
+  .player-tiro { padding: 0.2rem .4rem; min-width: 3.5rem; min-height:2.5rem; font-weight: bold; font-size: 1.2rem;}
+  #game-period { font-size: 1.2rem; }
+    
   .toast {
-    font-size: 1.4rem;     /* Ancora più piccolo su schermi Oppo/Smartphone */
-    bottom: 2px;
+    font-size: 2.24rem;     /* Ancora più piccolo su schermi Oppo/Smartphone */
+    bottom: 0.2rem;
   }
   .period-badge {
-    left: 145px;
-    font-size: 0.7rem;
-    padding: 2px 6px;
+    left: 14.5rem;
+    font-size: 1.12rem;
+    padding: 0.2rem 0.6rem;
   }
   .clock-badge {
-    font-size: 0.75rem;
-    padding: 3px 8px;
+    font-size: 1.2rem;
+    padding: 0.3rem 0.8rem;
   }
 /* Riduciamo i margini del contenitore */
   .highlights-container {
-    padding: 8px 4px;
-    gap: 4px;
+    padding: 0.8rem 1.4rem;
+    gap: 0.4rem;
   }
 
   /* Forza i 5 bottoni (Stella + 4 navigazione) sulla stessa riga */
   .highlights-top-row {
     justify-content: space-between; /* Distribuisce lo spazio tra toggle e controlli */
-    gap: 4px; 
+    gap: 0.4rem; 
   }
 
   /* I 4 bottoni di navigazione */
   .highlights-buttons {
-    gap: 3px;
+    gap: 0.3rem;
   }
 
   .highlights-buttons button {
-    padding: 6px 8px;
-    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    font-size: 1.44rem;
   }
   
   #highlight-duration {
-    width: 30px;
-    font-size: 0.8rem;
+    width: 3.0rem;
+    font-size: 1.28rem;
   }
 
   /* La label sotto sfrutta tutto lo spazio */
   #highlight-label {
-    font-size: 0.85rem;
-    margin-top: 4px;
+    font-size: 1.36rem;
+    margin-top: 0.4rem;
     white-space: pre; /* Fondamentale: permette al testo lungo di andare a capo */
     line-height: 1.2;
-    padding: 0 10px;
+    padding: 0 1.0rem;
   }
 }
+
 @media (min-width: 481px) and (max-width: 1000px) {
-  .team-labels { font-size: 2.0rem; padding: 0 0px; }
+  .team-labels { font-size: 4rem; padding: 0 0rem; }
+  .player-points { font-weight: bold; text-align: right; color: #ffcc00; font-size: 3rem; width: 4rem; padding-left: 0.2rem; margin-left: 0.2rem; }
+  .player-tiro { padding: .2rem .4rem; min-width: 6.5rem; min-height:2.5rem; font-weight: bold; font-size: 2.4rem;}
+  #game-period { font-size: 2.2rem; }
+  .player-stats {   font-size: 2rem; }
+  .toast { font-size: 2.5rem;}
+  .opponent-label {font-size: 3.4rem;}
+  .pulse-animation { font-size: 4rem; }
+
   .clock-badge {
-    font-size: 1.2rem;
-    padding: 3px 8px;
+    font-size: 1.92rem;
+    padding: 0.3rem 0.8rem;
   }
 /* Ingrandisce i bottoni di navigazione (prev, next, ecc.) */
   .highlights-buttons button {
-    padding: 12px 18px;
-    font-size: 1.2rem;
+    padding: 1.2rem 1.8rem;
+    font-size: 1.92rem;
   }
 
   /* Ingrandisce il bottone Highlights (Stella) */
   #toggle-highlights {
-    padding: 12px 18px;
-    font-size: 1.1rem;
+    padding: 1.2rem 1.8rem;
+    font-size: 1.6rem;
   }
 
   /* Ingrandisce la label con le 3 righe degli eventi */
   #highlight-label {
-    font-size: 1.15rem;   /* Font decisamente più grande */
+    font-size: 1.84rem;   /* Font decisamente più grande */
     line-height: 1.4;     /* Aumenta lo spazio tra le 3 righe per leggibilità */
-    margin-top: 10px;
-    padding: 0 15px;
+    margin-top: 1.0rem;
+    padding: 0 1.5rem;
   }
 
   /* Ingrandisce il selettore della durata */
   #highlight-duration {
-    width: 45px;
-    font-size: 1.1rem;
+    width: 4.5rem;
+    font-size: 1.76rem;
   }
   
   .highlight-duration-container span {
-    font-size: 0.9rem;
+    font-size: 1.44rem;
   }
 
   /* Opzionale: aumenta il padding del contenitore generale */
   .highlights-container {
-    padding: 15px;
-    gap: 12px;
+    padding: 1.5rem 2rem ;
+    gap: 1.2rem;
   }
 }
