@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Polismile Basket App</title>
-    <script src="common.js?v=1.0.98"></script>
+    <script src="common.js?v=1.0.105"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html {
-          font-size: 62.5%; 
+            font-size: 62.5%;
         }
-	
+
         :root {
             --bg-color: #121212;
             --primary: #27ae60;
@@ -21,7 +22,7 @@
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-			font-size: 1.6rem;
+            font-size: 1.6rem;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -51,7 +52,7 @@
             height: 6.4rem;
             object-fit: contain;
         }
-		
+
         .menu-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -68,12 +69,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-			text-align: center;
+            text-align: center;
             padding: 1.0rem;
             text-decoration: none;
             color: white;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             cursor: pointer;
         }
 
@@ -82,14 +83,16 @@
             margin-bottom: 1.0rem;
             color: var(--primary);
         }
+
         /* Stile per il testo su più righe */
-        #live-text { 
-            font-weight: bold; 
-            font-size: 1.4rem; 
-            line-height: 1.2; /* Riduce lo spazio tra le righe */
+        #live-text {
+            font-weight: bold;
+            font-size: 1.4rem;
+            line-height: 1.2;
+            /* Riduce lo spazio tra le righe */
             display: block;
         }
-		
+
         .menu-button span {
             font-weight: bold;
             font-size: 1.6rem;
@@ -101,7 +104,7 @@
             pointer-events: auto;
             opacity: 1;
         }
-        
+
         .menu-button.live-active i {
             color: #ff0000;
             animation: pulse 2s infinite;
@@ -110,24 +113,40 @@
         /* --- STATO LIVE DISATTIVATO --- */
         .menu-button.live-off {
             opacity: 0.4;
-            pointer-events: none; /* Rende il bottone insensibile */
+            pointer-events: none;
+            /* Rende il bottone insensibile */
             filter: grayscale(1);
         }
 
         @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.05); }
-            100% { opacity: 1; transform: scale(1); }
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.05);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         /* --- POPUP --- */
         #customPopup {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: var(--overlay);
             z-index: 1000;
-            justify-content: center; align-items: center;
+            justify-content: center;
+            align-items: center;
         }
 
         .popup-content {
@@ -135,61 +154,172 @@
             border: 2px solid var(--primary);
             border-radius: 20px;
             padding: 3.0rem;
-            width: 80%; max-width: 30.0rem;
+            width: 80%;
+            max-width: 30.0rem;
             text-align: center;
             animation: slideUp 0.3s ease-out;
         }
 
         .popup-btn {
             background-color: var(--primary);
-            color: white; border: none;
-            padding: 1.2rem 4.0rem; border-radius: 10px;
-            font-weight: bold; cursor: pointer;
-            text-transform: uppercase; margin-top: 2.0rem;
+            color: white;
+            border: none;
+            padding: 1.2rem 4.0rem;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 2.0rem;
         }
 
         @keyframes slideUp {
-            from { transform: translateY(5.0rem); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(5.0rem);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-		.app-version {
-          text-align: center;
-          font-size: 1.2rem;
-          color: #666;
-          margin-top: auto; /* Lo spinge verso il basso se il contenitore è flex */
-          padding-bottom: 1.5rem;
-          letter-spacing: 1px;
+
+        .app-version {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-top: auto;
+            /* Lo spinge verso il basso se il contenitore è flex */
+            padding-bottom: 1.5rem;
+            letter-spacing: 1px;
         }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- STILE POPUP ADMIN (CENTRAGGIO) --- */
+        #adminPopup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay);
+            display: none;
+            /* Gestito via JS */
+            justify-content: center;
+            /* Centra orizzontalmente */
+            align-items: center;
+            /* Centra verticalmente */
+            z-index: 2000;
+        }
+
+        #adminPopup .popup-content {
+            background-color: var(--card-color);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 3rem;
+            width: 85%;
+            max-width: 32rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        #adminPopup h3 {
+            margin: 0 0 1.5rem 0;
+            color: var(--primary);
+            font-size: 2.2rem;
+        }
+
+        #adminPassword {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: white;
+            font-size: 1.8rem;
+            text-align: center;
+            box-sizing: border-box;
+            /* Cruciale per il mobile */
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        #confirmAdmin,
+        #closeAdmin {
+            flex: 1;
+            padding: 1.2rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            font-size: 1.4rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        #confirmAdmin {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #closeAdmin {
+            background-color: #444;
+            color: white;
+        }
+.column-flex {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Spazio tra Allenamenti e Calendario */
+}
+
+/* Assicuriamoci che i bottoni occupino tutto lo spazio nel flex */
+.column-flex .menu-button {
+    flex-grow: 1;
+}        
     </style>
 </head>
+
 <body>
 
     <header>
         <h1>Polismile Basket U14</h1>
-        <div class="app-version">Versione 1.0.98</div>
-        <img src="icon-192.png" alt="Logo Polismile" class="header-logo">
+        <div class="app-version">Versione 1.0.105</div>
+        <img src="icon-192.png" alt="Logo Polismile" class="header-logo" onclick="Login()" style="cursor: pointer;">
     </header>
-	
     <div class="menu-grid">
         <a href="roster.html" class="menu-button">
             <i class="fas fa-users"></i>
             <span style="font-weight:bold; font-size: 1.5rem;">Roster & Statistiche</span>
         </a>
 
-        <a href="calendario.html" class="menu-button">
-            <i class="fas fa-calendar-alt"></i>
-            <span style="font-weight:bold; font-size: 1.5rem;">Calendario</span>
-        </a>
+        <div class="column-flex">
+            <a href="calendario.html" class="menu-button">
+                <i class="fas fa-calendar-alt"></i>
+                <span style="font-weight:bold; font-size: 1.5rem;">Calendario</span>
+            </a>
+
+            <div class="menu-button" onclick="gotoAllenamenti()">
+                <i class="fas fa-dumbbell"></i>
+                <span style="font-weight:bold; font-size: 1.5rem;">Allenamenti</span>
+            </div>
+        </div>
 
         <div id="btn-live" class="menu-button live-off" onclick="GotoLive()">
             <i class="fas fa-broadcast-tower"></i>
             <span id="live-text">Live</span>
         </div>
-        
-        <div class="menu-button" onclick="mostraPopup()">
-            <i class="fas fa-trophy"></i>
-            <span style="font-weight:bold; font-size: 1.5rem;">Classifiche</span>
-        </div>
+
+        <a href="maps.html" class="menu-button">
+            <i class="fas fa-map-location"></i>
+            <span style="font-weight:bold; font-size: 1.5rem;">Mappa Trasferte</span>
+        </a>
+
     </div>
     <div id="customPopup">
         <div class="popup-content">
@@ -198,16 +328,57 @@
             <button class="popup-btn" onclick="chiudiPopup()">OK</button>
         </div>
     </div>
-
+    <div id="trainingPopup" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 3000; justify-content: center; align-items: center; display: none;">
+        <div class="popup-content" style="max-width: 85%;">
+            <i class="fas fa-dumbbell" style="font-size: 5rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+            <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">Programma Allenamenti</h3>
+            <div id="training-content" style="font-size: 1.6rem; line-height: 1.5; white-space: pre-wrap; text-align: left; margin: 1.5rem 0; max-height: 50vh; overflow-y: auto; padding: 10px; background: #2a2a2a; border-radius: 10px;">
+                Caricamento...
+            </div>
+            <button class="popup-btn" onclick="chiudiTraining()">Chiudi</button>
+        </div>
+    </div>
     <script>
 
         let liveMatchData = null; // Memorizza i dati della partita live corrente
+
+        function gotoAllenamenti() {
+            const popup = document.getElementById('trainingPopup');
+            const content = document.getElementById('training-content');
+            
+            // Mostriamo il popup in stato di caricamento
+            popup.style.display = 'flex';
+            content.innerText = "Recupero info in corso...";
+
+            const params = new URLSearchParams({
+                sheet: "Allenamenti", // Nome del foglio dove tieni i dati
+                userId: userId,
+                action: "GetAllenamenti", 
+                details: JSON.stringify(getDeviceData)
+            });
+
+            mostraPopup();
+            // fetch(`${url}?${params.toString()}`)
+            //     .then(res => res.json())
+            //     .then(data => {
+            //         // Supponendo che lo script restituisca { data: "testo della cella" }
+            //         content.innerText = data.data || "Nessun allenamento programmato.";
+            //     })
+            //     .catch(err => {
+            //         console.error("Errore:", err);
+            //         content.innerText = "Errore nel caricamento dei dati.";
+            //     });
+        }
+
+        function chiudiTraining() {
+            document.getElementById('trainingPopup').style.display = 'none';
+        }
 
         // Funzione per gestire il click sul Live
         function GotoLive() {
             if (liveMatchData) {
                 const p = liveMatchData;
-                
+
                 // Salvataggio dati richiesti nel localStorage
                 localStorage.setItem("matchId", p.matchId || "");
                 localStorage.setItem("teamA", p.squadraA || "");
@@ -226,21 +397,52 @@
                 window.location.href = "direttavideo.html?matchId=" + encodeURIComponent(p.matchId);
             }
         }
-		
+        function Login() {
+            // 1. Se l'utente è già Admin, gestiamo il Logout
+            const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+            if (isAdmin) {
+                if (confirm("Vuoi uscire dalla modalità Admin?")) {
+                    localStorage.setItem("isAdmin", "false");
+                    localStorage.setItem("AdminPassword", "");
+                    location.reload();
+                }
+                return;
+            }
+
+            // 2. Se non è admin, mostriamo il popup di login
+            if (typeof createAdminPopup === "function") {
+                createAdminPopup();
+                // Assicuriamoci che sia visibile
+                const p = document.getElementById("adminPopup");
+                p.classList.remove("hidden");
+                p.style.display = "flex";
+            }
+        }
+
         function checkLiveStatus() {
             const btnLive = document.getElementById("btn-live");
             const txtLive = document.getElementById("live-text");
             const isAdmin = localStorage.getItem("isAdmin") === "true"; // Recuperiamo il ruolo
-        
-            fetch(url + "?sheet=Partite")
+
+            const params = new URLSearchParams({
+                sheet: "Partite",
+                userId: userId,
+                action: "Get Partite Live",
+                details: JSON.stringify(getDeviceData)
+            });
+            fetch(`${url}?${params.toString()}`)
                 .then(res => res.json())
                 .then(data => {
                     let partite = Array.isArray(data) ? data : data.data;
-        
+
+                    // Aggiorna la cache delle partite (quelle visualizzate nel calendario) con i nuovi dati freschi
+                    localStorage.setItem("cache_partite", JSON.stringify(partite));
+
                     // Cerchiamo la partita live, ma aggiungiamo il controllo sul matchId se non è admin
                     const match = partite.find(p => {
                         const isMatchLive = (p.isLive === "true" || p.isLive === true);
-                        
+
                         if (isAdmin) {
                             return isMatchLive; // L'admin vede tutto ciò che è live
                         } else {
@@ -250,24 +452,42 @@
                             return isMatchLive && isAuthorized;
                         }
                     });
-        
+
                     if (match) {
                         liveMatchData = match;
-                        txtLive.innerHTML = `${match.squadraA}<br>vs<br>${match.squadraB}`;
+                        
+                        // Recuperiamo i punteggi (mettiamo 0 se sono vuoti o non definiti)
+                        const pA = match.punteggioA !== undefined && match.punteggioA !== "" ? match.punteggioA : 0;
+                        const pB = match.punteggioB !== undefined && match.punteggioB !== "" ? match.punteggioB : 0;
+                        
+                        // Aggiorniamo il testo del bottone con Squadre e Punteggio
+                        txtLive.innerHTML = `
+                            ${match.squadraA}<br>vs<br>${match.squadraB}<br>
+                            <span style="font-size: 2rem; color: #ff0000; display: block; margin-top: 5px;">
+                                ${pA} - ${pB}
+                            </span>
+                        `;
+                        
                         btnLive.classList.replace("live-off", "live-active");
                     } else {
                         liveMatchData = null;
                         txtLive.innerHTML = "Live";
                         btnLive.classList.replace("live-active", "live-off");
-                    }
+                    }                    
                 })
                 .catch(err => {
                     console.error("Errore:", err);
                     liveMatchData = null;
                     btnLive.classList.replace("live-active", "live-off");
                 });
-        }		
-		
+
+            // aggiorna anche Roster e statistiche cosi' le troviamo già pronte se si seleziona il bottone relativo    
+            aggiornaDatiRosterEStats().then(dati => {});
+        }
+
+
+        registerUserId();
+
         // Avvia il controllo subito e poi ogni 5 secondi
         checkLiveStatus();
         setInterval(checkLiveStatus, 10000);
@@ -275,12 +495,13 @@
         // Funzioni Popup
         function mostraPopup() { document.getElementById('customPopup').style.display = 'flex'; }
         function chiudiPopup() { document.getElementById('customPopup').style.display = 'none'; }
-        
-        window.onclick = function(event) {
+
+        window.onclick = function (event) {
             let popup = document.getElementById('customPopup');
             if (event.target == popup) chiudiPopup();
         }
     </script>
 
 </body>
+
 </html>
