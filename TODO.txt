@@ -20,38 +20,28 @@
 //
 //  Anagrafica.html
 //    - Visualizzare tiri liberi sbagliati
+//    - BUG: a volte nel google sheet "Statistiche" nella colonna Squadra viene scritto 'undefined' al posto di "Polismile A" e questo sballa le statistich
 //
 //  Calendario.html
-//    - quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
+//    - NICE TO HAVE: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - quando faccio login o logout deve fare "Aggiorna" in automatico
 //
 //  DirettaVideo.html
-//    - SERVE?: cambiare i matchid delle partite nel DB. renderli numeri casuali
-//    - NICE TO HAVE: i client non devono fare polling ma usare notifiche realtime da Firebase
 //    - NICE TO HAVE: Highlight anche in orizzontale
 //    - NICE TO HAVE: memorizzare anche i falli per squadra e per giocatore 
+//    - NICE TO HAVE: Inserire il toast per In/Out giocatori
 //    - NICE TO HAVE: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
 //
 //
 //    - Memorizzare punteggi alla fine ciascun quarto. Storicizzare il cambio di quarto
-//    - leggere lista giocatori da Google Sheet
-//
 //    - lo stato In/Out non è storicizzato. Nella review della partita mostra l'ultimo stato noto. ANche per il quarto attuale.
-//    - Inserire il toast per In/Out giocatori
-// 
+//    - leggere lista giocatori da Google Sheet
 //    - cambiare lo sfondo della title bar per evidenziare quando si è connessi come Admin
-//
-//    - BUG: quando faccio logout da admin, nel menu di calendario rimane ancora attiva la scritta Logout
 //    - rendere cliccabile il bottone del quarto e attivare il popup
 //    - Highlights: aggiungere per admin un bottone "fix" che cambia l'ora del canestro con quello visualizzato.
-//    - 
+//  * - Highlights: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
 //
-//    ------------------------ URGENTE ----------------------------
-//    - FATTO: gli highlihts non funzionano bene se non è definito lo start time della partita. Pezza: metto sempre a 1 secondo lo startTime
-//  *  - Highlights: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
-//  * - BUG: dopo aver inserito Marasco e dopo averla inserita nelle convocazioni, non viene salvata nel database
-//  * - impedire allo spettatore di entrare dal calendario nella partita, altrimenti ricarica all'infinito la pagina direttavideo perche' probabilmente il videoId è vuoto.
-//    - BUG: visualizzando come spettatore una partita live (quella di test), il contatori della partita e quello dei singoli giocatori si aggiornano in momenti diversi
+//    - BUG: quando faccio logout da admin, nel menu di calendario rimane ancora attiva la scritta Logout
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - ATTENZIONE: la durata del video youtube della partita contro Crocetta non è compatibile con i tempi reali. (forse perchè è stato interrotto)
 //
@@ -59,22 +49,14 @@
 //    - Su tablet aumentare dimensione toast e tutto hamburger menu
 //    - su Oppo diminuire dimensione hud score
 //
-//    - FATTO: uso di Firebase: i contatori cumulativi non vengono aggiornati 
-//    - FATTO: uso di Firebase: evento In/out non viene piu' visto
-//
 //  maps.html
 //    -
-//
-//  VARIE:
-//    - FATTO: cambiare i loop di lettura ogni 5 secondi con una implementazioni a eventi con un server realtime (notifica push)
-//
 //
 //
 //  NUOVE FEATURES (NICE TO HAVE):
 //    - visualizzare il calendario delle partite in forma di calendario vero e proprio (Tipo Google Calendar con vista mensile)
-//    - inserire voiceregnotion per dare i comandi vocali
+//    - inserire voicerecognition per dare i comandi vocali
 //    - inserire i loghi delle squadre
-//    - tracciare numero utenti e creare pagina accessibile solo Admin con lista utenti che utilizzano l'app
 //    - password Admin da crittografare
 //    - offuscare il codice
 //
@@ -85,6 +67,7 @@
 
 // -----------------------------------------------------------------------------------
 // TODO List:
+//    - FATTO: tracciare numero utenti e creare pagina accessibile solo Admin con lista utenti che utilizzano l'app
 //
 //  Index.html
 //    - FATTO: allo startup (sulla pagina index.html) forzare un aggiornamento di tutto:roster, statistiche, calendario, mappa in modo da avere dati freschi al posto della cache
@@ -147,5 +130,10 @@
 //    - FATTO:inserire la possibilità di ordinamento dei giocatori per Admin
 //    - FATTO: creare funzione di refresh della pagina senza dover chiamare caricaDatiPartita, questo facilita l'implementazione del sort
 //    - FATTO: da spettatore mostrare una label con i dettagli anche per la squadra avversaria e per la Polismile (ma cumulativa)
+//    - FATTO: gli highlihts non funzionano bene se non è definito lo start time della partita. Pezza: metto sempre a 1 secondo lo startTime
+//    - FATTO: impedire allo spettatore di entrare dal calendario nella partita, altrimenti ricarica all'infinito la pagina direttavideo perche' probabilmente il videoId è vuoto.
+//    - FATTO: visualizzando come spettatore una partita live (quella di test), il contatori della partita e quello dei singoli giocatori si aggiornano in momenti diversi
+//    - FATTO: uso di Firebase: i contatori cumulativi non vengono aggiornati 
+//    - FATTO: uso di Firebase: evento In/out non viene piu' visto
 //
 // -----------------------------------------------------------------------------------

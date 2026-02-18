@@ -1,8 +1,10 @@
 // common.js - Funzioni e variabili condivise
 const url =
-"https://script.google.com/macros/s/AKfycbyy6uWQYmuXcOa0D-3Ca61hIMXFEgwiYVjaruQOqRVlTTRq2OgCL8bXFvQAJETBwI-WKw/exec"
+"https://script.google.com/macros/s/AKfycbw5x9ia8BuKiBQI4OYVyzzDSSqs_gsVvSljWXn7xCDEaPBf1FEYsgePOIkDFVeeWlVR6w/exec"
 
-// ULTIMA FUNZIONANTE "https://script.google.com/macros/s/AKfycbxgrkXvfXs-cFLwSwC4VKOHfFqeucUfuMs4Q7R_epU6TskqIc9CwPjWL2tqAhU_tYLa3Q/exec"
+// ULTIMA FUNZIONANTE "https://script.google.com/macros/s/AKfycbyy6uWQYmuXcOa0D-3Ca61hIMXFEgwiYVjaruQOqRVlTTRq2OgCL8bXFvQAJETBwI-WKw/exec"
+
+// "https://script.google.com/macros/s/AKfycbxgrkXvfXs-cFLwSwC4VKOHfFqeucUfuMs4Q7R_epU6TskqIc9CwPjWL2tqAhU_tYLa3Q/exec"
 
 //"https://script.google.com/macros/s/AKfycbyqydQs1oF1P0eFud0uAYgWiHfjkKBcKi2488TybV6CwY4WCGbbcH3VS4BGBVV7pi18DA/exec"
 //"https://script.google.com/macros/s/AKfycbw4AW8USh3Cp6VJIZPWyDqqHfG8mixzjP9n9emjuvdgHAW4ZEocABAgrq8yQhoGps1MUw/exec"
@@ -582,21 +584,21 @@ function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, te
   //   console.error("Errore nell'invio FormData live:", error);
   // });
 
-fetch(url, {
-  method: "POST",
-  body: formData
-})
-.then(response => {
-  if (!response.ok) throw new Error('Errore di rete');
-  return response.json(); // Legge il JSON inviato dal doPost
-})
-.then(data => {
-  console.log(`[SERVER RESPONSE] Status: ${data.status}, Message: ${data.message}`);
-  console.log(`[LIVE] Elaborato: ${idGiocatore} -> ${puntiRealizzati}`);
-})
-.catch(error => {
-  console.error("Errore nell'invio o nella lettura della risposta:", error);
-});
+  fetch(url, {
+    method: "POST",
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Errore di rete');
+    return response.json(); // Legge il JSON inviato dal doPost
+  })
+  .then(data => {
+    console.log(`[SERVER RESPONSE] Status: ${data.status}, Message: ${data.message}`);
+    console.log(`[LIVE] Elaborato: ${idGiocatore} -> ${puntiRealizzati}`);
+  })
+  .catch(error => {
+    console.error("Errore nell'invio o nella lettura della risposta:", error);
+  });
 
 }
 

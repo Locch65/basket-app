@@ -273,16 +273,35 @@
             background-color: #444;
             color: white;
         }
-.column-flex {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* Spazio tra Allenamenti e Calendario */
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+#badge-allenamenti {
+    animation: pulse 1.5s infinite;
 }
 
-/* Assicuriamoci che i bottoni occupino tutto lo spazio nel flex */
-.column-flex .menu-button {
-    flex-grow: 1;
-}        
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+    display: inline-block; /* Necessario per permettere la rotazione */
+}
+        .column-flex {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* Spazio tra Allenamenti e Calendario */
+        }
+
+        /* Assicuriamoci che i bottoni occupino tutto lo spazio nel flex */
+        .column-flex .menu-button {
+            flex-grow: 1;
+        }        
     </style>
 </head>
 
@@ -305,10 +324,23 @@
                 <span style="font-weight:bold; font-size: 1.5rem;">Calendario</span>
             </a>
 
-            <div class="menu-button" onclick="gotoAllenamenti()">
-                <i class="fas fa-dumbbell"></i>
-                <span style="font-weight:bold; font-size: 1.5rem;">Allenamenti</span>
-            </div>
+<div class="menu-button" onclick="ShowAllenamenti()" style="position: relative;">
+    <i class="fas fa-dumbbell"></i>
+    <span style="font-weight:bold; font-size: 1.5rem;">Allenamenti</span>
+    <span id="badge-allenamenti" style="
+        display: none; 
+        position: absolute; 
+        top: 5px; 
+        right: 5px; 
+        background-color: red; 
+        color: white; 
+        font-size: 1.2rem; 
+        font-weight: bold; 
+        padding: 2px 6px; 
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    ">NEW</span>
+</div>
         </div>
 
         <div id="btn-live" class="menu-button live-off" onclick="GotoLive()">
@@ -331,47 +363,98 @@
     </div>
     <div id="trainingPopup" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 3000; justify-content: center; align-items: center; display: none;">
         <div class="popup-content" style="max-width: 85%;">
-            <i class="fas fa-dumbbell" style="font-size: 5rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+            <!-- <i class="fas fa-dumbbell" style="font-size: 5rem; color: var(--primary); margin-bottom: 1.5rem;"></i> -->
+            <i id="training-icon" class="fas fa-dumbbell" style="font-size: 5rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
             <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">Programma Allenamenti</h3>
             <div id="training-content" style="font-size: 1.6rem; line-height: 1.5; white-space: pre-wrap; text-align: left; margin: 1.5rem 0; max-height: 50vh; overflow-y: auto; padding: 10px; background: #2a2a2a; border-radius: 10px;">
                 Caricamento...
             </div>
-            <button class="popup-btn" onclick="chiudiTraining()">Chiudi</button>
+            <button class="popup-btn" onclick="closePopupTraining()">Chiudi</button>
         </div>
     </div>
     <script>
 
         let liveMatchData = null; // Memorizza i dati della partita live corrente
 
-        function gotoAllenamenti() {
+async function verificaNovitaAllenamenti() {
+    const badge = document.getElementById("badge-allenamenti");
+    const testoPrecedente = localStorage.getItem("cache_allenamenti") || "";
+
+    try {
+        const params = new URLSearchParams({
+            sheet: "Allenamenti",
+            userId: userId,
+            action: "GetAllenamenti", 
+            details: JSON.stringify(getDeviceData) 
+        });
+
+        const response = await fetch(`${url}?${params.toString()}`);
+        const result = await response.json();
+
+        if (result.status === "success" && result.data) {
+            const nuovoTesto = result.data.trim();
+            
+            // Se il testo è diverso dalla cache, mostra il badge
+            if (nuovoTesto !== testoPrecedente.trim()) {
+                badge.style.display = "block";
+            }
+        }
+    } catch (e) {
+        console.error("Errore nel controllo news allenamenti:", e);
+    }
+}
+
+        function ShowAllenamenti() {
+// 1. Nascondi il badge (l'utente sta leggendo ora)
+document.getElementById("badge-allenamenti").style.display = "none";
+
             const popup = document.getElementById('trainingPopup');
             const content = document.getElementById('training-content');
-            
-            // Mostriamo il popup in stato di caricamento
+            const icon = document.getElementById('training-icon'); // Seleziona l'icona
+            const storageKey = "cache_allenamenti";
+
+            popup.classList.remove('hidden');
             popup.style.display = 'flex';
-            content.innerText = "Recupero info in corso...";
+
+            // 1. Carichiamo la cache per mostrare subito qualcosa
+            const cache = localStorage.getItem(storageKey);
+            if (cache) {
+                content.innerHTML = cache.replace(/\n/g, "<br>");
+            } else {
+                content.innerHTML = "<em>Recupero info in corso...</em>";
+            }
+
+            // 2. Facciamo RUOTARE l'icona
+            if (icon) icon.classList.add('spinning');
 
             const params = new URLSearchParams({
-                sheet: "Allenamenti", // Nome del foglio dove tieni i dati
+                sheet: "Allenamenti",
                 userId: userId,
                 action: "GetAllenamenti", 
-                details: JSON.stringify(getDeviceData)
+                details: JSON.stringify(getDeviceData) 
             });
 
-            mostraPopup();
-            // fetch(`${url}?${params.toString()}`)
-            //     .then(res => res.json())
-            //     .then(data => {
-            //         // Supponendo che lo script restituisca { data: "testo della cella" }
-            //         content.innerText = data.data || "Nessun allenamento programmato.";
-            //     })
-            //     .catch(err => {
-            //         console.error("Errore:", err);
-            //         content.innerText = "Errore nel caricamento dei dati.";
-            //     });
+            fetch(`${url}?${params.toString()}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.data) {
+                        const nuovoTesto = data.data;
+                        content.innerHTML = nuovoTesto.replace(/\n/g, "<br>");
+                        // Salviamo i nuovi dati
+                        localStorage.setItem(storageKey, nuovoTesto);
+                    }
+                })
+                .catch(err => {
+                    console.error("Errore refresh:", err);
+                    if (!cache) content.innerHTML = "Errore di connessione.";
+                })
+                .finally(() => {
+                    // 3. FERMIAMO la rotazione
+                    if (icon) icon.classList.remove('spinning');
+                });
         }
 
-        function chiudiTraining() {
+        function closePopupTraining() {
             document.getElementById('trainingPopup').style.display = 'none';
         }
 
@@ -496,6 +579,9 @@
         // Funzioni Popup
         function mostraPopup() { document.getElementById('customPopup').style.display = 'flex'; }
         function chiudiPopup() { document.getElementById('customPopup').style.display = 'none'; }
+
+// Avvia il controllo all'apertura della webapp
+document.addEventListener("DOMContentLoaded", verificaNovitaAllenamenti);
 
         window.onclick = function (event) {
             let popup = document.getElementById('customPopup');
