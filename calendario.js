@@ -94,10 +94,6 @@ function isInTheFuture(newDate) {
     }
     return tempDate > today;
 }
-// Funzioni Popup
-function mostraPopup() { document.getElementById('customPopup').style.display = 'flex'; }
-function chiudiPopup() { document.getElementById('customPopup').style.display = 'none'; }
-
 
 function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
     /**
@@ -182,7 +178,7 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
 
         card.onclick = () => {
             const inTheFuture = isInTheFuture(p.data);
-            if (inTheFuture) {
+            if (!isAdmin && inTheFuture) {
                 //alert("Video e Statistiche partita non ancora disponibili!")
                 //mostraPopup();
                 alertCustom("Video e Statistiche partita non ancora disponibili!");
