@@ -606,6 +606,17 @@ body.dark-mode .campionato.U15 {
   }
 }
 
+@keyframes slideUp {
+    from {
+        transform: translateY(5.0rem);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
 
 .popup {
   position: fixed;

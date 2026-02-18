@@ -551,7 +551,15 @@ function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, te
   formData.append("puntiRealizzati", puntiRealizzati);
   formData.append("action", action);
   formData.append("squadra", team);
-  formData.append("AoB", team === teamA ? "A" : "B");
+  let AoB = "";
+  if (teamA === "Polismile A") {
+     AoB = (team === teamA) ? "A" : "B"
+  }
+  else {
+     AoB = (team === teamB) ? "B" : "A"
+  }
+  formData.append("AoB", AoB);
+//  formData.append("AoB", team === teamA ? "A" : "B");
 
   // Timestamp reale
   //const timestampReale = new Date().toLocaleTimeString('it-IT');
@@ -591,3 +599,36 @@ fetch(url, {
 });
 
 }
+
+// Funzione che crea l'HTML del popup al caricamento della pagina
+function injectUniversalPopup() {
+    const popupHTML = `
+    <div id="universalPopup" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 10px;">
+        <div class="popup-content" style="background: #1e1e1e; border: 2px solid #27ae60; border-radius: 15px; padding: 2rem; width: 90%; max-width: 280px; text-align: center; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <i id="uPopupIcon" class="fas fa-info-circle" style="font-size: 4rem; color: #27ae60; margin-bottom: 1rem;"></i>
+            <div id="uPopupMessage" style="font-size: 1.6rem; margin: 1.5rem 0; color: white; line-height: 1.4; word-wrap: break-word; max-height: 60vh; overflow-y: auto;"></div>
+            <button class="popup-btn" onclick="closeUniversalPopup()" style="background: #27ae60; color: white; border: none; padding: 1rem 3rem; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; max-width: 150px;">OK</button>
+        </div>
+    </div>`;
+    
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+}
+
+// Funzione per mostrare il popup
+function alertCustom(messaggio, icona = 'fa-info-circle') {
+    const popup = document.getElementById('universalPopup');
+    if (!popup) return; // Sicurezza se non ancora iniettato
+    
+    document.getElementById('uPopupMessage').innerText = messaggio;
+    document.getElementById('uPopupIcon').className = 'fas ' + icona;
+    
+    popup.style.display = 'flex';
+    popup.classList.remove('hidden');
+}
+
+// Funzione per chiudere
+function closeUniversalPopup() {
+    const popup = document.getElementById('universalPopup');
+    if (popup) popup.style.display = 'none';
+}
+

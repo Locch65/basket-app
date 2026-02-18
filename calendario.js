@@ -82,6 +82,23 @@ function fetchPartiteDalServer(filtroCampionato) {
         });
 }
 
+function isInTheFuture(newDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    let tempDate;
+    if (typeof newDate === 'string' && newDate.includes('/')) {
+        const parti = newDate.split('/');
+        tempDate = new Date(parti[2], parti[1] - 1, parti[0]);
+    } else {
+        tempDate = new Date(newDate);
+    }
+    return tempDate > today;
+}
+// Funzioni Popup
+function mostraPopup() { document.getElementById('customPopup').style.display = 'flex'; }
+function chiudiPopup() { document.getElementById('customPopup').style.display = 'none'; }
+
+
 function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
     /**
      * Ricostruisce l'intero DOM della lista.
@@ -164,6 +181,13 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
         else if (p.casaTrasferta === "Trasferta") card.querySelector(".teamB .team-name").classList.add("highlight");
 
         card.onclick = () => {
+            const inTheFuture = isInTheFuture(p.data);
+            if (inTheFuture) {
+                //alert("Video e Statistiche partita non ancora disponibili!")
+                //mostraPopup();
+                alertCustom("Video e Statistiche partita non ancora disponibili!");
+                return;
+            }
             localStorage.setItem("matchId", p.matchId);
             localStorage.setItem("teamA", p.squadraA);
             localStorage.setItem("teamB", p.squadraB);
@@ -423,3 +447,6 @@ function init() {
 document.addEventListener("DOMContentLoaded", () => {
     init();
 });
+
+// Esegui l'iniezione automatica all'avvio di ogni pagina
+window.addEventListener('DOMContentLoaded', injectUniversalPopup);

@@ -398,7 +398,7 @@ function undoPuntiSquadraB(eventToRemove) {
 }
 
 function AddPuntiSquadraB(punti, memorizzaOrario) {
-  puntiSquadraB += punti;
+  puntiSquadraB = puntiSquadraB + punti;
   contatoriB[punti]++;
 
   const oraCorrente = memorizzaOrario ? new Date().toLocaleTimeString('it-IT') : "??";
@@ -1971,6 +1971,7 @@ function IncrPuntiSquadraB(points) {
   // chiamato dall'html
   gestisciPuntiAvversari(points, null);
   modifyHistory();
+  renderPlayerListLive(); // ATTENZIONE serve solo per "rinfrescare" i punti nel tempo
   updateScoreboard(matchIsLive || isReviewMode); 
   saveToFirebaseAll();
 }
@@ -2003,7 +2004,7 @@ function gestisciPuntiAvversari(azione, evento) {
     if (isAdmin && matchIsLive) { 
       aggiornaBottoniSquadraB();
     }
-    updateScoreboard(matchIsLive || isReviewMode);
+//    updateScoreboard(matchIsLive || isReviewMode); non serve, è chiamato dal chiamante
 }
 
 function requestFullscreen() {
@@ -2313,6 +2314,7 @@ function salvaStatoLive(dati) {
   console.log("Dati inviati a salvaStatoLive:", dati);
   isLive = (dati.goLive === true);
 
+
   // Gestione logica quarto e variabile globale
   if (dati.terminata === true) {
     statoPartita = "Terminata";
@@ -2327,6 +2329,7 @@ function salvaStatoLive(dati) {
 
   dettagliGara.statoPartita = statoPartita;
   dettagliGara.isLive = isLive;
+  matchIsLive = isLive;
   saveToFirebaseHistory('partite/', dettagliGara); 
 
   saveToServerMatchData();

@@ -53,6 +53,7 @@
 //  * - impedire allo spettatore di entrare dal calendario nella partita, altrimenti ricarica all'infinito la pagina direttavideo perche' probabilmente il videoId è vuoto.
 //    - BUG: visualizzando come spettatore una partita live (quella di test), il contatori della partita e quello dei singoli giocatori si aggiornano in momenti diversi
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
+//    - ATTENZIONE: la durata del video youtube della partita contro Crocetta non è compatibile con i tempi reali. (forse perchè è stato interrotto)
 //
 //    - su tablet aggiungere un sound al posto del vibrate
 //    - Su tablet aumentare dimensione toast e tutto hamburger menu
