@@ -159,12 +159,24 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
         const giorni = ["Dom.", "Lun.", "Mar.", "Mer.", "Gio.", "Ven.", "Sab."];
         const giornoSett = giorni[dataPartita.getDay()];
 
+
+        const note = JSON.parse(p.note || '{}');
+        const hasVideo = p.videoURL && p.videoURL.trim() !== "";
+        const hasStats = note.stats || false;
+        const hasHighlights = note.highlights || false; 
+
         card.innerHTML = `
             <div class="match-top">
                 <span class="campionato ${cat}">${cat}</span>
                 <span class="match-id">${mIdPulito}</span>
                 <span class="data">${giornoSett} ${p.data}</span>
                 <span class="orario">${p.orario}</span>
+                
+                <div class="match-icons">
+                    <i class="fas fa-video icon-video ${hasVideo ? '' : 'hidden'}" title="Video Integrale"></i>
+                    <i class="fas fa-chart-bar icon-stats ${hasStats ? '' : 'hidden'}" title="Statistiche"></i>
+                    <i class="fas fa-star icon-highlights ${hasHighlights ? '' : 'hidden'}" title="Highlights"></i>
+                </div>
             </div>
             <div class="match-middle"><span class="luogo">${p.luogo}</span></div>
             <div class="match-bottom">
@@ -172,6 +184,20 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
                 <span class="vs">vs</span>
                 <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
             </div>`;
+
+        // card.innerHTML = `
+        //     <div class="match-top">
+        //         <span class="campionato ${cat}">${cat}</span>
+        //         <span class="match-id">${mIdPulito}</span>
+        //         <span class="data">${giornoSett} ${p.data}</span>
+        //         <span class="orario">${p.orario}</span>
+        //     </div>
+        //     <div class="match-middle"><span class="luogo">${p.luogo}</span></div>
+        //     <div class="match-bottom">
+        //         <span class="teamA"><span class="team-name">${p.squadraA}</span> <strong>${p.punteggioA ?? "-"}</strong></span>
+        //         <span class="vs">vs</span>
+        //         <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
+        //     </div>`;
 
         if (p.casaTrasferta === "Casa") card.querySelector(".teamA .team-name").classList.add("highlight");
         else if (p.casaTrasferta === "Trasferta") card.querySelector(".teamB .team-name").classList.add("highlight");

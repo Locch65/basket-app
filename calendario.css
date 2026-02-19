@@ -5,7 +5,7 @@ html {
 body {
   font-family: Arial, sans-serif;
   font-size: 1.6rem;
-  margin: 1.6rem;
+  margin-top: 1.6rem;
   display: flex;
   flex-direction: column;
 
@@ -159,9 +159,47 @@ body.dark-mode #selectOrdine {
   }
 }
 
+/* Rendiamo il top un flex container per allineare le icone a destra */
+.match-top {
+    display: flex;
+    align-items: center; /* Centra verticalmente testo e icone */
+    gap: 10px;           /* Spazio tra gli elementi a sinistra */
+    width: 100%;
+    position: relative;
+}
+
+/* Container icone: colonna posizionata a destra */
+/* Container icone a destra */
+.match-icons {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column; /* Sempre incolonnate */
+    gap: 2px;               /* Spazio ridotto tra le icone */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Stile icone FontAwesome */
+.match-icons i {
+    font-size: 10px;     /* Ridotto leggermente per ospitare la terza icona */
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    color: white;
+}
+
+.icon-video { background-color: #ff0000; }      /* Rosso */
+.icon-stats { background-color: #007bff; }      /* Blu */
+.icon-highlights { background-color: #ff9800; }   /* Arancio/Oro per Highlights */
+
+.hidden { visibility: hidden; pointer-events: none; }
+
 
 /* Riga 1: info principali */
-.match-top {
+.OLDmatch-top {
   display: flex;
   flex-wrap: wrap;
   gap: 1.2rem;

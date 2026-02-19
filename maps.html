@@ -139,7 +139,7 @@
                 LoadAddress();
             }
         } else {
-            LoadAddress();
+            forzaAggiornamento();
         }
 
         function forzaAggiornamento() {
@@ -230,6 +230,7 @@
                 .then(data => {
                     const partite = Array.isArray(data) ? data : data.data;
                     salvaDatiMappa(partite);
+                    datiLocali = JSON.parse(localStorage.getItem("mappaLuoghi"));
                     
                     applicaFiltro();
                     setTimeout(() => {

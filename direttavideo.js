@@ -1388,13 +1388,27 @@ function updateScoreboard(matchIsLive) {
     totalA[3] += (g.contatori[3] || 0);
   });
   
+  let statsTLavailable = totalA[0] !== 0;
   const tentativiA = totalA[0] + totalA[1];
-  let strA = `[TL:${totalA[1]}/${tentativiA}, T2:${totalA[2]}, T3:${totalA[3]}]`;
+  let strA = "";
+  let strB = "";
+  if (statsTLavailable) {
+    strA = `[TL:${totalA[1]}/${tentativiA}, T2:${totalA[2]}, T3:${totalA[3]}]`;
+  }
+  else {
+    strA = `[TL:${totalA[1]}, T2:${totalA[2]}, T3:${totalA[3]}]`;
+  }
 
   // --- Calcolo Dettagli Squadra B ---
   // Assumendo che contatoriB sia aggiornato globalmente (presente in generaHistory)
+  statsTLavailable = contatoriB[0] !== 0;
   const tentativiB = (contatoriB[0] || 0) + (contatoriB[1] || 0);
-  let strB = `[TL:${contatoriB[1] || 0}/${tentativiB}, T2:${contatoriB[2] || 0}, T3:${contatoriB[3] || 0}]`;
+  if (statsTLavailable) {
+    strB = `[TL:${contatoriB[1] || 0}/${tentativiB}, T2:${contatoriB[2] || 0}, T3:${contatoriB[3] || 0}]`;
+  }
+  else {
+    strB = `[TL:${contatoriB[1] || 0}, T2:${contatoriB[2] || 0}, T3:${contatoriB[3] || 0}]`;
+  }
 
   if (teamA !== "Polismile A") {
     let temp = strB;
