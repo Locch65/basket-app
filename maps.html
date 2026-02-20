@@ -11,10 +11,7 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; }
 
-        .header-container {
-            margin-bottom: 20px;
-        }
-
+        .header-container { margin-bottom: 20px; }
         h2 { color: #2c3e50; margin: 0; text-align: left; }
 
         .home-btn, .refresh-btn {
@@ -50,7 +47,6 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            -webkit-tap-highlight-color: transparent;
         }
 
         #map { 
@@ -59,7 +55,6 @@
             border-radius: 12px; 
             box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
             border: 2px solid #fff;
-            /* Evita conflitti di selezione su iOS */
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
@@ -73,7 +68,7 @@
             font-size: 9px;
             font-weight: 700;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            pointer-events: none !important; /* Cruciale per Safari */
+            pointer-events: none !important;
             border: 1px solid;
         }
 
@@ -83,8 +78,58 @@
         .rotating { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Ottimizzazione Popup per Mobile */
-        .leaflet-popup-content { font-size: 14px; line-height: 1.4; }
+        /* Stili per il nuovo Menu Navigatori e Copia */
+        .map-choice-container { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .map-choice-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.9rem;
+
+            box-sizing: border-box; /* Include padding nel calcolo della larghezza */
+            width: 100%;
+
+        }
+        .map-choice-btn i { font-size: 1.4rem; width: 25px; text-align: center; }
+        .btn-google { color: #4285F4; }
+        .btn-apple { color: #000000; }
+        .btn-waze { color: #33CCFF; }
+        .btn-tomtom { color: #ff5b00; }
+
+        .copy-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            background: #eee;
+            border: 1px dashed #bbb;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #555;
+            transition: all 0.2s;
+        }
+/* Limita la larghezza massima del popup */
+.leaflet-popup-content-wrapper {
+    max-width: 260px; /* Larghezza ideale per mobile */
+    border-radius: 10px;
+}
+
+.leaflet-popup-content {
+    width: auto !important; /* Forza il ridimensionamento automatico */
+    margin: 12px;
+    line-height: 1.4;
+}        
     </style>
 </head>
 <body>
@@ -109,17 +154,26 @@
 
     <div id="map"></div>
 
-      <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-      <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-      <script src="common.js?v=1.0.109"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+    <script src="common.js?v=1.0.109"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // Configurazione mappa ottimizzata per Mobile
+        // Check dispositivo iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        // 1. Inizializza la mappa senza il controllo zoom automatico
         const map = L.map('map', {
-            tap: false, // Disabilita gestione tap interna (conflittuale su iOS)
-            tapTolerance: 15 // Aumenta la tolleranza del movimento durante il tocco
+            tap: false,
+            tapTolerance: 15,
+            zoomControl: false // <--- Disabilita il posizionamento automatico in alto a sinistra
         }).setView([45.2, 7.8], 8);
+
+        // 2. Aggiungi il controllo zoom in basso a sinistra (o bottomright se preferisci)
+        L.control.zoom({
+            position: 'bottomleft'
+        }).addTo(map);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -127,17 +181,23 @@
 
         let datiLocali = [];
         const markerGroup = new L.featureGroup();
-        const urlPartite = url; 
+
+        // Funzione per copiare l'indirizzo
+        function copiaIndirizzo(testo) {
+            navigator.clipboard.writeText(testo).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check" style="color: #27ae60;"></i> Copiato!';
+                setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+            }).catch(err => console.error('Errore copia:', err));
+        }
 
         const cacheMappa = localStorage.getItem("mappaLuoghi");
         if (cacheMappa) {
             try {
                 datiLocali = JSON.parse(cacheMappa);
-                // Usiamo applicaFiltro invece di renderizzaMappa direttamente
-                // così gestiamo anche lo stato dei radio button all'avvio
                 applicaFiltro(); 
             } catch (e) {
-                console.error("Errore cache corrotta:", e);
                 LoadAddress();
             }
         } else {
@@ -152,32 +212,16 @@
 
         function formattaData(dataStr, tipo = 'completa') {
             if (!dataStr) return "N.D.";
-            
             let d;
-
-            // Caso 1: Stringa nel formato DD/MM/YYYY (comune nei fogli Google)
             if (typeof dataStr === 'string' && dataStr.includes('/')) {
                 const parti = dataStr.split('/');
-                if (parti.length === 3) {
-                    // Gestisce sia YYYY che YY
-                    const anno = parti[2].length === 2 ? "20" + parti[2] : parti[2];
-                    d = new Date(anno, parti[1] - 1, parti[0]);
-                }
-            } 
-            // Caso 2: È già un oggetto Date o una stringa ISO/standard
-            else {
+                const anno = parti[2].length === 2 ? "20" + parti[2] : parti[2];
+                d = new Date(anno, parti[1] - 1, parti[0]);
+            } else {
                 d = new Date(dataStr);
             }
-
-            // Controllo se la data è valida
-            if (!d || isNaN(d.getTime())) {
-                console.warn("Data non valida ricevuta:", dataStr);
-                return "N.D.";
-            }
-
-            if (tipo === 'corta') {
-                return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
-            }
+            if (!d || isNaN(d.getTime())) return "N.D.";
+            if (tipo === 'corta') return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
             return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
@@ -206,7 +250,6 @@
         }
 
         function LoadAddress() {
-            // Definiamo i parametri
             const params = new URLSearchParams({
                 sheet: "Partite",
                 userId: userId,
@@ -220,16 +263,12 @@
                     const partite = Array.isArray(data) ? data : data.data;
                     salvaDatiMappa(partite);
                     datiLocali = JSON.parse(localStorage.getItem("mappaLuoghi"));
-                    
                     applicaFiltro();
-                    setTimeout(() => {
-                        document.getElementById('refresh-icon').classList.remove('rotating');
-                    }, 1000);
+                    setTimeout(() => { document.getElementById('refresh-icon').classList.remove('rotating'); }, 1000);
                 })
                 .catch(err => {
-                    console.error("Errore nel caricamento dati:", err);
                     document.getElementById('refresh-icon').classList.remove('rotating');
-                    alert("Errore nel caricamento delle partite. Controlla la connessione.");
+                    alert("Errore caricamento dati.");
                 });
         }
 
@@ -254,16 +293,14 @@
                     const classeEtichetta = èPassata ? 'map-label label-passata' : 'map-label label-futura';
                     const color = poi.campionato === 'U14' ? "#ff6600" : "#007bff";
 
-                    // Usiamo un Marker classico per massimizzare la compatibilità mobile,
-                    // oppure un CircleMarker con raggio aumentato per il tocco
                     const marker = L.circleMarker([coords[0], coords[1]], {
-                        radius: 12, // Leggermente più grande per facilitare il tocco
+                        radius: 12,
                         fillColor: color,
                         color: "#fff",
                         weight: 2,
                         opacity: 1,
                         fillOpacity: 0.8,
-                        interactive: true // Assicura che risponda agli eventi
+                        interactive: true
                     });
 
                     marker.bindTooltip(formattaData(poi.dataPartita, 'corta'), {
@@ -273,39 +310,58 @@
                         className: classeEtichetta
                     });
 
-                    // Creiamo un link universale che funziona bene su iOS e Android
-                    const navigatoreUrl = `https://www.google.com/maps/dir/?api=1&destination=${poi.coordinate}`;
+                    // Logica Navigatori
+                    const coordsStr = `${coords[0]},${coords[1]}`;
+                    const labelEncoded = encodeURIComponent(poi.luogo);
+                    const indirizzoPerCopia = poi.luogo.replace(/'/g, "\\'");
+
+                    const urlGoogle = `https://www.google.com/maps/search/?api=1&query=${coordsStr}`;
+                    const urlApple  = `maps://?q=${labelEncoded}&ll=${coordsStr}`;
+                    const urlWaze   = `https://waze.com/ul?ll=${coordsStr}&navigate=yes`;
+
+                    // Utilizza il protocollo geo: che permette al sistema di chiedere con quale app aprire
+                    const urlNavigatoreGenerico = `geo:${coordsStr}?q=${coordsStr}(${labelEncoded})`;
+
+                    // ATTENZIONE: non funziona per TomTom
+                    // URL specifico per Android Intent (TomTom GO Navigation)
+                    // // Estraiamo lat e lon singolarmente dalle coordinate
+                    // const [lat, lon] = coordsStr.split(",");
+                    // const urlTomTom = isIOS 
+                    //     ? `tomtomgo://x-callback-url/navigate?destination=${coordsStr}` // Versione iOS
+                    //     : `intent://navigate?lat=${lat}&lon=${lon}` + `#Intent;scheme=tomtomnavapp;package=com.tomtom.speedcams.android.map;end;`; // Versione Android
+
+                    let appleBtn = isIOS ? `<a href="${urlApple}" class="map-choice-btn"><i class="fab fa-apple btn-apple"></i> Mappe (iOS)</a>` : "";
 
                     const popupContent = `
-                        <div style="font-size: 1.1em; min-width: 170px; padding: 5px;">
-                            <strong style="color: ${color};">${poi.campionato}</strong><br>
-                            <hr style="margin: 5px 0; border: 0; border-top: 1px solid #eee;">
-                            <b>Data:</b> ${formattaData(poi.dataPartita, 'completa')}<br>
-                            <b>Avversario:</b> ${poi.avversario}<br>
-                            <b>Campo:</b> ${poi.luogo}<br>
-                            <div style="margin-top: 12px; text-align: center;">
-                                <a href="${navigatoreUrl}" target="_blank" 
-                                style="background-color: #007bff; color: white; padding: 8px 12px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: 600; font-size: 0.9em;">
-                                    <i class="fas fa-location-arrow"></i> Indicazioni Stradali
-                                </a>
+                        <div style="font-size: 1.1em; min-width: 210px; padding: 5px;">
+                            <strong style="color: ${color}; font-size: 1.2em;">${poi.campionato}</strong><br>
+                            <div style="color: #666; font-size: 0.9em; margin-bottom: 2px;">${poi.avversario}</div>
+                            <div style="font-weight: bold; font-size: 0.9em;">${poi.luogo}</div>
+
+                            <button class="copy-btn" onclick="copiaIndirizzo('${indirizzoPerCopia}')">
+                                <i class="fas fa-copy"></i> Copia indirizzo
+                            </button>
+
+                            <hr style="margin: 12px 0; border: 0; border-top: 1px solid #eee;">
+                            
+                            <div class="map-choice-container">
+                                <div style="font-size: 0.75rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 4px;">Naviga con:</div>
+                                <a href="${urlGoogle}" target="_blank" class="map-choice-btn"><i class="fab fa-google btn-google"></i> Google Maps</a>
+                                ${appleBtn}
+                                <a href="${urlWaze}" target="_blank" class="map-choice-btn"><i class="fab fa-waze btn-waze"></i> Waze</a>
+                                <a href="${urlNavigatoreGenerico}" class="map-choice-btn"><i class="fas fa-location-arrow btn-tomtom"></i> Altri Navigatori</a>
                             </div>
                         </div>
                     `;
 
                     marker.bindPopup(popupContent);
-
-                    // Forza apertura su click per Safari iOS
-                    marker.on('click', function(e) {
-                        this.openPopup();
-                    });
-
+                    marker.on('click', function() { this.openPopup(); });
                     markerGroup.addLayer(marker);
                 }
             });
             map.addLayer(markerGroup);
             if (luoghiData.length > 0) map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
         }
-
 
         registerUserId();
 
