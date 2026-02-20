@@ -109,7 +109,9 @@
 
     <div id="map"></div>
 
-    <script src="common.js?v=1.0.05"></script>
+      <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+      <script src="common.js?v=1.0.109"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -176,19 +178,6 @@
             if (tipo === 'corta') {
                 return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
             }
-            return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        }
-        function OLDformattaData(dataStr, tipo = 'completa') {
-            if (!dataStr) return "N.D.";
-            let d;
-            if (typeof dataStr === 'string' && dataStr.includes('/')) {
-                const parti = dataStr.split('/');
-                if (parti.length === 3) d = new Date(parti[2], parti[1] - 1, parti[0]);
-            } else {
-                d = new Date(dataStr);
-            }
-            if (!d || isNaN(d.getTime())) return dataStr;
-            if (tipo === 'corta') return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
             return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 

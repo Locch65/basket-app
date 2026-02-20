@@ -10,7 +10,13 @@
 
   <style>
     html {
-      font-size: 62.5%;
+      font-size: 60%;
+    }
+
+    @media (min-width: 800px) {
+      html {
+        font-size: 85%;
+      }
     }
 
     /* --- Layout Generale --- */
@@ -23,197 +29,199 @@
       user-select: none;
     }
 
-    .swiper {
-      width: 100%;
-      height: 100vh;
-    }
-
     .swiper-slide {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
       background: #fff;
-      padding: 6.0rem 1.0rem 2.0rem 1.0rem;
+      padding: 1.5rem 1.0rem 2.0rem 1.0rem;
       box-sizing: border-box;
       width: 100%;
       overflow-y: auto;
     }
 
+    /* --- Header Compatto (Lista, Foto, Nome su una riga) --- */
     .player-header {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.2rem;
       width: 100%;
       margin-bottom: 1.5rem;
     }
 
+    .back-btn {
+      background: #0056b3;
+      color: white;
+      width: 4.2rem;  /* Forma circolare/stondata per l'icona */
+      height: 4.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      text-decoration: none;
+      font-size: 2.2rem;
+      font-weight: bold;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background 0.3s;
+    }
+
+    .back-btn:active {
+      background: #004494;
+    }
+
     .player-photo {
-      width: 6.5rem;
-      height: 6.5rem;
-      object-fit: cover;
+      width: 5.5rem;
+      height: 5.5rem;
       border-radius: 50%;
       border: 2px solid #007bff;
-      background: #eee;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .player-info {
+      flex-grow: 1;
+      min-width: 0;
     }
 
     .player-info h2 {
       margin: 0;
-      font-size: 2.0rem;
+      font-size: 1.6rem;
       color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
     }
 
     /* --- Filtri --- */
     .filters-container {
       background: #f9f9f9;
-      padding: 0.8rem;
-      border-radius: 8px;
-      margin-bottom: 1.2rem;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
       border: 1px solid #eee;
-      display: flex;
-      gap: 1.0rem;
-      flex-wrap: wrap;
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 1.2rem;
     }
 
-    .filter-group {
-      display: flex;
+    .filter-group label {
+      display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      background: #fff;
+      padding: 0.6rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1.3rem;
+      margin: 0.2rem;
     }
 
-    .filter-group strong {
-      color: #007bff;
+    .filter-group label:has(input:checked) {
+      background: #007bff;
+      color: #fff;
     }
 
-    /* --- Tabella Ultra-Compatta per Oppo --- */
+    /* --- Tabella --- */
     table {
       width: 100%;
       table-layout: fixed;
-      /* Obbliga il browser a rispettare le larghezze */
       border-collapse: collapse;
-      font-size: 1.1rem;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
 
-    /* Reset e base per tutte le celle */
-    th,
-    td {
-      padding: 0.8rem 0.1rem !important;
+    th, td {
+      padding: 1rem 0.1rem !important;
       text-align: center;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #eee;
       overflow: hidden;
-      text-overflow: ellipsis;
+    }
+
+    thead tr {
+      background-color: #0056b3; 
     }
 
     th {
-      background-color: #007bff;
       color: white;
-      font-size: 1.0rem !important;
-      /* Forza intestazioni piccole */
-      white-space: nowrap;
+      text-transform: uppercase;
+      font-weight: bold;
     }
 
-    /* --- Dimensionamento Colonne --- */
+    /* Colonne Iniziali (Mobile) */
+    .date-col, th:nth-child(1) { width: 4.2rem !important; font-size: 1rem !important; }
+    .id-col, th:nth-child(2) { 
+      width: 4.2rem !important; 
+      font-size: 1rem !important; 
+      white-space: nowrap !important;
+    }
+    .loc-cell, th:nth-child(3) { width: 2.0rem !important; }
 
-    /* 1. Data */
-    .date-col,
-    th:nth-child(1) {
-      width: 5.2rem !important;
-      /* color: #666;  <-- RIMOSSO per non cambiare il colore del testo */
+    /* STATISTICHE (TL, T2, T3) */
+    th:nth-last-child(-n+3),
+    td:nth-last-child(-n+3) {
+      width: 2.8rem !important;
+      font-size: 1.4rem;
     }
 
-    /* 2. ID */
-    .id-col,
-    th:nth-child(2) {
-      width: 5.5rem !important;
-      /* color: #888;  <-- RIMOSSO */
-      white-space: normal !important;
-      line-height: 1.1;
+    /* COLONNA PTS (Azzurro Chiaro) */
+    th:nth-last-child(4) { width: 2.8rem !important; }
+    td:nth-last-child(4) {
+      width: 2.8rem !important;
+      background-color: #e3f2fd;
+      color: #0056b3;
+      font-weight: 800;
+      font-size: 1.5rem;
     }
 
-    /* 3. Location (Casetta/Bus) */
-    .loc-cell,
-    th:nth-child(3) {
-      width: 2.2rem !important;
-    }
-
-    /* Colonna Avversaria: permette il ritorno a capo */
-    td:nth-child(4),
-    th:nth-child(4) {
+    /* Colonna AVVERSARIA (Espansa) */
+    .avversaria-cell,
+    th:nth-child(4),
+    td:nth-child(4) {
       width: auto !important;
       text-align: left;
-      padding-left: 0.4rem !important;
-      font-size: 1.4rem;
-      /* Leggermente più piccolo aiuta il layout */
-
-      /* Queste tre righe attivano il ritorno a capo */
-      white-space: normal !important;
-      word-wrap: break-word;
-      line-height: 1.1;
+      padding-left: 0.5rem !important;
+      font-size: 1.3rem;
+      white-space: nowrap !important;
+      text-overflow: ellipsis;
     }
 
-    /* 5-8. Statistiche (PTS, TL, T2, T3) */
-    th:nth-last-child(1),
-    td:nth-last-child(1),
-    th:nth-last-child(2),
-    td:nth-last-child(2),
-    th:nth-last-child(3),
-    td:nth-last-child(3),
-    th:nth-last-child(4),
-    td:nth-last-child(4) {
-      width: 3.0rem !important;
+    /* --- Totali --- */
+    .tfoot-totale td {
+      font-weight: bold;
+      background-color: #f8f9fa;
+      border-top: 2px solid #0056b3;
       font-size: 1.4rem;
     }
 
-    /* --- Utility --- */
-    .tfoot-totale {
-      background-color: #e9f4ff;
-      font-weight: bold;
-    }
-
-    .pts-bold {
-      color: #007bff;
-      font-weight: bold;
-    }
-
-    .back-btn {
-      position: absolute;
-      top: 1.5rem;
-      left: 1.5rem;
-      z-index: 100;
-      background: #007bff;
+    .tfoot-totale td:nth-last-child(4) {
+      background-color: #007bff;
       color: white;
-      padding: 0.6rem 1.2rem;
-      border-radius: 20px;
-      text-decoration: none;
-      font-size: 1.4rem;
     }
 
-    th.sort-asc::after {
-      content: " ▲";
-      font-size: 0.7em;
-    }
+    /* --- MEDIA QUERY TABLET (800px) --- */
+    @media (min-width: 800px) {
+      .player-photo { width: 8rem; height: 8rem; }
+      .player-info h2 { font-size: 2.4rem; }
+      .back-btn { font-size: 1.8rem; padding: 1rem 1.5rem; }
 
-    th.sort-desc::after {
-      content: " ▼";
-      font-size: 0.7em;
+      .date-col, th:nth-child(1) { width: 7rem !important; font-size: 1.3rem !important; }
+      .id-col, th:nth-child(2) { width: 10rem !important; font-size: 1.3rem !important; }
+      .loc-cell, th:nth-child(3) { width: 3.5rem !important; }
+
+      th:nth-last-child(-n+4), td:nth-last-child(-n+4) { 
+        width: 4.0rem !important; 
+        font-size: 1.8rem;
+      }
+
+      .avversaria-cell, td:nth-child(4) { font-size: 1.8rem; }
+      .tfoot-totale td { font-size: 2rem; }
     }
   </style>
 </head>
 
 <body>
 
-  <a href="roster.html" class="back-btn">← Lista</a>
-
   <div class="swiper">
     <div class="swiper-wrapper" id="roster-container"></div>
     <div class="swiper-pagination"></div>
   </div>
 
-  <script src="common.js?v=1.0.107"></script>
+  <script src="common.js?v=1.0.109"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
   <script>
@@ -247,7 +255,6 @@
         const slide = slides[idx];
         if (!slide) return;
         const cat = slide.querySelector('input[name="catFilter-' + idx + '"]:checked').value;
-
         let filtrate = partite.filter(p => {
           if (cat === "Tutti") return p.matchIdFull.includes("U14") || p.matchIdFull.includes("U15");
           return p.matchIdFull.includes(cat);
@@ -302,9 +309,9 @@
       tbody.innerHTML = dati.map(p => `
         <tr>
           <td class="date-col">${p.Data.substring(0, 6) + p.Data.slice(-2)}</td>
-<td class="id-col" style="line-height: 1.1;">${p.MatchIdDisplay.replace(' ', '<br>')}</td>
+          <td class="id-col" style="line-height: 1.1;">${p.MatchIdDisplay.replace(' ', '<br>')}</td>
           <td class="loc-cell">${p.Location}</td>
-<td class="avversaria-cell">${p.MatchName}</td>
+          <td class="avversaria-cell">${p.MatchName}</td>
           <td class="pts-bold">${p.PTS}</td>
           <td>${p.TL}</td>
           <td>${p.T2}</td>
@@ -313,11 +320,9 @@
       `).join('');
       tfoot.innerHTML = `
         <tr class="tfoot-totale">
-          <td></td>
-          <td></td>
-          <td></td>
-          <td style="text-align:left; padding-left:0.1rem">TOTALE</td>
-          <td class="pts-bold">${tPTS}</td>
+          <td></td><td></td><td></td>
+          <td style="text-align:left; padding-left:0.5rem">TOTALE</td>
+          <td>${tPTS}</td>
           <td>${tTL}</td>
           <td>${tT2}</td>
           <td>${tT3}</td>
@@ -345,7 +350,6 @@
           });
 
           const res = await fetch(`${url}?${params.toString()}`);
-//          const res = await fetch(url + "?sheet=Partite");
           const data = await res.json();
           partiteInfo = Array.isArray(data) ? data : data.data;
           localStorage.setItem("cache_partite", JSON.stringify(partiteInfo));
@@ -379,7 +383,6 @@
             nomeGara = isCasa ? infoGara.squadraB : infoGara.squadraA;
             dataGara = infoGara.data || "--/--";
           }
-
           return {
             matchIdFull: idStr,
             Data: dataGara,
@@ -398,10 +401,11 @@
 
         slide.innerHTML = `
           <div class="player-header">
-            <img src="${player.Foto}" class="player-photo" />
+            <a href="roster.html" class="back-btn">‹</a>
             <div class="player-info">
               <h2>#${player["Numero Maglia"]} - ${player.Cognome} ${player.Nome}</h2>
             </div>
+            <img src="${player.Foto}" class="player-photo" />
           </div>
           <div class="filters-container">
             <div class="filter-group">
@@ -426,12 +430,11 @@
             </thead>
             <tbody id="tbody-${idx}"></tbody>
             <tfoot id="tfoot-${idx}"></tfoot>
-          </table>        `;
+          </table>`;
         container.appendChild(slide);
       });
 
       applicaFiltriEGenera();
-
       new Swiper('.swiper', {
         initialSlide: parseInt(new URLSearchParams(window.location.search).get('player')) || 0,
         pagination: { el: '.swiper-pagination', clickable: true },

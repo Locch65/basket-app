@@ -1,43 +1,69 @@
 // common.js - Funzioni e variabili condivise
 const url =
-"https://script.google.com/macros/s/AKfycby3XUCWXpplbU1mtmA1c4iEAHNjOmOm-yyUBz8VmK8VuJROa0uyimpKcat65oObFxk3mA/exec"
+"https://script.google.com/macros/s/AKfycbwXbljXTz-YAIeWRsGXAqsz1NT-ff3eleTP5OBrKgn3XzivFG89AE_3uulg9N75_Nql8g/exec"
+
+// "https://script.google.com/macros/s/AKfycby3XUCWXpplbU1mtmA1c4iEAHNjOmOm-yyUBz8VmK8VuJROa0uyimpKcat65oObFxk3mA/exec"
 
 // "https://script.google.com/macros/s/AKfycbw5x9ia8BuKiBQI4OYVyzzDSSqs_gsVvSljWXn7xCDEaPBf1FEYsgePOIkDFVeeWlVR6w/exec"
 // "https://script.google.com/macros/s/AKfycbyy6uWQYmuXcOa0D-3Ca61hIMXFEgwiYVjaruQOqRVlTTRq2OgCL8bXFvQAJETBwI-WKw/exec"
 // "https://script.google.com/macros/s/AKfycbxgrkXvfXs-cFLwSwC4VKOHfFqeucUfuMs4Q7R_epU6TskqIc9CwPjWL2tqAhU_tYLa3Q/exec"
 // "https://script.google.com/macros/s/AKfycbyqydQs1oF1P0eFud0uAYgWiHfjkKBcKi2488TybV6CwY4WCGbbcH3VS4BGBVV7pi18DA/exec"
 // "https://script.google.com/macros/s/AKfycbw4AW8USh3Cp6VJIZPWyDqqHfG8mixzjP9n9emjuvdgHAW4ZEocABAgrq8yQhoGps1MUw/exec"
-// "https://script.google.com/macros/s/AKfycbyYYCrKkjBJ3jBl9k-Tw0x837pAXf0i4ezdu2Tc21OZPVff4h1mjt_uVfhbLjww8_W-pQ/exec"
-// "https://script.google.com/macros/s/AKfycbytT1mu9460M0S8naYzM27knn9zOjvmBUdgFUVNN8Uuyf9vwDvdAmpt6Iz6RTwE0q-3/exec"
-// "https://script.google.com/macros/s/AKfycbzrNT0V842eP_n7lm-sqINp2XwRHXq5na6YoEfHIHJbe2XxStrGwVQo2a-wNvzbAe3TAA/exec"
-// "https://script.google.com/macros/s/AKfycbz-EjPJp_NONG2s4KtJYqZ5shjreIzKg6T2lUmy04wQpEVeQGY4Kxwn6fH_TDdfAx_cCg/exec"
-// "https://script.google.com/macros/s/AKfycbxjDtRaQ4Y-ZkL_hwdHkMbeTV5xk8XZFr4G4tq89PzpP7lWIlV7fuKrQYHZR1MH4iwH-w/exec"
-// "https://script.google.com/macros/s/AKfycby1NyR0t3GnqQvCQrQM582y9a1GxENcqqSBFdSmuNggzBHQ_vEgBh9dopmv3Jzqrcm3gw/exec"
-// "https://script.google.com/macros/s/AKfycbymGqUkCc-q3sVdoIlNZAm75_oFj545EXz3AypZ3CawaY8xG6r7CVOBj6S4OfHR87InTg/exec"
-// "https://script.google.com/macros/s/AKfycbxUtOQKQnt68CQ8S8hXNfQ6SKPXw9ag5nEafR5NpjUZvFsW9Bg1go5g30XbIq8yYhYj2g/exec"
-// "https://script.google.com/macros/s/AKfycbyUU78OiIboiiiQjyL4PhVWFJwdLzL3lTkdAu_yPX96J-bXDd7pXFpbONhreiRxgyhiaw/exec"
-// "https://script.google.com/macros/s/AKfycbwheEeXmUaCPVFSIQdYY4_L8Y46FscJ3QH0xlSL4I-f57fnGYj0Zz8I3T1m2Ja0R1PYsQ/exec"
-// "https://script.google.com/macros/s/AKfycbxq20v-2HmWYQE4CH-TVOf6qKFiNc0IvLsYnQLVyqTv1n9s_zTDr0BQdC-kWQxY0Hss9Q/exec"
-// "https://script.google.com/macros/s/AKfycby-q20-wr86lZECDqIsLm8WAZY_NEQ2GhY-8QO0UPTsni_CBKghTcxUhsgnsR2DmOwNxA/exec"
-// "https://script.google.com/macros/s/AKfycbw2_Fc16irIpvzFI4rTwXp85LF3qnPvgcMFrCdgYBDMy_ZO_NpQPrNabK_SoSrjhlL_NA/exec"
-// "https://script.google.com/macros/s/AKfycbx6PhFjEvG85LtS_VJHN0QUWbpx_0PynviQmK273IDRLKsp0vBxN-1TjzlviKvBiPmwQA/exec"
-// "https://script.google.com/macros/s/AKfycbzwDJ4W1r9Wh10gDRaOc4IF0vF-GIjFiZKFxBvHrVxWHu6J4coHVpagaQx4PPK-y6gjbQ/exec"
-// "https://script.google.com/macros/s/AKfycbwQ7Bt5ZuivxMTcmYKpIGWA-_ChjCB9FuMWgd8DYegDIf9x_PNX2Lt9w625HuDSBHzDpg/exec"
-// "https://script.google.com/macros/s/AKfycbxH2mdeKSWbYOnFBxBvT5KAmx83RiYC2tq5t0a7WaXOnnUA_RgPAh2smBQ0Xvsw-UQbSQ/exec"
-// "https://script.google.com/macros/s/AKfycbwDGniIbwT2i1ApT4jdKppzjosqUg4RKeaoPKGmaNAkrQ5_yFigpCdrLwo7DzHUnXFTLA/exec"
-// "https://script.google.com/macros/s/AKfycbxrxF4QrfXwrKqYlIy-sdSKooaBRcjBwHAmFPW53H8qxUaabR5q2J96rMVjtbSPkBqEWQ/exec"
-// "https://script.google.com/macros/s/AKfycbzIMK6y50A0Jpwyy1um-pcyYxys4W9cMXd-sutQGpD7greXovCPDXC0U6lbXrmWvhEgZA/exec"
-// "https://script.google.com/macros/s/AKfycbz0tn8zc9uDboqvDg8YtC1PT2-d4BAbPjfnuQboTEkfboIWu4t2eYU7sL4X_f6Fr6T7Tg/exec"
-// "https://script.google.com/macros/s/AKfycbzq4NE-vY7lI8eniR9lV-eayYhXtaI97-agenX1Mhu0lHHWkhk4YvARwmyHhP7dnPyn-Q/exec"
-// "https://script.google.com/macros/s/AKfycbyEE1MUZ3XCHFOFd5eVFDUhPUOohU0UQd8bc3h00hepesC9zZ17eEJmRFT2scDM9hcPrg/exec"
-// "https://script.google.com/macros/s/AKfycbx4hX7_B0Iqkll1dRNzXa-sgNG6FQJQuqBlairJApKK-fsNDzNl0I70Hma8_-pi4Q75Tw/exec";
 
-const giocatoriA = [
-  "C. Marasco", "E. Carfora", "K. Popa", "G. Giacco", "H. Taylor", "C. Licata", "L. Migliari", "F. Piazzano", "V. Occhipinti",
-  "A. Salvatore", "R. Bontempi", "L. Ostuni", "L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
-];
+// const giocatoriA = [
+//   "C. Marasco", "E. Carfora", "K. Popa", "G. Giacco", "H. Taylor", "C. Licata", "L. Migliari", "F. Piazzano", "V. Occhipinti",
+//   "A. Salvatore", "R. Bontempi", "L. Ostuni", "L. Jugrin", "A. Mollo", "A. DiFranco", "C. Gallo", "A. Tusa", "X. Undefined"
+// ];
 
-const numeriMaglia = ["55", "5", "18", "4", "21", "15", "34", "20", "31", "25", "11", "23", "17", "9", "26", "41", "29", "99"];
+// const numeriMaglia = ["55", "5", "18", "4", "21", "15", "34", "20", "31", "25", "11", "23", "17", "9", "26", "41", "29", "99"];
+
+let giocatoriA = [];
+let numeriMaglia = [];
+const USE_FIREBASE = true;
+
+//------------------------------------------------------------------------------------------------------------------
+// 1. Configurazione (copiala dalla console di Firebase: Impostazioni Progetto)
+const firebaseConfig = {
+  databaseURL: "https://locch65-basketapp-default-rtdb.europe-west1.firebasedatabase.app/",
+};
+
+// 2. Inizializzazione
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function saveToFirebaseAll() {
+  if (isAdmin) {
+    saveToFirebaseHistory('partite/', dettagliGara); 
+    saveToFirebaseHistory('statistiche/', giocatoriObj);
+    saveToFirebaseHistory('events/', fullMatchHistory);
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+function saveToFirebaseHistory(path, data) {
+// ---------------------------------------------------------------------------------------------
+  // Scrittura su Firebase
+  db.ref(path + matchId).set(data)
+    .then(() => {
+      console.log("Firebase aggiornato:  " + path);
+    })
+    .catch((error) => {
+      console.error("Errore Firebase: ", error);
+    });
+}
+
+// ---------------------------------------------------------------------------------------------
+function saveToFirebaseRoster(path, data) {
+// ---------------------------------------------------------------------------------------------
+  // Scrittura su Firebase
+  db.ref(path).set(data)
+    .then(() => {
+      console.log("Firebase aggiornato: " + path);
+    })
+    .catch((error) => {
+      console.error("Errore Firebase: ", error);
+    });
+}
 
 function getTeamName() {
   return (teamA === "Polismile A") ? teamA : teamB;
@@ -126,6 +152,26 @@ async function collectDeviceStats() {
     return info;
 }
 
+function popolaGiocatoriA(datiRoster) {
+  if (!datiRoster || !Array.isArray(datiRoster)) return;
+
+  // Ordiniamo il roster per numero di maglia (opzionale, ma consigliato per consistenza)
+  const rosterOrdinato = [...datiRoster].sort((a, b) => 
+    parseInt(a["Numero Maglia"]) - parseInt(b["Numero Maglia"])
+  );
+
+  // Mappiamo i nomi nel formato "I. Cognome"
+  giocatoriA = rosterOrdinato.map(p => {
+    const iniziale = p.Nome ? p.Nome.charAt(0).toUpperCase() + ". " : "";
+    return iniziale + p.Cognome;
+  });
+
+  // Mappiamo i numeri (come stringhe)
+  numeriMaglia = rosterOrdinato.map(p => String(p["Numero Maglia"]));
+
+  console.log("Roster mappato con successo:", giocatoriA.length, "giocatori.");
+}
+
 function GetCognome(idGiocatore) {
   // 1. Troviamo l'indice del giocatore cercando l'ID (convertito in stringa) 
   // nell'array numeriMaglia
@@ -180,14 +226,6 @@ function secondsToHms(d) {
   return (h < 10 ? "0" + h : h) + ":" + 
          (m < 10 ? "0" + m : m) + ":" + 
          (s < 10 ? "0" + s : s);
-}
-
-function OLDsecondsToHms(d) {
-  d = Number(d);
-  var h = Math.floor(d / 3600);
-  var m = Math.floor(d % 3600 / 60);
-  var s = Math.floor(d % 3600 % 60);
-  return (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
 }
 
 function aggiungiSecondiAOrario(orarioStr, secondiDaAggiungere) {
@@ -421,49 +459,62 @@ function createAdminPopup() {
     }
   }, { passive: true });
 }
-
-async function aggiornaDatiRosterEStats() {
+async function aggiornaDatiRosterEStats(what = "all") {
     /**
-     * Carica Roster e Statistiche in parallelo e li salva nel localStorage.
-     * @returns {Promise<{roster: Array, stats: Array}|null>} I dati caricati o null in caso di errore.
+     * Carica Roster e/o Statistiche in base al parametro 'what' e li salva nel localStorage.
+     * @param {string} what - "all", "roster", "stats" o null.
+     * @returns {Promise<object|null>} I dati caricati o null in caso di errore.
      */
     const loadingEl = document.getElementById("loading");
     
     try {
-        // Parametri per le statistiche
-        const paramsStats = new URLSearchParams({
-            getAllStats: "1",
-            userId: userId, // Presuppone userId globale
-            action: "Get All Stats",
-            details: JSON.stringify(getDeviceData) // Presuppone getDeviceData globale
-        });
+        const promises = [];
+        const types = [];
 
-        // Parametri per il Roster
-        const paramsRoster = new URLSearchParams({
-            sheet: "Roster",
-            userId: userId,
-            action: "Get Roster",
-            details: JSON.stringify(getDeviceData)
-        });
+        // Definiamo cosa caricare
+        const caricaRoster = (what === "all" || what === "roster" || what === null);
+        const caricaStats = (what === "all" || what === "stats" || what === null);
 
-        // Esecuzione parallela delle fetch
-        const [resRoster, resStats] = await Promise.all([
-            fetch(`${url}?${paramsRoster.toString()}`),
-            fetch(`${url}?${paramsStats.toString()}`)
-        ]);
-
-        if (!resRoster.ok || !resStats.ok) {
-            throw new Error("Risposta server non valida");
+        // Prepariamo la fetch per il Roster
+        if (caricaRoster) {
+            const paramsRoster = new URLSearchParams({
+                sheet: "Roster",
+                userId: userId,
+                action: "Get Roster",
+                details: JSON.stringify(getDeviceData)
+            });
+            promises.push(fetch(`${url}?${paramsRoster.toString()}`).then(res => res.json()));
+            types.push("roster");
         }
 
-        const rosterData = await resRoster.json();
-        const statsData = await resStats.json();
+        // Prepariamo la fetch per le Statistiche
+        if (caricaStats) {
+            const paramsStats = new URLSearchParams({
+                getAllStats: "1",
+                userId: userId,
+                action: "Get All Stats",
+                details: JSON.stringify(getDeviceData)
+            });
+            promises.push(fetch(`${url}?${paramsStats.toString()}`).then(res => res.json()));
+            types.push("stats");
+        }
 
-        // Salvataggio in cache
-        localStorage.setItem("datiRoster", JSON.stringify(rosterData));
-        localStorage.setItem("datiTutteLeStats", JSON.stringify(statsData));
+        // Esecuzione delle fetch (parallele se più di una)
+        const risultati = await Promise.all(promises);
+        const dataResponse = {};
 
-        return { roster: rosterData, stats: statsData };
+        risultati.forEach((data, index) => {
+            const type = types[index];
+            if (type === "roster") {
+                localStorage.setItem("datiRoster", JSON.stringify(data));
+                dataResponse.roster = data;
+            } else if (type === "stats") {
+                localStorage.setItem("datiTutteLeStats", JSON.stringify(data));
+                dataResponse.stats = data;
+            }
+        });
+
+        return dataResponse;
 
     } catch (e) {
         console.error("Errore fetch:", e);
@@ -558,28 +609,13 @@ function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, te
      AoB = (team === teamB) ? "B" : "A"
   }
   formData.append("AoB", AoB);
-//  formData.append("AoB", team === teamA ? "A" : "B");
 
   // Timestamp reale
-  //const timestampReale = new Date().toLocaleTimeString('it-IT');
   formData.append("timestampReale", timestampReale);
 
   // Ora video (calcolata se hai una funzione o un timer attivo)
   const oraVideo = typeof getCurrentGameTime === 'function' ? getCurrentGameTime() : "00:00:00";
   formData.append("oraVideo", oraVideo);
-
-  // 3. Invio della richiesta fetch
-  // fetch(url, {
-  //   method: "POST",
-  //   mode: "no-cors", // Cruciale per Google Apps Script
-  //   body: formData   // Passiamo direttamente l'oggetto FormData
-  // })
-  // .then(() => {
-  //   console.log(`[LIVE] Inviato con successo: ${idGiocatore} +${puntiRealizzati}`);
-  // })
-  // .catch(error => {
-  //   console.error("Errore nell'invio FormData live:", error);
-  // });
 
   fetch(url, {
     method: "POST",

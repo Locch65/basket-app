@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Polismile Basket App</title>
-    <script src="common.js?v=1.0.107"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+    <script src="common.js?v=1.0.109"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html {
@@ -274,24 +276,25 @@
             color: white;
         }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-#badge-allenamenti {
-    animation: pulse 1.5s infinite;
-}
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        #badge-allenamenti {
+            animation: pulse 1.5s infinite;
+        }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-.spinning {
-    animation: spin 1s linear infinite;
-    display: inline-block; /* Necessario per permettere la rotazione */
-}
+        .spinning {
+            animation: spin 1s linear infinite;
+            display: inline-block; /* Necessario per permettere la rotazione */
+        }
+
         .column-flex {
             display: flex;
             flex-direction: column;
@@ -309,7 +312,7 @@
 
     <header>
         <h1>Polismile Basket U14</h1>
-        <div class="app-version">Versione 1.0.107</div>
+        <div class="app-version">Versione 1.0.109</div>
         <img src="icon-192.png" alt="Logo Polismile" class="header-logo" onclick="Login()" style="cursor: pointer;">
     </header>
     <div class="menu-grid">
@@ -372,41 +375,42 @@
             <button class="popup-btn" onclick="closePopupTraining()">Chiudi</button>
         </div>
     </div>
+
     <script>
 
         let liveMatchData = null; // Memorizza i dati della partita live corrente
 
-async function verificaNovitaAllenamenti() {
-    const badge = document.getElementById("badge-allenamenti");
-    const testoPrecedente = localStorage.getItem("cache_allenamenti") || "";
+            async function verificaNovitaAllenamenti() {
+                const badge = document.getElementById("badge-allenamenti");
+                const testoPrecedente = localStorage.getItem("cache_allenamenti") || "";
 
-    try {
-        const params = new URLSearchParams({
-            sheet: "Allenamenti",
-            userId: userId,
-            action: "GetAllenamenti", 
-            details: JSON.stringify(getDeviceData) 
-        });
+                try {
+                    const params = new URLSearchParams({
+                        sheet: "Allenamenti",
+                        userId: userId,
+                        action: "GetAllenamenti", 
+                        details: JSON.stringify(getDeviceData) 
+                    });
 
-        const response = await fetch(`${url}?${params.toString()}`);
-        const result = await response.json();
+                    const response = await fetch(`${url}?${params.toString()}`);
+                    const result = await response.json();
 
-        if (result.status === "success" && result.data) {
-            const nuovoTesto = result.data.trim();
-            
-            // Se il testo è diverso dalla cache, mostra il badge
-            if (nuovoTesto !== testoPrecedente.trim()) {
-                badge.style.display = "block";
+                    if (result.status === "success" && result.data) {
+                        const nuovoTesto = result.data.trim();
+                        
+                        // Se il testo è diverso dalla cache, mostra il badge
+                        if (nuovoTesto !== testoPrecedente.trim()) {
+                            badge.style.display = "block";
+                        }
+                    }
+                } catch (e) {
+                    console.error("Errore nel controllo news allenamenti:", e);
+                }
             }
-        }
-    } catch (e) {
-        console.error("Errore nel controllo news allenamenti:", e);
-    }
-}
 
-        function ShowAllenamenti() {
-// 1. Nascondi il badge (l'utente sta leggendo ora)
-document.getElementById("badge-allenamenti").style.display = "none";
+                    function ShowAllenamenti() {
+            // 1. Nascondi il badge (l'utente sta leggendo ora)
+            document.getElementById("badge-allenamenti").style.display = "none";
 
             const popup = document.getElementById('trainingPopup');
             const content = document.getElementById('training-content');
@@ -566,7 +570,26 @@ document.getElementById("badge-allenamenti").style.display = "none";
                 });
 
             // aggiorna anche Roster e statistiche cosi' le troviamo già pronte se si seleziona il bottone relativo    
-            aggiornaDatiRosterEStats().then(dati => {});
+            // Aggiorna anche Roster e statistiche
+            aggiornaDatiRosterEStats().then(dati => {
+                if (isAdmin) {
+                    // 1. Trasformiamo i dati in stringa per confrontarli
+                    const datiString = JSON.stringify(dati.roster);
+                    
+                    // 2. Recuperiamo l'ultima versione salvata in locale
+                    const lastSaved = localStorage.getItem("last_roster_firebase_sync");
+
+                    // 3. Verifichiamo se la funzione esiste E se i dati sono cambiati
+                    if (datiString !== lastSaved) {
+                        console.log("Dati roster cambiati. Aggiorno Firebase...");
+                        
+                        saveToFirebaseRoster('roster/', dati.roster);
+                        
+                        // 4. Aggiorniamo il "checkpoint" nel localStorage
+                        localStorage.setItem("last_roster_firebase_sync", datiString);
+                    } 
+                }
+            });        
         }
 
 
@@ -580,8 +603,8 @@ document.getElementById("badge-allenamenti").style.display = "none";
         function mostraPopup() { document.getElementById('customPopup').style.display = 'flex'; }
         function chiudiPopup() { document.getElementById('customPopup').style.display = 'none'; }
 
-// Avvia il controllo all'apertura della webapp
-document.addEventListener("DOMContentLoaded", verificaNovitaAllenamenti);
+        // Avvia il controllo all'apertura della webapp
+        document.addEventListener("DOMContentLoaded", verificaNovitaAllenamenti);
 
         window.onclick = function (event) {
             let popup = document.getElementById('customPopup');

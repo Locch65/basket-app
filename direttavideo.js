@@ -1,41 +1,78 @@
-const USE_FIREBASE = true;
+// @ts-check
+let LIVE_OFFSET = 5;
+let REFRESH_TIME = 300;
+let ACCEPTABLE_DELAY_FOR_TOAST = 5; // secondi di ritardo accettabili per visualizzare il toast del punto realizzato
 
-//------------------------------------------------------------------------------------------------------------------
-// 1. Configurazione (copiala dalla console di Firebase: Impostazioni Progetto)
-const firebaseConfig = {
-  databaseURL: "https://locch65-basketapp-default-rtdb.europe-west1.firebasedatabase.app/",
-};
+let player;
+let timelineInterval;
+let punteggioA = 0;
+let punteggioB = 0;
+let lastScoreStr = "";
+let isUserLive = true;
+let orarioVisualizzato = null;
+let orarioVisualizzatoFormattato = null;
+let fullMatchHistory = []; // Qui salviamo tutto il liveData ricevuto
+let videoId = null;
+let dettagliGara = null;
+let matchStartTime = 0;
+let matchIsLive = false;
+let isReviewMode = false;
+let currentHighlightIndex = -1; // -1 significa che nessun highlight è ancora selezionato
+let highlightsAvailable = false; // Di default la sezione è nascosta
+let isFetching = false; // Impedisce chiamate sovrapposte
+let bloccoSincronizzazioneManuale = false;
+let userNavigatedToEnd = false;
+let isSyncPending = false; // Indica se c'è un evento SYNC già visualizzato ma non ancora gestito
 
-// 2. Inizializzazione
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+let convocazioni = "";
+let puntiSquadraA = 0;
+let puntiSquadraB = 0;
+let puntiSquadraA_NelTempo = 0;
+let puntiSquadraB_NelTempo = 0;
+let historyB = [];
+let contatoriB = { 0: 0, 1: 0, 2: 0, 3: 0 }; // Aggiunto 0
+let ultimoOrdinamento = "numero";
+let score = 0;
+let scoreB = 0;
+let isAdmin = false;
+let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
+let matchId = null;
+let teamA = "";
+let teamB = "";
+let squadraAvversaria = "";
+let isLive = false;
+let oraInizioDiretta = "";
+let statoPartita = "";
+let lastScoreState = "";
+let lastQuartoState = "";
+let quartoAttuale = ""; // Variabile globale per il quarto attuale
+let googleApiKey = "";
 
-function saveToFirebaseAll() {
-  if (isAdmin) {
-    saveToFirebaseHistory('partite/', dettagliGara); 
-    saveToFirebaseHistory('statistiche/', giocatoriObj);
-    saveToFirebaseHistory('events/', fullMatchHistory);
-  }
-}
+let refreshTimer = null; // variabile globale per l'ID del timer
 
-// ---------------------------------------------------------------------------------------------
-function saveToFirebaseHistory(path, data) {
-// ---------------------------------------------------------------------------------------------
-  if (history.length < 0) return;
-  // Scrittura su Firebase
-  db.ref(path + matchId).set(data)
-    .then(() => {
-      console.log("Firebase aggiornato:  " + path);
-      
-      // // SOLO DOPO Firebase, chiami GAS per lo storico su Sheets
-      // google.script.run
-      //   .withSuccessHandler(() => console.log("Copia su Sheets salvata!"))
-      //   .tuaFunzioneGAS(datiPartita);
-    })
-    .catch((error) => {
-      console.error("Errore Firebase:", error);
-    });
-}
+
+const hudLabel = document.getElementById("hud-label");
+const urlParams = new URLSearchParams(window.location.search);
+
+matchId = urlParams.get("matchId");
+
+let giocatoriObj = [];
+giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
+  const [nome, cognome] = nomeCompleto.split(" ");
+  return {
+    id: `${cognome}_${nome}`,
+    numero: numeriMaglia[index],
+    nome,
+    cognome,
+    displayName: `${cognome} ${nome}`,
+    punti: 0,
+    contatori: { 0: 0, 1: 0, 2: 0, 3: 0 }, // Aggiunto 0 qui
+    history: [], // Qui verranno inseriti oggetti {punti: X, ora: "HH:mm:ss"}
+    stato: "Out"
+  };
+});
+
+initTeamNames();
 
 // ---------------------------------------------------------------------------------------------
 function registerToFirebaseEvents() {
@@ -119,82 +156,6 @@ function registerToFirebaseEvents() {
 }
 //------------------------------------------------------------------------------------------------------------------
 
-// @ts-check
-let LIVE_OFFSET = 5;
-let REFRESH_TIME = 300;
-let ACCEPTABLE_DELAY_FOR_TOAST = 5; // secondi di ritardo accettabili per visualizzare il toast del punto realizzato
-
-let player;
-let timelineInterval;
-let punteggioA = 0;
-let punteggioB = 0;
-let lastScoreStr = "";
-let isUserLive = true;
-let orarioVisualizzato = null;
-let orarioVisualizzatoFormattato = null;
-let fullMatchHistory = []; // Qui salviamo tutto il liveData ricevuto
-let videoId = null;
-let dettagliGara = null;
-let matchStartTime = 0;
-let matchIsLive = false;
-let isReviewMode = false;
-let currentHighlightIndex = -1; // -1 significa che nessun highlight è ancora selezionato
-let highlightsAvailable = false; // Di default la sezione è nascosta
-let isFetching = false; // Impedisce chiamate sovrapposte
-let bloccoSincronizzazioneManuale = false;
-let userNavigatedToEnd = false;
-let isSyncPending = false; // Indica se c'è un evento SYNC già visualizzato ma non ancora gestito
-
-let convocazioni = "";
-let puntiSquadraA = 0;
-let puntiSquadraB = 0;
-let puntiSquadraA_NelTempo = 0;
-let puntiSquadraB_NelTempo = 0;
-let historyB = [];
-let contatoriB = { 0: 0, 1: 0, 2: 0, 3: 0 }; // Aggiunto 0
-let ultimoOrdinamento = "numero";
-let score = 0;
-let scoreB = 0;
-let isAdmin = false;
-let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
-let matchId = null;
-let teamA = "";
-let teamB = "";
-let squadraAvversaria = "";
-let isLive = false;
-let oraInizioDiretta = "";
-let statoPartita = "";
-let lastScoreState = "";
-let lastQuartoState = "";
-let quartoAttuale = ""; // Variabile globale per il quarto attuale
-let googleApiKey = "";
-
-let refreshTimer = null; // variabile globale per l'ID del timer
-
-
-const hudLabel = document.getElementById("hud-label");
-const urlParams = new URLSearchParams(window.location.search);
-
-matchId = urlParams.get("matchId");
-
-let giocatoriObj = [];
-giocatoriObj = giocatoriA.map((nomeCompleto, index) => {
-  const [nome, cognome] = nomeCompleto.split(" ");
-  return {
-    id: `${cognome}_${nome}`,
-    numero: numeriMaglia[index],
-    nome,
-    cognome,
-    displayName: `${cognome} ${nome}`,
-    punti: 0,
-    contatori: { 0: 0, 1: 0, 2: 0, 3: 0 }, // Aggiunto 0 qui
-    history: [], // Qui verranno inseriti oggetti {punti: X, ora: "HH:mm:ss"}
-    stato: "Out"
-  };
-});
-
-initTeamNames();
-
 function inizializzaGiocatoriConvocati() {
   const stringaConvocati = localStorage.getItem("convocazioni");
   
@@ -245,7 +206,6 @@ function inizializzaGiocatoriConvocati() {
 
   console.log("GiocatoriObj aggiornato (preservando dati esistenti):", giocatoriObj);
 }
-
 
 window.onYouTubeIframeAPIReady = function () {
   console.log("YouTube API Ready");
@@ -406,7 +366,6 @@ function AddPuntiSquadraB(punti, memorizzaOrario) {
 
   saveToServerEventoLive("", punti, oraCorrente, "Squadra B", "save");
 }
-
 
 function caricaAnagraficaSingolaPartita(targetMatchId) {
   if (!targetMatchId) return;
@@ -744,70 +703,6 @@ function caricaDatiPartita(mId) {
 
       updateDatiPartita("all", data);
 
-//       // 1. Estrazione dati
-//       const rows = data.statisticheGiocatori || [];
-//       const dettagli = data.dettagliGara || {};
-//       matchIsLive = dettagli.isLive;
-//       oraInizioDiretta = dettagli.oraInizioDiretta;
-//       isUserLive = matchIsLive;
-//       if (dettagli.convocazioni !== convocazioni) {
-// //        alert(dettagli.convocazioni + " <> " + convocazioni);
-//         convocazioni = dettagli.convocazioni;
-//         localStorage.setItem("convocazioni", convocazioni);
-//         location.reload();
-
-//         // inizializzaGiocatoriConvocati();
-//       }
-
-//       generaHistory(data.liveData);
-
-//       if (isAdmin && matchIsLive) { // Solo se l'utente è admin e i bottoni esistono
-//         aggiornaBottoniSquadraB();
-//       }
-
-//       controllaDisponibilitaHighlights();
-
-//       // 2. Aggiornamento giocatori
-//       rows.forEach(function (r) {
-//         const g = giocatoriObj.find(function (x) {
-//           return String(x.numero) === String(r.numero);
-//         });
-//         if (g) {
-//           const nuoviPunti = parseInt(r.punti, 10) || 0;
-//           g.punteggio = nuoviPunti;
-//           g.stato = (r.stato ?? r.statoGiocatore) === "In" ? "In" : "Out";
-
-//           try {
-//             g.contatori = JSON.parse(r.dettagli || '{"0":0,"1":0,"2":0,"3":0}');
-//             // Se il JSON esiste ma non ha il tasto "0", lo aggiungiamo
-//             if (g.contatori["0"] === undefined) {
-//               g.contatori["0"] = 0;
-//             }
-//           } catch (e) { 
-//             g.contatori = {"0":0,"1":0,"2":0,"3":0};
-//           }
-
-//         } else if (r.giocatore === "Squadra B" && !matchIsLive && !isReviewMode) { // in ReviewMode il punteggio e' calcolato in base al tempo visualizzato
-//           punteggioB = parseInt(r.punti, 10) || 0;
-//         }
-//       });
-
-//       // GESTIONE QUARTO/PERIODO
-//       quartoAttuale = data.dettagliGara?.statoPartita;
-//       localStorage.setItem("statoPartita", quartoAttuale);
-
-//       if (matchIsLive || isReviewMode) {
-//         renderPlayerListLive();
-//         if (isAdmin || isFirstLoad) modifyHistory();
-//       } else {
-//         renderPlayerList();
-//       }
-
-//       updateScoreboard(matchIsLive || isReviewMode);
-//       isFirstLoad = false;
-
-//       // IMPORTANTE: Reset del flag alla fine del successo
-//       isFetching = false;
     })
     .catch(function (err) {
       document.getElementById("players-grid").innerHTML = "Errore: " + err;
@@ -2349,7 +2244,6 @@ function salvaStatoLive(dati) {
   saveToServerMatchData();
 }
 
-
 // ---------------------------------------------------------------------------------------------------- //
 function init() {
 // ---------------------------------------------------------------------------------------------------- //
@@ -2378,29 +2272,68 @@ function init() {
   const urlParams = new URLSearchParams(window.location.search);
   const currentMatchId = urlParams.get("matchId");
 
-  if (currentMatchId) {
-    // Carichiamo i dati freschi dal server prima di mostrare il video
-    caricaAnagraficaSingolaPartita(matchId).then(() => {
+  // if (currentMatchId) {
+  //   // Carichiamo i dati freschi dal server prima di mostrare il video
+  //   caricaAnagraficaSingolaPartita(matchId).then(() => {
 
+  //     inizializzaGiocatoriConvocati();
+
+  //     videoId = localStorage.getItem("videoId");
+  //     matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
+
+  //     // Crea il player (questo poi chiamerà onPlayerReady in automatico)
+  //     if (videoId && videoId !== "null" && videoId !== "") {
+  //       // Se c'è un video, creiamo il player (che chiamerà tickTimeline al caricamento)
+  //       creaIlPlayer(videoId);
+  //     } else {
+  //       // Se NON c'è un video, nascondiamo lo spinner e avviamo il tick manualmente
+  //       const videoSpinner = document.getElementById("video-loading");
+  //       if (videoSpinner) videoSpinner.classList.add("hidden");
+
+  //       console.log("Nessun video trovato, avvio tickTimeline per sole statistiche.");
+  //       avviaTickSenzaVideo();
+  //     }
+
+  //     console.log("Timeline avviata per il match:", matchId);
+  //   });
+  // }
+
+  if (currentMatchId) {
+
+    // Carichiamo i dati freschi della partita
+    caricaAnagraficaSingolaPartita(matchId).then(() => {
+      
+      // --- INTEGRAZIONE AGGIORNAMENTO ROSTER E STATS ---
+      // Chiamiamo la funzione asincrona con what="all" (o null)
+      return aggiornaDatiRosterEStats("roster");
+      
+    }).then(dati => {
+      // Se i dati sono stati scaricati con successo, aggiorniamo le variabili globali
+      if (dati && dati.roster) {
+        popolaGiocatoriA(dati.roster) 
+        if (isAdmin) saveToFirebaseRoster('roster/', dati.roster); 
+
+        console.log("Roster e Statistiche aggiornati globalmente.");
+      }
+
+      // Ora procediamo con l'inizializzazione della UI della partita
       inizializzaGiocatoriConvocati();
 
       videoId = localStorage.getItem("videoId");
       matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
 
-      // Crea il player (questo poi chiamerà onPlayerReady in automatico)
       if (videoId && videoId !== "null" && videoId !== "") {
-        // Se c'è un video, creiamo il player (che chiamerà tickTimeline al caricamento)
         creaIlPlayer(videoId);
       } else {
-        // Se NON c'è un video, nascondiamo lo spinner e avviamo il tick manualmente
         const videoSpinner = document.getElementById("video-loading");
         if (videoSpinner) videoSpinner.classList.add("hidden");
-
         console.log("Nessun video trovato, avvio tickTimeline per sole statistiche.");
         avviaTickSenzaVideo();
       }
 
       console.log("Timeline avviata per il match:", matchId);
+    }).catch(err => {
+      console.error("Errore durante il caricamento dei dati iniziali:", err);
     });
   }
 

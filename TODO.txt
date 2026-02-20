@@ -27,7 +27,7 @@
 //  Calendario.html
 //    - NICE TO HAVE: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - quando faccio login o logout deve fare "Aggiorna" in automatico
-//    - inserire nel badge di ciascuna partita un flag per indicare "Video Presente", "Statistiche Presenti"
+//    - ingrandire i font su tablet
 //
 //  Classifiche:
 //    - NICE TO HAVE: nuova pagina con le classifiche del campionato con i punti di ciascuna squadra preso da ItaliaCanestro
@@ -37,17 +37,17 @@
 //    - NICE TO HAVE: memorizzare anche i falli per squadra e per giocatore 
 //    - NICE TO HAVE: Inserire il toast per In/Out giocatori
 //    - NICE TO HAVE: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
+//    - NICE TO HAVE: se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
 //
 //    - Storicizzare stato In/Out. Nella review della partita mostra l'ultimo stato noto
 //    - Storicizzare il cambio di quarto
 //    - rendere cliccabile il bottone del quarto e attivare il popup
 //    - Memorizzare punteggi alla fine ciascun quarto. 
-//    - leggere lista giocatori da Google Sheet
+//    - FATTO: leggere lista giocatori da Google Sheet. VERIFICARE che non ci siano side-effect
 //    - cambiare lo sfondo della title bar per evidenziare quando si è connessi come Admin
 //    - Highlights: aggiungere per admin un bottone "fix" che cambia l'ora del canestro con quello visualizzato.
 //  * - Highlights: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
 //
-//    - BUG: quando faccio logout da admin, nel menu di calendario rimane ancora attiva la scritta Logout
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - ATTENZIONE: la durata del video youtube della partita contro Crocetta non è compatibile con i tempi reali. (forse perchè è stato interrotto)
 //
@@ -95,6 +95,7 @@
 //    - FATTO: mettere U14, U15, TUtti allo stesso livello non nel sottomenu Campionato
 //    - FATTO: Aggiungere in hamburger le voci: "Home" che porta index.html
 //    - FATTO; inserire la possibilita di ordinare il calendario in ordine ascendente/discendente per data
+//    - FATTO: inserire nel badge di ciascuna partita un flag per indicare "Video Presente", "Statistiche Presenti"
 //
 //  Match.html
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 

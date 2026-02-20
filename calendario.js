@@ -185,20 +185,6 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
                 <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
             </div>`;
 
-        // card.innerHTML = `
-        //     <div class="match-top">
-        //         <span class="campionato ${cat}">${cat}</span>
-        //         <span class="match-id">${mIdPulito}</span>
-        //         <span class="data">${giornoSett} ${p.data}</span>
-        //         <span class="orario">${p.orario}</span>
-        //     </div>
-        //     <div class="match-middle"><span class="luogo">${p.luogo}</span></div>
-        //     <div class="match-bottom">
-        //         <span class="teamA"><span class="team-name">${p.squadraA}</span> <strong>${p.punteggioA ?? "-"}</strong></span>
-        //         <span class="vs">vs</span>
-        //         <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
-        //     </div>`;
-
         if (p.casaTrasferta === "Casa") card.querySelector(".teamA .team-name").classList.add("highlight");
         else if (p.casaTrasferta === "Trasferta") card.querySelector(".teamB .team-name").classList.add("highlight");
 
@@ -333,9 +319,13 @@ function init() {
     const campRadios = document.querySelectorAll('.camp-radio');
     const selectOrdine = document.getElementById("selectOrdine");
 
+
     // --- 1. GESTIONE MENU PRINCIPALE ---
     // Apri/chiudi menu principale
     hamburgerBtn.addEventListener("click", () => {
+        const isAdmin = localStorage.getItem("isAdmin") === "true";
+        adminBtn.innerHTML = isAdmin ? '<i class="fas fa-sign-out-alt"></i> Logout' : '<i class="fas fa-user-shield"></i> Admin';
+
         menu.classList.toggle("hidden");
     });
 
@@ -421,7 +411,6 @@ function init() {
         createAdminPopup(); // Inizializza il popup se la funzione esiste
     }
 
-    const isAdmin = localStorage.getItem("isAdmin") === "true";
     if (isAdmin && adminBtn) {
         adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
     }
@@ -439,6 +428,7 @@ function init() {
                 const popup = document.getElementById("adminPopup");
                 if (popup) {
                     popup.classList.remove("hidden");
+                    popup.style.display = "flex"; 
                     document.getElementById("adminPassword").value = "";
                     document.getElementById("adminPassword").focus();
                 }

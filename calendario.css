@@ -199,15 +199,6 @@ body.dark-mode #selectOrdine {
 
 
 /* Riga 1: info principali */
-.OLDmatch-top {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.2rem;
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #555;
-  margin-bottom: 0.6rem;
-}
 
 .match-top .match-id {
   margin-right: auto;

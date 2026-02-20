@@ -391,11 +391,9 @@ function gestisciConvocazioni() {
     saveToFirebaseHistory('partite/', dettagliGara); 
 
     saveToServerMatchData();
-
     popup.remove();
-
-    // aggiorna la pagina per ricaricare le convocazioni
-    location.reload();
+    // fai reload dopo 2 secondi per permettere la scrittura su google sheet
+    setTimeout(() => location.reload(), 2000);
   };
 
   const closeBtn = document.createElement("button");
