@@ -1,6 +1,13 @@
 // common.js - Funzioni e variabili condivise
 const url =
-"https://script.google.com/macros/s/AKfycbwXbljXTz-YAIeWRsGXAqsz1NT-ff3eleTP5OBrKgn3XzivFG89AE_3uulg9N75_Nql8g/exec"
+"https://script.google.com/macros/s/AKfycbwqV1ACwwbM8U2nHlGY1dWAA1vcDQSwOF-TblS8r0eDtyWCo1gyvTfNze8Rp5oGE6WnJg/exec"
+
+// ULTIMA FUNZIONANANTE "https://script.google.com/macros/s/AKfycbxNezGpflHNVJsWkhn_MV0wKf3sHyKahFk3GNZDxYXYyQmixYAaLVzjniXUYZ_P8nDY2g/exec"
+
+
+// "https://script.google.com/macros/s/AKfycbzV27rlhFPmBdlIOjTNAC44LDnhdhM3GtGOaaY9_CXXMxgQBffBlnK5uEWLJLMh3L_0uQ/exec"
+
+// "https://script.google.com/macros/s/AKfycbwXbljXTz-YAIeWRsGXAqsz1NT-ff3eleTP5OBrKgn3XzivFG89AE_3uulg9N75_Nql8g/exec"
 
 // "https://script.google.com/macros/s/AKfycby3XUCWXpplbU1mtmA1c4iEAHNjOmOm-yyUBz8VmK8VuJROa0uyimpKcat65oObFxk3mA/exec"
 
@@ -27,9 +34,44 @@ const firebaseConfig = {
   databaseURL: "https://locch65-basketapp-default-rtdb.europe-west1.firebasedatabase.app/",
 };
 
-// 2. Inizializzazione
+// 1. Inizializzazione
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+// 1. Riferimenti
+const connectedRef = db.ref(".info/connected");
+const presenceRef = db.ref("presence/online_users"); // Nodo che conterrà gli utenti
+const userRef = presenceRef.push(); // Crea un ID univoco per questa sessione
+const countDisplayRef = db.ref("presence/user_count"); // Dove salveremo il numero finale
+
+// 2. Gestione Connessione/Disconnessione
+connectedRef.on("value", (snap) => {
+  if (snap.val() === true) {
+    // Quando mi disconnetto, rimuovi il mio ID univoco
+    userRef.onDisconnect().remove();
+    
+    // Segnala che sono online
+    userRef.set(true);
+    
+    console.log("Connesso al server!");
+  }
+});
+
+// 2. Questa funzione gestisce il conteggio anche quando il nodo è vuoto
+// presenceRef.on("value", (snap) => {
+//   let conteggioAttuale = 0;
+
+//   if (snap.exists()) {
+//     conteggioAttuale = snap.numChildren();
+//   }
+
+//   // Aggiorna il valore globale nel database
+//   // Questo assicura che se l'ultimo esce, user_count diventi effettivamente 0
+//   countDisplayRef.set(conteggioAttuale);
+  
+//   console.log("Utenti online:", conteggioAttuale);
+// });
+//------------------------------------------------------------------------------------------------------------------
 
 function saveToFirebaseAll() {
   if (isAdmin) {
@@ -72,7 +114,38 @@ function getTeamName() {
 let userId = undefined;
 
 let getDeviceData = undefined;
-function registerUserId()
+
+// Aggiungi 'async' qui
+async function registerUserId() {
+  // 1. Inizializzazione base (opzionale se sovrascritta dopo)
+  getDeviceData = {
+    os: navigator.platform,
+    userAgent: navigator.userAgent,
+    isMobile: /Mobi|Android/i.test(navigator.userAgent),
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+    language: navigator.language
+  };
+
+  // 2. Gestione User ID
+  userId = localStorage.getItem('webapp_user_id') || crypto.randomUUID();
+  if (!localStorage.getItem('webapp_user_id')) {
+    localStorage.setItem('webapp_user_id', userId);
+  }
+
+  // 3. ASPETTA il completamento delle statistiche
+  // Usiamo await per bloccare l'esecuzione finché collectDeviceStats non ha finito
+  const stats = await collectDeviceStats(); 
+  
+  // Ora getDeviceData conterrà i dati reali ritornati dalla funzione
+  getDeviceData = stats;
+
+  console.log("Registrazione completata per l'utente:", userId);
+  console.log("Dati dispositivo:", getDeviceData);
+  
+  return { userId, getDeviceData }; // Opzionale: ritorna i dati per usarli altrove
+}
+
+function OLDregisterUserId()
 {
   getDeviceData = {
     os: navigator.platform,
@@ -170,6 +243,10 @@ function popolaGiocatoriA(datiRoster) {
   numeriMaglia = rosterOrdinato.map(p => String(p["Numero Maglia"]));
 
   console.log("Roster mappato con successo:", giocatoriA.length, "giocatori.");
+}
+
+function isQuintettoCompleto() {
+    return giocatoriObj.filter(g => g.stato === "In").length === 5;
 }
 
 function GetCognome(idGiocatore) {
@@ -591,6 +668,10 @@ function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, te
     return;
   }
 
+  // ATTENZIONE: riempire campo note correttamente. nel caso di In/Out deve essere la lista dei giocatori In, nel caso di Fallo dovrebbe essere il numero di falli totali del giocatore
+  if ((action !== "undo") && (puntiRealizzati === "In" || puntiRealizzati === "Out") && !isQuintettoCompleto()) return;
+  const note = getNumeriGiocatoriIn();
+
   // 1. Creazione dell'oggetto FormData
   const formData = new FormData();
 
@@ -613,9 +694,7 @@ function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, te
   // Timestamp reale
   formData.append("timestampReale", timestampReale);
 
-  // Ora video (calcolata se hai una funzione o un timer attivo)
-  const oraVideo = typeof getCurrentGameTime === 'function' ? getCurrentGameTime() : "00:00:00";
-  formData.append("oraVideo", oraVideo);
+  formData.append("note", note);
 
   fetch(url, {
     method: "POST",
@@ -667,3 +746,15 @@ function closeUniversalPopup() {
     if (popup) popup.style.display = 'none';
 }
 
+function getNumeriGiocatoriIn() {
+  // Filtra i giocatori con stato "In" e prende solo il valore del numero
+  const numeriIn = giocatoriObj
+    .filter(g => g.stato === "In")
+    .map(g => g.numero); // Prende il valore così com'è (es. 11 o "11")
+
+  // 2. Ordina l'array in modo numerico crescente
+  numeriIn.sort((a, b) => parseInt(a) - parseInt(b));
+
+  // Crea la stringa finale unendo i valori con la virgola
+  return `[${numeriIn.join(",")}]`;
+}

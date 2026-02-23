@@ -291,7 +291,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
 
-  <script src="common.js?v=1.0.109"></script>
+  <script src="common.js?v=1.0.111"></script>
   <script>
     let datiOriginali = [];
     let datiFinali = [];
@@ -494,9 +494,21 @@
       location.reload();
     }
 
-    registerUserId();
+    async function startApp() {
+        try {
+            // 1. Aspettiamo che l'identificazione utente e device sia completata
+            await registerUserId(); 
 
-    inizializzaDati();
+            // 2. Solo ora facciamo partire il caricamento e il calcolo dei dati
+            await inizializzaDati();
+            
+        } catch (error) {
+            console.error("Errore durante l'avvio:", error);
+        }
+    }
+
+    // Avviamo il tutto
+    startApp();
 
   </script>
 </body>

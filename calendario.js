@@ -308,7 +308,7 @@ function startRefreshAutomatico(attiva, filtro) {
 }
 
 function init() {
-    registerUserId();
+    registerUserId().then((data) => {});
 
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const menu = document.getElementById("menu");

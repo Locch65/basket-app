@@ -320,6 +320,12 @@ function gestisciConvocazioni() {
 
   const list = document.createElement("ul");
   list.className = "convocazioniPopup-list";
+  // AGGIUNTA STILI PER SCROLLBAR
+  list.style.maxHeight = "600px";
+  list.style.overflowY = "auto";
+  list.style.overflowX = "hidden"; // Evita scorrimento orizzontale
+  list.style.paddingRight = "10px";
+  list.style.listStyle = "none";
 
   // 1. Mappatura e Ordinamento Alfabetico per Cognome
   let listaOrdinata = giocatori.map((nomeCompleto, index) => {

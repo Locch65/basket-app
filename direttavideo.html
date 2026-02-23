@@ -100,7 +100,7 @@
       <div class="highlights-top-row">
       <div id="opponent" class="opponent-label">PUNTI SQUADRA B</div>
         <div class="highlights-buttons">
-          <button id="btn-details" class="btn-details" onclick="NewShowPlayerPopup()">Details</button>
+          <button id="btn-details" class="btn-details" onclick="ShowPlayerPopup()">Details</button>
           <button id="btn-opp-1" class="btn-score" onclick="IncrPuntiSquadraB(1)">+1</button>
           <button id="btn-opp-2" class="btn-score" onclick="IncrPuntiSquadraB(2)">+2</button>
           <button id="btn-opp-3" class="btn-score" onclick="IncrPuntiSquadraB(3)">+3</button>
@@ -123,14 +123,18 @@
     <div>Tempo risposta server: <span id="fetch-time">0</span> ms</div>
     <div>Risoluzione: <span id="display-size">0x0</span> (DPR: <span id="display-dpr">1</span>)</div>
   </div>
+  <div id="adminCounter" class="admin-live-counter hidden">
+    <i class="fas fa-users"></i> <span id="onlineCount">0</span>
+  </div>  
+
   <!-- ------------------------------------------------------------------------- -->
   <!-- ATTENZIONE: Aggiornare la versione -->
   <!-- ------------------------------------------------------------------------- -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-  <script src="common.js?v=1.0.109"></script>
+  <script src="common.js?v=1.0.111"></script>
   <script src="menus.js"></script>
-  <script src="direttavideo.js?v=1.0.109"></script>
+  <script src="direttavideo.js?v=1.0.111"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 

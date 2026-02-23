@@ -156,7 +156,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.109"></script>
+    <script src="common.js?v=1.0.111"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -363,7 +363,7 @@
             if (luoghiData.length > 0) map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
         }
 
-        registerUserId();
+        registerUserId().then((data) => {});
 
         const legend = L.control({position: 'bottomright'});
         legend.onAdd = function (map) {
