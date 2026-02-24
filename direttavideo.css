@@ -135,7 +135,7 @@ body.admin-mode #highlights-section {
     text-align: center;
 }
 
-.btn-undo {
+.mybtn-undo {
     background-color: #e74c3c !important;
     color: white;
     padding: 0.8rem 1.2rem;
@@ -147,6 +147,7 @@ body.admin-mode #highlights-section {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
 }
 
 .opponent-label {
@@ -172,7 +173,7 @@ body.admin-mode #highlights-section {
   font-weight: bold;
   font-size: 14px;
   border: 1px solid #333;
-  display: flex;
+  display: none;
   align-items: center;
   gap: 8px;
   pointer-events: none; /* Così non blocca eventuali click sotto di esso */
@@ -382,6 +383,72 @@ body.user-mode .video-container {
     border-bottom: 1px solid #eee;
     padding-bottom: 1rem;
 }
+
+/* 1. Forza lo z-index massimo quando qualunque elemento va in fullscreen */
+:fullscreen .popup-transparent-overlay,
+:fullscreen ~ .popup-transparent-overlay,
+:-webkit-full-screen .popup-transparent-overlay,
+:-webkit-full-screen ~ .popup-transparent-overlay {
+    z-index: 2147483647 !important;
+    display: flex !important;
+}
+
+/* 2. Assicurati che l'altezza sia corretta per i browser mobile (Oppo/Chrome) */
+.popup-transparent-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    /* Risolve il problema della barra indirizzi su Android */
+    height: -webkit-fill-available !important; 
+    background: rgba(0, 0, 0, 0.01); 
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+}
+
+/* Forza la visibilità del popup anche in landscape */
+.OLDpopup-transparent-overlay {
+    position: fixed !important; /* Non segue lo scroll */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.01); /* Quasi invisibile ma blocca i click */
+    display: flex !important; /* Vince sui display:none delle media queries */
+    justify-content: center;
+    align-items: center;
+    z-index: 999999 !important; /* Sopra a ogni elemento video o HUD */
+}
+
+/* Nasconde l'intero overlay solo quando ha la classe .hidden */
+.popup-transparent-overlay.hidden {
+    display: none !important;
+}
+
+/* Box dei bottoni ottimizzato per il poco spazio verticale del landscape */
+.popup-box {
+    background: #222;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 2px solid #444;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    width: auto;
+    min-width: 250px;
+    pointer-events: auto; /* Permette di cliccare i bottoni */
+}
+
+.popup-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.btn-full { width: 100%; }
+
 /* Footer di debug (ex stile inline) */
 .debug-footer {
     text-align: center;
@@ -611,9 +678,14 @@ body.user-mode .video-container {
 
 /* Quando lo schermo è in LANDSCAPE (Orizzontale) */
 @media (orientation: landscape) and (max-width: 932px) {
-    /* 1. Mostra il tasto quando ruota */
+    .popup-box {
+        padding: 1rem;
+        transform: scale(0.9); /* Lo rimpicciolisce leggermente per farlo stare bene */
+    }
 
-/* iPhone Landscape Fix — riduce l’altezza del video per compensare la barra di Safari */
+  /* 1. Mostra il tasto quando ruota */
+
+    /* iPhone Landscape Fix — riduce l’altezza del video per compensare la barra di Safari */
     .video-container {
         height: 80vh !important;   /* Prova 80, 78, 75 finché non ti piace */
         width: 100vw !important;
@@ -631,10 +703,6 @@ body.user-mode .video-container {
     header, 
     #stats-section { 
         display: none !important; 
-    }
-
-    #adminCounter {
-        display: flex !important; 
     }
 
     /* Assicurati che lo score sia visibile sopra il video */
@@ -661,13 +729,15 @@ body.user-mode .video-container {
   }
   
   /* Nasconde lo score sopra il video quando sei in verticale */
-  #hud-score, #hud-period {
+  #hud-score {
+    /* display: none !important; */
+    font-size: 1rem !important; /* Font ridotto */
+
+  }
+  #hud-period {
     display: none !important;
   }
 
-  #adminCounter {
-        display: flex !important;
-    }
 }
 
 
@@ -932,7 +1002,7 @@ body.user-mode .video-container {
   left: 50%;               /* Sposta il bordo sinistro al centro */
   transform: translateX(-75%); /* Lo trasla indietro del 50% della sua larghezza per centrarlo perfettamente */
   
-  font-size: 2.56rem !important; /* Font ridotto (era 2.5rem) */
+  font-size: 2.56rem; /* Font ridotto (era 2.5rem) */
   font-weight: 900 !important;
   padding: 0.3rem 0.6rem !important; /* Padding leggermente ridotto */
   

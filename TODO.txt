@@ -28,7 +28,7 @@
 //    - NICE TO HAVE: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - quando faccio login o logout deve fare "Aggiorna" in automatico
 //    - ingrandire i font su tablet
-//    - forse è meglio togliere la vode Admin per evitare "curiosi". lasciare solo il bottone nella home page
+//    - forse è meglio togliere la voce Admin per evitare "curiosi". lasciare solo il bottone nella home page
 //
 //  Classifiche:
 //    - NICE TO HAVE: nuova pagina con le classifiche del campionato con i punti di ciascuna squadra preso da ItaliaCanestro
@@ -36,12 +36,12 @@
 //  DirettaVideo.html
 //    - NICE TO HAVE: Highlight anche in orizzontale
 //    - NICE TO HAVE: Inserire il toast per In/Out giocatori
-//    - NICE TO HAVE: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
 //    - NICE TO HAVE: se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
+//    - FATTO: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
 //
 //    - memorizzare anche i falli per squadra e per giocatore 
 //    - inserire un orologio digitale con il tempo attuale in alto a destra se isAdmin=true
-//    - mostrare al lato dell'orologio il numero di utenti collegati al database Firebase (se è possibile avere questa info)
+//    - FATTO: mostrare al lato dell'orologio il numero di utenti collegati al database Firebase (se è possibile avere questa info)
 //    - Storicizzare stato In/Out. Nella review della partita mostra l'ultimo stato noto
 //    - Storicizzare il cambio di quarto
 //    - rendere cliccabile il bottone del quarto e attivare il popup
@@ -59,7 +59,7 @@
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
 //
 //  maps.html
-//    -
+//    - FATTO: far lampeggiare il POI della prossima partita
 //
 //
 //  NUOVE FEATURES (NICE TO HAVE):

@@ -29,6 +29,7 @@ let highlightsAvailable = false; // Di default la sezione è nascosta
 let isFetching = false; // Impedisce chiamate sovrapposte
 let bloccoSincronizzazioneManuale = false;
 let hudPositionIndex = 1; // Partiamo dal 50% (centro)
+let timePositionIndex = 0; // in alto a sinistra
 let userNavigatedToEnd = false;
 let isFirstLoad = true; 
 let isToastRunning = false; // Variabile di controllo per la durata del flash
@@ -925,6 +926,16 @@ function updateDatiPartita(what, data) {
       dettagliGara = data.dettagliGara || {}
       matchIsLive = dettagliGara.isLive;
       oraInizioDiretta = dettagliGara.oraInizioDiretta;
+      const config = JSON.parse(dettagliGara.note || '{}');
+      // 2. Lettura posizioni HUD (Score e Clock)
+      if (config['hud-score'] !== undefined) {
+          changeHUDLayout('hud-score', parseInt(config['hud-score']));
+      }
+      
+      if (config['hud-clock'] !== undefined) {
+          changeHUDLayout('hud-time', parseInt(config['hud-clock']));
+      }      
+
       isUserLive = matchIsLive;
       // GESTIONE QUARTO/PERIODO
       quartoAttuale = dettagliGara?.statoPartita;
@@ -1132,11 +1143,9 @@ renderPlayerListLive(); // ATTENZIONE: TEst
 
   if (eventoCorrente) {
     // Aggiorna l'HUD con i dati dell'evento trovato
-    //document.getElementById('hud-score').textContent = `${eventoCorrente.punteggioA} - ${eventoCorrente.punteggioB}`;
     punteggioA = eventoCorrente.punteggioA;
     punteggioB = eventoCorrente.punteggioB;
     updateScoreboard(matchIsLive || isReviewMode);
-    //console.log("Ultimo evento: " + eventoCorrente.secondiReali + " now: " + secondiVisualizzati);
     if ((isUserLive || isReviewMode) && (eventoCorrente.secondiReali !== 0) && (secondiVisualizzati - eventoCorrente.secondiReali < ACCEPTABLE_DELAY_FOR_TOAST) &&
         eventoCorrente.puntiRealizzati > 0) {
       const tmpId = GetCognome(eventoCorrente.idGiocatore);
@@ -1218,38 +1227,103 @@ function initTeamNames() {
   if (opponent) opponent.textContent = squadraAvversaria;
 }
 
-function scambiaPosizioniHUD() {
-  const hudScore = document.getElementById('hud-score');
-  const basketToast = document.querySelector('.toast');
+function gestisciHud() {
+  const pop = document.getElementById('popup-hud-opts');
+  if (pop) {
+    // Forza lo spostamento alla fine del body per evitare che i padri lo nascondano
+    document.body.appendChild(pop); 
+    
+    pop.classList.remove('hidden');
+  }
+}
 
-  if (!hudScore) return;
+function chiudiPopupHud() {
+  const pop = document.getElementById('popup-hud-opts');
+  if (pop) pop.classList.add('hidden');
+  document.body.style.overflow = '';
 
-  // Incrementiamo l'indice della posizione (ciclo tra 0, 1, 2)
-  hudPositionIndex = (hudPositionIndex + 1) % 3;
+  const nuovaConfig = {
+        "stats": dettagliGara.note['stats'] || false,
+        "highlights": dettagliGara.note['highlights'] || false,
+        "hud-score": hudPositionIndex,
+        "hud-clock": timePositionIndex
+  };
+  // 2. Trasformiamo l'oggetto in una stringa JSON
+  const note = JSON.stringify(nuovaConfig);
+  dettagliGara.note = note;
 
-  // Applichiamo le proprietà base per tenerlo sempre in alto
-  hudScore.style.top = '0px';
-  hudScore.style.bottom = 'auto';
-  hudScore.style.transform = 'translateX(-50%)';
-  hudScore.style.position = 'absolute'; // Assicurati che sia absolute o fixed
+  if (isAdmin) {
+    saveToFirebaseHistory('partite/', dettagliGara); 
 
-  // Ruotiamo solo le posizioni orizzontali
-  switch (hudPositionIndex) {
-    case 0: // Sinistra (25%)
-      hudScore.style.left = '30%';
-      break;
-    case 1: // Centro (50%)
-      hudScore.style.left = '50%';
-      break;
-    case 2: // Destra (75%)
-      hudScore.style.left = '70%';
-      break;
+    saveToServerMatchData(); // La tua funzione esistente per salvare su Google Sheets
   }
 
-  // Poiché lo score è ora SEMPRE in alto, il toast rimane sempre in basso
-  if (basketToast) {
+}
+
+function changeHUDLayout(elementId, newPos) {
+  /**
+   * Sposta ciclicamente la posizione degli elementi HUD
+   * @param {string} elementId - L'ID dell'elemento ('hud-score' o 'time-container')
+   */
+   vibrate(100);
+
+  const elem = document.getElementById(elementId);
+  if (!elem) return;
+
+  // Definiamo i 6 stati possibili (gli stessi per entrambi)
+  const states = [
+    { top: '0px', bottom: 'auto', left: '0%',  transform: 'none' },               // 0: Alto Sinistra
+    { top: '0px', bottom: 'auto', left: '50%', transform: 'translateX(-50%)' },    // 1: Alto Centro
+    { top: '0px', bottom: 'auto', left: '95%', transform: 'translateX(-100%)' },   // 2: Alto Destra
+    { top: 'auto', bottom: '0px', left: '95%', transform: 'translateX(-100%)' },   // 3: Basso Destra
+    { top: 'auto', bottom: '0px', left: '50%', transform: 'translateX(-50%)' },    // 4: Basso Centro
+    { top: 'auto', bottom: '0px', left: '0%',  transform: 'none' }                // 5: Basso Sinistra
+  ];
+
+  // Identifichiamo quale indice incrementare
+  if (elementId === 'hud-score') {
+    if (newPos === undefined)
+      hudPositionIndex = (hudPositionIndex + 1) % states.length;
+    else
+      hudPositionIndex = newPos;
+
+    const nextPos = states[hudPositionIndex];
+    applicaStilePosizione(elem, nextPos);
+    // Se lo score finisce in basso, sposta i messaggi Toast in alto
+    if (typeof gestisciToast === "function") gestisciToast(nextPos.bottom !== 'auto');
+    
+  } else if (elementId === 'hud-time') {
+    if (newPos === undefined)
+      timePositionIndex = (timePositionIndex + 1) % states.length;
+    else
+      timePositionIndex = newPos;
+
+    const nextPos = states[timePositionIndex];
+    applicaStilePosizione(elem, nextPos);
+  }
+}
+
+function applicaStilePosizione(elem, pos) {
+  Object.assign(elem.style, {
+    position: 'absolute',
+    top: pos.top,
+    bottom: pos.bottom,
+    left: pos.left,
+    transform: pos.transform,
+    zIndex: '1000' // Assicuriamoci che stia sopra il video
+  });
+}
+
+function gestisciToast(isHudAtBottom) {
+  const basketToast = document.querySelector('.toast');
+  if (!basketToast) return;
+
+  if (isHudAtBottom) {
+    basketToast.style.top = '10px';
+    basketToast.style.bottom = 'auto';
+  } else {
     basketToast.style.top = 'auto';
-    basketToast.style.bottom = '0.5rem';
+    basketToast.style.bottom = '10px';
   }
 }
 
@@ -2774,6 +2848,7 @@ function saveToServerMatchData() {
   formData.append("oraInizioDiretta", oraInizioDiretta);
   formData.append("isLive", isLive);
   formData.append("statoPartita", statoPartita);
+  formData.append("note", dettagliGara.note);
 
   // Invia al tuo Google Apps Script
   fetch(url, {
@@ -2936,18 +3011,6 @@ async function init() {
   }
 
   oraInizioDiretta = localStorage.getItem("oraInizioDiretta");
-  // Seleziona l'elemento dello score
-  const hudScoreElement = document.getElementById('hud-score');
-
-  // Aggiunge l'ascoltatore per il click
-  if (hudScoreElement) {
-    hudScoreElement.style.pointerEvents = 'auto'; // Importante: abilita i click sull'elemento
-    hudScoreElement.style.cursor = 'pointer';      // Cambia il cursore per far capire che è cliccabile
-
-    hudScoreElement.addEventListener('click', () => {
-      scambiaPosizioniHUD();
-    }, { passive: true });
-  }
 
   const hudClockElement = document.getElementById('hud-video-time');
   if (isAdmin && hudClockElement) {
@@ -3041,7 +3104,10 @@ async function init() {
 
   if (isAdmin) {
     const counterDiv = document.getElementById('adminCounter');
-    if (counterDiv) counterDiv.classList.remove('hidden');
+    if (counterDiv) {
+     counterDiv.style.setProperty('display', 'flex', 'important');
+     // counterDiv.classList.remove('hidden');
+    }
 
     const presenceRef = db.ref("presence/online_users");
     

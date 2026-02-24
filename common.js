@@ -1,16 +1,12 @@
 // common.js - Funzioni e variabili condivise
 const url =
-"https://script.google.com/macros/s/AKfycbwqV1ACwwbM8U2nHlGY1dWAA1vcDQSwOF-TblS8r0eDtyWCo1gyvTfNze8Rp5oGE6WnJg/exec"
+"https://script.google.com/macros/s/AKfycbwFXpOEaJPS5VmqVgBbeiZd76giOcqISRiV2GdCBa2Xmfy_wTuk_CP_iXD3mqqHw7Yqbw/exec"
 
-// ULTIMA FUNZIONANANTE "https://script.google.com/macros/s/AKfycbxNezGpflHNVJsWkhn_MV0wKf3sHyKahFk3GNZDxYXYyQmixYAaLVzjniXUYZ_P8nDY2g/exec"
-
-
+//  ULTIMA FUNZIONANANTE "https://script.google.com/macros/s/AKfycbwqV1ACwwbM8U2nHlGY1dWAA1vcDQSwOF-TblS8r0eDtyWCo1gyvTfNze8Rp5oGE6WnJg/exec"
+// "https://script.google.com/macros/s/AKfycbxNezGpflHNVJsWkhn_MV0wKf3sHyKahFk3GNZDxYXYyQmixYAaLVzjniXUYZ_P8nDY2g/exec"
 // "https://script.google.com/macros/s/AKfycbzV27rlhFPmBdlIOjTNAC44LDnhdhM3GtGOaaY9_CXXMxgQBffBlnK5uEWLJLMh3L_0uQ/exec"
-
 // "https://script.google.com/macros/s/AKfycbwXbljXTz-YAIeWRsGXAqsz1NT-ff3eleTP5OBrKgn3XzivFG89AE_3uulg9N75_Nql8g/exec"
-
 // "https://script.google.com/macros/s/AKfycby3XUCWXpplbU1mtmA1c4iEAHNjOmOm-yyUBz8VmK8VuJROa0uyimpKcat65oObFxk3mA/exec"
-
 // "https://script.google.com/macros/s/AKfycbw5x9ia8BuKiBQI4OYVyzzDSSqs_gsVvSljWXn7xCDEaPBf1FEYsgePOIkDFVeeWlVR6w/exec"
 // "https://script.google.com/macros/s/AKfycbyy6uWQYmuXcOa0D-3Ca61hIMXFEgwiYVjaruQOqRVlTTRq2OgCL8bXFvQAJETBwI-WKw/exec"
 // "https://script.google.com/macros/s/AKfycbxgrkXvfXs-cFLwSwC4VKOHfFqeucUfuMs4Q7R_epU6TskqIc9CwPjWL2tqAhU_tYLa3Q/exec"
