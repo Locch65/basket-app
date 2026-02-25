@@ -7,7 +7,7 @@
     <title>Polismile Basket App</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.112"></script>
+    <script src="common.js?v=1.0.113"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html {
@@ -312,7 +312,7 @@
 
     <header>
         <h1>Polismile Basket U14</h1>
-        <div class="app-version">Versione 1.0.112</div>
+        <div class="app-version">Versione 1.0.113</div>
         <img src="icon-192.png" alt="Logo Polismile" class="header-logo" onclick="Login()" style="cursor: pointer;">
     </header>
     <div class="menu-grid">
@@ -624,9 +624,6 @@
 
         // Avvia tutto quando il DOM è pronto
         document.addEventListener("DOMContentLoaded", initApp);
-
-        // Avvia il controllo all'apertura della webapp
-        // document.addEventListener("DOMContentLoaded", verificaNovitaAllenamenti);
 
         window.onclick = function (event) {
             let popup = document.getElementById('customPopup');

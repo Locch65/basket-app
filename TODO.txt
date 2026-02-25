@@ -37,12 +37,10 @@
 //    - NICE TO HAVE: Highlight anche in orizzontale
 //    - NICE TO HAVE: Inserire il toast per In/Out giocatori
 //    - NICE TO HAVE: se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
-//    - FATTO: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
 //
-//    - memorizzare anche i falli per squadra e per giocatore 
+//    - aggiungere i falli accanto al punteggio hud (alpmeno in landscape). flashare quando cambiano i falli per la squadra B
 //    - inserire un orologio digitale con il tempo attuale in alto a destra se isAdmin=true
-//    - FATTO: mostrare al lato dell'orologio il numero di utenti collegati al database Firebase (se è possibile avere questa info)
-//    - Storicizzare stato In/Out. Nella review della partita mostra l'ultimo stato noto
+//  * - Storicizzare stato In/Out. Nella review della partita mostra l'ultimo stato noto
 //    - Storicizzare il cambio di quarto
 //    - rendere cliccabile il bottone del quarto e attivare il popup
 //    - Memorizzare punteggi alla fine ciascun quarto. 
@@ -51,15 +49,13 @@
 //  * - Highlights: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
 //
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
+//    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
 //    - ATTENZIONE: la durata del video youtube della partita contro Crocetta non è compatibile con i tempi reali. (forse perchè è stato interrotto)
 //
 //    - su tablet aggiungere un sound al posto del vibrate
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
-//    - su Oppo diminuire dimensione hud score
-//    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
 //
 //  maps.html
-//    - FATTO: far lampeggiare il POI della prossima partita
 //
 //
 //  NUOVE FEATURES (NICE TO HAVE):
@@ -81,6 +77,8 @@
 //  Index.html
 //    - FATTO: allo startup (sulla pagina index.html) forzare un aggiornamento di tutto:roster, statistiche, calendario, mappa in modo da avere dati freschi al posto della cache
 //    - 
+//  Maps.html
+//    - FATTO: far lampeggiare il POI della prossima partita
 //
 //  Roster.html
 //    - FATTO: mostrare tabella con "#, Nome, Punti Totali, Punti da 1, da 2, da 3, Media per Partita, #Partite"
@@ -147,5 +145,7 @@
 //    - FATTO: uso di Firebase: evento In/out non viene piu' visto
 //    - FATTO: per le partite che non hanno statistiche sui tiri liberi, non metttere "TL:n/m" ma solo "TL:n"
 //    - FATTO: leggere lista giocatori da Google Sheet. VERIFICARE che non ci siano side-effect
+//    - FATTO: mostrare al lato dell'orologio il numero di utenti collegati al database Firebase (se è possibile avere questa info)
+//    - FATTO: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
 //
 // -----------------------------------------------------------------------------------

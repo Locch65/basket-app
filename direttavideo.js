@@ -2,7 +2,7 @@
 // @ts-check
 let LIVE_OFFSET = 5;
 let REFRESH_TIME = 300;
-let ACCEPTABLE_DELAY_FOR_TOAST = 5; // secondi di ritardo accettabili per visualizzare il toast del punto realizzato
+let ACCEPTABLE_DELAY_FOR_TOAST = 2; // secondi di ritardo accettabili per visualizzare il toast del punto realizzato
 
 let player;
 let timelineInterval;
@@ -445,10 +445,10 @@ function AddPuntiSquadraB(valore, memorizzaOrario) {
     historyB.push({ punti: punti, ora: oraCorrente, type: "punto" });
     saveToServerEventoLive("", punti, oraCorrente, "Squadra B", "save");
   } else {
-    // Gestione Fallo, InOut o altri stati
-    if (tipoEvento === "Fallo") {
-       if (contatoriB[0] !== undefined) contatoriB[0]++;
-    }
+    // // Gestione Fallo, InOut o altri stati
+    // if (tipoEvento === "Fallo") {
+    //    if (contatoriB[0] !== undefined) contatoriB[0]++;
+    // }
     
     historyB.push({ punti: valore, ora: oraCorrente, type: tipoEvento });
     saveToServerEventoLive("", valore, oraCorrente, "Squadra B", "save");
@@ -474,145 +474,13 @@ function undoPuntiSquadraB(eventToRemove) {
       
       saveToServerEventoLive("", -puntiDaTogliere, removedEntry.ora, "Squadra B", "undo");
     } else {
-      if (removedEntry.type === "Fallo") {
-        if (contatoriB[0] !== undefined) contatoriB[0]--;
-      }
+      // if (removedEntry.type === "Fallo") {
+      //   if (contatoriB[0] !== undefined) contatoriB[0]--;
+      // }
       // Per gli stati (Fallo, InOut), inviamo il valore originale per l'undo
-      saveToServerEventoLive("", removedEntry.punti, removedEntry.ora, "Squadra B", "undo");
+      saveToServerEventoLive("", removedEntry.type, removedEntry.ora, "Squadra B", "undo");
     }
     console.log(`Rimosso evento ${removedEntry.type} Squadra B`);
-  }
-}
-
-
-function OLDaggiornaPunteggio(target, valore) {
-  const isNumeric = !isNaN(parseFloat(valore)) && isFinite(valore);
-  const oraCorrente = new Date().toLocaleTimeString('it-IT');
-
-  if (isNumeric) {
-    const punti = parseInt(valore);
-    target.punti += punti;
-
-    // Gestione contatori (solo per i punti)
-    if (target.contatori[punti] === undefined) target.contatori[punti] = 0;
-    target.contatori[punti]++;
-
-    target.history.push({ punti: punti, ora: oraCorrente, type: "punto" });
-  } else {
-    // Gestione eventi di stato (In, Out, Fallo)
-    target.history.push({ stato: valore, ora: oraCorrente, type: "stato" });
-  }
-}
-
-function OLDAddPuntiGiocatore(id, valore) {
-  const g = giocatoriObj.find(x => x.id === id);
-  aggiornaPunteggio(g, valore);
-
-  const ultimaAzione = g.history[g.history.length - 1];
-  const timestampReale = ultimaAzione.ora;
-
-  // Il valore salvato sul server sarà il numero (punti) o la stringa (In/Out/Fallo)
-  const datoDaSalvare = ultimaAzione.type === "stato" ? ultimaAzione.stato : valore;
-
-  saveToServerEventoLive(g.numero, datoDaSalvare, timestampReale, getTeamName(), "save");
-
-  console.log("Evento registrato:", datoDaSalvare);
-}
-
-function OLDundoPunteggio(target, eventToRemove) {
-  if (!eventToRemove || target.history.length === 0) return;
-
-  const index = target.history.findIndex(ev => 
-    ev.ora === eventToRemove.ora && 
-    (ev.type === "stato" ? ev.stato === eventToRemove.stato : ev.punti === eventToRemove.punti)
-  );
-
-  if (index !== -1) {
-    const removedEntry = target.history.splice(index, 1)[0]; 
-    
-    if (removedEntry.type === "punto") {
-      const puntiDaTogliere = removedEntry.punti;
-      target.punti -= puntiDaTogliere;
-      target.contatori[puntiDaTogliere]--;
-      console.log(`Rimosso punto: ${puntiDaTogliere} alle ${removedEntry.ora}`);
-    } else {
-      console.log(`Rimosso stato: ${removedEntry.stato} alle ${removedEntry.ora}`);
-    }
-  }
-}
-
-function OLDundoPuntiGiocatore(id, evento) {
-  const g = giocatoriObj.find(x => x.id === id);
-  if (!g || g.history.length <= 0) return 0;
-
-  const azioneDaAnnullare = (evento !== undefined) ? evento : g.history[g.history.length - 1];
-  const timestampReale = azioneDaAnnullare.ora;
-  
-  // Prepariamo il valore per il server
-  let valorePerServer;
-  if (azioneDaAnnullare.type === "stato") {
-      valorePerServer = azioneDaAnnullare.stato;
-  } else {
-      valorePerServer = -azioneDaAnnullare.punti;
-  }
-
-  undoPunteggio(g, azioneDaAnnullare); 
-  
-  saveToServerEventoLive(g.numero, valorePerServer, timestampReale, getTeamName(), "undo");
-
-  return azioneDaAnnullare.type === "punto" ? azioneDaAnnullare.punti : 0;
-}
-
-function OLDAddPuntiSquadraB(valore, memorizzaOrario) {
-  const isNumeric = !isNaN(parseFloat(valore)) && isFinite(valore);
-  const oraCorrente = memorizzaOrario ? new Date().toLocaleTimeString('it-IT') : "??";
-
-  if (isNumeric) {
-    const punti = parseInt(valore);
-    puntiSquadraB += punti;
-    if (contatoriB[punti] !== undefined) contatoriB[punti]++;
-    
-    historyB.push({ punti: punti, ora: oraCorrente, type: "punto" });
-    saveToServerEventoLive("", punti, oraCorrente, "Squadra B", "save");
-  } else {
-    // Gestione Fallo o altri stati
-    historyB.push({ punti: valore, ora: oraCorrente, type: "stato" });
-    saveToServerEventoLive("", valore, oraCorrente, "Squadra B", "save");
-  }
-}
-
-function OLDundoPuntiSquadraB(eventToRemove) {
-/**
- * Rimuove un evento specifico dalla cronologia della Squadra B
- * @param {Object} eventToRemove - L'oggetto {punti, ora} da rimuovere
- */
-  if (historyB.length === 0) return;
-
-  const azioneDaAnnullare = (eventToRemove !== undefined) ? eventToRemove : historyB[historyB.length - 1];
-  
-  // Trova l'indice controllando sia l'orario che il valore (punti o stringa fallo)
-  const index = historyB.findIndex(ev => 
-    ev.ora === azioneDaAnnullare.ora && ev.punti === azioneDaAnnullare.punti
-  );
-
-  if (index !== -1) {
-    const removedEntry = historyB.splice(index, 1)[0];
-    const isNumeric = !isNaN(parseFloat(removedEntry.punti)) && isFinite(removedEntry.punti);
-
-    if (isNumeric) {
-      const puntiDaTogliere = parseInt(removedEntry.punti);
-      puntiSquadraB -= puntiDaTogliere;
-      if (contatoriB[puntiDaTogliere] !== undefined) contatoriB[puntiDaTogliere]--;
-      
-      saveToServerEventoLive("", -puntiDaTogliere, removedEntry.ora, "Squadra B", "undo");
-      console.log(`Rimosso punteggio Squadra B: ${puntiDaTogliere}pt`);
-    } else {
-      // Se era un fallo, mandiamo "undo_Fallo" al server
-      saveToServerEventoLive("", azioneDaAnnullare.punti, removedEntry.ora, "Squadra B", "undo");
-      console.log(`Rimosso evento stato Squadra B: ${removedEntry.punti}`);
-    }
-  } else {
-    console.warn("Evento non trovato nella cronologia della Squadra B");
   }
 }
 
@@ -746,7 +614,7 @@ function modifyHistory() {
 
       allEvents.push({
         idGiocatore: "Squadra B",
-        puntiRealizzati: ev.type === "punto" ? ev.punti : ev.stato,
+        puntiRealizzati: ev.type === "punto" ? ev.punti : ev.type,
         eventType: ev.type,
         falliTotali: ft > 0 ? ft : 0,
         squadra: 'Squadra B',
@@ -768,141 +636,6 @@ function modifyHistory() {
       const p = parseInt(evento.puntiRealizzati) || 0;
       if (evento.squadra === 'Squadra B') runningScoreB += p;
       else runningScoreA += p;
-    }
-
-    return {
-      ...evento,
-      punteggioA: runningScoreA,
-      punteggioB: runningScoreB
-    };
-  });
-
-  punteggioA = runningScoreA;
-  punteggioB = runningScoreB;
-
-  console.log("History rigenerata. Eventi totali:", fullMatchHistory.length);
-  highlightsAvailable = fullMatchHistory.length > 0;
-}
-
-
-function OLDgeneraHistory(liveDataDalBackend) {
-  let scoreA = 0;
-  let scoreB = 0;
-
-  historyB = [];
-  contatoriB = { 0: 0, 1: 0, 2: 0, 3: 0 };
-  giocatoriObj.forEach(g => { g.history = []; });
-
-  if (!liveDataDalBackend || liveDataDalBackend.length === 0) {
-    fullMatchHistory = giocatoriObj.map(g => ({
-      idGiocatore: g.numero,
-      puntiRealizzati: 0,
-      eventType: "punto", // Default per inizializzazione
-      squadra: 'Polismile A',
-      timestampReale: "00:00:00",
-      secondiReali: 0,
-      punteggioA: 0,
-      punteggioB: 0
-    }));
-    highlightsAvailable = false;
-    return;
-  }
-
-  fullMatchHistory = liveDataDalBackend
-    .filter(evento => evento.squadra !== "SYNC")
-    .map(evento => {
-      const valRaw = evento.puntiRealizzati;
-      // Determiniamo se è un punto o uno stato
-      const isNumeric = !isNaN(parseFloat(valRaw)) && isFinite(valRaw);
-      const type = isNumeric ? "punto" : "stato";
-      const punti = isNumeric ? parseInt(valRaw) : 0;
-
-      if (evento.squadra === 'Squadra B') {
-        scoreB += punti;
-        if (type === "punto") {
-          historyB.push({ punti: punti, ora: evento.timestampReale });
-          if (contatoriB[punti] !== undefined) contatoriB[punti]++;
-        }
-      } else {
-        scoreA += punti;
-        const giocatore = giocatoriObj.find(g => String(g.numero) === String(evento.idGiocatore));
-        // Registriamo in history del giocatore solo se sono punti reali o se è un evento di stato
-        if (giocatore) {
-          if (type === "punto" && punti !== 0) {
-            giocatore.history.push({ punti: punti, ora: evento.timestampReale });
-          } else if (type === "stato") {
-            // Opzionale: puoi salvare anche i falli/cambi nella history del giocatore
-            giocatore.history.push({ stato: valRaw, ora: evento.timestampReale, type: "stato" });
-          }
-        }
-      }
-
-      return {
-        ...evento,
-        eventType: type,
-        puntiRealizzati: valRaw, // Manteniamo il valore originale ("In", "Fallo", etc.)
-        secondiReali: hmsToSeconds(evento.timestampReale.replace("*", "")),
-        punteggioA: scoreA,
-        punteggioB: scoreB
-      };
-    });
-
-  highlightsAvailable = true;
-}
-
-function OldmodifyHistory() {
-  let allEvents = [];
-
-  // 1. Raccogli eventi della Squadra A
-  giocatoriObj.forEach(g => {
-    if (g.history && g.history.length > 0) {
-      g.history.forEach(ev => {
-        // Se ev.type è stato, usiamo ev.stato, altrimenti ev.punti
-        const isStato = ev.type === "stato";
-        allEvents.push({
-          idGiocatore: g.numero,
-          puntiRealizzati: isStato ? ev.stato : ev.punti,
-          eventType: isStato ? "stato" : "punto",
-          squadra: 'Polismile A',
-          timestampReale: ev.ora,
-          secondiReali: hmsToSeconds(ev.ora.replace("*", ""))
-        });
-      });
-    }
-  });
-
-  // 2. Raccogli eventi della Squadra B
-  if (typeof historyB !== 'undefined' && historyB.length > 0) {
-    historyB.forEach(ev => {
-      allEvents.push({
-        idGiocatore: "Squadra B",
-        puntiRealizzati: ev.punti,
-        eventType: "punto",
-        squadra: 'Squadra B',
-        timestampReale: ev.ora,
-        secondiReali: hmsToSeconds(ev.ora.replace("*", ""))
-      });
-    });
-  }
-
-  // 3. Ordina per tempo
-  allEvents.sort((a, b) => a.secondiReali - b.secondiReali);
-
-  // 4. Ricalcola i punteggi progressivi
-  let runningScoreA = 0;
-  let runningScoreB = 0;
-
-  fullMatchHistory = allEvents.map(evento => {
-    // Calcoliamo i punti solo se l'evento è di tipo "punto"
-    let punti = 0;
-    if (evento.eventType === "punto") {
-      punti = parseInt(evento.puntiRealizzati) || 0;
-    }
-
-    if (evento.squadra === 'Squadra B') {
-      runningScoreB += punti;
-    } else {
-      runningScoreA += punti;
     }
 
     return {
@@ -1024,7 +757,6 @@ function updateDatiPartita(what, data) {
 }
 
 function caricaDatiPartita(mId) {
-  
   if (!mId) return;
 
   // Se una chiamata è già in corso, esci subito
@@ -1139,7 +871,7 @@ function processEventBuffer() {
 
   if (!(matchIsLive || isReviewMode)) return;
 
-renderPlayerListLive(); // ATTENZIONE: TEst
+  renderPlayerListLive();
 
   if (eventoCorrente) {
     // Aggiorna l'HUD con i dati dell'evento trovato
@@ -1272,12 +1004,12 @@ function changeHUDLayout(elementId, newPos) {
 
   // Definiamo i 6 stati possibili (gli stessi per entrambi)
   const states = [
-    { top: '0px', bottom: 'auto', left: '0%',  transform: 'none' },               // 0: Alto Sinistra
+    { top: '0px', bottom: 'auto', left: '1%',  transform: 'none' },               // 0: Alto Sinistra
     { top: '0px', bottom: 'auto', left: '50%', transform: 'translateX(-50%)' },    // 1: Alto Centro
-    { top: '0px', bottom: 'auto', left: '95%', transform: 'translateX(-100%)' },   // 2: Alto Destra
-    { top: 'auto', bottom: '0px', left: '95%', transform: 'translateX(-100%)' },   // 3: Basso Destra
+    { top: '0px', bottom: 'auto', left: '99%', transform: 'translateX(-100%)' },   // 2: Alto Destra
+    { top: 'auto', bottom: '0px', left: '99%', transform: 'translateX(-100%)' },   // 3: Basso Destra
     { top: 'auto', bottom: '0px', left: '50%', transform: 'translateX(-50%)' },    // 4: Basso Centro
-    { top: 'auto', bottom: '0px', left: '0%',  transform: 'none' }                // 5: Basso Sinistra
+    { top: 'auto', bottom: '0px', left: '1%',  transform: 'none' }                // 5: Basso Sinistra
   ];
 
   // Identifichiamo quale indice incrementare
@@ -1286,6 +1018,13 @@ function changeHUDLayout(elementId, newPos) {
       hudPositionIndex = (hudPositionIndex + 1) % states.length;
     else
       hudPositionIndex = newPos;
+
+    // sposta il periodo alla sinistra dello score per evitare che esca fuori dallo schermo
+    if (hudPositionIndex === 2 || hudPositionIndex === 3) {
+      elem.classList.add('anchor-right');
+    } else {
+      elem.classList.remove('anchor-right');
+    }
 
     const nextPos = states[hudPositionIndex];
     applicaStilePosizione(elem, nextPos);
@@ -1619,9 +1358,37 @@ function eseguiSeekHighlight(evento) {
 }
 //#endregion
 
+function aggiornaFalliSquadra() {
+  // 1. Recuperiamo il tempo corrente del video in secondi
+  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
+
+  // 2. Filtriamo la fullMatchHistory per prendere solo i falli 
+  // avvenuti fino al secondo corrente (escludendo i SYNC)
+  const eventiFinoAdOra = fullMatchHistory.filter(evento => 
+    evento.eventType === "Fallo" && 
+    evento.secondiReali <= secondiCorrentiVideo
+  );
+
+  // 3. Calcolo Falli Squadra A
+  // Contiamo quanti di questi eventi appartengono alla Squadra A
+  const totalFoulsA = eventiFinoAdOra.filter(ev => ev.squadra === 'Polismile A').length;
+
+  // 4. Calcolo Falli Squadra B
+  // Contiamo quanti di questi eventi appartengono alla Squadra B
+  const totalFoulsB = eventiFinoAdOra.filter(ev => ev.squadra === 'Squadra B').length;
+
+  // 5. Aggiornamento DOM
+  const elA = document.getElementById("team-fouls-A");
+  const elB = document.getElementById("team-fouls-B");
+  
+  if (elA) elA.textContent = totalFoulsA;
+  if (elB) elB.textContent = totalFoulsB;
+}
+
 function updateScoreboard(matchIsLive) {
+  // Chiama questa funzione dentro generaHistory() o dopo ogni aggiornamento del punteggio
   const scoreEl = document.getElementById("game-score");
-  const hudScoreEl = document.getElementById("hud-score");
+  const scoreTextHUD = document.getElementById("score-text");
   const detailsAEl = document.getElementById("team-details-A");
   const detailsBEl = document.getElementById("team-details-B");
 
@@ -1699,7 +1466,7 @@ function updateScoreboard(matchIsLive) {
     vibrate(100);
 
     // Aggiorna l'HUD in alto nel video
-    if (hudScoreEl) hudScoreEl.textContent = currentScore;
+    if (scoreTextHUD) scoreTextHUD.textContent = currentScore;
 
     scoreEl.textContent = currentScore;
     
@@ -1733,6 +1500,8 @@ function updateScoreboard(matchIsLive) {
       }
     }
   });
+
+  aggiornaFalliSquadra();
 }
 
 function renderPlayerList() {
@@ -1761,17 +1530,25 @@ function renderPlayerList() {
     const flashClass = hasChanged ? 'flash-update' : '';
 
     return `
-      <div class="player-item ${g.stato === 'In' ? 'is-in' : 'is-out'}">
-        <div>
-          <span class="player-num">#${g.numero}</span>
-          <span class="player-name">${g.displayName}</span>
-        </div>
-        <div class="player-stats">
-          ${stats} 
-          <span class="player-points">${g.punti}</span>
+      <div class="player-item ${g.stato === 'In' ? 'is-in' : 'is-out'}" data-player-num="${g.numero}">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div>
+            <span class="player-num">#${g.numero}</span>
+            <span class="player-name">${g.displayName}</span>
+          </div>
+          <div class="player-stats" style="display: flex; align-items: center; gap: 10px;">
+            <span class="stats-text">${stats}</span>
+            
+            <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 10px; text-align: center;">
+              ${g.falliTotaliCorrenti > 0 ? g.falliTotaliCorrenti : ''}
+            </span>
+
+            <span class="player-points">${g.punti}</span>
+          </div>
         </div>
       </div>
-        `;
+    `;
+
   }).join('');
 }
 
@@ -2040,229 +1817,6 @@ function ShowPlayerPopup(giocatore) {
   refreshPopupUI();
 }
 
-
-function OLDShowPlayerPopup(giocatore) {
-  const existingOverlay = document.querySelector('.player-popup-overlay');
-  if (existingOverlay) existingOverlay.remove();
-  document.body.style.overflow = 'hidden';
-
-  const isSquadraB = (giocatore === undefined || giocatore === null);
-  
-  const info = {
-    titolo: isSquadraB ? squadraAvversaria : `#${giocatore.numero} - ${giocatore.displayName}`,
-    contatori: isSquadraB ? contatoriB : giocatore.contatori,
-    history: isSquadraB ? historyB : giocatore.history,
-    objOriginale: giocatore 
-  };
-
-  const overlay = document.createElement('div');
-  overlay.className = 'player-popup-overlay';
-  
-  const applyFeedback = (el) => {
-    el.classList.add('btn-feedback-active');
-    if (typeof vibrate === 'function') vibrate(100);
-    setTimeout(() => el.classList.remove('btn-feedback-active'), 150);
-  };
-
-  const closePopup = () => {
-    document.body.style.overflow = '';
-    overlay.remove();
-    renderPlayerListLive(); 
-  };
-
-  overlay.onclick = (e) => { if(e.target === overlay) closePopup(); };
-
-  const content = document.createElement('div');
-  content.className = 'player-popup-content dark-theme';
-
-  // --- AGGIORNAMENTO UI POPUP ---
-  const refreshPopupUI = () => {
-    const nuovoTotale = (info.contatori[1] * 1) + (info.contatori[2] * 2) + (info.contatori[3] * 3);
-    totalDisplay.innerHTML = `Totale Punti: <strong>${nuovoTotale}</strong>`;
-    
-    const labels = content.querySelectorAll('.stat-value strong');
-    if (labels.length >= 4) {
-        labels[0].innerText = info.contatori[0] || 0;
-        labels[1].innerText = info.contatori[1] || 0;
-        labels[2].innerText = info.contatori[2] || 0;
-        labels[3].innerText = info.contatori[3] || 0;
-    }
-
-    // Aggiornamento contatore falli (Sia per Giocatore che per Squadra B)
-    const numFalli = info.history.filter(ev => 
-      (ev.type === "stato" && ev.stato === "Fallo") || ev.punti === "Fallo"
-    ).length;
-    
-    const foulDisplay = content.querySelector('.foul-count-badge');
-    if (foulDisplay) {
-      foulDisplay.innerText = numFalli;
-      // Allerta visiva: per i giocatori a 5, per la squadra (bonus) a 4 o 5 per bonus tiri liberi
-      foulDisplay.style.backgroundColor = numFalli >= 5 ? "#ff0000" : "#444";
-    }
-
-    updateEventList();
-  };
-
-  const title = document.createElement('h2');
-  title.innerText = info.titolo;
-  content.appendChild(title);
-
-  const totalDisplay = document.createElement('div');
-  totalDisplay.className = 'player-total-points';
-  content.appendChild(totalDisplay);
-
-  const gridContainer = document.createElement('div');
-  gridContainer.className = 'player-stats-grid';
-
-  const statsConfig = [
-    { label: 'TL Sbagliati', val: info.contatori[0], pts: 0, extraClass: 'btn-tl-miss' },
-    { label: 'TL Segnati',   val: info.contatori[1], pts: 1 },
-    { label: '2pt Realizzati', val: info.contatori[2], pts: 2 },
-    { label: '3pt Realizzati', val: info.contatori[3], pts: 3 }
-  ];
-
-  const groupTL = document.createElement('div');
-  groupTL.className = 'group-tl-inline';
-  gridContainer.appendChild(groupTL);
-
-  statsConfig.forEach((item, index) => {
-    const col = document.createElement('div');
-    col.className = 'grid-column';
-    col.innerHTML = `<div class="stat-value"><span>${item.label}</span><strong>${item.val || 0}</strong></div>`;
-    
-    const btn = document.createElement('button');
-    btn.className = 'btn-pts-action' + (item.extraClass ? ' ' + item.extraClass : '');
-    btn.innerText = `+${item.pts}`;
-    
-    btn.onclick = () => {
-      applyFeedback(btn);
-      if (isSquadraB) {
-        gestisciPuntiAvversari(item.pts);
-      } else {
-        AddPuntiGiocatore(info.objOriginale.id, item.pts);
-//        syncGiocatoreUI(info.objOriginale);
-      }
-      modifyHistory();
-      refreshPopupUI(); 
-      updateScoreboard(matchIsLive || isReviewMode); 
-      saveToFirebaseAll();
-    };
-    col.appendChild(btn);
-
-    if (index < 2) groupTL.appendChild(col);
-    else gridContainer.appendChild(col);
-  });
-  content.appendChild(gridContainer);
-
-  // --- SEZIONE FALLI UNIVERSALE (Ora anche per Squadra B) ---
-  const foulRow = document.createElement('div');
-  foulRow.style.display = 'flex';
-  foulRow.style.alignItems = 'center';
-  foulRow.style.gap = '15px';
-  foulRow.style.marginTop = '15px';
-  foulRow.style.padding = '10px';
-  foulRow.style.backgroundColor = 'rgba(255,255,255,0.05)';
-  foulRow.style.borderRadius = '8px';
-
-  const falloBtn = document.createElement('button');
-  falloBtn.className = 'btn-pts-action btn-fallo-action';
-  falloBtn.style.flex = "1";
-  falloBtn.style.margin = "0";
-  falloBtn.style.height = "40px";
-  falloBtn.style.fontSize = "14px";
-  falloBtn.style.backgroundColor = "#dc3545";
-  falloBtn.innerText = "FALLO";
-  falloBtn.onclick = () => {
-      applyFeedback(falloBtn);
-      if (isSquadraB) {
-          gestisciPuntiAvversari("Fallo");
-      } else {
-          AddPuntiGiocatore(info.objOriginale.id, "Fallo");
-      }
-      modifyHistory();
-      refreshPopupUI();
-      saveToFirebaseAll();
-  };
-
-  const foulLabel = document.createElement('div');
-  foulLabel.style.textAlign = 'center';
-  foulLabel.innerHTML = `<span style="display:block; font-size:10px; color:#aaa; text-transform:uppercase;">Tot Falli</span>
-                         <span class="foul-count-badge" style="display:inline-block; min-width:30px; padding:4px 8px; background:#444; color:#fff; border-radius:4px; font-weight:bold; font-size:18px;">0</span>`;
-
-  foulRow.appendChild(falloBtn);
-  foulRow.appendChild(foulLabel);
-  content.appendChild(foulRow);
-
-  // --- LISTA EVENTI ---
-  let eventoSelezionato = null;
-  const historyRow = document.createElement('div');
-  historyRow.className = 'history-row-container';
-  const list = document.createElement('div');
-  list.className = 'events-scroll-list';
-  
-  const updateEventList = () => {
-    list.innerHTML = '';
-    [...info.history].reverse().forEach(ev => {
-      const row = document.createElement('div');
-      row.className = 'event-list-item';
-      
-      const isStato = ev.type === "stato" || ev.punti === "Fallo";
-      const labelEvento = isStato ? (ev.stato || ev.punti) : `${ev.punti} pt`;
-      const colorEvento = isStato ? "#ffc107" : "#fff"; 
-
-      row.innerHTML = `<span>${ev.ora}</span><strong style="color:${colorEvento}">${labelEvento}</strong>`;
-      
-      row.onclick = () => {
-        content.querySelectorAll('.event-list-item').forEach(el => el.classList.remove('selected'));
-        row.classList.add('selected');
-        eventoSelezionato = ev;
-      };
-      list.appendChild(row);
-    });
-  };
-  
-  historyRow.appendChild(list);
-
-  const undoBtn = document.createElement('button');
-  undoBtn.className = 'btn-undo-popup';
-  undoBtn.innerHTML = '<i class="fas fa-undo"></i><br>Undo';
-  undoBtn.onclick = () => {
-    applyFeedback(undoBtn);
-    if (eventoSelezionato) {
-      if (isSquadraB) {
-        gestisciPuntiAvversari('undo', eventoSelezionato);
-      } else {
-        const puntiRimossi = undoPuntiGiocatore(info.objOriginale.id, eventoSelezionato);
-        if (eventoSelezionato.type !== "stato") {
-            giocatore.punti -= puntiRimossi;
-        }
-      }
-      if (!isSquadraB) syncGiocatoreUI(info.objOriginale);
-      modifyHistory();
-      refreshPopupUI();
-      updateScoreboard(matchIsLive || isReviewMode);
-      eventoSelezionato = null;
-      saveToFirebaseAll();
-    }
-  };
-  historyRow.appendChild(undoBtn);
-  content.appendChild(historyRow);
-
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'btn-close-popup';
-  closeBtn.innerText = 'Chiudi';
-  closeBtn.onclick = () => { 
-    closePopup();
-    updateScoreboard(matchIsLive || isReviewMode);
-  };
-  content.appendChild(closeBtn);
-
-  overlay.appendChild(content);
-  document.body.appendChild(overlay);
-
-  refreshPopupUI();
-}
-
 function setSortMode(mode) {
     // Funzione per cambiare la modalità e rinfrescare la lista
     adminSortMode = mode;
@@ -2316,16 +1870,264 @@ function renderPlayerListLive() {
       (isAdmin === true || evento.secondiReali <= secondiCorrentiVideo)
     );
 
-    let n0 = 0, n1 = 0, n2 = 0, n3 = 0, puntiTotali = 0;
+    let n0 = 0, n1 = 0, n2 = 0, n3 = 0, puntiTotali = 0, nFalli = 0;
+    // Calcolo dello stato nel tempo in base agli eventi InOut
+    let statoNelTempo = g.stato; 
+    
+    eventiGiocatore.forEach(e => {
+      if (e.timestampReale !== "00:00:00") {
+        if (e.eventType === "punto") {
+          const p = parseInt(e.puntiRealizzati) || 0;
+          if (p === 0) n0++;
+          else if (p === 1) n1++;
+          else if (p === 2) n2++;
+          else if (p === 3) n3++;
+          puntiTotali += p;
+        }
+        else if (e.eventType === "Fallo") {
+          nFalli++;
+        }
+        else if (e.eventType === "InOut") {
+          // L'ultimo evento InOut determina lo stato al secondo corrente
+          statoNelTempo = e.puntiRealizzati; // "In" o "Out"
+        }
+      }
+    });
+
+    const tentativiTL = n0 + n1;
+
+    return {
+      ...g,
+      // Se admin, usa lo stato reale del DB, altrimenti quello calcolato dagli eventi video
+      statoEffettivo: isAdmin ? g.stato : statoNelTempo,
+      puntiNelTempo: puntiTotali,
+      falliNelTempo: nFalli,
+      statsNelTempo: `[TL:${n1}/${tentativiTL}, T2:${n2}, T3:${n3}]`,
+      count0: n0, count1: n1, count2: n2, count3: n3
+    };
+  });
+
+  // --- CALCOLO PUNTEGGI TOTALI ---
+  puntiSquadraA_NelTempo = visualizzazioneGiocatori.reduce((acc, g) => acc + g.puntiNelTempo, 0);
+
+  const eventiSquadraB = fullMatchHistory.filter(evento => {
+    const isSquadraB = (evento.idGiocatore === "Squadra B" || evento.idGiocatore === "" || evento.idGiocatore === null);
+    const timeMatch = (isAdmin === true || evento.secondiReali <= secondiCorrentiVideo);
+    return isSquadraB && timeMatch;
+  });
+
+  puntiSquadraB_NelTempo = eventiSquadraB.reduce((acc, e) => acc + (parseInt(e.puntiRealizzati) || 0), 0);
+
+  
+  const conteggioIn = visualizzazioneGiocatori.filter(g => g.statoEffettivo === 'In').length;
+  const coloreAllerta = (isAdmin && conteggioIn !== 5) ? "#FF0000" : "#6CFF6C";
+
+  visualizzazioneGiocatori.sort((a, b) => {
+    if (a.statoEffettivo === 'In' && b.statoEffettivo !== 'In') return -1;
+    if (a.statoEffettivo !== 'In' && b.statoEffettivo === 'In') return 1;
+    if (isAdmin && typeof adminSortMode !== 'undefined') {
+      if (adminSortMode === 'numero') return parseInt(a.numero) - parseInt(b.numero);
+      if (adminSortMode === 'cognome') return a.displayName.localeCompare(b.displayName);
+      return b.puntiNelTempo - a.puntiNelTempo;
+    }
+    return b.puntiNelTempo - a.puntiNelTempo;
+  });
+
+  // 4. Rendering Chirurgico
+  visualizzazioneGiocatori.forEach((g, index) => {
+    let playerDiv = container.querySelector(`[data-player-num="${g.numero}"]`);
+    
+    const statoPrecedente = playerDiv ? playerDiv.getAttribute("data-stato") : null;
+    const terminalitaPrecedente = playerDiv ? playerDiv.getAttribute("data-was-terminated") : null;
+    
+    const isNew = !playerDiv;
+    const statoCambiato = statoPrecedente !== g.statoEffettivo;
+    const matchStatusCambiato = terminalitaPrecedente !== String(isTerminata);
+
+    if (isNew || statoCambiato || matchStatusCambiato) {
+      if (!playerDiv) {
+        playerDiv = document.createElement("div");
+        playerDiv.setAttribute("data-player-num", g.numero);
+      }
+      playerDiv.setAttribute("data-stato", g.statoEffettivo);
+      playerDiv.setAttribute("data-was-terminated", String(isTerminata));
+      
+      if (isAdmin && !isTerminata) {
+        playerDiv.innerHTML = `
+          <div class="player-row-wrapper no-select" style="display: flex; justify-content: space-between; align-items: center; width: 100%; white-space: nowrap; gap: 8px;">
+            <div class="player-main-info" style="display: flex; align-items: center; gap: 2px; flex-grow: 1; overflow: hidden; cursor: pointer;">
+              <span class="player-num" style="flex-shrink: 0; min-width: 28px;">#${g.numero}</span>
+              <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.displayName}</span>
+            </div>
+            <div class="player-stats-actions" style="display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 12px;">
+              <div class="admin-controls" style="display: flex; gap: 3px;"></div>
+              
+              <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
+                ${g.falliTotaliCorrenti || ''}
+              </span>
+
+              <span class="player-points player-points-value">0</span>
+            </div>
+          </div>`;
+
+        playerDiv.querySelector(".player-main-info").onclick = () => {
+          vibrate(100);
+          const nuovoStato = (g.statoEffettivo === "In") ? "Out" : "In";
+          const p = giocatoriObj.find(item => item.id === g.id);
+          if(p) p.stato = nuovoStato;
+          setStato(g.id, nuovoStato);
+          modifyHistory();
+
+          // salva il cambio di stato In/Out sul DB degli eventi live
+          //const oraCorrente = new Date().toLocaleTimeString('it-IT');
+          //saveToServerEventoLive(g.numero, nuovoStato, oraCorrente, getTeamName(), "save");
+
+          renderPlayerListLive();
+          saveToFirebaseAll();
+        };
+
+        if (g.statoEffettivo === "In") {
+          const controls = playerDiv.querySelector(".admin-controls");
+          
+          const btnDetails = document.createElement("button");
+          btnDetails.className = "player-tiro";
+          btnDetails.style.backgroundColor = "#007bff";
+          btnDetails.textContent = "Details";
+          btnDetails.style.marginRight = "1rem";
+          btnDetails.onclick = (e) => { e.stopPropagation(); vibrate(100); ShowPlayerPopup(g); };
+          controls.appendChild(btnDetails);
+
+          const btnPlus2 = document.createElement("button");
+          btnPlus2.className = "player-tiro";
+          btnPlus2.textContent = "+2";
+          btnPlus2.onclick = (e) => {
+            e.stopPropagation();
+            vibrate(100);
+            punteggioA = giocatoriObj.reduce((sum, g) => sum + g.punti, 0) + 2;
+            AddPuntiGiocatore(g.id, 2);
+            g.punti += 2;
+            modifyHistory();
+            renderPlayerListLive();
+            updateScoreboard(true);
+            saveToFirebaseAll();
+          };
+          controls.appendChild(btnPlus2);
+        }
+      } else {
+        playerDiv.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <span class="player-num">#${g.numero}</span>
+              <span class="player-name">${g.displayName}</span>
+            </div>
+            <div class="player-stats">
+              <span class="stats-text"></span> 
+              <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
+                ${g.falliNelTempo || ''}
+              </span>
+              <span class="player-points">0</span>
+            </div>
+          </div>`;
+      }
+    }
+
+
+    playerDiv.className = `player-item ${g.statoEffettivo === 'In' ? 'is-in' : 'is-out'}`;
+    
+    const numSpan = playerDiv.querySelector(".player-num");
+
+    if (g.statoEffettivo === 'In') {
+        playerDiv.style.borderLeft = `4px solid ${coloreAllerta}`;
+        if (numSpan) numSpan.style.color = (isAdmin) ? coloreAllerta : ""; 
+    } else {
+        playerDiv.style.borderLeft = ""; 
+        if (numSpan) numSpan.style.color = ""; 
+    }
+
+    // 1. Gestione Falli
+    const foulsSpan = playerDiv.querySelector('.player-fouls-display');
+    let falliCambiati = false;
+    if (foulsSpan) {
+        const fVis = parseInt(foulsSpan.textContent) || 0;
+        // Verifichiamo se il valore attuale nel DOM è diverso dal nuovo calcolo
+        if (fVis !== (g.falliNelTempo || 0)) {
+            foulsSpan.innerText = g.falliNelTempo || "";
+            falliCambiati = true;
+        }
+    }
+
+    // 2. Gestione Punti
+    const scoreSpan = playerDiv.querySelector(".player-points") || playerDiv.querySelector(".player-points-value");
+    let puntiCambiati = false;
+    if (scoreSpan) {
+        const pVis = parseInt(scoreSpan.textContent) || 0;
+        if (pVis !== g.puntiNelTempo) {
+            scoreSpan.textContent = g.puntiNelTempo;
+            puntiCambiati = true;
+        }
+    }
+
+    // 3. Attivazione Flash
+    // Se non è il primo caricamento (isNew) e almeno uno dei due è cambiato
+    if (!isNew && (puntiCambiati || falliCambiati)) {
+        playerDiv.classList.add("row-highlight-flash");
+        setTimeout(() => playerDiv.classList.remove("row-highlight-flash"), 2000);
+    }
+
+    const statsSpan = playerDiv.querySelector(".stats-text");
+    if (statsSpan) statsSpan.textContent = g.statsNelTempo;
+
+    if (container.children[index] !== playerDiv) {
+      container.insertBefore(playerDiv, container.children[index]);
+    }
+  });
+
+  while (container.children.length > visualizzazioneGiocatori.length) {
+    container.removeChild(container.lastChild);
+  }
+}
+
+function OLDrenderPlayerListLive() {
+  const container = document.getElementById("players-grid");
+  if (!container) return;
+
+  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
+  
+  // 1. Rileviamo lo stato attuale del match
+  const isTerminata = typeof quartoAttuale !== 'undefined' && quartoAttuale.toLowerCase().includes("terminata");
+  
+  // --- GESTIONE SEZIONE AVVERSARI (SQUADRA B) ---
+  const opponentSection = document.getElementById('opponent-score-section');
+  if (opponentSection) {
+    if (isAdmin && !isTerminata) {
+      opponentSection.classList.add("section-ready");
+    } else {
+      opponentSection.classList.remove("section-ready");
+    }
+  }
+
+  // 2. Mappatura e calcolo statistiche
+  const visualizzazioneGiocatori = giocatoriObj.map(g => {
+    const eventiGiocatore = fullMatchHistory.filter(evento =>
+      String(evento.idGiocatore) === String(g.numero) &&
+      (isAdmin === true || evento.secondiReali <= secondiCorrentiVideo)
+    );
+
+    let n0 = 0, n1 = 0, n2 = 0, n3 = 0, puntiTotali = 0, nFalli = 0;
 
     eventiGiocatore.forEach(e => {
       if (e.timestampReale !== "00:00:00") {
-        const p = parseInt(e.puntiRealizzati) || 0;
-        if (p === 0) n0++;
-        else if (p === 1) n1++;
-        else if (p === 2) n2++;
-        else if (p === 3) n3++;
-        puntiTotali += p;
+        if (e.eventType === "punto") {
+          const p = parseInt(e.puntiRealizzati) || 0;
+          if (p === 0) n0++;
+          else if (p === 1) n1++;
+          else if (p === 2) n2++;
+          else if (p === 3) n3++;
+          puntiTotali += p;
+        }
+        else if (e.eventType === "Fallo") {
+          nFalli++;
+        }
       }
     });
 
@@ -2334,6 +2136,7 @@ function renderPlayerListLive() {
     return {
       ...g,
       puntiNelTempo: puntiTotali,
+      falliNelTempo: nFalli,
       statsNelTempo: `[TL:${n1}/${tentativiTL}, T2:${n2}, T3:${n3}]`,
       count0: n0, count1: n1, count2: n2, count3: n3
     };
@@ -2387,34 +2190,23 @@ function renderPlayerListLive() {
       playerDiv.setAttribute("data-was-terminated", String(isTerminata));
       
       if (isAdmin && !isTerminata) {
-playerDiv.innerHTML = `
-  <div class="player-row-wrapper no-select" style="display: flex; justify-content: space-between; align-items: center; width: 100%; white-space: nowrap; gap: 8px;">
-    <div class="player-main-info" style="display: flex; align-items: center; gap: 2px; flex-grow: 1; overflow: hidden; cursor: pointer;">
-      <span class="player-num" style="flex-shrink: 0; min-width: 28px;">#${g.numero}</span>
-      <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.displayName}</span>
-    </div>
-    <div class="player-stats-actions" style="display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 12px;">
-      <div class="admin-controls" style="display: flex; gap: 3px;"></div>
-      
-      <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
-        ${g.falliTotaliCorrenti || ''}
-      </span>
+        playerDiv.innerHTML = `
+          <div class="player-row-wrapper no-select" style="display: flex; justify-content: space-between; align-items: center; width: 100%; white-space: nowrap; gap: 8px;">
+            <div class="player-main-info" style="display: flex; align-items: center; gap: 2px; flex-grow: 1; overflow: hidden; cursor: pointer;">
+              <span class="player-num" style="flex-shrink: 0; min-width: 28px;">#${g.numero}</span>
+              <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.displayName}</span>
+            </div>
+            <div class="player-stats-actions" style="display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 12px;">
+              <div class="admin-controls" style="display: flex; gap: 3px;"></div>
+              
+              <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
+                ${g.falliTotaliCorrenti || ''}
+              </span>
 
-      <span class="player-points player-points-value">0</span>
-    </div>
-  </div>`;
+              <span class="player-points player-points-value">0</span>
+            </div>
+          </div>`;
 
-        // playerDiv.innerHTML = `
-        //   <div class="player-row-wrapper no-select" style="display: flex; justify-content: space-between; align-items: center; width: 100%; white-space: nowrap; gap: 8px;">
-        //     <div class="player-main-info" style="display: flex; align-items: center; gap: 6px; flex-grow: 1; overflow: hidden; cursor: pointer;">
-        //       <span class="player-num" style="flex-shrink: 0; min-width: 28px;">#${g.numero}</span>
-        //       <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.displayName}</span>
-        //     </div>
-        //     <div class="player-stats-actions" style="display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 12px;">
-        //       <div class="admin-controls" style="display: flex; gap: 3px;"></div>
-        //       <span class="player-points player-points-value">0</span>
-        //     </div>
-        //   </div>`;
 
         playerDiv.querySelector(".player-main-info").onclick = () => {
           vibrate(100);
@@ -2468,6 +2260,9 @@ playerDiv.innerHTML = `
             </div>
             <div class="player-stats">
               <span class="stats-text"></span> 
+              <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
+                ${g.falliNelTempo || ''}
+              </span>
               <span class="player-points">0</span>
             </div>
           </div>`;
@@ -2488,24 +2283,36 @@ playerDiv.innerHTML = `
         if (numSpan) numSpan.style.color = ""; 
     }
 
-      // aggiorna i falli ATTENZIONE: CONTINUARE
+    // 1. Gestione Falli
     const foulsSpan = playerDiv.querySelector('.player-fouls-display');
+    let falliCambiati = false;
     if (foulsSpan) {
-        foulsSpan.innerText = g.falliTotaliCorrenti || "";
+        const fVis = parseInt(foulsSpan.textContent) || 0;
+        // Verifichiamo se il valore attuale nel DOM è diverso dal nuovo calcolo
+        if (fVis !== (g.falliNelTempo || 0)) {
+            foulsSpan.innerText = g.falliNelTempo || "";
+            falliCambiati = true;
+        }
     }
 
+    // 2. Gestione Punti
     const scoreSpan = playerDiv.querySelector(".player-points") || playerDiv.querySelector(".player-points-value");
+    let puntiCambiati = false;
     if (scoreSpan) {
-      const pVis = parseInt(scoreSpan.textContent) || 0;
-      if (pVis !== g.puntiNelTempo) {
-        scoreSpan.textContent = g.puntiNelTempo;
-        if (!isNew) {
-           playerDiv.classList.add("row-highlight-flash");
-           setTimeout(() => playerDiv.classList.remove("row-highlight-flash"), 2000);
+        const pVis = parseInt(scoreSpan.textContent) || 0;
+        if (pVis !== g.puntiNelTempo) {
+            scoreSpan.textContent = g.puntiNelTempo;
+            puntiCambiati = true;
         }
-      }
     }
-    
+
+    // 3. Attivazione Flash
+    // Se non è il primo caricamento (isNew) e almeno uno dei due è cambiato
+    if (!isNew && (puntiCambiati || falliCambiati)) {
+        playerDiv.classList.add("row-highlight-flash");
+        setTimeout(() => playerDiv.classList.remove("row-highlight-flash"), 2000);
+    }
+
     const statsSpan = playerDiv.querySelector(".stats-text");
     if (statsSpan) statsSpan.textContent = g.statsNelTempo;
 
@@ -3066,7 +2873,7 @@ async function init() {
       // Chiude il menu se si clicca fuori
       document.addEventListener("click", () => {
         menu.classList.add("hidden");
-      });
+      }, { passive: true });
     }
     //gestisciVisibilitaMenu();
 
@@ -3096,7 +2903,7 @@ async function init() {
            setTimeout(() => location.reload(), 1000);
           }
         }
-      });
+      }, { passive: true });
 
     }
 
