@@ -688,7 +688,7 @@ body.user-mode .video-container {
 /* Gestione visibilità sezioni in base all'orientamento */
 
 /* Quando lo schermo è in LANDSCAPE (Orizzontale) */
-@media (orientation: landscape) and (max-width: 932px) {
+@media (orientation: landscape) and (max-width: 1400px) {
     .popup-box {
         padding: 1rem;
         transform: scale(0.9); /* Lo rimpicciolisce leggermente per farlo stare bene */
@@ -698,7 +698,7 @@ body.user-mode .video-container {
 
     /* iPhone Landscape Fix — riduce l’altezza del video per compensare la barra di Safari */
     .video-container {
-        height: 80vh !important;   /* Prova 80, 78, 75 finché non ti piace */
+        height: 100vh !important;   /* Prova 80, 78, 75 finché non ti piace */
         width: 100vw !important;
         aspect-ratio: unset !important; /* Disattiva il vincolo 16:9 */
     }
