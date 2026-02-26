@@ -20,6 +20,7 @@ const url =
 
 // const numeriMaglia = ["55", "5", "18", "4", "21", "15", "34", "20", "31", "25", "11", "23", "17", "9", "26", "41", "29", "99"];
 
+let isAdmin = false;
 let giocatoriA = [];
 let numeriMaglia = [];
 const USE_FIREBASE = true;
@@ -449,20 +450,80 @@ function extractYoutubeTime(input) {
 }
 
 function createAdminPopup() {
-  // Verifica se esiste già per evitare duplicati
+  // 1. Verifica se esiste già
   let popup = document.getElementById("adminPopup");
 
   if (popup) {
-    popup.classList.remove("hidden");
-    popup.style.display = "flex"; // Lo mostriamo se esiste già
-    // Focus dopo la prima creazione
+    popup.style.display = "flex";
+    const inputPass = document.getElementById("adminPassword");
     setTimeout(() => inputPass.focus(), 50);
     return;
   }
 
+  // 2. Iniezione degli STILI INLINE (CSS-in-JS)
+  const style = document.createElement('style');
+  style.textContent = `
+    #adminPopup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.85); /* Fallback per var(--overlay) */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    #adminPopup .popup-content {
+      background-color: #1e1e1e; /* Fallback per var(--card-color) */
+      border: 2px solid #ffcc00; /* Fallback per var(--primary) */
+      border-radius: 20px;
+      padding: 3rem;
+      width: 85%;
+      max-width: 32rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    #adminPopup h3 {
+      margin: 0 0 1.5rem 0;
+      color: #ffcc00;
+      font-size: 2.2rem;
+      font-family: sans-serif;
+    }
+    #adminPassword {
+      width: 100%;
+      padding: 1.2rem;
+      margin-bottom: 2rem;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: white;
+      font-size: 1.8rem;
+      text-align: center;
+      box-sizing: border-box;
+    }
+    .popup-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+    #confirmAdmin, #closeAdmin {
+      flex: 1;
+      padding: 1.2rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
+      font-size: 1.4rem;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    #confirmAdmin { background-color: #ffcc00; color: black; }
+    #closeAdmin { background-color: #444; color: white; }
+    .hidden { display: none !important; }
+  `;
+  document.head.appendChild(style);
+
+  // 3. Creazione dell'elemento POPUP
   popup = document.createElement("div");
   popup.id = "adminPopup";
-  popup.className = "popup hidden";
   popup.innerHTML = `
     <div class="popup-content">
       <h3>Accesso Admin</h3>
@@ -476,62 +537,71 @@ function createAdminPopup() {
   document.body.appendChild(popup);
 
   const inputPass = document.getElementById("adminPassword");
-
-  // Focus dopo la prima creazione
   setTimeout(() => inputPass.focus(), 50);
 
-  // Funzione per chiudere il popup
+  // --- LOGICA FUNZIONALE ---
+
   const closePopup = () => {
-    const p = document.getElementById("adminPopup");
-    p.classList.add("hidden");
-    p.style.display = "none"; // Forza la scomparsa  
+    popup.style.display = "none";
+    inputPass.value = ""; // Pulisce la pass alla chiusura
   };
 
-  // Funzione di validazione
   const handleLogin = () => {
     const pass = inputPass.value;
-    const storedPassword = localStorage.getItem("AdminPassword") || "";
     if (pass === "007") {
-      //    if (pass === storedPassword) { 
       isAdmin = true;
       localStorage.setItem("isAdmin", "true");
       localStorage.setItem("AdminPassword", pass);
 
-
-      // CAMBIO TESTO IN LOGOUT
       const adminBtn = document.getElementById("adminBtn");
       if (adminBtn) {
         adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
       }
-
       closePopup();
     } else {
       alert("Password errata!");
     }
   };
-  // 1. Click sul tasto Annulla
-  document.getElementById("closeAdmin").onclick = closePopup;
 
-  // 2. Click sul tasto Conferma
+  // Event Listeners
+  document.getElementById("closeAdmin").onclick = closePopup;
   document.getElementById("confirmAdmin").onclick = handleLogin;
 
-  // 3. Tasto Enter nell'input
-  inputPass.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
+  inputPass.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
       handleLogin();
     }
-  }, { passive: true });
+  });
 
-  // 4. NUOVO: Click all'esterno (sull'overlay scuro)
-  popup.addEventListener("click", (event) => {
-    // Se il target del click è proprio il div 'adminPopup' (l'overlay)
-    // e NON il 'popup-content' o i suoi figli
-    if (event.target === popup) {
-      closePopup();
-    }
-  }, { passive: true });
+  popup.addEventListener("click", (e) => {
+    if (e.target === popup) closePopup();
+  });
 }
+
+function Login() {
+    // 1. Se l'utente è già Admin, gestiamo il Logout
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+    if (isAdmin) {
+        if (confirm("Vuoi uscire dalla modalità Admin?")) {
+            localStorage.setItem("isAdmin", "false");
+            localStorage.setItem("AdminPassword", "");
+            location.reload();
+        }
+        return;
+    }
+
+    // 2. Se non è admin, mostriamo il popup di login
+    if (typeof createAdminPopup === "function") {
+        createAdminPopup();
+        // Assicuriamoci che sia visibile
+        const p = document.getElementById("adminPopup");
+        p.classList.remove("hidden");
+        p.style.display = "flex";
+    }
+}
+
 async function aggiornaDatiRosterEStats(what = "all") {
     /**
      * Carica Roster e/o Statistiche in base al parametro 'what' e li salva nel localStorage.

@@ -1856,8 +1856,18 @@ body.user-mode .video-container {
   .highlights-buttons button {
     padding: 0.6rem 0.8rem;
     font-size: 1.44rem;
+    min-width: 50px;  /* Larghezza minima garantita */
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
   }
   
+  .highlights-buttons button:active {
+    background-color: var(--primary, #ffcc00);
+    color: black;
+    transform: scale(0.95); /* Feedback visivo al click */
+  }
+
   #highlight-duration {
     width: 3.0rem;
     font-size: 1.28rem;

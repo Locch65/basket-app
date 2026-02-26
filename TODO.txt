@@ -38,15 +38,17 @@
 //    - NICE TO HAVE: Inserire il toast per In/Out giocatori
 //    - NICE TO HAVE: se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
 //
+//    - Popup Convocazioni: separare in due liste ordinate alfabeticamente. quando clicco su una il giocatore va nell'altra.
 //    - aggiungere i falli accanto al punteggio hud (alpmeno in landscape). flashare quando cambiano i falli per la squadra B
 //    - inserire un orologio digitale con il tempo attuale in alto a destra se isAdmin=true
-//  * - Storicizzare stato In/Out. Nella review della partita mostra l'ultimo stato noto
 //    - Storicizzare il cambio di quarto
 //    - rendere cliccabile il bottone del quarto e attivare il popup
 //    - Memorizzare punteggi alla fine ciascun quarto. 
 //    - cambiare lo sfondo della title bar per evidenziare quando si è connessi come Admin
 //    - Highlights: aggiungere per admin un bottone "fix" che cambia l'ora del canestro con quello visualizzato.
 //  * - Highlights: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
+//    - Highlights: quando esco dagli highlight riportare il punteggio al risultato finale se la partita è "Terminata"
+//    - 
 //
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
@@ -56,14 +58,14 @@
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 //
 //  maps.html
-//
+//    -
 //
 //  NUOVE FEATURES (NICE TO HAVE):
 //    - visualizzare il calendario delle partite in forma di calendario vero e proprio (Tipo Google Calendar con vista mensile)
 //    - inserire voicerecognition per dare i comandi vocali
 //    - inserire i loghi delle squadre
 //    - password Admin da crittografare
-//    - offuscare il codice
+//  * - offuscare il codice
 //
 //    - installare ESLint in VSCODE (per verificare variabili non usate)
 //
@@ -147,5 +149,6 @@
 //    - FATTO: leggere lista giocatori da Google Sheet. VERIFICARE che non ci siano side-effect
 //    - FATTO: mostrare al lato dell'orologio il numero di utenti collegati al database Firebase (se è possibile avere questa info)
 //    - FATTO: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
+//    - FATTO: Storicizzare stato In/Out. Nella review della partita mostra l'ultimo stato noto
 //
 // -----------------------------------------------------------------------------------

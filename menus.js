@@ -303,6 +303,140 @@ function gestisciConvocazioni() {
   const giocatori = giocatoriA;
   const numeri = numeriMaglia;
 
+  const existingPopup = document.getElementById("convocazioniPopup");
+  if (existingPopup) existingPopup.remove();
+
+  const popup = document.createElement("div");
+  popup.id = "convocazioniPopup";
+  popup.className = "convocazioniPopup-overlay";
+
+  const content = document.createElement("div");
+  content.className = "convocazioniPopup-content";
+
+  const title = document.createElement("h2");
+  title.textContent = "Convocazioni";
+  content.appendChild(title);
+
+  const list = document.createElement("ul");
+  list.id = "convocazioniList"; // ID per recuperarlo facilmente
+  list.className = "convocazioniPopup-list";
+  list.style.maxHeight = "600px";
+  list.style.overflowY = "auto";
+  list.style.overflowX = "hidden";
+  list.style.paddingRight = "10px";
+  list.style.listStyle = "none";
+
+  // 1. Mappatura iniziale
+  let datiGiocatori = giocatori.map((nomeCompleto, index) => {
+    const parts = nomeCompleto.trim().split(" ");
+    const nome = parts[0];
+    const cognome = parts.slice(1).join(" ");
+    return {
+      index: index,
+      nome: nome,
+      cognome: cognome,
+      visuale: `${cognome} ${nome}`,
+      numeroMaglia: numeri[index],
+      selezionato: false // Stato iniziale
+    };
+  });
+
+  // 2. Recupero convocati salvati per impostare lo stato 'selezionato' iniziale
+  let convocatiNum = [];
+  if (typeof convocazioni !== 'undefined' && convocazioni.trim() !== "") {
+    try {
+      const parsed = JSON.parse(convocazioni);
+      convocatiNum = Array.isArray(parsed) ? parsed.map(n => Number(n)) : [];
+    } catch (e) { console.error("Errore parse convocazioni", e); }
+  }
+  
+  datiGiocatori.forEach(g => {
+    if (convocatiNum.includes(Number(g.numeroMaglia))) g.selezionato = true;
+  });
+
+  // 3. Funzione per renderizzare la lista ordinata
+  const renderList = () => {
+    list.innerHTML = ""; // Svuota la lista
+
+    // Ordinamento: Prima i selezionati, poi alfabetico per cognome
+    datiGiocatori.sort((a, b) => {
+      if (a.selezionato === b.selezionato) {
+        return a.cognome.localeCompare(b.cognome);
+      }
+      return a.selezionato ? -1 : 1;
+    });
+
+    datiGiocatori.forEach((item) => {
+      const li = document.createElement("li");
+      li.className = "convocazioniPopup-item";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = `conv_${item.index}`;
+      checkbox.checked = item.selezionato;
+
+      // Al cambio, aggiorna lo stato nel database locale 'datiGiocatori' e ri-renderizza
+      checkbox.onchange = () => {
+        item.selezionato = checkbox.checked;
+        renderList(); 
+      };
+
+      const label = document.createElement("label");
+      label.htmlFor = `conv_${item.index}`;
+      label.innerHTML = `
+        <span class="conv-num">${item.numeroMaglia}</span>
+        <span class="conv-name">${item.visuale}</span>
+      `;
+
+      li.appendChild(checkbox);
+      li.appendChild(label);
+      list.appendChild(li);
+    });
+  };
+
+  // Esegui il primo render
+  renderList();
+  content.appendChild(list);
+
+  // Bottoni Azione
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "convocazioniPopup-buttons";
+
+  const confirmBtn = document.createElement("button");
+  confirmBtn.textContent = "Salva";
+  confirmBtn.className = "convocazioniPopup-confirmBtn";
+  confirmBtn.onclick = () => {
+    // Filtra solo quelli che risultano selezionati nell'array datiGiocatori
+    const selezionati = datiGiocatori
+      .filter(g => g.selezionato)
+      .map(g => Number(g.numeroMaglia));
+
+    convocazioni = JSON.stringify(selezionati);
+    localStorage.setItem("convocazioni", convocazioni);
+
+    dettagliGara.convocazioni = convocazioni;
+    saveToFirebaseHistory('partite/', dettagliGara); 
+
+    saveToServerMatchData();
+    popup.remove();
+    setTimeout(() => location.reload(), 2000);
+  };
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Annulla";
+  closeBtn.className = "convocazioniPopup-closeBtn";
+  closeBtn.onclick = () => popup.remove();
+
+  buttonsContainer.append(confirmBtn, closeBtn);
+  content.appendChild(buttonsContainer);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+}
+
+function OLDgestisciConvocazioni() {
+  const giocatori = giocatoriA;
+  const numeri = numeriMaglia;
+
   // Rimuove popup esistenti per evitare duplicati
   const existingPopup = document.getElementById("convocazioniPopup");
   if (existingPopup) existingPopup.remove();

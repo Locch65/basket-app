@@ -1,9 +1,5 @@
-let isAdmin = localStorage.getItem("isAdmin") === "true";
 let ordineCalendario = "desc";
-
 let refreshInterval = null; // Gestisce il loop di aggiornamento
-
-let mappaLuoghi = []; // Variabile globale per memorizzare i campi da gioco
 
 function parseItalianDate(dateStr, timeStr) {
     const [giorno, mese, anno] = dateStr.split("/").map(Number);
@@ -190,6 +186,8 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
 
         card.onclick = () => {
             const inTheFuture = isInTheFuture(p.data);
+            const isAdmin = localStorage.getItem("isAdmin") === "true";
+
             if (!isAdmin && inTheFuture) {
                 //alert("Video e Statistiche partita non ancora disponibili!")
                 //mostraPopup();
@@ -310,6 +308,8 @@ function startRefreshAutomatico(attiva, filtro) {
 function init() {
     registerUserId().then((data) => {});
 
+    isAdmin = localStorage.getItem("isAdmin") === "true";
+
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const menu = document.getElementById("menu");
     const toggleTheme1 = document.getElementById("toggleTheme1");
@@ -406,11 +406,6 @@ function init() {
         menu.classList.add("hidden");
     });
 
-    // --- 5. ADMIN & LOGIN ---
-    if (typeof createAdminPopup === "function") {
-        createAdminPopup(); // Inizializza il popup se la funzione esiste
-    }
-
     if (isAdmin && adminBtn) {
         adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
     }
@@ -425,13 +420,7 @@ function init() {
                     location.reload(); // Ricarica per aggiornare i permessi
                 }
             } else {
-                const popup = document.getElementById("adminPopup");
-                if (popup) {
-                    popup.classList.remove("hidden");
-                    popup.style.display = "flex"; 
-                    document.getElementById("adminPassword").value = "";
-                    document.getElementById("adminPassword").focus();
-                }
+                Login();
             }
         });
     }

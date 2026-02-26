@@ -45,7 +45,6 @@ let contatoriB = { 0: 0, 1: 0, 2: 0, 3: 0 }; // Aggiunto 0
 let ultimoOrdinamento = "numero";
 let score = 0;
 let scoreB = 0;
-let isAdmin = false;
 let listaGiocatoriCorrente = []; // per ricaricare la lista dopo login
 let matchId = null;
 let teamA = "";
@@ -384,10 +383,6 @@ function undoPunteggio(target, eventToRemove) {
     } else if (removedEvent.type === "Fallo") {
       target.falliTotaliCorrenti--;
     }
-    
-    // ATTENZIONE: è vero il commento successivo?
-    // Se l'evento rimosso era "InOut", non serve modificare i punti
-    // in quanto la rimozione dall'array history è già sufficiente.
     
     return true; // Indica che la rimozione è avvenuta con successo
   }
@@ -1109,6 +1104,48 @@ function controllaDisponibilitaHighlights() {
 }
 
 function toggleHighlights() {
+  const btnToggle = document.getElementById('toggle-highlights');
+  const controls = document.getElementById('highlights-controls');
+  const label = document.getElementById('highlight-label');
+  
+  // Recuperiamo lo span che contiene il testo dentro il bottone
+  const btnText = btnToggle.querySelector('.text-label');
+
+  // Toggle restituisce true se ha aggiunto la classe 'show', false se l'ha rimossa
+  const isNowVisible = controls.classList.toggle('show');
+
+  if (isNowVisible) {
+    // --- APERTURA ---
+    btnToggle.classList.replace('btn-toggle-off', 'btn-toggle-on');
+    
+    // RIMUOVI IL TESTO DAL BOTTONE
+    if (btnText) btnText.textContent = ""; 
+
+    if (label) {
+      label.style.display = 'block';
+      label.innerText = "Seleziona un'azione";
+    }
+    
+    inizializzaHighlights();
+    isReviewMode = true;
+  } else {
+    // --- CHIUSURA ---
+    btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
+    
+    // RIPRISTINA IL TESTO NEL BOTTONE
+    if (btnText) btnText.textContent = "Highlights";
+
+    currentHighlightIndex = -1;
+
+    if (label) {
+      label.style.display = 'none';
+      label.innerText = "";
+    }
+    isReviewMode = false;
+  }
+}
+
+function OLDtoggleHighlights() {
 
   const btnToggle = document.getElementById('toggle-highlights');
   const controls = document.getElementById('highlights-controls');
@@ -1447,7 +1484,6 @@ function updateScoreboard(matchIsLive) {
     dettagliGara.punteggioB = punteggioB;
   } else { // ATTENZIONE: ???
     if (teamA === "Polismile A") {
-//??      currentScore = `${punteggioA} - ${punteggioB}`;
       currentScore = `${puntiSquadraA_NelTempo} - ${puntiSquadraB_NelTempo}`;
       dettagliGara.punteggioA = punteggioA;
       dettagliGara.punteggioB = punteggioB;
@@ -2556,21 +2592,6 @@ Vuoi applicare la nuova sincronizzazione?`;
 }
 //#endregion
 
-function gestisciVisibilitaMenu() {
-// Funzione per gestire la visibilità del menu in base ai permessi
-  const menuIcon = document.getElementById("hamburgerMenu");
-
-  if (menuIcon) {
-    if (isAdmin === true || isAdmin === "true") {
-      // Se è admin, mostriamo il menu
-      menuIcon.style.display = "block";
-    } else {
-      // Se non è admin, lo nascondiamo completamente
-      menuIcon.style.display = "none";
-    }
-  }
-}
-
 function updateDebugFooter(serverTime = null) {
   const fetchSpan = document.getElementById("fetch-time");
   const sizeSpan = document.getElementById("display-size");
@@ -2699,6 +2720,60 @@ function salvaStatoLive(dati) {
 //#endregion
 
 function inizializzaGiocatoriConvocati() {
+  const stringaConvocati = localStorage.getItem("convocazioni");
+  
+  // 1. Pulizia della stringa dei convocati
+  let convocatiIds = [];
+  if (stringaConvocati && stringaConvocati.trim() !== "" && stringaConvocati !== "[ALL]") {
+    const stringaPulita = stringaConvocati.replace(/[\[\]'" ]/g, "");
+    convocatiIds = stringaPulita.split(",");
+  }
+
+  // 2. Creiamo la nuova lista basandoci sull'anagrafica totale
+  const nuoviGiocatoriObj = giocatoriA.map((nomeCompleto, index) => {
+    // MODIFICA QUI: Gestione spazi nel nome e cognome
+    const parti = nomeCompleto.trim().split(/\s+/); // Divide per uno o più spazi
+    const nome = parti[0]; // La prima parola è il nome
+    const cognome = parti.slice(1).join(" "); // Tutto il resto è il cognome
+    
+    const numeroMaglia = String(numeriMaglia[index]);
+
+    // Verifica se il giocatore è convocato
+    const isConvocato = convocatiIds.length === 0 || convocatiIds.includes(numeroMaglia);
+    
+    if (!isConvocato) return null;
+
+    // CERCA se il giocatore esisteva già
+    const giocatoreEsistente = giocatoriObj.find(g => String(g.numero) === numeroMaglia);
+
+    if (giocatoreEsistente) {
+      // Se esiste, lo restituiamo così com'è (mantiene history, punteggio, stato, ecc.)
+      return giocatoreEsistente;
+    } else {
+      return {
+        id: `${cognome.replace(/\s+/g, '_')}_${nome}`, // ID senza spazi per sicurezza
+        numero: numeroMaglia,
+        displayName: `${cognome} ${nome}`,
+        punti: 0,
+        contatori: { 0: 0, 1: 0, 2: 0, 3: 0 },
+        history: [], 
+        stato: "Out",
+        lastPunteggio: 0,
+        nome: nome,
+        cognome: cognome  
+      };
+    }
+  })
+  .filter(g => g !== null) // Rimuove i non convocati
+  .sort((a, b) => a.cognome.localeCompare(b.cognome)); // Mantiene l'ordinamento
+
+  // 3. Aggiorna la variabile globale
+  giocatoriObj = nuoviGiocatoriObj;
+
+  console.log("GiocatoriObj aggiornato:", giocatoriObj);
+}
+
+function OLDinizializzaGiocatoriConvocati() {
   const stringaConvocati = localStorage.getItem("convocazioni");
   
   // 1. Pulizia della stringa dei convocati (array di numeri maglia come stringhe)
@@ -2875,11 +2950,7 @@ async function init() {
         menu.classList.add("hidden");
       }, { passive: true });
     }
-    //gestisciVisibilitaMenu();
 
-    if (typeof createAdminPopup === "function") {
-      createAdminPopup(); // Inizializza il popup se la funzione esiste
-    }
     const adminBtn = document.getElementById("adminBtn");
 
     if (isAdmin) {
