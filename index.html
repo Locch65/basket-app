@@ -64,7 +64,7 @@
             padding-bottom: 4.0rem;
         }
 
-        .menu-button {
+        /* .menu-button {
             background-color: var(--card-color);
             border: 1px solid #333;
             border-radius: 15px;
@@ -79,7 +79,26 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             cursor: pointer;
-        }
+        } */
+.menu-button {
+    background-color: var(--card-color);
+    border: 1px solid #333;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1.0rem;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    /* AGGIUNGI QUESTE DUE RIGHE: */
+    min-height: 12rem; 
+    overflow: hidden;
+}         
 
         .menu-button i {
             font-size: 3.8rem;
@@ -87,14 +106,21 @@
             color: var(--primary);
         }
 
+#live-text {
+    font-weight: bold;
+    font-size: 1.3rem; /* Leggermente più piccolo per sicurezza */
+    line-height: 1.1;
+    display: block;
+    width: 100%; /* Occupa tutto lo spazio */
+    word-wrap: break-word; /* Evita che i nomi lunghi escano dai bordi */
+}        
         /* Stile per il testo su più righe */
-        #live-text {
+        /* #live-text {
             font-weight: bold;
             font-size: 1.4rem;
             line-height: 1.2;
-            /* Riduce lo spazio tra le righe */
             display: block;
-        }
+        } */
 
         .menu-button span {
             font-weight: bold;
