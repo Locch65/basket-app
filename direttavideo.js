@@ -1145,40 +1145,6 @@ function toggleHighlights() {
   }
 }
 
-function OLDtoggleHighlights() {
-
-  const btnToggle = document.getElementById('toggle-highlights');
-  const controls = document.getElementById('highlights-controls');
-  const label = document.getElementById('highlight-label');
-
-  // Toggle restituisce true se ha aggiunto la classe, false se l'ha rimossa
-  const isNowVisible = controls.classList.toggle('show');
-
-  if (isNowVisible) {
-    // APERTURA
-    btnToggle.classList.replace('btn-toggle-off', 'btn-toggle-on');
-    // Mostriamo la label solo se i controlli sono aperti
-    if (label) {
-      label.style.display = 'block';
-      label.innerText = "Seleziona un'azione"; // Testo iniziale per evitare buchi
-    }
-    inizializzaHighlights();
-    isReviewMode = true;
-  } else {
-    // CHIUSURA
-    btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
-    label.style.display = 'none';  // <--- NASCONDE LA LABEL
-    currentHighlightIndex = -1;
-
-    // Nascondiamo la label quando chiudiamo i controlli
-    if (label) {
-      label.style.display = 'none';
-      label.innerText = "";
-    }
-    isReviewMode = false;
-  }
-}
-
 function inizializzaHighlights() {
   // Rimosso il controllo if (currentHighlightIndex >= 0) per permettere il reset
   if (fullMatchHistory && fullMatchHistory.length > 0) {
@@ -1565,12 +1531,31 @@ function renderPlayerList() {
     const hasChanged = g.punti !== g.lastPunteggio;
     const flashClass = hasChanged ? 'flash-update' : '';
 
+    // return `
+    //   <div class="player-item ${g.stato === 'In' ? 'is-in' : 'is-out'}" data-player-num="${g.numero}">
+    //     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    //       <div>
+    //         <span class="player-num">#${g.numero}</span>
+    //         <span class="player-name">${g.displayName}</span>
+    //       </div>
+    //       <div class="player-stats" style="display: flex; align-items: center; gap: 10px;">
+    //         <span class="stats-text">${stats}</span>
+            
+    //         <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 10px; text-align: center;">
+    //           ${g.falliTotaliCorrenti > 0 ? g.falliTotaliCorrenti : ''}
+    //         </span>
+
+    //         <span class="player-points">${g.punti}</span>
+    //       </div>
+    //     </div>
+    //   </div>
+    // `;
     return `
       <div class="player-item ${g.stato === 'In' ? 'is-in' : 'is-out'}" data-player-num="${g.numero}">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
           <div>
             <span class="player-num">#${g.numero}</span>
-            <span class="player-name">${g.displayName}</span>
+            <span class="player-name">${g.cognome}</span>
           </div>
           <div class="player-stats" style="display: flex; align-items: center; gap: 10px;">
             <span class="stats-text">${stats}</span>
@@ -1989,11 +1974,28 @@ function renderPlayerListLive() {
       playerDiv.setAttribute("data-was-terminated", String(isTerminata));
       
       if (isAdmin && !isTerminata) {
+        // playerDiv.innerHTML = `
+        //   <div class="player-row-wrapper no-select" style="display: flex; justify-content: space-between; align-items: center; width: 100%; white-space: nowrap; gap: 8px;">
+        //     <div class="player-main-info" style="display: flex; align-items: center; gap: 2px; flex-grow: 1; overflow: hidden; cursor: pointer;">
+        //       <span class="player-num" style="flex-shrink: 0; min-width: 28px;">#${g.numero}</span>
+        //       <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.displayName}</span>
+        //     </div>
+        //     <div class="player-stats-actions" style="display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 12px;">
+        //       <div class="admin-controls" style="display: flex; gap: 3px;"></div>
+              
+        //       <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
+        //         ${g.falliTotaliCorrenti || ''}
+        //       </span>
+
+        //       <span class="player-points player-points-value">0</span>
+        //     </div>
+        //   </div>`;
+
         playerDiv.innerHTML = `
           <div class="player-row-wrapper no-select" style="display: flex; justify-content: space-between; align-items: center; width: 100%; white-space: nowrap; gap: 8px;">
             <div class="player-main-info" style="display: flex; align-items: center; gap: 2px; flex-grow: 1; overflow: hidden; cursor: pointer;">
               <span class="player-num" style="flex-shrink: 0; min-width: 28px;">#${g.numero}</span>
-              <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.displayName}</span>
+              <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.cognome}</span>
             </div>
             <div class="player-stats-actions" style="display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 12px;">
               <div class="admin-controls" style="display: flex; gap: 3px;"></div>
@@ -2005,6 +2007,7 @@ function renderPlayerListLive() {
               <span class="player-points player-points-value">0</span>
             </div>
           </div>`;
+
 
         playerDiv.querySelector(".player-main-info").onclick = () => {
           vibrate(100);
@@ -2050,11 +2053,25 @@ function renderPlayerListLive() {
           controls.appendChild(btnPlus2);
         }
       } else {
+        // playerDiv.innerHTML = `
+        //   <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        //     <div>
+        //       <span class="player-num">#${g.numero}</span>
+        //       <span class="player-name">${g.displayName}</span>
+        //     </div>
+        //     <div class="player-stats">
+        //       <span class="stats-text"></span> 
+        //       <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
+        //         ${g.falliNelTempo || ''}
+        //       </span>
+        //       <span class="player-points">0</span>
+        //     </div>
+        //   </div>`;
         playerDiv.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <div>
               <span class="player-num">#${g.numero}</span>
-              <span class="player-name">${g.displayName}</span>
+              <span class="player-name">${g.cognome}</span>
             </div>
             <div class="player-stats">
               <span class="stats-text"></span> 
@@ -2064,6 +2081,7 @@ function renderPlayerListLive() {
               <span class="player-points">0</span>
             </div>
           </div>`;
+
       }
     }
 
@@ -2074,245 +2092,6 @@ function renderPlayerListLive() {
 
     if (g.statoEffettivo === 'In') {
         playerDiv.style.borderLeft = `4px solid ${coloreAllerta}`;
-        if (numSpan) numSpan.style.color = (isAdmin) ? coloreAllerta : ""; 
-    } else {
-        playerDiv.style.borderLeft = ""; 
-        if (numSpan) numSpan.style.color = ""; 
-    }
-
-    // 1. Gestione Falli
-    const foulsSpan = playerDiv.querySelector('.player-fouls-display');
-    let falliCambiati = false;
-    if (foulsSpan) {
-        const fVis = parseInt(foulsSpan.textContent) || 0;
-        // Verifichiamo se il valore attuale nel DOM è diverso dal nuovo calcolo
-        if (fVis !== (g.falliNelTempo || 0)) {
-            foulsSpan.innerText = g.falliNelTempo || "";
-            falliCambiati = true;
-        }
-    }
-
-    // 2. Gestione Punti
-    const scoreSpan = playerDiv.querySelector(".player-points") || playerDiv.querySelector(".player-points-value");
-    let puntiCambiati = false;
-    if (scoreSpan) {
-        const pVis = parseInt(scoreSpan.textContent) || 0;
-        if (pVis !== g.puntiNelTempo) {
-            scoreSpan.textContent = g.puntiNelTempo;
-            puntiCambiati = true;
-        }
-    }
-
-    // 3. Attivazione Flash
-    // Se non è il primo caricamento (isNew) e almeno uno dei due è cambiato
-    if (!isNew && (puntiCambiati || falliCambiati)) {
-        playerDiv.classList.add("row-highlight-flash");
-        setTimeout(() => playerDiv.classList.remove("row-highlight-flash"), 2000);
-    }
-
-    const statsSpan = playerDiv.querySelector(".stats-text");
-    if (statsSpan) statsSpan.textContent = g.statsNelTempo;
-
-    if (container.children[index] !== playerDiv) {
-      container.insertBefore(playerDiv, container.children[index]);
-    }
-  });
-
-  while (container.children.length > visualizzazioneGiocatori.length) {
-    container.removeChild(container.lastChild);
-  }
-}
-
-function OLDrenderPlayerListLive() {
-  const container = document.getElementById("players-grid");
-  if (!container) return;
-
-  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
-  
-  // 1. Rileviamo lo stato attuale del match
-  const isTerminata = typeof quartoAttuale !== 'undefined' && quartoAttuale.toLowerCase().includes("terminata");
-  
-  // --- GESTIONE SEZIONE AVVERSARI (SQUADRA B) ---
-  const opponentSection = document.getElementById('opponent-score-section');
-  if (opponentSection) {
-    if (isAdmin && !isTerminata) {
-      opponentSection.classList.add("section-ready");
-    } else {
-      opponentSection.classList.remove("section-ready");
-    }
-  }
-
-  // 2. Mappatura e calcolo statistiche
-  const visualizzazioneGiocatori = giocatoriObj.map(g => {
-    const eventiGiocatore = fullMatchHistory.filter(evento =>
-      String(evento.idGiocatore) === String(g.numero) &&
-      (isAdmin === true || evento.secondiReali <= secondiCorrentiVideo)
-    );
-
-    let n0 = 0, n1 = 0, n2 = 0, n3 = 0, puntiTotali = 0, nFalli = 0;
-
-    eventiGiocatore.forEach(e => {
-      if (e.timestampReale !== "00:00:00") {
-        if (e.eventType === "punto") {
-          const p = parseInt(e.puntiRealizzati) || 0;
-          if (p === 0) n0++;
-          else if (p === 1) n1++;
-          else if (p === 2) n2++;
-          else if (p === 3) n3++;
-          puntiTotali += p;
-        }
-        else if (e.eventType === "Fallo") {
-          nFalli++;
-        }
-      }
-    });
-
-    const tentativiTL = n0 + n1;
-
-    return {
-      ...g,
-      puntiNelTempo: puntiTotali,
-      falliNelTempo: nFalli,
-      statsNelTempo: `[TL:${n1}/${tentativiTL}, T2:${n2}, T3:${n3}]`,
-      count0: n0, count1: n1, count2: n2, count3: n3
-    };
-  });
-
-  // --- CALCOLO PUNTEGGI TOTALI ---
-  puntiSquadraA_NelTempo = visualizzazioneGiocatori.reduce((acc, g) => acc + g.puntiNelTempo, 0);
-
-  const eventiSquadraB = fullMatchHistory.filter(evento => {
-    const isSquadraB = (evento.idGiocatore === "Squadra B" || evento.idGiocatore === "" || evento.idGiocatore === null);
-    const timeMatch = (isAdmin === true || evento.secondiReali <= secondiCorrentiVideo);
-    return isSquadraB && timeMatch;
-  });
-
-  puntiSquadraB_NelTempo = eventiSquadraB.reduce((acc, e) => acc + (parseInt(e.puntiRealizzati) || 0), 0);
-
-  // --- LOGICA QUINTETTO (Solo per Admin) ---
-  const conteggioIn = visualizzazioneGiocatori.filter(g => g.stato === 'In').length;
-  // Se non è admin o se il quintetto è 5, usiamo il verde standard. Altrimenti rosso.
-  const coloreAllerta = (isAdmin && conteggioIn !== 5) ? "#FF0000" : "#6CFF6C";
-
-  // 3. Ordinamento
-  visualizzazioneGiocatori.sort((a, b) => {
-    if (a.stato === 'In' && b.stato !== 'In') return -1;
-    if (a.stato !== 'In' && b.stato === 'In') return 1;
-    if (isAdmin && typeof adminSortMode !== 'undefined') {
-      if (adminSortMode === 'numero') return parseInt(a.numero) - parseInt(b.numero);
-      if (adminSortMode === 'cognome') return a.displayName.localeCompare(b.displayName);
-      return b.puntiNelTempo - a.puntiNelTempo;
-    }
-    return b.puntiNelTempo - a.puntiNelTempo;
-  });
-
-  // 4. Rendering Chirurgico
-  visualizzazioneGiocatori.forEach((g, index) => {
-    let playerDiv = container.querySelector(`[data-player-num="${g.numero}"]`);
-    
-    const statoPrecedente = playerDiv ? playerDiv.getAttribute("data-stato") : null;
-    const terminalitaPrecedente = playerDiv ? playerDiv.getAttribute("data-was-terminated") : null;
-    
-    const isNew = !playerDiv;
-    const statoCambiato = statoPrecedente !== g.stato;
-    const matchStatusCambiato = terminalitaPrecedente !== String(isTerminata);
-
-    if (isNew || statoCambiato || matchStatusCambiato) {
-      if (!playerDiv) {
-        playerDiv = document.createElement("div");
-        playerDiv.setAttribute("data-player-num", g.numero);
-      }
-      playerDiv.setAttribute("data-stato", g.stato);
-      playerDiv.setAttribute("data-was-terminated", String(isTerminata));
-      
-      if (isAdmin && !isTerminata) {
-        playerDiv.innerHTML = `
-          <div class="player-row-wrapper no-select" style="display: flex; justify-content: space-between; align-items: center; width: 100%; white-space: nowrap; gap: 8px;">
-            <div class="player-main-info" style="display: flex; align-items: center; gap: 2px; flex-grow: 1; overflow: hidden; cursor: pointer;">
-              <span class="player-num" style="flex-shrink: 0; min-width: 28px;">#${g.numero}</span>
-              <span class="player-name" style="overflow: hidden; text-overflow: ellipsis; flex-grow: 1;">${g.displayName}</span>
-            </div>
-            <div class="player-stats-actions" style="display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-left: 12px;">
-              <div class="admin-controls" style="display: flex; gap: 3px;"></div>
-              
-              <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
-                ${g.falliTotaliCorrenti || ''}
-              </span>
-
-              <span class="player-points player-points-value">0</span>
-            </div>
-          </div>`;
-
-
-        playerDiv.querySelector(".player-main-info").onclick = () => {
-          vibrate(100);
-          const nuovoStato = (g.stato === "In") ? "Out" : "In";
-          const p = giocatoriObj.find(item => item.id === g.id);
-          if(p) p.stato = nuovoStato;
-          setStato(g.id, nuovoStato);
-          modifyHistory();
-
-          // salva il cambio di stato In/Out sul DB degli eventi live
-          //const oraCorrente = new Date().toLocaleTimeString('it-IT');
-          //saveToServerEventoLive(g.numero, nuovoStato, oraCorrente, getTeamName(), "save");
-
-          renderPlayerListLive();
-          saveToFirebaseAll();
-        };
-
-        if (g.stato === "In") {
-          const controls = playerDiv.querySelector(".admin-controls");
-          
-          const btnDetails = document.createElement("button");
-          btnDetails.className = "player-tiro";
-          btnDetails.style.backgroundColor = "#007bff";
-          btnDetails.textContent = "Details";
-          btnDetails.style.marginRight = "1rem";
-          btnDetails.onclick = (e) => { e.stopPropagation(); vibrate(100); ShowPlayerPopup(g); };
-          controls.appendChild(btnDetails);
-
-          const btnPlus2 = document.createElement("button");
-          btnPlus2.className = "player-tiro";
-          btnPlus2.textContent = "+2";
-          btnPlus2.onclick = (e) => {
-            e.stopPropagation();
-            vibrate(100);
-            punteggioA = giocatoriObj.reduce((sum, g) => sum + g.punti, 0) + 2;
-            AddPuntiGiocatore(g.id, 2);
-            g.punti += 2;
-            modifyHistory();
-            renderPlayerListLive();
-            updateScoreboard(true);
-            saveToFirebaseAll();
-          };
-          controls.appendChild(btnPlus2);
-        }
-      } else {
-        playerDiv.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <div>
-              <span class="player-num">#${g.numero}</span>
-              <span class="player-name">${g.displayName}</span>
-            </div>
-            <div class="player-stats">
-              <span class="stats-text"></span> 
-              <span class="player-fouls-display" style="color: #ff4444; font-weight: bold; min-width: 20px; text-align: center; font-size: 1.4rem;">
-                ${g.falliNelTempo || ''}
-              </span>
-              <span class="player-points">0</span>
-            </div>
-          </div>`;
-      }
-    }
-
-    // --- AGGIORNAMENTO COSTANTE COLORI (Logica condizionale isAdmin) ---
-    playerDiv.className = `player-item ${g.stato === 'In' ? 'is-in' : 'is-out'}`;
-    
-    const numSpan = playerDiv.querySelector(".player-num");
-
-    if (g.stato === 'In') {
-        playerDiv.style.borderLeft = `4px solid ${coloreAllerta}`;
-        // Applichiamo il colore al numero solo se è admin (mostrando l'allerta)
         if (numSpan) numSpan.style.color = (isAdmin) ? coloreAllerta : ""; 
     } else {
         playerDiv.style.borderLeft = ""; 
@@ -2773,55 +2552,11 @@ function inizializzaGiocatoriConvocati() {
   console.log("GiocatoriObj aggiornato:", giocatoriObj);
 }
 
-function OLDinizializzaGiocatoriConvocati() {
-  const stringaConvocati = localStorage.getItem("convocazioni");
-  
-  // 1. Pulizia della stringa dei convocati (array di numeri maglia come stringhe)
-  let convocatiIds = [];
-  if (stringaConvocati && stringaConvocati.trim() !== "" && stringaConvocati !== "[ALL]") {
-    const stringaPulita = stringaConvocati.replace(/[\[\]'" ]/g, "");
-    convocatiIds = stringaPulita.split(",");
-  }
-
-  // 2. Creiamo la nuova lista basandoci sull'anagrafica totale (giocatoriA)
-  const nuoviGiocatoriObj = giocatoriA.map((nomeCompleto, index) => {
-    const [nome, cognome] = nomeCompleto.split(" ");
-    const numeroMaglia = String(numeriMaglia[index]);
-
-    // Verifica se il giocatore è convocato
-    const isConvocato = convocatiIds.length === 0 || convocatiIds.includes(numeroMaglia);
-    
-    if (!isConvocato) return null;
-
-    // CERCA se il giocatore esisteva già nel vecchio giocatoriObj per non perdere i dati
-    const giocatoreEsistente = giocatoriObj.find(g => String(g.numero) === numeroMaglia);
-
-    if (giocatoreEsistente) {
-      // Se esiste, lo restituiamo così com'è (mantiene history, punteggio, stato, ecc.)
-      return giocatoreEsistente;
-    } else {
-      // Se è nuovo, creiamo l'oggetto da zero
-      return {
-        id: `${cognome}_${nome}`,
-        numero: numeroMaglia,
-        displayName: `${cognome} ${nome}`,
-        punti: 0,
-        contatori: { 0: 0, 1: 0, 2: 0, 3: 0 },
-        history: [], 
-        stato: "Out",
-        lastPunteggio: 0,
-        nome: nome,
-        cognome: cognome  
-      };
-    }
-  })
-  .filter(g => g !== null) // Rimuove i non convocati
-  .sort((a, b) => a.cognome.localeCompare(b.cognome)); // Mantiene l'ordinamento
-
-  // 3. Aggiorna la variabile globale
-  giocatoriObj = nuoviGiocatoriObj;
-
-  console.log("GiocatoriObj aggiornato (preservando dati esistenti):", giocatoriObj);
+// Funzione per aggiornare l'orario
+function updateSystemClock() {
+    const clockElement = document.getElementById('systemClock');
+    const now = new Date();
+    clockElement.textContent = now.toLocaleTimeString('it-IT', { hour12: false });
 }
 
 // ---------------------------------------------------------------------------------------------------- //
@@ -2983,8 +2718,13 @@ async function init() {
   if (isAdmin) {
     const counterDiv = document.getElementById('adminCounter');
     if (counterDiv) {
-     counterDiv.style.setProperty('display', 'flex', 'important');
-     // counterDiv.classList.remove('hidden');
+       counterDiv.style.setProperty('display', 'flex', 'important');
+    }
+
+    // Mostra l'orologio
+    const clockDiv = document.getElementById('systemClock');
+    if (counterDiv) {
+      clockDiv.classList.remove('hidden');
     }
 
     const presenceRef = db.ref("presence/online_users");
@@ -2995,7 +2735,6 @@ async function init() {
         if (snap.exists()) {
             count = snap.numChildren();
         }
-        
         // Aggiorna l'interfaccia
         const countSpan = document.getElementById('onlineCount');
         if (countSpan) {
@@ -3021,6 +2760,10 @@ async function init() {
 
   if (!isAdmin) {
     registerToFirebaseEvents();
+  }
+  else {
+    // Avvia il timer per aggiornare il system cloc
+    setInterval(updateSystemClock, 1000);    
   }
 }
 

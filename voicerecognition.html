@@ -14,29 +14,21 @@
             background: #121212;
             color: white;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
         }
 
-        #status-indicator {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: red;
-            margin: 20px;
-            transition: 0.3s;
-            border: 3px solid white;
-        }
-
-        .active {
-            background: #00ff00 !important;
-            box-shadow: 0 0 20px #00ff00;
+        /* Riga superiore: Video a sinistra, Status a destra */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
         #video-container {
-            position: relative;
-            width: 320px;
-            height: 240px;
-            border-radius: 15px;
+            width: 80px; /* Ridotto */
+            height: 60px;
+            border-radius: 10px;
             overflow: hidden;
             background: #333;
         }
@@ -48,22 +40,59 @@
             object-fit: cover;
         }
 
-        #log {
-            width: 90%;
+        #status-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: red;
+            transition: 0.3s;
+            border: 3px solid white;
+        }
+
+        .active {
+            background: #00ff00 !important;
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.8em;
+        }
+
+        /* Lista Roster Centrale */
+        #roster-list {
+            width: 100%;
             max-width: 400px;
-            background: #222;
-            padding: 15px;
+            background: #1e1e1e;
             border-radius: 10px;
-            height: 150px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #333;
+            max-height: 250px;
             overflow-y: auto;
-            margin-top: 20px;
+        }
+
+        .roster-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: 5px 0;
+            border-bottom: 1px solid #2a2a2a;
             font-size: 0.9em;
         }
 
-        .points-entry {
+        /* Log in basso */
+        #log {
+            width: 90%;
+            max-width: 400px;
+            background: #000;
+            padding: 15px;
+            border-radius: 10px;
+            height: 120px;
+            overflow-y: auto;
             color: #00ff00;
-            border-bottom: 1px solid #333;
-            padding: 5px 0;
+            font-family: monospace;
         }
 
         button {
@@ -77,23 +106,30 @@
             font-weight: bold;
         }
     </style>
+
 </head>
 
 <body>
+    <h1>Basket Assistant</h1>
 
-    <h1>Basket Score Assistant</h1>
-
-    <div id="video-container">
-        <video id="webcam" autoplay playsinline></video>
+    <div class="top-bar">
+        <div id="video-container">
+            <video id="webcam" autoplay playsinline></video>
+        </div>
+        <div id="status-indicator"></div>
+        <div class="controls">
+            <label><input type="checkbox" id="enableVoice" checked> Voce</label>
+        </div>
     </div>
-
-    <div id="status-indicator"></div>
-    <p id="instruction">Premi Start e guarda lo schermo per segnare i punti</p>
 
     <button id="startBtn">ATTIVA SISTEMA</button>
 
+    <div id="roster-list">
+        <div style="text-align: center; color: #666;">Il roster apparirà qui all'avvio</div>
+    </div>
+
     <div id="log">
-        <div style="color: #888;">Log attività...</div>
+        <div style="color: #444;">In attesa di comandi...</div>
     </div>
 
     <script type="module">
@@ -104,9 +140,13 @@
         const log = document.getElementById("log");
         const startBtn = document.getElementById("startBtn");
 
+        let roster;
         let faceDetector;
         let isUserLooking = false;
         let recognition;
+        let lastProcessedTime = 0;
+        let lastCommandKey = ""; // Per memorizzare l'ultimo comando (es: "Rossi2")
+        let isSpeaking = false; // Flag per capire se l'assistente sta parlando        
 
         // 1. Inizializza Face Detector
         async function initFaceDetection() {
@@ -128,21 +168,90 @@
 
         // 3. Loop di rilevamento volto
         async function predictWebcam() {
+            if (!faceDetector) return;
+
             const startTimeMs = performance.now();
             const detections = faceDetector.detectForVideo(video, startTimeMs).detections;
 
-            if (detections.length > 0) {
-                isUserLooking = true;
+            isUserLooking = detections.length > 0;
+            
+            if (isUserLooking) {
                 statusIndicator.classList.add("active");
             } else {
-                isUserLooking = false;
                 statusIndicator.classList.remove("active");
             }
-            window.requestAnimationFrame(predictWebcam);
+
+            // Risparmio energetico: controllo ogni mezzo secondo
+            setTimeout(() => {
+                window.requestAnimationFrame(predictWebcam);
+            }, 500); 
         }
 
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playBeep(frequency, duration) {
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = frequency;
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + duration);
+}
+
+// Beep acuto e breve (Successo)
+function beepSuccess() {
+    playBeep(880, 0.2); // Nota LA5
+}
+
+// Beep grave (Errore)
+function beepError() {
+    playBeep(600, 0.2); // Nota LA3
+    playBeep(440, 0.2); // Nota LA3
+}
+
         // 4. Configura Riconoscimento Vocale
-        function initVoiceRecognition() {
+function initVoiceRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'it-IT';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+recognition.onresult = (event) => {
+    // SE L'ASSISTENTE STA PARLANDO, IGNORA TUTTO
+    if (isSpeaking) {
+        console.log("Ignorato: sto parlando io.");
+        return;
+    }
+
+    const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+
+    if (isUserLooking) {
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        // Log Giallo (Grezzo)
+        const rawEntry = document.createElement("div");
+        rawEntry.style.padding = "2px 0";
+        rawEntry.style.color = "#ffff00";
+        rawEntry.innerHTML = `&bull; ${time}: "${transcript}"`;
+        log.prepend(rawEntry);
+
+        processCommand(transcript);
+    }
+};
+
+    recognition.onend = () => recognition.start();
+    recognition.start();
+}
+
+        function OLDinitVoiceRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.lang = 'it-IT';
@@ -165,39 +274,173 @@
         }
 
         // 5. Analisi del comando e Risposta vocale
-        function processCommand(text) {
-            // Regex per catturare "Nome" e "Numero" (es: "Rossi 2")
-            const regex = /([a-zàèìòù]+)\s+(\d+)/i;
-            const match = text.match(regex);
+function ottieniNomiAmbigui(roster) {
+    const conteggioNomi = {};
+    roster.forEach(p => {
+        const nome = p.Nome.toLowerCase();
+        conteggioNomi[nome] = (conteggioNomi[nome] || 0) + 1;
+    });
+    // Ritorna un array di nomi che appaiono più di una volta
+    return Object.keys(conteggioNomi).filter(nome => conteggioNomi[nome] > 1);
+}
 
-            if (match) {
-                const player = match[1];
-                const points = match[2];
-                const time = new Date().toLocaleTimeString();
+// Funzione per calcolare la somiglianza (0 = identiche, più è alto più sono diverse)
+function levenshtein(a, b) {
+    const tmp = [];
+    for (let i = 0; i <= a.length; i++) tmp[i] = [i];
+    for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            tmp[i][j] = Math.min(tmp[i - 1][j] + 1, tmp[i][j - 1] + 1, tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        }
+    }
+    return tmp[a.length][b.length];
+}
 
-                // Log visivo
-                const entry = document.createElement("div");
-                entry.className = "points-entry";
-                entry.innerHTML = `<strong>${time}</strong> - ${player}: +${points} punti`;
-                log.prepend(entry);
+function processCommand(text) {
+    const now = Date.now();
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const isVoiceEnabled = document.getElementById("enableVoice").checked;
 
-                // Feedback Vocale (Sintesi)
-                speakFeedback(`Confermato, ${player} ha segnato ${points} punti.`);
+    const pointsMatch = text.match(/\b(1|2|3)\b/);
+    if (!pointsMatch) return;
+    const points = pointsMatch[0];
+    
+    const voiceName = text.replace(points, "").replace(/punti|punto|pt/g, "").trim();
+    if (voiceName.length < 2) return;
+
+    const nomiAmbigui = ottieniNomiAmbigui(roster);
+    let bestMatch = null;
+    let minDistance = 3; 
+    let matchedAnAmbiguousName = false;
+
+    roster.forEach(p => {
+        const cognome = p.Cognome.toLowerCase();
+        const nick = (p.NickName || "").toLowerCase();
+        const nome = p.Nome.toLowerCase();
+
+        // 1. Controlliamo prima se l'input somiglia a un nome ambiguo
+        if (nomiAmbigui.includes(nome)) {
+            if (levenshtein(voiceName, nome) < minDistance) {
+                matchedAnAmbiguousName = true;
             }
         }
 
-        function speakFeedback(message) {
+        // 2. Cerchiamo il match reale nelle varianti ammesse
+        let varianti = [cognome, nick];
+        if (!nomiAmbigui.includes(nome)) varianti.push(nome);
+
+        varianti.forEach(target => {
+            if (!target) return;
+            const dist = levenshtein(voiceName, target);
+            if (dist < minDistance) {
+                minDistance = dist;
+                bestMatch = p;
+                matchedAnAmbiguousName = false; // Se trovo un match valido (es. Cognome), l'ambiguità decade
+            }
+        });
+    });
+
+    if (bestMatch) {
+        // ... (Logica successo invariata) ...
+        const label = bestMatch.Cognome || bestMatch.NickName;
+        const currentCommandKey = `${label.toLowerCase()}${points}`;
+        if (currentCommandKey === lastCommandKey && (now - lastProcessedTime) < 5000) return;
+
+        lastProcessedTime = now;
+        lastCommandKey = currentCommandKey;
+
+        const entry = document.createElement("div");
+        entry.style.padding = "2px 0";
+        entry.style.color = "#00ff00";
+        entry.innerHTML = `=> OK: ${label.toUpperCase()} ${points} pt`;
+        log.prepend(entry);
+
+        if (isVoiceEnabled) speakFeedback(`${label}, ${points}.`);
+        else beepSuccess();
+
+    } else {
+        lastCommandKey = ""; 
+        const entry = document.createElement("div");
+        entry.style.padding = "2px 0";
+        entry.style.color = "#ff4444";
+
+        // MESSAGGIO PERSONALIZZATO
+        if (matchedAnAmbiguousName) {
+            entry.innerHTML = `x "${voiceName}" NOME DUPLICATO (usa Cognome/Nick)`;
+        } else {
+            entry.innerHTML = `? Nessun match per "${voiceName}"`;
+        }
+        
+        log.prepend(entry);
+        if (!isVoiceEnabled) beepError();
+    }
+}
+
+function speakFeedback(message) {
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = 'it-IT';
+
+    // Quando inizia a parlare, attiviamo il flag
+    utterance.onstart = () => {
+        isSpeaking = true;
+    };
+
+    // Quando finisce, aspettiamo un piccolo margine (500ms) prima di riascoltare
+    // per evitare l'eco residua nella stanza
+    utterance.onend = () => {
+        setTimeout(() => {
+            isSpeaking = false;
+        }, 500);
+    };
+
+    window.speechSynthesis.speak(utterance);
+}
+        function OLDspeakFeedback(message) {
             const utterance = new SpeechSynthesisUtterance(message);
             utterance.lang = 'it-IT';
             window.speechSynthesis.speak(utterance);
         }
 
+        function readRoster() {
+            const cacheRoster = localStorage.getItem("datiRoster");
+            if (cacheRoster ) {
+                try {
+                    roster = JSON.parse(cacheRoster);
+                } catch (e) {
+                  console.error("Errore parsing cache Roster", e);
+                  localStorage.removeItem("datiRoster");
+                }
+            }
+        }
+
+        // Funzione per visualizzare il roster al centro
+        function popolaRoster() {
+            const container = document.getElementById("roster-list");
+            if (!roster || roster.length === 0) {
+                container.innerHTML = "Roster vuoto.";
+                return;
+            }
+
+            let html = '<div style="color: #ff6600; font-weight: bold; margin-bottom: 10px;">GIOCATORI ATTIVI</div>';
+            roster.forEach(p => {
+                html += `
+                <div class="roster-item">
+                    <span>${p.Cognome} ${p.Nome}</span>
+                    <span style="color: #00ff00; text-align: right;">${p.NickName || '-'}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
         // Avvio al click
         startBtn.addEventListener("click", () => {
+            readRoster();
+            popolaRoster(); // Visualizza la lista al centro
             initFaceDetection();
             initVoiceRecognition();
             startBtn.style.display = "none";
-            speakFeedback("Sistema attivato. Ti ascolto, Turiddu.");
+            speakFeedback("Pronto.");
         });
 
     </script>

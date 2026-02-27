@@ -179,9 +179,27 @@ body.admin-mode #highlights-section {
   pointer-events: none; /* Così non blocca eventuali click sotto di esso */
 }
 
+.system-clock {
+    position: fixed;
+    top: 2px; /* Regola in base all'altezza del tuo adminCounter */
+    right: 90px; /* Spostato più a sinistra per non coprire il counter (che starà a circa 10px) */
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace; /* Font tipico da orologio */
+    font-size: 1.4rem;
+    font-weight: bold;
+    z-index: 1000;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .admin-live-counter i {
   font-size: 12px;
 }
+
+
 
 /* --- STILE HAMBURGER MENU IN REM --- */
 #hamburgerMenu {
@@ -1480,409 +1498,368 @@ body.user-mode .video-container {
 /* ======================================== */
 /* MEDIA QUERY PER SCHERMI PICCOLI (MOCKUP) */
 /* ======================================== */
-@media (max-width: 480px) {
+@media (max-width: 320px) {
+    .player-name { font-size: 1.5rem; }
+    .player-stats { font-size: 1.0rem; }
 
-  #header {
-    gap: 10px;
-    margin-bottom: 5px;
-  }
-
-  /* 1. Body: riduce il font base e i margini */
-  body {
-    font-size: 12px;
-    /* margin: 4px; */
-  }
-
-  #contenuto {
-    gap: 5px;
-  }
-
-  /* 2. Intestazione */
-  .squadra-label {
-    font-size: 14px;
-    /* Ridotto ulteriormente da 16px a 14px */
-    padding: 6px 4px;
-    /* Ridotto il padding laterale */
-    width: 120px;
-    /* Ridotto per farle stare affiancate senza sovrapposizioni */
-    border-radius: 6px;
-    white-space: nowrap;
-    /* Impedisce al testo di andare a capo */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Se il nome è troppo lungo, mette i puntini */
-  }
-
-  /* Spostamento del titolo per non coprire il menu */
-  h1 {
-    font-size: 18px;
-    margin-left: 0;
-    /* Rimuoviamo il margine fisso */
-    text-align: center;
-    /* Centriamo il titolo dell'app */
-    width: 100%;
-    margin-top: 40px;
-    /* Diamo spazio sopra per l'hamburger menu */
-  }
-
-  /* Gestione del contenitore dei nomi delle squadre */
-  #teamNames {
-    gap: 8px;
-    /* Riduciamo lo spazio tra le due etichette */
-    justify-content: center;
-    margin-top: 10px;
-  }
-
-  /* 4. Scoreboard */
-  #scoreboard {
-    font-size: 32px;
-    min-height: 50px;
-  }
-
-  #periodoAttuale {
-    font-size: 12px;
-    /* Dimensione bilanciata per mobile */
-    margin-left: 10px;
-    padding: 2px 4px;
-    border-width: 2px;
-    border-radius: 4px;
-    left: auto;
-    /* Fondamentale: annulla il vecchio left: 5px */
-  }
-
-  #periodoAttuale.terminata {
-    font-size: 14px;
-  }
-
-  /* 5. Controlli top (Undo/Punteggio Squadra B) */
-  #controlsB .punteggio {
-    font-size: 16px;
-    margin-left: 6px;
-  }
-
-  .undo {
-    font-size: 12px;
-    padding: 3px 6px;
-    margin: 0;
-  }
-
-  #ordinamenti {
-    justify-content: space-between;
-    /* Su mobile distribuisce meglio lo spazio */
-  }
-
-  #ordinamenti button {
-    font-size: 14px;
-    /* Leggermente più piccolo per stare in riga */
-    padding: 6px 8px;
-  }
-
-  .btn-time {
-    width: 32px;
-    height: 32px;
-    font-size: 1.6rem !important;
-    margin-left: 0px !important;
-
-  }
-
-
-  .clock-display {
-    font-size: 1.1rem;
-    /* Dimensione ridotta per il cellulare */
-    min-width: 70px;
-    /* Riduce l'ingombro orizzontale */
-    padding: 2px 6px;
-    /* Riduce lo spazio interno */
-    border-width: 1px;
-    /* Bordo più sottile per non appesantire */
-    margin-left: 5px;
-    /* Meno spazio dal bottone precedente se lo schermo è strettissimo */
-  }
-
-  /* 7. Giocatori (la parte più importante per Admin) */
-  .giocatore {
-    font-size: 14px;
-    padding: 6px 8px;
-    margin-bottom: 2px;
-    /* RIDUZIONE GAP TRA CARDS IN */
-    border-radius: 8px;
-  }
-
-  .nome {
-    gap: 4px;
-    flex: none;
-  }
-
-  .numero {
-    font-size: 14px;
-    min-width: 20px;
-  }
-
-  .cognome {
-    font-size: 16px;
-    min-width: 70px;
-    max-width: 80px;
-  }
-
-  /* 8. Bottoni Tiro (+1, +2, +3) */
-  .tiro {
-    margin: 0;
-    padding: 3px 6px;
-    font-size: 14px;
-    border-radius: 4px;
-  }
-
-  /* 9. Punteggio Giocatore */
-  .punteggio .totale {
-    font-size: 16px;
-  }
-
-  .punteggio .dettagli {
-    font-size: 12px;
-    margin-left: 2px;
-  }
-
-
-  /* 10. Menu Hamburger e pulsante Video/Admin */
-  #hamburgerMenu {
-    gap: 10px;
-  }
-
-  #hamburgerBtn {
-    padding: 0px 0px;
-    font-size: 2rem;
-  }
-
-  #videoBtn,
-  #adminBtn1 {
-    padding: 4px 8px;
-    font-size: 12px;
-    border-radius: 4px;
-  }
-
-  #adminButtonContainer {
-    top: 40px;
-    right: 5px;
-  }
-
-  /* 11. Popup del Giocatore (playerPopup) */
-  #playerPopup .popup-content {
-    margin-top: 50px;
-    padding: 15px;
-  }
-
-  #playerPopup .popup-content h2 {
-    font-size: 24px;
-  }
-
-  #playerPopup .popup-content h2 .numero {
-    min-width: 40px;
-  }
-
-  #playerPopup .popup-content h2 .cognome {
-    font-size: 28px;
-  }
-
-  #playerPopup .btn-inc,
-  #playerPopup .btn-dec,
-  #playerPopup button {
-    font-size: 18px;
-    width: 50px;
-    height: 40px;
-    padding: 4px 0;
-    margin: 4px;
-  }
-
-  #playerPopup button.close-btn {
-    padding: 8px;
-    margin-top: 20px;
-    font-size: 16px;
-  }
-
-  /* 12. Convocazioni Popup */
-  .convocazioniPopup-item label {
-    font-size: 18px;
-  }
-
-  /* Checkbox popup Convocazioni – versione mobile */
-  .convocazioniPopup-item input[type="checkbox"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #555;
-    border-radius: 4px;
-    background-color: #fff !important;
-    /* sfondo bianco */
-    cursor: pointer;
-    position: relative;
-  }
-
-  .convocazioniPopup-item input[type="checkbox"]:checked {
-    background-color: #1f77e7 !important;
-    border-color: #2c3e50;
-  }
-
-  .convocazioniPopup-item input[type="checkbox"]:checked::after {
-    content: "✓";
-    color: white;
-    position: absolute;
-    top: 0;
-    left: 4px;
-    font-size: 14px;
-    font-weight: bold;
-  }
-
-
-  .convocazioniPopup-confirmBtn,
-  .convocazioniPopup-closeBtn {
-    font-size: 1.4rem !important;
-    /* Come i popup Admin */
-    padding: 12px 22px !important;
-    min-width: 100px;
-    margin: 10px 5px;
-    font-weight: bold;
-    border-radius: 8px;
-    display: inline-block;
-  }
-
-  .convocazioniPopup-confirmBtn {
-    background-color: #4CAF50;
-    color: white;
-  }
-
-  .convocazioniPopup-closeBtn {
-    background-color: #f28b82;
-    color: white;
-  }
-
-  
-  /* Assicurati che il contenitore dei bottoni li centri bene */
-  .convocazioniPopup-content div:last-child {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 15px;
-  }
-
-  /* 13. Grid dei giocatori "out" e giocatori "in" */
-  #giocatori-out {
-    grid-template-columns: repeat(2, 1fr);
-    /* RIPRISTINATO: Due colonne per massimizzare lo spazio */
-    gap: 2px;
-  }
-
-  #giocatori-in {
-    gap: 4px;
-  }
-
-  /* NUOVE REGOLE PER SQUADRA B BOX */
-  .squadra-box {
-    padding: 6px 10px;
-    margin: 4px 0;
-  }
-
-  #titoloB {
-    font-size: 1.2rem;
-  }
-
-  .squadraB-right {
-    display: flex;
-    gap: 3px;
-    align-items: center;
-  }
-
-  .squadraB-right button {
-    font-size: 12px;
-    padding: 3px 6px;
-    margin-left: 0;
-  }
-
-  .squadraB-left {
-    margin-right: 10px;
-  }
 }
 
-/* 5. OTTIMIZZAZIONE SMARTPHONE */
 @media (max-width: 480px) {
-  /*.scoreboard { padding: 1.0rem 0.5rem; }*/
-  .pulse-animation { font-size: 2rem;}
+    .pulse-animation { font-size: 2rem;}
+    .team-cumulative-details { font-size: 0.9rem; }
+    .team-labels { font-size: 2rem; padding: 0 0rem; }
+    .main-score { font-size: 3.2rem; line-height: 1; }
+    .player-item { padding: 0.4rem 0.6rem; }
+    .player-num { font-size: 1.6rem; width: 3.6rem; }
+    .player-name { font-size: 1.76rem; }
+    .player-tiro { padding: 0.2rem .4rem; min-width: 3.5rem; min-height:2.5rem; font-weight: bold; font-size: 1.2rem;}
+    #game-period { font-size: 1.2rem; }
 
-  .team-cumulative-details { font-size: 0.9rem; }
-  .team-labels { font-size: 2rem; padding: 0 0rem; }
-  .highlights-container {
-    padding: 1.5rem 7rem ;
-    gap: 1.2rem;
-  }
+    #header {
+      gap: 10px;
+      margin-bottom: 5px;
+    }
 
-  .main-score { font-size: 3.2rem; line-height: 1; }
-  .player-item { padding: 0.4rem 0.6rem; }
-  .player-num { font-size: 1.6rem; width: 3.6rem; }
-  .player-name { font-size: 1.76rem; }
-  /*.player-points { font-weight: bold; text-align: right; color: #ffcc00; font-size: 2rem; width: 3rem; padding-left: 0.2rem; margin-left: 0.2rem; }*/
-  .player-tiro { padding: 0.2rem .4rem; min-width: 3.5rem; min-height:2.5rem; font-weight: bold; font-size: 1.2rem;}
-  #game-period { font-size: 1.2rem; }
+    /* 1. Body: riduce il font base e i margini */
+    body {
+      font-size: 12px;
+    }
+
+    #contenuto {
+      gap: 5px;
+    }
+
+    .toast {
+      font-size: 2.24rem;
+      bottom: 0.2rem;
+    }
+
+    .period-badge {
+      left: 14.5rem;
+      font-size: 1.12rem;
+      padding: 0.2rem 0.6rem;
+    }
+
+    .clock-badge {
+      font-size: 1.2rem;
+      padding: 0.3rem 0.8rem;
+    }
+
+    .highlights-container {
+      padding: 0.8rem 1.4rem;
+      gap: 0.4rem;
+    }
+
+    /* Forza i 5 bottoni (Stella + 4 navigazione) sulla stessa riga */
+    .highlights-top-row {
+      justify-content: space-between;
+      gap: 0.4rem; 
+    }
+
+    /* I 4 bottoni di navigazione */
+    .highlights-buttons {
+      gap: 0.3rem;
+    }
+
+    .highlights-buttons button {
+      padding: 0.6rem 0.8rem;
+      font-size: 1.44rem;
+      min-width: 50px;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
     
-  .toast {
-    font-size: 2.24rem;     /* Ancora più piccolo su schermi Oppo/Smartphone */
-    bottom: 0.2rem;
-  }
-  .period-badge {
-    left: 14.5rem;
-    font-size: 1.12rem;
-    padding: 0.2rem 0.6rem;
-  }
-  .clock-badge {
-    font-size: 1.2rem;
-    padding: 0.3rem 0.8rem;
-  }
-/* Riduciamo i margini del contenitore */
-  .highlights-container {
-    padding: 0.8rem 1.4rem;
-    gap: 0.4rem;
-  }
+    .highlights-buttons button:active {
+      background-color: var(--primary, #ffcc00);
+      color: black;
+      transform: scale(0.95);
+    }
 
-  /* Forza i 5 bottoni (Stella + 4 navigazione) sulla stessa riga */
-  .highlights-top-row {
-    justify-content: space-between; /* Distribuisce lo spazio tra toggle e controlli */
-    gap: 0.4rem; 
-  }
+    #highlight-duration {
+      width: 3.0rem;
+      font-size: 1.28rem;
+    }
 
-  /* I 4 bottoni di navigazione */
-  .highlights-buttons {
-    gap: 0.3rem;
-  }
+    /* La label sotto sfrutta tutto lo spazio */
+    #highlight-label {
+      font-size: 1.36rem;
+      margin-top: 0.4rem;
+      white-space: pre;
+      line-height: 1.2;
+      padding: 0 1.0rem;
+    }
 
-  .highlights-buttons button {
-    padding: 0.6rem 0.8rem;
-    font-size: 1.44rem;
-    min-width: 50px;  /* Larghezza minima garantita */
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  .highlights-buttons button:active {
-    background-color: var(--primary, #ffcc00);
-    color: black;
-    transform: scale(0.95); /* Feedback visivo al click */
-  }
+    /* 2. Intestazione */
+    .squadra-label {
+      font-size: 14px;
+      padding: 6px 4px;
+      width: 120px;
+      border-radius: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  #highlight-duration {
-    width: 3.0rem;
-    font-size: 1.28rem;
-  }
+    /* Spostamento del titolo per non coprire il menu */
+    h1 {
+      font-size: 18px;
+      margin-left: 0;
+      text-align: center;
+      width: 100%;
+      margin-top: 40px;
+    }
 
-  /* La label sotto sfrutta tutto lo spazio */
-  #highlight-label {
-    font-size: 1.36rem;
-    margin-top: 0.4rem;
-    white-space: pre; /* Fondamentale: permette al testo lungo di andare a capo */
-    line-height: 1.2;
-    padding: 0 1.0rem;
-  }
+    /* Gestione del contenitore dei nomi delle squadre */
+    #teamNames {
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    /* 4. Scoreboard */
+    #scoreboard {
+      font-size: 32px;
+      min-height: 50px;
+    }
+
+    #periodoAttuale {
+      font-size: 12px;
+      margin-left: 10px;
+      padding: 2px 4px;
+      border-width: 2px;
+      border-radius: 4px;
+      left: auto;
+    }
+
+    #periodoAttuale.terminata {
+      font-size: 14px;
+    }
+
+    /* 5. Controlli top (Undo/Punteggio Squadra B) */
+    #controlsB .punteggio {
+      font-size: 16px;
+      margin-left: 6px;
+    }
+
+    .undo {
+      font-size: 12px;
+      padding: 3px 6px;
+      margin: 0;
+    }
+
+    #ordinamenti {
+      justify-content: space-between;
+    }
+
+    #ordinamenti button {
+      font-size: 14px;
+      padding: 6px 8px;
+    }
+
+    .btn-time {
+      width: 32px;
+      height: 32px;
+      font-size: 1.6rem !important;
+      margin-left: 0px !important;
+    }
+
+
+    .clock-display {
+      font-size: 1.1rem;
+      min-width: 70px;
+      padding: 2px 6px;
+      border-width: 1px;
+      margin-left: 5px;
+    }
+
+    .giocatore {
+      font-size: 14px;
+      padding: 6px 8px;
+      margin-bottom: 2px;
+      border-radius: 8px;
+    }
+
+    .nome {
+      gap: 4px;
+      flex: none;
+    }
+
+    .numero {
+      font-size: 14px;
+      min-width: 20px;
+    }
+
+    .cognome {
+      font-size: 16px;
+      min-width: 70px;
+      max-width: 80px;
+    }
+
+    .tiro {
+      margin: 0;
+      padding: 3px 6px;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+
+    .punteggio .totale {
+      font-size: 16px;
+    }
+
+    .punteggio .dettagli {
+      font-size: 12px;
+      margin-left: 2px;
+    }
+
+    #hamburgerMenu {
+      gap: 10px;
+    }
+
+    #hamburgerBtn {
+      padding: 0px 0px;
+      font-size: 2rem;
+    }
+
+    #videoBtn,
+    #adminBtn1 {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    #adminButtonContainer {
+      top: 40px;
+      right: 5px;
+    }
+
+    #playerPopup .popup-content {
+      margin-top: 50px;
+      padding: 15px;
+    }
+
+    #playerPopup .popup-content h2 {
+      font-size: 24px;
+    }
+
+    #playerPopup .popup-content h2 .numero {
+      min-width: 40px;
+    }
+
+    #playerPopup .popup-content h2 .cognome {
+      font-size: 28px;
+    }
+
+    #playerPopup .btn-inc,
+    #playerPopup .btn-dec,
+    #playerPopup button {
+      font-size: 18px;
+      width: 50px;
+      height: 40px;
+      padding: 4px 0;
+      margin: 4px;
+    }
+
+    #playerPopup button.close-btn {
+      padding: 8px;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    .convocazioniPopup-item label {
+      font-size: 18px;
+    }
+
+    .convocazioniPopup-item input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #555;
+      border-radius: 4px;
+      background-color: #fff !important;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .convocazioniPopup-item input[type="checkbox"]:checked {
+      background-color: #1f77e7 !important;
+      border-color: #2c3e50;
+    }
+
+    .convocazioniPopup-item input[type="checkbox"]:checked::after {
+      content: "✓";
+      color: white;
+      position: absolute;
+      top: 0;
+      left: 4px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .convocazioniPopup-confirmBtn,
+    .convocazioniPopup-closeBtn {
+      font-size: 1.4rem !important;
+      padding: 12px 22px !important;
+      min-width: 100px;
+      margin: 10px 5px;
+      font-weight: bold;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .convocazioniPopup-confirmBtn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .convocazioniPopup-closeBtn {
+      background-color: #f28b82;
+      color: white;
+    }
+
+    .convocazioniPopup-content div:last-child {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    #giocatori-out {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+    }
+
+    #giocatori-in {
+      gap: 4px;
+    }
+
+    .squadra-box {
+      padding: 6px 10px;
+      margin: 4px 0;
+    }
+
+    #titoloB {
+      font-size: 1.2rem;
+    }
+
+    .squadraB-right {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .squadraB-right button {
+      font-size: 12px;
+      padding: 3px 6px;
+      margin-left: 0;
+    }
+
+    .squadraB-left {
+      margin-right: 10px;
+    }
 }
-
+  
 @media (min-width: 481px) and (max-width: 1000px) {
   .team-labels { font-size: 4rem; padding: 0 0rem; }
   .player-points { font-weight: bold; text-align: right; color: #ffcc00; font-size: 3rem; width: 4rem; padding-left: 0.2rem; margin-left: 0.2rem; }

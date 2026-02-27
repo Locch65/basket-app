@@ -38,7 +38,6 @@
 //    - NICE TO HAVE: Inserire il toast per In/Out giocatori
 //    - NICE TO HAVE: se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
 //
-//    - Popup Convocazioni: separare in due liste ordinate alfabeticamente. quando clicco su una il giocatore va nell'altra.
 //    - aggiungere i falli accanto al punteggio hud (alpmeno in landscape). flashare quando cambiano i falli per la squadra B
 //    - inserire un orologio digitale con il tempo attuale in alto a destra se isAdmin=true
 //    - Storicizzare il cambio di quarto
@@ -150,5 +149,6 @@
 //    - FATTO: mostrare al lato dell'orologio il numero di utenti collegati al database Firebase (se è possibile avere questa info)
 //    - FATTO: Centralizzare su server la posizione degli elementi del hud (score e orologio). Se lo cambia admin deve valere per tutti
 //    - FATTO: Storicizzare stato In/Out. Nella review della partita mostra l'ultimo stato noto
+//    - FATTO: Popup Convocazioni: separare in due liste ordinate alfabeticamente. quando clicco su una il giocatore va nell'altra.
 //
 // -----------------------------------------------------------------------------------

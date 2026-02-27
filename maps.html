@@ -9,10 +9,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f0f2f5; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 15px; /* Ridotto leggermente per dare più spazio alla mappa */
+            background-color: #f0f2f5; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; /* Altezza totale dello schermo */
+            box-sizing: border-box; 
+            overflow: hidden; /* Evita scroll della pagina intera */
+        }        
 
-        .header-container { margin-bottom: 20px; }
-        h2 { color: #2c3e50; margin: 0; text-align: left; }
+        .header-container { 
+            margin-bottom: 10px; 
+            flex-shrink: 0; /* Impedisce all'header di schiacciarsi */
+        }        
+        
+        h2 { color: #2c3e50; margin: 0; text-align: left; font-size: 1.4rem;}
 
         .home-btn, .refresh-btn {
             text-decoration: none;
@@ -30,9 +44,9 @@
 
         .filter-container {
             display: flex;
-            gap: 20px;
+            gap: 4px;
             margin-top: 10px;
-            padding: 8px 15px;
+            padding: 8px 2px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -40,24 +54,26 @@
         }
 
         .filter-container label {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: #444;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 2px;
         }
 
         #map { 
-            height: 600px; 
+            flex-grow: 1; /* Occupa tutto lo spazio rimanente */
             width: 100%; 
             border-radius: 12px; 
             box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
             border: 2px solid #fff;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
+            margin-bottom: 10px; /* Spazio dal bordo inferiore */
         }
+
         
         .legend { background: white; padding: 10px; line-height: 18px; color: #555; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
         .legend i { width: 14px; height: 14px; float: left; margin-right: 8px; border-radius: 50%; opacity: 0.8; }
@@ -170,6 +186,7 @@
 
         <div class="filter-container">
             <label><input type="radio" name="filtroPartite" value="passate" onclick="applicaFiltro()"> Passate</label>
+            <label><input type="radio" name="filtroPartite" value="prossima" onclick="applicaFiltro()"> Prossima</label>
             <label><input type="radio" name="filtroPartite" value="future" onclick="applicaFiltro()"> Future</label>
             <label><input type="radio" name="filtroPartite" value="tutte" checked onclick="applicaFiltro()"> Tutte</label>
         </div>
@@ -179,7 +196,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.114"></script>
+    <script src="common.js?v=1.0.115"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -256,6 +273,31 @@
 
             if (filtro === 'tutte') {
                 renderizzaMappa(datiLocali);
+            } else if (filtro === 'prossima') {
+                // --- LOGICA FILTRO PROSSIMA PARTITA ---
+                let prossimaPartita = null;
+                let minDiff = Infinity;
+
+                datiLocali.forEach(poi => {
+                    let dObj;
+                    if (typeof poi.dataPartita === 'string' && poi.dataPartita.includes('/')) {
+                        const parti = poi.dataPartita.split('/');
+                        dObj = new Date(parti[2], parti[1] - 1, parti[0]);
+                    } else {
+                        dObj = new Date(poi.dataPartita);
+                    }
+
+                    const diff = dObj.getTime() - oggi.getTime();
+                    // Cerchiamo la partita più vicina che sia oggi o nel futuro
+                    if (diff >= 0 && diff < minDiff) {
+                        minDiff = diff;
+                        prossimaPartita = poi;
+                    }
+                });
+
+                // Se l'abbiamo trovata, passiamo un array con un solo elemento
+                renderizzaMappa(prossimaPartita ? [prossimaPartita] : []);
+                
             } else {
                 const filtrati = datiLocali.filter(poi => {
                     let dObj;
@@ -390,97 +432,6 @@
                                 <i class="fas fa-copy"></i> Copia indirizzo
                             </button>
                             <hr style="margin: 12px 0; border: 0; border-top: 1px solid #eee;">
-                            <div class="map-choice-container">
-                                <div style="font-size: 0.75rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 4px;">Naviga con:</div>
-                                <a href="${urlGoogle}" target="_blank" class="map-choice-btn"><i class="fab fa-google btn-google"></i> Google Maps</a>
-                                ${appleBtn}
-                                <a href="${urlWaze}" target="_blank" class="map-choice-btn"><i class="fab fa-waze btn-waze"></i> Waze</a>
-                                <a href="${urlNavigatoreGenerico}" class="map-choice-btn"><i class="fas fa-location-arrow btn-tomtom"></i> Altri Navigatori</a>
-                            </div>
-                        </div>
-                    `;
-
-                    marker.bindPopup(popupContent);
-                    marker.on('click', function() { this.openPopup(); });
-                    markerGroup.addLayer(marker);
-                }
-            });
-            map.addLayer(markerGroup);
-            if (luoghiData.length > 0) map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
-        }
-
-        function OLDrenderizzaMappa(luoghiData) {
-            markerGroup.clearLayers();
-            const oggi = new Date();
-            oggi.setHours(0, 0, 0, 0); 
-
-            luoghiData.forEach(poi => {
-                const coords = poi.coordinate.split(',').map(c => parseFloat(c.trim()));
-                if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-                    
-                    let dataPartitaObj;
-                    if (typeof poi.dataPartita === 'string' && poi.dataPartita.includes('/')) {
-                        const parti = poi.dataPartita.split('/');
-                        dataPartitaObj = new Date(parti[2], parti[1] - 1, parti[0]);
-                    } else {
-                        dataPartitaObj = new Date(poi.dataPartita);
-                    }
-
-                    const èPassata = dataPartitaObj < oggi;
-                    const classeEtichetta = èPassata ? 'map-label label-passata' : 'map-label label-futura';
-                    const color = poi.campionato === 'U14' ? "#ff6600" : "#007bff";
-
-                    const marker = L.circleMarker([coords[0], coords[1]], {
-                        radius: 12,
-                        fillColor: color,
-                        color: "#fff",
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.8,
-                        interactive: true
-                    });
-
-                    marker.bindTooltip(formattaData(poi.dataPartita, 'corta'), {
-                        permanent: true, 
-                        direction: 'top',
-                        offset: [0, -12],
-                        className: classeEtichetta
-                    });
-
-                    // Logica Navigatori
-                    const coordsStr = `${coords[0]},${coords[1]}`;
-                    const labelEncoded = encodeURIComponent(poi.luogo);
-                    const indirizzoPerCopia = poi.luogo.replace(/'/g, "\\'");
-
-                    const urlGoogle = `https://www.google.com/maps/search/?api=1&query=${coordsStr}`;
-                    const urlApple  = `maps://?q=${labelEncoded}&ll=${coordsStr}`;
-                    const urlWaze   = `https://waze.com/ul?ll=${coordsStr}&navigate=yes`;
-
-                    // Utilizza il protocollo geo: che permette al sistema di chiedere con quale app aprire
-                    const urlNavigatoreGenerico = `geo:${coordsStr}?q=${coordsStr}(${labelEncoded})`;
-
-                    // ATTENZIONE: non funziona per TomTom
-                    // URL specifico per Android Intent (TomTom GO Navigation)
-                    // // Estraiamo lat e lon singolarmente dalle coordinate
-                    // const [lat, lon] = coordsStr.split(",");
-                    // const urlTomTom = isIOS 
-                    //     ? `tomtomgo://x-callback-url/navigate?destination=${coordsStr}` // Versione iOS
-                    //     : `intent://navigate?lat=${lat}&lon=${lon}` + `#Intent;scheme=tomtomnavapp;package=com.tomtom.speedcams.android.map;end;`; // Versione Android
-
-                    let appleBtn = isIOS ? `<a href="${urlApple}" class="map-choice-btn"><i class="fab fa-apple btn-apple"></i> Mappe (iOS)</a>` : "";
-
-                    const popupContent = `
-                        <div style="font-size: 1.1em; min-width: 210px; padding: 5px;">
-                            <strong style="color: ${color}; font-size: 1.2em;">${poi.campionato}</strong><br>
-                            <div style="color: #666; font-size: 0.9em; margin-bottom: 2px;">${poi.avversario}</div>
-                            <div style="font-weight: bold; font-size: 0.9em;">${poi.luogo}</div>
-
-                            <button class="copy-btn" onclick="copiaIndirizzo('${indirizzoPerCopia}')">
-                                <i class="fas fa-copy"></i> Copia indirizzo
-                            </button>
-
-                            <hr style="margin: 12px 0; border: 0; border-top: 1px solid #eee;">
-                            
                             <div class="map-choice-container">
                                 <div style="font-size: 0.75rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 4px;">Naviga con:</div>
                                 <a href="${urlGoogle}" target="_blank" class="map-choice-btn"><i class="fab fa-google btn-google"></i> Google Maps</a>
