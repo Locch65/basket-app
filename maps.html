@@ -9,20 +9,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 15px; /* Ridotto leggermente per dare più spazio alla mappa */
-            background-color: #f0f2f5; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; /* Altezza totale dello schermo */
-            box-sizing: border-box; 
-            overflow: hidden; /* Evita scroll della pagina intera */
-        }        
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    /* Padding di base + margine di sicurezza per gesture/barre di sistema */
+    padding: 10px 10px calc(15px + env(safe-area-inset-bottom)) 10px; 
+    background-color: #f0f2f5; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh;
+    height: 100dvh; 
+    box-sizing: border-box; 
+    overflow: hidden; 
+}
 
         .header-container { 
-            margin-bottom: 10px; 
+            margin-bottom: 8px; 
             flex-shrink: 0; /* Impedisce all'header di schiacciarsi */
         }        
         
@@ -63,17 +65,17 @@
             gap: 2px;
         }
 
-        #map { 
-            flex-grow: 1; /* Occupa tutto lo spazio rimanente */
-            width: 100%; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
-            border: 2px solid #fff;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            margin-bottom: 10px; /* Spazio dal bordo inferiore */
-        }
-
+#map { 
+    flex: 1; 
+    width: 100%; 
+    border-radius: 12px; 
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
+    border: 2px solid #fff;
+    /* Margine di sicurezza ulteriore per la mappa */
+    margin-bottom: 5px; 
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
         
         .legend { background: white; padding: 10px; line-height: 18px; color: #555; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
         .legend i { width: 14px; height: 14px; float: left; margin-right: 8px; border-radius: 50%; opacity: 0.8; }
@@ -178,7 +180,7 @@
             <a href="index.html" class="home-btn" aria-label="Home">
                 <i class="fas fa-home"></i>
             </a>
-            <h2 style="flex-grow: 1;">Mappa Trasferte</h2>
+            <h2 style="flex-grow: 1;">Mappa Trasferte.</h2>
             <button onclick="forzaAggiornamento()" class="refresh-btn" title="Aggiorna dati dal server">
                 <i id="refresh-icon" class="fas fa-sync-alt"></i>
             </button>
