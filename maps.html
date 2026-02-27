@@ -12,22 +12,23 @@
 body { 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     margin: 0; 
-    /* Padding di base + margine di sicurezza per gesture/barre di sistema */
-    padding: 10px 10px calc(15px + env(safe-area-inset-bottom)) 10px; 
+    padding: 0; 
     background-color: #f0f2f5; 
-    display: flex; 
-    flex-direction: column; 
+    /* Usiamo una dimensione fissa senza scroll */
     height: 100vh;
     height: 100dvh; 
-    box-sizing: border-box; 
+    width: 100vw;
     overflow: hidden; 
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
-        .header-container { 
-            margin-bottom: 8px; 
-            flex-shrink: 0; /* Impedisce all'header di schiacciarsi */
-        }        
-        
+.header-container { 
+    padding: 10px;
+    flex-shrink: 0; 
+    z-index: 1000;
+}        
         h2 { color: #2c3e50; margin: 0; text-align: left; font-size: 1.4rem;}
 
         .home-btn, .refresh-btn {
@@ -66,14 +67,19 @@ body {
         }
 
 #map { 
-    flex: 1; 
-    width: 100%; 
+    /* Invece di flex: 1, usiamo una gestione più solida */
+    position: relative;
+    width: calc(100% - 20px); /* Sottrae il padding laterale */
+    margin: 0 auto;
+    flex-grow: 1;
+    
+    /* Margine di sicurezza critico in basso */
+    margin-bottom: calc(20px + env(safe-area-inset-bottom)); 
+    
     border-radius: 12px; 
     box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
     border: 2px solid #fff;
-    /* Margine di sicurezza ulteriore per la mappa */
-    margin-bottom: 5px; 
-    -webkit-user-select: none;
+    box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
         
@@ -180,7 +186,7 @@ body {
             <a href="index.html" class="home-btn" aria-label="Home">
                 <i class="fas fa-home"></i>
             </a>
-            <h2 style="flex-grow: 1;">Mappa Trasferte.</h2>
+            <h2 style="flex-grow: 1;">Mappa Trasferte</h2>
             <button onclick="forzaAggiornamento()" class="refresh-btn" title="Aggiorna dati dal server">
                 <i id="refresh-icon" class="fas fa-sync-alt"></i>
             </button>
@@ -216,6 +222,16 @@ body {
         L.control.zoom({
             position: 'bottomleft'
         }).addTo(map);
+
+// Aggiungi questo subito sotto per alzare i tasti zoom di qualche pixel
+const zoomControl = document.querySelector('.leaflet-bottom.leaflet-left');
+zoomControl.style.marginBottom = "25px";
+zoomControl.style.marginLeft = "10px";
+
+// Fai lo stesso per la legenda se serve
+const legendControl = document.querySelector('.leaflet-bottom.leaflet-right');
+legendControl.style.marginBottom = "25px";
+legendControl.style.marginRight = "10px";
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
