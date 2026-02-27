@@ -9,26 +9,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
     <style>
-body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    margin: 0; 
-    padding: 0; 
-    background-color: #f0f2f5; 
-    /* Usiamo una dimensione fissa senza scroll */
-    height: 100vh;
-    height: 100dvh; 
-    width: 100vw;
-    overflow: hidden; 
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f0f2f5; 
+            /* Usiamo una dimensione fissa senza scroll */
+            height: 97vh;
+            /* height: 100dvh;  */
+            width: 100vw;
+            overflow: hidden; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
 
-.header-container { 
-    padding: 10px;
-    flex-shrink: 0; 
-    z-index: 1000;
-}        
+        .header-container { 
+            padding: 10px;
+            flex-shrink: 0; 
+            z-index: 1000;
+        }        
+
         h2 { color: #2c3e50; margin: 0; text-align: left; font-size: 1.4rem;}
 
         .home-btn, .refresh-btn {
@@ -66,22 +67,22 @@ body {
             gap: 2px;
         }
 
-#map { 
-    /* Invece di flex: 1, usiamo una gestione più solida */
-    position: relative;
-    width: calc(100% - 20px); /* Sottrae il padding laterale */
-    margin: 0 auto;
-    flex-grow: 1;
-    
-    /* Margine di sicurezza critico in basso */
-    margin-bottom: calc(40px + env(safe-area-inset-bottom)); 
-    
-    border-radius: 12px; 
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
-    border: 2px solid #fff;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
+        #map { 
+            /* Invece di flex: 1, usiamo una gestione più solida */
+            position: relative;
+            width: calc(100% - 20px); /* Sottrae il padding laterale */
+            margin: 0 auto;
+            flex-grow: 1;
+            
+            /* Margine di sicurezza critico in basso */
+            margin-bottom: calc(40px + env(safe-area-inset-bottom)); 
+            
+            border-radius: 12px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
+            border: 2px solid #fff;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
         
         .legend { background: white; padding: 10px; line-height: 18px; color: #555; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2); }
         .legend i { width: 14px; height: 14px; float: left; margin-right: 8px; border-radius: 50%; opacity: 0.8; }
@@ -91,7 +92,8 @@ body {
             padding: 1px 4px;
             font-size: 9px;
             font-weight: 700;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5) !important;
+            border: 1px solid #000 !important;
             pointer-events: none !important;
             border: 1px solid;
         }
@@ -154,6 +156,16 @@ body {
             margin: 12px;
             line-height: 1.4;
         }        
+        .leaflet-control-layers {
+            margin-top: 15px !important;
+            margin-right: 10px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+        }        
+        /* Nasconde il quadratino bianco in basso a destra con i credits */
+        .leaflet-control-attribution {
+            display: none !important;
+        }
         /* Animazione Pulsante Statica: cambia solo intensità e bordo */
         @keyframes pulse-marker {
             0% { 
@@ -204,34 +216,57 @@ body {
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.115"></script>
+    <script src="common.js?v=1.0.116"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         // Check dispositivo iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
+        // Layer 1: OpenStreetMap Classica (Stradale)
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+        // Layer 2: Google Satellite (Solo foto)
+        const satellitePuro = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });
+
+        // Layer 3: Google Hybrid (Satellite + Strade/Nomi)
+        const hybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });        
+        const baseMaps = {
+            "Stradale": osm,
+            "Satellitare": hybrid
+        };
+
         // 1. Inizializza la mappa senza il controllo zoom automatico
         const map = L.map('map', {
             tap: false,
             tapTolerance: 15,
-            zoomControl: false // <--- Disabilita il posizionamento automatico in alto a sinistra
+            zoomControl: false, // <--- Disabilita il posizionamento automatico in alto a sinistra
+            layers: [osm] // Carica OSM come predefinito
         }).setView([45.2, 7.8], 8);
 
         // 2. Aggiungi il controllo zoom in basso a sinistra (o bottomright se preferisci)
         L.control.zoom({
-            position: 'bottomleft'
+            position: 'topright'
         }).addTo(map);
 
-// Aggiungi questo subito sotto per alzare i tasti zoom di qualche pixel
-const zoomControl = document.querySelector('.leaflet-bottom.leaflet-left');
-zoomControl.style.marginBottom = "25px";
-zoomControl.style.marginLeft = "10px";
+        // Aggiungiamo il controllo alla mappa
+        L.control.layers(baseMaps, null, {
+            position: 'bottomleft' // Puoi metterlo dove preferisci
+        }).addTo(map);        
 
-// Fai lo stesso per la legenda se serve
-const legendControl = document.querySelector('.leaflet-bottom.leaflet-right');
-legendControl.style.marginBottom = "25px";
-legendControl.style.marginRight = "10px";
+        // Aggiungi questo subito sotto per alzare i tasti zoom di qualche pixel
+        const zoomControl = document.querySelector('.leaflet-bottom.leaflet-left');
+        zoomControl.style.marginBottom = "25px";
+        zoomControl.style.marginLeft = "10px";
+
+        // Fai lo stesso per la legenda se serve
+        const legendControl = document.querySelector('.leaflet-bottom.leaflet-right');
+        legendControl.style.marginBottom = "25px";
+        legendControl.style.marginRight = "10px";
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -467,6 +502,12 @@ legendControl.style.marginRight = "10px";
             });
             map.addLayer(markerGroup);
             if (luoghiData.length > 0) map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
+
+            // Se c'è un solo punto (o lo zoom è diventato troppo stretto)
+            // limitiamo lo zoom massimo a 13 (puoi cambiare questo valore)
+            if (map.getZoom() > 13) {
+                map.setZoom(13);
+            }
         }
 
         registerUserId().then((data) => {});
