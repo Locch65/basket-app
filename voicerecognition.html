@@ -296,8 +296,92 @@ function levenshtein(a, b) {
     }
     return tmp[a.length][b.length];
 }
-
 function processCommand(text) {
+    const now = Date.now();
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const isVoiceEnabled = document.getElementById("enableVoice").checked;
+
+    const pointsMatch = text.match(/\b(1|2|3)\b/);
+    if (!pointsMatch) return;
+    const points = pointsMatch[0];
+    
+    const voiceName = text.replace(points, "").replace(/punti|punto|pt/g, "").trim();
+    if (voiceName.length < 2) return;
+
+    const nomiAmbigui = ottieniNomiAmbigui(roster);
+    let bestMatch = null;
+    let minDistance = 3; 
+    let matchedAnAmbiguousName = false;
+
+    roster.forEach(p => {
+        const cognome = p.Cognome.toLowerCase();
+        const nick = (p.NickName || "").toLowerCase();
+        const nome = p.Nome.toLowerCase();
+
+        if (nomiAmbigui.includes(nome)) {
+            if (levenshtein(voiceName, nome) < minDistance) {
+                matchedAnAmbiguousName = true;
+            }
+        }
+
+        let varianti = [cognome, nick];
+        if (!nomiAmbigui.includes(nome)) varianti.push(nome);
+
+        varianti.forEach(target => {
+            if (!target) return;
+            const dist = levenshtein(voiceName, target);
+            if (dist < minDistance) {
+                minDistance = dist;
+                bestMatch = p;
+                matchedAnAmbiguousName = false; 
+            }
+        });
+    });
+
+    if (bestMatch) {
+        const label = bestMatch.Cognome || bestMatch.NickName;
+        const currentCommandKey = `${label.toLowerCase()}${points}`;
+
+        // --- CONTROLLO 5 SECONDI: SOLO PER I MATCH RIUSCITI ---
+        if (currentCommandKey === lastCommandKey && (now - lastProcessedTime) < 5000) {
+            console.log("Comando duplicato bloccato per 5 secondi.");
+            return;
+        }
+
+        // Se arriviamo qui, il comando è valido e non è un duplicato recente
+        lastProcessedTime = now;
+        lastCommandKey = currentCommandKey;
+
+        const entry = document.createElement("div");
+        entry.style.padding = "2px 0";
+        entry.style.color = "#00ff00";
+        entry.innerHTML = `=> OK: ${label.toUpperCase()} ${points} pt`;
+        log.prepend(entry);
+
+        if (isVoiceEnabled) speakFeedback(`${label}, ${points}.`);
+        else beepSuccess();
+
+    } else {
+        // --- SE IL COMANDO FALLISCE: RESETTIAMO IL FILTRO ---
+        // In questo modo, se ripeti la stessa cosa e stavolta viene riconosciuta, passerà subito.
+        lastCommandKey = ""; 
+        lastProcessedTime = 0; 
+
+        const entry = document.createElement("div");
+        entry.style.padding = "2px 0";
+        entry.style.color = "#ff4444";
+
+        if (matchedAnAmbiguousName) {
+            entry.innerHTML = `x "${voiceName}" NOME DUPLICATO (usa Cognome/Nick)`;
+        } else {
+            entry.innerHTML = `? Nessun match per "${voiceName}"`;
+        }
+        
+        log.prepend(entry);
+        if (!isVoiceEnabled) beepError();
+    }
+}
+function OLDprocessCommand(text) {
     const now = Date.now();
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const isVoiceEnabled = document.getElementById("enableVoice").checked;
