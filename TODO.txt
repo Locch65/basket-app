@@ -37,6 +37,8 @@
 //    - NICE TO HAVE: Highlight anche in orizzontale
 //    - NICE TO HAVE: Inserire il toast per In/Out giocatori
 //    - NICE TO HAVE: se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
+//    - NICE TO HAVE: grafico con avanzamento punti
+//    - NICE TO HAVE: cercare sul canale YouTube della Polismile il link della partita Live, invece che fare copia e incolla
 //
 //    - aggiungere i falli accanto al punteggio hud (alpmeno in landscape). flashare quando cambiano i falli per la squadra B
 //    - inserire un orologio digitale con il tempo attuale in alto a destra se isAdmin=true
@@ -47,8 +49,11 @@
 //    - Highlights: aggiungere per admin un bottone "fix" che cambia l'ora del canestro con quello visualizzato.
 //  * - Highlights: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
 //    - Highlights: quando esco dagli highlight riportare il punteggio al risultato finale se la partita è "Terminata"
-//    - 
-//
+//    - FATTO: Falli nella scoreboard invertiti se polismile e' squadra b
+//  * - Resettare i falli di squadra alla fine del quarto
+//  * - Il pallino rosso del live non funziona. Anche se è molto indietro, da rosso
+//  * - Highlights: filtrare solo i punti e non falli e inout
+//  * - Falli su scoreboard non seguono il tempo ma sono istantanei. se la partita è Terminata, non vengono memorizzati nello sheet Partite. si trovano solo negli event
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
 //    - ATTENZIONE: la durata del video youtube della partita contro Crocetta non è compatibile con i tempi reali. (forse perchè è stato interrotto)

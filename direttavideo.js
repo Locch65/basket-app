@@ -1158,6 +1158,60 @@ function inizializzaHighlights() {
 function gestisciHighlight(azione) {
   if (!fullMatchHistory) return;
 
+  userNavigatedToEnd = false;
+
+  switch (azione) {
+    case 'start': 
+      currentHighlightIndex = (matchStartTime > 0) ? -2 : -1; 
+      break;
+
+    case 'prev':
+      // Cerchiamo all'indietro il primo evento di tipo "punto"
+      let prevIdx = currentHighlightIndex - 1;
+      while (prevIdx >= 0) {
+        if (fullMatchHistory[prevIdx].eventType === "punto") {
+          break;
+        }
+        prevIdx--;
+      }
+      // Se non trova punti, decidiamo se fermarci a -1 o restare dove siamo
+      // Qui lo impostiamo al punto trovato o al limite minimo (-2/-1)
+      currentHighlightIndex = (prevIdx < 0) ? ((matchStartTime > 0) ? -2 : -1) : prevIdx;
+      break;
+
+    case 'next':
+      // Cerchiamo in avanti il primo evento di tipo "punto"
+      let nextIdx = currentHighlightIndex + 1;
+      let trovatoNext = false;
+      while (nextIdx < fullMatchHistory.length) {
+        if (fullMatchHistory[nextIdx].eventType === "punto") {
+          trovatoNext = true;
+          break;
+        }
+        nextIdx++;
+      }
+      // Se trova un punto lo assegna, altrimenti va alla fine (end)
+      currentHighlightIndex = trovatoNext ? nextIdx : fullMatchHistory.length;
+      if (!trovatoNext) userNavigatedToEnd = true;
+      break;
+
+    case 'end':
+      currentHighlightIndex = fullMatchHistory.length;
+      userNavigatedToEnd = true;
+      break;
+  }
+
+  bloccoSincronizzazioneManuale = true;
+  aggiornaUIHighlight(true);
+
+  setTimeout(() => {
+    bloccoSincronizzazioneManuale = false;
+  }, 1000);
+}
+
+function OLDgestisciHighlight(azione) {
+  if (!fullMatchHistory) return;
+
   // Resettiamo il flag ogni volta che si preme un tasto
   userNavigatedToEnd = false;
 
@@ -1263,7 +1317,7 @@ function aggiornaUIHighlight(eseguiSeek = true) {
 
   // Indici 0, 1, 2...
   fullMatchHistory.forEach((ev, idx) => {
-    if (ev.timestampReale !== '00:00:00') {
+    if (ev.eventType === "punto" && ev.timestampReale !== '00:00:00') {
       const contatore = `(${idx + 1}/${fullMatchHistory.length})`.padEnd(8, ' ');
       const pStr = ev.puntiRealizzati ? `+${ev.puntiRealizzati}` : "  ";
       const cStr = GetCognome(ev.idGiocatore).substring(0, 12).padEnd(12, ' ');
@@ -1384,8 +1438,14 @@ function aggiornaFalliSquadra() {
   const elA = document.getElementById("team-fouls-A");
   const elB = document.getElementById("team-fouls-B");
   
-  if (elA) elA.textContent = totalFoulsA;
-  if (elB) elB.textContent = totalFoulsB;
+  if (teamA === "Polismile A") {
+    if (elA) elA.textContent = totalFoulsA;
+    if (elB) elB.textContent = totalFoulsB;
+  }
+  else {
+    if (elA) elA.textContent = totalFoulsB;
+    if (elB) elB.textContent = totalFoulsA;
+  }
 }
 
 function updateScoreboard(matchIsLive) {
