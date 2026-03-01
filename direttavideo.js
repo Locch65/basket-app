@@ -1429,7 +1429,7 @@ function aggiornaFalliSquadra() {
   }
 
   // 3. Determiniamo l'inizio del quarto attuale (es: Q1, Q2...)
-  const inizioQuartoStr = config[quartoAttuale];
+  const inizioQuartoStr = quartoAttuale !== "Terminata" ? config[quartoAttuale] : "00:00:00";
   if (!inizioQuartoStr) {
     console.warn(`Orario di inizio per Q${quartoAttuale} non trovato.`);
     // Se non c'è l'orario, potresti voler azzerare i contatori o uscire
@@ -1447,7 +1447,7 @@ function aggiornaFalliSquadra() {
     return (
       evento.eventType === "Fallo" && 
       evento.secondiReali >= secondiInizioQuarto && 
-      evento.secondiReali <= secondiCorrentiVideo
+      (evento.secondiReali <= secondiCorrentiVideo || isAdmin) // se isAdmin deve mostrare il fallo indipendentemente da dove è arrivato il video youtube
     );
   });
 
