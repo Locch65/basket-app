@@ -1419,6 +1419,106 @@ function aggiornaFalliSquadra() {
   // 1. Recuperiamo il tempo corrente del video in secondi
   const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
 
+  // 2. Recuperiamo gli orari di inizio dei quarti dalle note
+  let config;
+  try {
+    config = typeof dettagliGara.note === 'string' ? JSON.parse(dettagliGara.note) : dettagliGara.note;
+  } catch (e) {
+    console.error("Errore nel parsing delle note:", e);
+    return;
+  }
+
+  // 3. Determiniamo l'inizio del quarto attuale (es: Q1, Q2...)
+  const inizioQuartoStr = config[quartoAttuale];
+  if (!inizioQuartoStr) {
+    console.warn(`Orario di inizio per Q${quartoAttuale} non trovato.`);
+    // Se non c'è l'orario, potresti voler azzerare i contatori o uscire
+    return;
+  }
+  
+  const secondiInizioQuarto = hmsToSeconds(inizioQuartoStr);
+
+  // 4. Filtriamo la fullMatchHistory
+  const eventiFinoAdOra = fullMatchHistory.filter(evento => {
+    // Il fallo deve essere:
+    // - Un evento di tipo "Fallo"
+    // - Avvenuto dopo l'inizio del quarto attuale
+    // - Avvenuto prima o uguale al secondo corrente del video
+    return (
+      evento.eventType === "Fallo" && 
+      evento.secondiReali >= secondiInizioQuarto && 
+      evento.secondiReali <= secondiCorrentiVideo
+    );
+  });
+
+  // 5. Calcolo Falli Squadra A e B
+  const totalFoulsA = eventiFinoAdOra.filter(ev => ev.squadra === 'Polismile A').length;
+  const totalFoulsB = eventiFinoAdOra.filter(ev => ev.squadra === 'Squadra B').length;
+
+  // 6. Aggiornamento DOM
+  const elA = document.getElementById("team-fouls-A");
+  const elB = document.getElementById("team-fouls-B");
+  
+  if (teamA === "Polismile A") {
+    if (elA) elA.textContent = totalFoulsA;
+    if (elB) elB.textContent = totalFoulsB;
+  } else {
+    if (elA) elA.textContent = totalFoulsB;
+    if (elB) elB.textContent = totalFoulsA;
+  }
+}
+
+function OLD2aggiornaFalliSquadra() {
+  // 1. Recuperiamo il tempo corrente del video in secondi
+  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
+
+  // 2. Filtriamo la fullMatchHistory
+  const eventiFinoAdOra = fullMatchHistory.filter(evento => {
+    // Verifichiamo che sia un fallo e nel tempo corretto
+    if (evento.eventType !== "Fallo" || evento.secondiReali > secondiCorrentiVideo) {
+      return false;
+    }
+
+    // Parifichiamo le note per estrarre il quarto
+    try {
+      // Nota: assicurati che gli eventi abbiano il campo note popolato
+      const noteData = evento.note ? JSON.parse(evento.note) : {};
+      
+      // Filtriamo solo se il quarto corrisponde a quello attuale
+      return noteData.quarto === quartoAttuale;
+    } catch (e) {
+      console.error("Errore nel parsing delle note:", e);
+      return false;
+    }
+  });
+
+
+  // 3. Calcolo Falli Squadra A
+  // Contiamo quanti di questi eventi appartengono alla Squadra A
+  const totalFoulsA = eventiFinoAdOra.filter(ev => ev.squadra === 'Polismile A').length;
+
+  // 4. Calcolo Falli Squadra B
+  // Contiamo quanti di questi eventi appartengono alla Squadra B
+  const totalFoulsB = eventiFinoAdOra.filter(ev => ev.squadra === 'Squadra B').length;
+
+  // 5. Aggiornamento DOM
+  const elA = document.getElementById("team-fouls-A");
+  const elB = document.getElementById("team-fouls-B");
+  
+  if (teamA === "Polismile A") {
+    if (elA) elA.textContent = totalFoulsA;
+    if (elB) elB.textContent = totalFoulsB;
+  }
+  else {
+    if (elA) elA.textContent = totalFoulsB;
+    if (elB) elB.textContent = totalFoulsA;
+  }
+}
+
+function OLDORIGINALEaggiornaFalliSquadra() {
+  // 1. Recuperiamo il tempo corrente del video in secondi
+  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
+
   // 2. Filtriamo la fullMatchHistory per prendere solo i falli 
   // avvenuti fino al secondo corrente (escludendo i SYNC)
   const eventiFinoAdOra = fullMatchHistory.filter(evento => 
@@ -2535,6 +2635,70 @@ function salvaStatoLive(dati) {
   console.log("Dati inviati a salvaStatoLive:", dati);
   isLive = (dati.goLive === true);
 
+  // Gestione logica quarto e variabile globale
+  if (dati.terminata === true) {
+    statoPartita = "Terminata";
+    quartoAttuale = "Terminata";
+  } else {
+    statoPartita = dati.quarto || "1° Quarto";
+    quartoAttuale = statoPartita.replace("° Quarto", "").trim();
+  }
+  
+  localStorage.setItem("statoPartita", statoPartita);
+  localStorage.setItem("isLive", isLive);
+
+  dettagliGara.statoPartita = statoPartita;
+  dettagliGara.isLive = isLive;
+  matchIsLive = isLive;
+
+  // --- LOGICA AGGIORNAMENTO CONFIGURAZIONE E TIMESTAMPS QUARTI ---
+  
+  // 1. Recuperiamo la configurazione esistente dalle note (se è già una stringa, facciamo il parse)
+  let configEsistente = {};
+  try {
+    configEsistente = (typeof dettagliGara.note === 'string') 
+      ? JSON.parse(dettagliGara.note) 
+      : (dettagliGara.note || {});
+  } catch (e) {
+    configEsistente = {};
+  }
+
+  // 2. Prepariamo la nuova configurazione mantenendo i valori vecchi dei quarti
+  const oraAttuale = new Date().toLocaleTimeString(); // Formato "HH:MM:SS"
+  
+  const nuovaConfig = {
+    "stats": configEsistente.stats || false,
+    "highlights": configEsistente.highlights || false,
+    "hud-score": hudPositionIndex,
+    "hud-clock": timePositionIndex,
+    // Manteniamo i valori esistenti per Q1, Q2, Q3, Q4
+    "Q1": configEsistente.Q1 || "",
+    "Q2": configEsistente.Q2 || "",
+    "Q3": configEsistente.Q3 || "",
+    "Q4": configEsistente.Q4 || ""
+  };
+
+  // 3. Aggiorniamo SOLO il campo corrispondente al quarto attuale
+  // Usiamo quartoAttuale che contiene "1", "2", "3" o "4"
+  const chiaveQuarto = quartoAttuale; 
+  if (nuovaConfig.hasOwnProperty(chiaveQuarto)) {
+    // Aggiorniamo l'ora solo se non è già stata impostata (opzionale)
+    // o se preferisci sovrascriverla ogni volta che salvi lo stato in quel quarto
+    nuovaConfig[chiaveQuarto] = oraAttuale;
+  }
+
+  // 4. Trasformiamo in JSON e salviamo
+  dettagliGara.note = JSON.stringify(nuovaConfig);
+  // ------------------------------------------------------------
+
+  saveToFirebaseHistory('partite/', dettagliGara); 
+  saveToServerMatchData();
+}
+
+function OLDsalvaStatoLive(dati) {
+  console.log("Dati inviati a salvaStatoLive:", dati);
+  isLive = (dati.goLive === true);
+
 
   // Gestione logica quarto e variabile globale
   if (dati.terminata === true) {
@@ -2551,6 +2715,20 @@ function salvaStatoLive(dati) {
   dettagliGara.statoPartita = statoPartita;
   dettagliGara.isLive = isLive;
   matchIsLive = isLive;
+
+//--------------------------------------
+  // ATTENZIONE: TEST
+  const nuovaConfig = {
+        "stats": dettagliGara.note['stats'] || false,
+        "highlights": dettagliGara.note['highlights'] || false,
+        "hud-score": hudPositionIndex,
+        "hud-clock": timePositionIndex
+  };
+  // 2. Trasformiamo l'oggetto in una stringa JSON
+  const note = JSON.stringify(nuovaConfig);
+  dettagliGara.note = note;
+//--------------------------------------
+
   saveToFirebaseHistory('partite/', dettagliGara); 
 
   saveToServerMatchData();

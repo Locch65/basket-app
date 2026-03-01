@@ -722,6 +722,63 @@ function salvaDatiMappa(partite) {
 }
 
 function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, team, action) {
+  if (!matchId) {
+    console.error("Errore: matchId non trovato.");
+    return;
+  }
+
+  // Controllo validità quintetto per i cambi
+  if ((action !== "undo") && (puntiRealizzati === "In" || puntiRealizzati === "Out") && !isQuintettoCompleto()) return;
+
+  // --- COSTRUZIONE DEL JSON PER IL CAMPO NOTE ---
+  const noteObj = {
+    quintetto: getNumeriGiocatoriIn(), // I numeri dei giocatori attualmente in campo
+    quarto: quartoAttuale        
+  };
+  
+  // Trasformiamo l'oggetto in una stringa JSON
+  const noteJSON = JSON.stringify(noteObj);
+  // ----------------------------------------------
+
+  const formData = new FormData();
+
+  formData.append("live", "1");
+  formData.append("matchId", matchId);
+  formData.append("idGiocatore", idGiocatore);
+  formData.append("puntiRealizzati", puntiRealizzati);
+  formData.append("action", action);
+  formData.append("squadra", team);
+
+  let AoB = "";
+  if (teamA === "Polismile A") {
+    AoB = (team === teamA) ? "A" : "B";
+  } else {
+    AoB = (team === teamB) ? "B" : "A";
+  }
+  formData.append("AoB", AoB);
+  formData.append("timestampReale", timestampReale);
+
+  // Inseriamo la stringa JSON nel campo note
+  formData.append("note", noteJSON);
+
+  fetch(url, {
+    method: "POST",
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Errore di rete');
+    return response.json();
+  })
+  .then(data => {
+    console.log(`[SERVER RESPONSE] Status: ${data.status}, Message: ${data.message}`);
+    console.log(`[LIVE] Elaborato: ${idGiocatore} -> ${puntiRealizzati}`);
+  })
+  .catch(error => {
+    console.error("Errore nell'invio o nella lettura della risposta:", error);
+  });
+}
+
+function OLDsaveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, team, action) {
   // 
   // Invia un evento di punteggio live al backend utilizzando FormData.
   // @param {string} idGiocatore - L'ID del giocatore (es. "Cognome_Nome").
@@ -736,7 +793,7 @@ function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, te
 
   // ATTENZIONE: riempire campo note correttamente. nel caso di In/Out deve essere la lista dei giocatori In, nel caso di Fallo dovrebbe essere il numero di falli totali del giocatore
   if ((action !== "undo") && (puntiRealizzati === "In" || puntiRealizzati === "Out") && !isQuintettoCompleto()) return;
-  const note = getNumeriGiocatoriIn();
+  const note = getNumeriGiocatoriIn(); //QUI
 
   // 1. Creazione dell'oggetto FormData
   const formData = new FormData();

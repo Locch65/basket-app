@@ -52,7 +52,8 @@
 //    - FATTO: Falli nella scoreboard invertiti se polismile e' squadra b
 //  * - Resettare i falli di squadra alla fine del quarto
 //  * - Il pallino rosso del live non funziona. Anche se è molto indietro, da rosso
-//  * - Highlights: filtrare solo i punti e non falli e inout
+//    - FATTO: Highlights: filtrare solo i punti e non falli e inout. 
+//    - BUG: Highlights perchè non funziona quando c'e' un orainiziopartita > 1
 //  * - Falli su scoreboard non seguono il tempo ma sono istantanei. se la partita è Terminata, non vengono memorizzati nello sheet Partite. si trovano solo negli event
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
