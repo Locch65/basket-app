@@ -319,8 +319,9 @@ function aggiungiSecondiAOrario(orarioStr, secondiDaAggiungere) {
  * @returns {Promise<string>} - L'ID del video live o un messaggio di errore.
  */
 function getCurrentLiveIdByChannel(apiKey) {
-  // L'ID del canale per @ItIsPolitime è UCZFhQQaIv8Uv59c_4WnlBPA
-  var channelId = "UCZFhQQaIv8Uv59c_4WnlBPA";
+
+//  var channelId = "UCZFhQQaIv8Uv59c_4WnlBPA";   // L'ID del canale per @ItIsPolitime è UCZFhQQaIv8Uv59c_4WnlBPA
+  var channelId = "UCQfwfsi5VrQ8yKZ-UWmAEFg";   // L'ID del canale per France 24 English è UCQfwfsi5VrQ8yKZ-UWmAEFg
   
   // Endpoint search filtrato per tipo 'video' ed eventType 'live'
   var apiUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=" + 
