@@ -313,6 +313,43 @@ function aggiungiSecondiAOrario(orarioStr, secondiDaAggiungere) {
   return `${h}:${m}:${s}`;
 }
 
+/**
+ * Restituisce l'ID del video attualmente in live streaming sul canale @ItIsPolitime.
+ * @param {string} apiKey - La tua YouTube Data API Key.
+ * @returns {Promise<string>} - L'ID del video live o un messaggio di errore.
+ */
+function getCurrentLiveIdByChannel(apiKey) {
+  // L'ID del canale per @ItIsPolitime è UCZFhQQaIv8Uv59c_4WnlBPA
+  var channelId = "UCZFhQQaIv8Uv59c_4WnlBPA";
+  
+  // Endpoint search filtrato per tipo 'video' ed eventType 'live'
+  var apiUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=" + 
+               channelId + "&type=video&eventType=live&key=" + apiKey;
+
+  return fetch(apiUrl)
+    .then(function (response) {
+      if (!response.ok) throw new Error("Errore API YouTube: " + response.status);
+      return response.json();
+    })
+    .then(function (data) {
+      if (data.items && data.items.length > 0) {
+        // Restituisce l'ID del primo (e solitamente unico) video in diretta
+        return data.items[0].id.videoId;
+      } else {
+        throw new Error("Il canale non è attualmente in live streaming.");
+      }
+    })
+    .catch(function (error) {
+      console.error("Errore:", error.message);
+      throw error;
+    });
+}
+
+// Esempio di utilizzo:
+// getCurrentLiveIdByChannel("LA_TUA_API_KEY")
+//   .then(id => console.log("ID del video live attuale: " + id))
+//   .catch(err => console.log(err.message));
+
 function getLiveStartTimeById(youtubeUrl, apiKey) {
   // 
   // Accetta l'URL di un video YouTube e restituisce l'ora di inizio reale.
