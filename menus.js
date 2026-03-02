@@ -140,7 +140,7 @@ function gestisciGoLive() {
   };
 }
 
-function gestisciDirettaYoutube() {
+function OLDgestisciDirettaYoutube() {
   const overlay = document.createElement('div');
   overlay.id = 'youtubePopup';
   overlay.className = 'popup';
@@ -252,7 +252,194 @@ function gestisciDirettaYoutube() {
     document.body.removeChild(overlay);
   };
 }
+
+function gestisciDirettaYoutube() {
+  const overlay = document.createElement('div');
+  overlay.id = 'youtubePopup';
+  overlay.className = 'popup';
+
+  const content = document.createElement('div');
+  content.className = 'popup-content';
+  content.style.textAlign = 'left';
+
+  const urlIniziale = (typeof videoURL !== 'undefined') ? videoURL : "";
+  const apiKeyCorrente = googleApiKey || "";
+  const oraSalvatatYt = oraInizioDiretta;
+
+  content.innerHTML = `
+        <h2 style="margin-bottom: 20px; text-align:center;">Diretta Youtube</h2>
+        
+        <label style="display:block; font-size:1.6rem; margin-bottom: 5px;">URL:</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="ytUrl" style="flex: 1; padding:10px; font-size:1.4rem;" 
+                   placeholder="https://www.youtube.com/watch?v=..." value="${urlIniziale}">
+            <button id="ytSearchBtn" style="padding: 10px; font-size: 1.6rem; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 5px;">
+                Cerca
+            </button>
+        </div>
+
+        <label style="display:block; font-size:1.6rem; margin-bottom: 5px;">Ora inizio Diretta (HH:mm:ss):</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="time" id="ytOraInizio" step="1" style="flex: 1; padding:10px; font-size:1.4rem;" value="${oraSalvatatYt}">
+            <button id="ytCalcolaBtn" disabled style="padding: 10px; font-size: 1.6rem; cursor: not-allowed; opacity: 0.5; background-color: #3498db; color: white; border: none; border-radius: 5px;">
+                Calcola
+            </button>
+        </div>
+
+        <label style="display:block; font-size:1.6rem; margin-bottom: 5px;">Offset Inizio Partita (secondi):</label>
+        <input type="number" id="ytOffset" style="width:100%; padding:10px; margin-bottom:15px; font-size:1.4rem;" 
+               placeholder="Esempio: 30" value="${matchStartTime || ""}">
+
+        <label style="display:block; font-size:1.6rem; margin-bottom: 5px;">API Key:</label>
+        <input type="text" id="ytApiKey" style="width:100%; padding:10px; margin-bottom:25px; font-size:1.4rem;" 
+               placeholder="Inserisci la tua Google API Key" value="${apiKeyCorrente}">
+
+        <div style="display: flex; justify-content: center; gap: 20px;">
+            <button id="ytSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="ytCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+    `;
+
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+
+  const urlInput = document.getElementById('ytUrl');
+  const calcolaBtn = document.getElementById('ytCalcolaBtn');
+  const searchBtn = document.getElementById('ytSearchBtn');
+
+  const validaUrl = (valore) => {
+    const isValid = valore.startsWith('http://') || valore.startsWith('https://');
+    calcolaBtn.disabled = !isValid;
+    calcolaBtn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+    calcolaBtn.style.opacity = isValid ? '1' : '0.5';
+  };
+
+  validaUrl(urlInput.value.trim());
+  urlInput.addEventListener('input', () => validaUrl(urlInput.value.trim()));
+
+  // Collegamento funzioni ai bottoni
+  calcolaBtn.onclick = () => calcolaOraInizioDirettaYoutube();
+  searchBtn.onclick = () => searchYoutubeLive(); // Funzione richiesta
+
+  document.getElementById('ytCancelBtn').onclick = () => {
+    document.body.removeChild(overlay);
+  };
+
+  document.getElementById('ytSaveBtn').onclick = () => {
+    // ... (resto del codice di salvataggio invariato)
+    let finalUrl = urlInput.value.trim();
+    const offsetValue = document.getElementById('ytOffset').value;
+    const oraInizioValue = document.getElementById('ytOraInizio').value;
+    const apiKeyValue = document.getElementById('ytApiKey').value.trim();
+
+    if (offsetValue && parseInt(offsetValue) >= 0) {
+      try {
+        let urlObj = new URL(finalUrl);
+        urlObj.searchParams.set("t", offsetValue + "s");
+        urlObj.searchParams.delete("start");
+        finalUrl = urlObj.toString();
+      } catch (e) {
+        if (!finalUrl.includes('t=') && !finalUrl.includes('start=')) {
+          const separator = finalUrl.includes('?') ? '&' : '?';
+          finalUrl = `${finalUrl}${separator}t=${offsetValue}s`;
+        } else {
+          finalUrl = finalUrl.replace(/([?&])(t|start)=[^&]*/, `$1t=${offsetValue}s`);
+        }
+      }
+    }
+
+    videoURL = finalUrl;
+    matchStartTime = offsetValue;
+    googleApiKey = apiKeyValue;
+    oraInizioDiretta = oraInizioValue;
+
+    localStorage.setItem("googleApiKey", apiKeyValue);
+    localStorage.setItem("matchStartTime", offsetValue);
+    localStorage.setItem("videoURL", finalUrl);
+    localStorage.setItem("oraInizioDiretta", oraInizioDiretta);
+
+    dettagliGara.oraInizioDiretta = oraInizioDiretta;
+    dettagliGara.videoURL = finalUrl;
+    
+    if (typeof saveToFirebaseHistory === 'function') saveToFirebaseHistory('partite/', dettagliGara);
+    if (typeof saveToServerMatchData === 'function') saveToServerMatchData();
+
+    document.body.removeChild(overlay);
+  };
+}
+
+async function searchYoutubeLive() {
+    console.log("Ricerca YouTube Live avviata...");
+    
+    const apiKeyInserita = document.getElementById("ytApiKey").value.trim();
+    
+    if (!apiKeyInserita) {
+        alert("Inserisci prima l'API Key per effettuare la ricerca.");
+        return;
+    }
+
+    try {
+        // Attendiamo il risultato della funzione asincrona
+        const videoId = await getCurrentLiveIdByChannel(apiKeyInserita);
+        
+        // Costruiamo l'URL completo
+        const liveVideoURL = `https://www.youtube.com/watch?v=${videoId}`;
+        
+        const messaggio = `Trovato Video Live: ${liveVideoURL}\nVuoi usare questo video?`;
+        
+        if (confirm(messaggio)) {
+            const urlInput = document.getElementById('ytUrl');
+            if (urlInput) {
+                // Aggiorniamo il campo URL
+                urlInput.value = liveVideoURL;
+
+                // Trigger manuale dell'evento input per validare il tasto "Calcola"
+                urlInput.dispatchEvent(new Event('input'));
+                
+                console.log("URL aggiornato con il video trovato:", liveVideoURL);
+            }
+        }
+    } catch (error) {
+        // Se getCurrentLiveIdByChannel lancia un errore (es. "canale non in live")
+        console.error("Errore durante la ricerca:", error.message);
+        alert(error.message);
+    }
+}
+
+function OLDsearchYoutubeLive() {
+    console.log("Ricerca YouTube Live avviata...");
+    
+    // Logica di ricerca (da implementare con API YouTube)
+    const apiKeyInserita = document.getElementById("ytApiKey").value.trim();
+    let videoFound = true; 
+    let liveVideoURL = "https://www.youtube.com/watch?v=ESEMPIO"; // URL di test
+
+    // ATTENZIONE TEST TEMPORANEO
+    liveVideoURL = getCurrentLiveIdByChannel(apiKeyInserita);
+
+    if (videoFound) {
+        const messaggio = `Trovato Video Live: ${liveVideoURL}\nVuoi usare questo video?`;
+        
+        if (confirm(messaggio)) {
+            const urlInput = document.getElementById('ytUrl');
+            if (urlInput) {
+                // Inserisce il valore nell'input
+                urlInput.value = liveVideoURL;
+
+                // Trigger manuale della validazione per abilitare il tasto "Calcola"
+                // Usiamo l'evento 'input' così i listener esistenti reagiscono
+                urlInput.dispatchEvent(new Event('input'));
+                
+                console.log("URL aggiornato con il video trovato.");
+            }
+        }
+    } else {
+        alert("Nessun Video Live trovato sul Canale Youtube");
+    }
+}
+
 function calcolaOraInizioDirettaYoutube() {
+
   console.log("Eseguo il calcolo dell'ora dall'URL inserito...");
 
   // 1. Recuperiamo i valori aggiornati dai campi del popup
