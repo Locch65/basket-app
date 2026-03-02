@@ -320,8 +320,8 @@ function aggiungiSecondiAOrario(orarioStr, secondiDaAggiungere) {
  */
 function getCurrentLiveIdByChannel(apiKey) {
 
-//  var channelId = "UCZFhQQaIv8Uv59c_4WnlBPA";   // L'ID del canale per @ItIsPolitime è UCZFhQQaIv8Uv59c_4WnlBPA
-  var channelId = "UCQfwfsi5VrQ8yKZ-UWmAEFg";   // L'ID del canale per France 24 English è UCQfwfsi5VrQ8yKZ-UWmAEFg
+//  var channelId = "UCQfwfsi5VrQ8yKZ-UWmAEFg";   // L'ID del canale per France 24 English è UCQfwfsi5VrQ8yKZ-UWmAEFg
+  var channelId = "UCZFhQQaIv8Uv59c_4WnlBPA";   // L'ID del canale per @ItIsPolitime è UCZFhQQaIv8Uv59c_4WnlBPA
   
   // Endpoint search filtrato per tipo 'video' ed eventType 'live'
   var apiUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=" + 
