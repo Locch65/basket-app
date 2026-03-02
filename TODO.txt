@@ -38,18 +38,15 @@
 //      - se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
 //      - grafico partita con avanzamento punti
 //      - su tablet aggiungere un sound al posto del vibrate
+//      - marcare i componenti del quintetto iniziale con un "*"
 //
 //    - GESTIONE LIVE:
-//      - FATTO: cercare sul canale YouTube della Polismile il link della partita Live, invece che fare copia e incolla e inserirlo nel popup
-//         - prevedere un messaggio broadcast per forzare un reload quando viene cambiato il videoID
 //      - se la live youtube si interrompe, si potrebbero creare più "spezzoni".
 //        - prevedere un comando broadcast per ricaricare il link del nuovo spezzone (dopo averlo settato com admin)
-//        - per poter avere degli highlights coerenti bisognerebbe avere un meccaniscmo per fare il load dinamico di videoId diversi durante la navigazione degli highlights
-//    * - se il video live non è disponibile, la mia app deve continuare a funzionare! 
+//        - per poter avere degli highlights coerenti bisognerebbe avere un meccanismo per fare il load dinamico di videoId diversi durante la navigazione degli highlights
 //      
 //    - GESTIONE FALLI:
-//      - FATTO: (VERIFICARE) Resettare i falli di squadra alla fine del quarto
-//      - FATTO: Falli su scoreboard per admin devono essere istantanei, per gli spettatori in funzione del tempo 
+//      - FATTO: VERIFICARE Falli su scoreboard per admin devono essere istantanei, per gli spettatori in funzione del tempo 
 //             (non vengono memorizzati nello sheet Partite. si trovano solo negli eventi)
 //      - aggiungere i falli accanto al punteggio hud (almeno in landscape). 
 //      - flashare la scoreboard quando cambiano i falli per la squadra B
@@ -59,18 +56,20 @@
 //      - rendere cliccabile il bottone del quarto e attivare il popup
 //      - Memorizzare punteggi alla fine ciascun quarto. 
 //   *  - se cambio quarto durante la partita, poi faccio back verso il calendario e poi riclicco sulla partita la variabile statoPartita assume il 
-//           valore del precedente quarto (non rilegge da localStorate). DOBBIAMO sostituire tutti i localStorage di singole variabili con localStorage di dettagliGara (che contiene tutto)
+//           valore del precedente quarto (non rilegge da localStorate). SOSTITUIRE tutti i localStorage di singole variabili con localStorage di dettagliGara (che contiene tutto)
 //
 //    - HIGHLIGHTS:
 //      - NICE TO HAVE: Highlight anche in orizzontale
 //      - aggiungere per admin un bottone "fix" che cambia l'ora del canestro con quello visualizzato.
-//      - quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
-//      - quando esco dagli highlight riportare il punteggio al risultato finale se la partita è "Terminata"
-//      - BUG: Highlights perchè non funziona quando c'e' un orainiziopartita > 1
+//   *  - quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
+//   *  - quando esco dagli highlight riportare il punteggio al risultato finale se la partita è "Terminata"
+//   *  - su iphone, quando clico sui bottoni, zooma l'intera pagina
+//      - VERIFICARE: Highlights perchè non funziona quando c'e' un orainiziopartita > 1. 
+//   *  - disabilitare il bottone Highlights se non ci sono gli eventi registrati, oppure soono inaffidabili
 //
 //
 //  * - Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante
-//    - punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo
+//    - BUG: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 // 
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
@@ -176,5 +175,10 @@
 //    - FATTO: Highlights: filtrare solo i punti e non falli e inout. 
 //    - FATTO: inserire un orologio digitale con il tempo attuale in alto a destra se isAdmin=true
 //    - FATTO: Falli nella scoreboard invertiti se polismile e' squadra b
+//    - FATTO: cercare sul canale YouTube della Polismile il link della partita Live, invece che fare copia e incolla e inserirlo nel popup
+//    - FATTO: prevedere un messaggio broadcast per forzare un reload quando viene cambiato il videoID
+//    - FATTO: se il video live non è disponibile, la mia app deve continuare a funzionare! 
+//    - FATTO: (VERIFICARE) Resettare i falli di squadra alla fine del quarto
+//    - FATTO: se la partita è "nuova", quando dopo il SYNC setto l'ora di inizio streaming, in HUD viene fuori NaN, NaN, NaN
 //
 // -----------------------------------------------------------------------------------

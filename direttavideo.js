@@ -1178,32 +1178,43 @@ function gestisciHighlight(azione) {
 
     case 'prev':
       // Cerchiamo all'indietro il primo evento di tipo "punto"
-      let prevIdx = currentHighlightIndex - 1;
-      while (prevIdx >= 0) {
-        if (fullMatchHistory[prevIdx].eventType === "punto") {
-          break;
-        }
-        prevIdx--;
+      if (currentHighlightIndex === 2) {
+        currentHighlightIndex = -1;
       }
-      // Se non trova punti, decidiamo se fermarci a -1 o restare dove siamo
-      // Qui lo impostiamo al punto trovato o al limite minimo (-2/-1)
-      currentHighlightIndex = (prevIdx < 0) ? ((matchStartTime > 0) ? -2 : -1) : prevIdx;
+      else
+      {
+        let prevIdx = currentHighlightIndex - 1;
+        while (prevIdx >= 0) {
+          if (fullMatchHistory[prevIdx].eventType === "punto") {
+            break;
+          }
+          prevIdx--;
+        }
+        // Se non trova punti, decidiamo se fermarci a -1 o restare dove siamo
+        // Qui lo impostiamo al punto trovato o al limite minimo (-2/-1)
+        currentHighlightIndex = (prevIdx < 0) ? ((matchStartTime > 0) ? -2 : -1) : prevIdx;
+      }
       break;
 
     case 'next':
       // Cerchiamo in avanti il primo evento di tipo "punto"
-      let nextIdx = currentHighlightIndex + 1;
-      let trovatoNext = false;
-      while (nextIdx < fullMatchHistory.length) {
-        if (fullMatchHistory[nextIdx].eventType === "punto") {
-          trovatoNext = true;
-          break;
-        }
-        nextIdx++;
+      if (currentHighlightIndex === -2) {
+        currentHighlightIndex++;
       }
-      // Se trova un punto lo assegna, altrimenti va alla fine (end)
-      currentHighlightIndex = trovatoNext ? nextIdx : fullMatchHistory.length;
-      if (!trovatoNext) userNavigatedToEnd = true;
+      else {
+        let nextIdx = currentHighlightIndex + 1;
+        let trovatoNext = false;
+        while (nextIdx < fullMatchHistory.length) {
+          if (fullMatchHistory[nextIdx].eventType === "punto") {
+            trovatoNext = true;
+            break;
+          }
+          nextIdx++;
+        }
+        // Se trova un punto lo assegna, altrimenti va alla fine (end)
+        currentHighlightIndex = trovatoNext ? nextIdx : fullMatchHistory.length;
+        if (!trovatoNext) userNavigatedToEnd = true;
+      }
       break;
 
     case 'end':
@@ -2443,6 +2454,7 @@ function modificaOraInizioDiretta(delta) {
   // 2. Converti HH:MM:SS in secondi totali
   if (!isAdmin) return;
 
+  if (oraInizioDiretta === "") oraInizioDiretta = "00:00:00";
   const parti = oraInizioDiretta.split(":");
   let secondiTotali = (+parti[0]) * 3600 + (+parti[1]) * 60 + (+parti[2]);
 
