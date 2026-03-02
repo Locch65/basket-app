@@ -68,6 +68,7 @@
 //   *  - disabilitare il bottone Highlights se non ci sono gli eventi registrati, oppure soono inaffidabili
 //
 //
+//    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagin.
 //  * - Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante
 //    - BUG: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
