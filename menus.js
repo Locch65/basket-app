@@ -341,7 +341,7 @@ function gestisciDirettaYoutube() {
       } catch (e) {
         if (!finalUrl.includes('t=') && !finalUrl.includes('start=')) {
           const separator = finalUrl.includes('?') ? '&' : '?';
-          finalUrl = `${finalUrl}${separator}t=${offsetValue}s`;
+          if (finalUrl !== "") finalUrl = `${finalUrl}${separator}t=${offsetValue}s`;
         } else {
           finalUrl = finalUrl.replace(/([?&])(t|start)=[^&]*/, `$1t=${offsetValue}s`);
         }

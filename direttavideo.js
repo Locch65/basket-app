@@ -93,6 +93,11 @@ function registerToFirebaseEvents() {
   db.ref('partite/' + matchId).on('value', (snapshot) => {
     const data = snapshot.val();
 
+    let videoURLChanged = false;
+    if (dettagliGara !== null) {
+      videoURLChanged = (dettagliGara?.videoURL ?? "") !== (data?.videoURL ?? "");    
+    }
+
     if (data) {
       dettagliGara = data;
       quartoAttuale = dettagliGara.statoPartita;
@@ -110,6 +115,12 @@ function registerToFirebaseEvents() {
     }
 
     updateDatiPartita("match", struct)
+
+    // se è cambiato il videoURL (ad es. perchè prima era vuoto e adesso è definito), fai il reload dell'interfaccia
+    if (videoURLChanged)
+    {
+      location.reload();
+    }
 
   }, (error) => {
     console.error("Errore di lettura:", error);
@@ -2851,12 +2862,21 @@ async function init() {
       matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
 
       if (videoId && videoId !== "null" && videoId !== "") {
-        creaIlPlayer(videoId);
+          creaIlPlayer(videoId);
       } else {
-        const videoSpinner = document.getElementById("video-loading");
-        if (videoSpinner) videoSpinner.classList.add("hidden");
-        console.log("Nessun video trovato, avvio tickTimeline per sole statistiche.");
-        avviaTickSenzaVideo();
+          // 1. Nascondi lo spinner di caricamento
+          const videoSpinner = document.getElementById("video-loading");
+          if (videoSpinner) videoSpinner.classList.add("hidden");
+
+          // 2. Mostra l'immagine statica di avviso
+          const placeholder = document.getElementById("video-placeholder");
+          if (placeholder) {
+              placeholder.style.display = "block";
+          }
+
+          // 3. Log e avvio statistiche
+          console.log("Nessun video trovato, mostro placeholder e avvio tickTimeline.");
+          avviaTickSenzaVideo();
       }
 
       console.log("Timeline avviata per il match:", matchId);
