@@ -427,20 +427,6 @@ body.user-mode .video-container {
     z-index: 999999;
 }
 
-/* Forza la visibilità del popup anche in landscape */
-.OLDpopup-transparent-overlay {
-    position: fixed !important; /* Non segue lo scroll */
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: rgba(0, 0, 0, 0.01); /* Quasi invisibile ma blocca i click */
-    display: flex !important; /* Vince sui display:none delle media queries */
-    justify-content: center;
-    align-items: center;
-    z-index: 999999 !important; /* Sopra a ogni elemento video o HUD */
-}
-
 /* Nasconde l'intero overlay solo quando ha la classe .hidden */
 .popup-transparent-overlay.hidden {
     display: none !important;
@@ -738,6 +724,9 @@ body.user-mode .video-container {
     #hud-overlay {
         z-index: 10001; /* Sopra il video e sopra il contenitore fullscreen */
     }
+    #rotation-tutorial-overlay.show {
+        display: none;
+    }    
 }
 
 /* Quando lo schermo è in PORTRAIT (Verticale) */
@@ -1493,6 +1482,117 @@ body.user-mode .video-container {
 .convocazioniPopup-closeBtn {
   background-color: #f28b82;
   color: white;
+}
+
+/* --- Stili per l'Overlay di Rotazione Schermo --- */
+#rotation-tutorial-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Sfondo più trasparente (0.6 invece di 0.85) */
+  background-color: rgba(0, 0, 0, 0.4); 
+  /* Effetto sfocatura opzionale per un look moderno */
+  backdrop-filter: blur(4px); 
+  -webkit-backdrop-filter: blur(4px); 
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  font-family: Arial, sans-serif;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+#OLDrotation-tutorial-overlay {
+  display: none; /* Inizialmente nascosto */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85); /* Sfondo scuro semitrasparente */
+  z-index: 10000; /* Assicura che sia sopra a tutto, anche al player */
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  font-family: Arial, sans-serif;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out; /* Transizione fluida per apparire/scomparire */
+}
+
+#rotation-tutorial-overlay.show {
+  display: flex;
+  opacity: 1;
+}
+
+/* Contenitore del telefono stilizzato */
+.phone-icon-container {
+  width: 60px;
+  height: 110px;
+  border: 4px solid white;
+  border-radius: 10px;
+  position: relative;
+  margin-bottom: 20px;
+  /* Animazione di rotazione */
+  animation: rotatePhone 2.5s ease-in-out infinite;
+  transform-origin: center center;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3); /* Ombra per staccare dallo sfondo chiaro */
+}
+
+/* Simula l'altoparlante/fotocamera superiore */
+.phone-icon-container::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 15px;
+  height: 4px;
+  background-color: white;
+  border-radius: 2px;
+}
+
+/* Simula il pulsante home inferiore */
+.phone-icon-container::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+/* Messaggio di testo */
+.rotation-text {
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 0 20px;
+  line-height: 1.4;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Ombra sul testo */
+}
+
+/* Definizione dell'Animazione CSS */
+@keyframes rotatePhone {
+  0% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(0deg); /* Pausa in verticale */
+  }
+  70% {
+    transform: rotate(-90deg); /* Ruota in orizzontale */
+  }
+  100% {
+    transform: rotate(-90deg); /* Pausa in orizzontale */
+  }
 }
 
 /* ======================================== */

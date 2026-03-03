@@ -183,6 +183,39 @@ window.onYouTubeIframeAPIReady = function () {
 function onPlayerReady() {
   console.log("Player pronto");
 
+  const videoSpinner = document.getElementById("video-loading");
+  if (videoSpinner) videoSpinner.classList.add("hidden");
+
+  player.mute();
+
+  // CONTROLLO LIVE: Se è una diretta, ignoriamo matchStartTime e puntiamo al futuro
+  if (isLiveStream()) {
+    // 1000000 è un trucco standard: forza il player al "punto ora"
+    player.seekTo(1000000, true);
+    setTimeout(() => {
+      syncToLive()
+    }, 1000); // ripete dopo un secondo il seekTO altrimenti compare l'orologino
+  } else {
+    player.seekTo(matchStartTime, true);
+  }
+
+  player.playVideo();
+
+  // Diamo tempo al player di stabilizzarsi prima di avviare i calcoli dell'HUD
+  setTimeout(() => {
+    if (timelineInterval) clearInterval(timelineInterval);
+    timelineInterval = setInterval(tickTimeline, REFRESH_TIME);
+    
+    // Sincronizziamo maxCurrentTime subito dopo il salto
+    maxCurrentTime = player.getCurrentTime();
+  }, 1000); 
+
+  if (!isAdmin) mostraTutorialRotazione();   
+}
+
+function OLD_OK_onPlayerReady() {
+  console.log("Player pronto");
+
   // NASCONDI LO SPINNER DEL VIDEO
   const videoSpinner = document.getElementById("video-loading");
   if (videoSpinner) {
@@ -195,6 +228,9 @@ function onPlayerReady() {
   tickTimeline();
   if (timelineInterval) clearInterval(timelineInterval); // Sicurezza anti-doppioni
   timelineInterval = setInterval(tickTimeline, REFRESH_TIME);
+
+  // per gli spettatori Mostra il tutorial appena il video è caricato e pronto
+  if (!isAdmin) mostraTutorialRotazione();  
 }
 
 function creaIlPlayer(vId) {
@@ -239,6 +275,15 @@ function onPlayerStateChange(event) {
 
 function isLiveStream() {
   const data = player.getVideoData();
+  const duration = player.getDuration();
+  
+  // Se data.isLive è vero, ottimo. 
+  // ALTRIMENTI, se la durata è 0 durante il caricamento, è quasi certamente una Live.
+  // Un video normale ha sempre una durata > 0 appena pronto.
+  return data.isLive === true || duration === 0;
+}
+function OLDOKisLiveStream() {
+  const data = player.getVideoData();
   return data.isLive === true;
 }
 
@@ -250,7 +295,22 @@ function updateLiveEdge() {
   }
 }
 
-function isBehindLiveEdge(threshold = 3) {
+function isBehindLiveEdge(threshold = 7) { 
+  if (isLiveStream()) {
+    // Nelle live di YouTube, la durata totale è il punto "ora"
+    const liveEdge = player.getDuration(); 
+    const current = player.getCurrentTime();
+    
+    // Se la differenza tra la fine del video e dove sei tu è > soglia, sei in ritardo
+    return (liveEdge - current) > threshold;
+  }
+  
+  // Per i video registrati (finti live), manteniamo la tua logica originale
+  const current = player.getCurrentTime();
+  return (maxCurrentTime - current) > threshold;
+}
+
+function OLD_OK_isBehindLiveEdge(threshold = 3) {
   const current = player.getCurrentTime();
   return (maxCurrentTime - current) > threshold;
 }
@@ -268,6 +328,29 @@ function isUserBehindLive() {
 
   // Caso 3: sei indietro rispetto al live edge
   return isBehindLiveEdge();
+}
+
+function syncToLive() {
+  if (!player || typeof player.seekTo !== "function") return;
+
+  // 1. Se è una trasmissione Live reale di YouTube
+  if (isLiveStream()) {
+    // Cercando un valore altissimo (es. 1 miliardo), 
+    // YouTube ci porta automaticamente all'ultimo secondo disponibile
+    player.seekTo(1000000000, true);
+  } else {
+    // 2. Se è un video "finto live" o registrato
+    // Usiamo la variabile maxCurrentTime che hai già nel tuo script
+    player.seekTo(maxCurrentTime, true);
+  }
+
+  // Resettiamo lo stato di "ritardo"
+  userIsBehindBecauseOfPause = false;
+  
+  // Assicuriamoci che il video riparta se era in pausa
+  player.playVideo();
+  
+  console.log("Sincronizzazione al Live Edge completata.");
 }
 
 function checkLiveStatus() {
@@ -576,7 +659,18 @@ function generaHistory(liveDataDalBackend) {
       };
     });
 
-  highlightsAvailable = true;
+  //highlightsAvailable = true; // ATTENZIONE: test
+  //highlightsAvailable = dettagliGara?.note?.highlights?.toLowerCase() === "true";
+  // 1. Trasformiamo la stringa in oggetto (se note è null, usa '{}')
+  const config = JSON.parse(dettagliGara?.note || '{}');
+
+  // 2. Verifichiamo se esiste la chiave e se è "true"
+  if (config["highlights"] !== undefined) {
+      // Usiamo String() per gestire sia il booleano true che la stringa "true"
+      highlightsAvailable = String(config["highlights"]).toLowerCase() === "true";
+  } else {
+      highlightsAvailable = false;
+  }
 }
 
 function modifyHistory() {
@@ -932,7 +1026,6 @@ async function tickTimeline() {
     else {
       // in questo caso solo admin usa caricaDatiPartita, gli altri aspettano gli eventi Firebase
       if (tickCounter === 0){ // la prima volta aggiorna i dati anche per admin
-//      if (isAdmin && tickCounter === 0){ // la prima volta aggiorna i dati anche per admin
           caricaDatiPartita(matchId);
       }
     }
@@ -1101,6 +1194,44 @@ function showBasketToast(name, points) {
 
 //#region GESTIONE HIGHLIGHTS
 function controllaDisponibilitaHighlights() {
+  const btnToggle = document.getElementById('toggle-highlights');
+  const highlightsContainer = document.getElementById('highlights-container'); // Il div che contiene la lista
+  const section = document.getElementById('highlights-section');
+
+  if (highlightsAvailable) {
+    // ABILITA IL BOTTONE
+    btnToggle.disabled = false;
+    btnToggle.style.opacity = "1";
+    btnToggle.style.cursor = "pointer";
+    //btnToggle.title = "Mostra Highlights";
+    
+    // Assicurati che la sezione contenitore sia visibile (ma non necessariamente aperta)
+    if (section) section.style.display = "flex"; 
+  } else {
+    // DISABILITA IL BOTTONE
+    btnToggle.disabled = true;
+    btnToggle.style.opacity = "0.5";      // Effetto sbiadito per feedback visivo
+    btnToggle.style.cursor = "not-allowed"; // Cambia il cursore al passaggio
+    //btnToggle.title = "Highlights non ancora disponibili";
+
+    // OPZIONALE: Se gli highlights erano aperti, li chiudiamo
+    if (highlightsContainer) {
+      highlightsContainer.classList.add('hidden');
+    }
+  }
+}
+
+function BADcontrollaDisponibilitaHighlights() {
+  // Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
+  const section = document.getElementById('highlights-section');
+  if (highlightsAvailable) {
+    section.style.display = "flex";
+  } else {
+    section.style.display = "none";
+  }
+}
+
+function OLDcontrollaDisponibilitaHighlights() {
   // Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
   if (highlightsAvailable == false) return;
 
@@ -1153,13 +1284,16 @@ function toggleHighlights() {
       label.innerText = "";
     }
     isReviewMode = false;
+
+    // quando esco dagli Highlights da un video live, vai alla diretta.
+    if (isLiveStream()) syncToLive();
   }
 }
 
 function inizializzaHighlights() {
   // Rimosso il controllo if (currentHighlightIndex >= 0) per permettere il reset
   if (fullMatchHistory && fullMatchHistory.length > 0) {
-    highlightsAvailable = true;
+    //highlightsAvailable = true;
     currentHighlightIndex = (matchStartTime > 0) ? -2 : -1;; // Indichiamo che siamo prima del primo evento
     controllaDisponibilitaHighlights();
     aggiornaUIHighlight();
@@ -1229,31 +1363,6 @@ function gestisciHighlight(azione) {
   setTimeout(() => {
     bloccoSincronizzazioneManuale = false;
   }, 1000);
-}
-
-function OLDgestisciHighlight(azione) {
-  if (!fullMatchHistory) return;
-
-  // Resettiamo il flag ogni volta che si preme un tasto
-  userNavigatedToEnd = false;
-
-  switch (azione) {
-    case 'start': currentHighlightIndex = (matchStartTime > 0) ? -2 : -1; break;
-    case 'prev': if (currentHighlightIndex > -2) currentHighlightIndex--; break;
-    case 'next': if (currentHighlightIndex < fullMatchHistory.length) currentHighlightIndex++; break;
-    case 'end':
-      currentHighlightIndex = fullMatchHistory.length;
-      userNavigatedToEnd = true; // <--- MARCIAMO L'INTENZIONE
-      break;
-  }
-
-  bloccoSincronizzazioneManuale = true;
-  aggiornaUIHighlight(true);
-
-  setTimeout(() => {
-    bloccoSincronizzazioneManuale = false;
-    // Non resettiamo userNavigatedToEnd qui, lo farà la prima sync valida
-  }, 1000); // Alziamo a 3 secondi per sicurezza
 }
 
 function sincronizzaIndiceHighlightColVideo() {
@@ -1485,86 +1594,6 @@ function aggiornaFalliSquadra() {
     if (elA) elA.textContent = totalFoulsA;
     if (elB) elB.textContent = totalFoulsB;
   } else {
-    if (elA) elA.textContent = totalFoulsB;
-    if (elB) elB.textContent = totalFoulsA;
-  }
-}
-
-function OLD2aggiornaFalliSquadra() {
-  // 1. Recuperiamo il tempo corrente del video in secondi
-  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
-
-  // 2. Filtriamo la fullMatchHistory
-  const eventiFinoAdOra = fullMatchHistory.filter(evento => {
-    // Verifichiamo che sia un fallo e nel tempo corretto
-    if (evento.eventType !== "Fallo" || evento.secondiReali > secondiCorrentiVideo) {
-      return false;
-    }
-
-    // Parifichiamo le note per estrarre il quarto
-    try {
-      // Nota: assicurati che gli eventi abbiano il campo note popolato
-      const noteData = evento.note ? JSON.parse(evento.note) : {};
-      
-      // Filtriamo solo se il quarto corrisponde a quello attuale
-      return noteData.quarto === quartoAttuale;
-    } catch (e) {
-      console.error("Errore nel parsing delle note:", e);
-      return false;
-    }
-  });
-
-
-  // 3. Calcolo Falli Squadra A
-  // Contiamo quanti di questi eventi appartengono alla Squadra A
-  const totalFoulsA = eventiFinoAdOra.filter(ev => ev.squadra === 'Polismile A').length;
-
-  // 4. Calcolo Falli Squadra B
-  // Contiamo quanti di questi eventi appartengono alla Squadra B
-  const totalFoulsB = eventiFinoAdOra.filter(ev => ev.squadra === 'Squadra B').length;
-
-  // 5. Aggiornamento DOM
-  const elA = document.getElementById("team-fouls-A");
-  const elB = document.getElementById("team-fouls-B");
-  
-  if (teamA === "Polismile A") {
-    if (elA) elA.textContent = totalFoulsA;
-    if (elB) elB.textContent = totalFoulsB;
-  }
-  else {
-    if (elA) elA.textContent = totalFoulsB;
-    if (elB) elB.textContent = totalFoulsA;
-  }
-}
-
-function OLDORIGINALEaggiornaFalliSquadra() {
-  // 1. Recuperiamo il tempo corrente del video in secondi
-  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
-
-  // 2. Filtriamo la fullMatchHistory per prendere solo i falli 
-  // avvenuti fino al secondo corrente (escludendo i SYNC)
-  const eventiFinoAdOra = fullMatchHistory.filter(evento => 
-    evento.eventType === "Fallo" && 
-    evento.secondiReali <= secondiCorrentiVideo
-  );
-
-  // 3. Calcolo Falli Squadra A
-  // Contiamo quanti di questi eventi appartengono alla Squadra A
-  const totalFoulsA = eventiFinoAdOra.filter(ev => ev.squadra === 'Polismile A').length;
-
-  // 4. Calcolo Falli Squadra B
-  // Contiamo quanti di questi eventi appartengono alla Squadra B
-  const totalFoulsB = eventiFinoAdOra.filter(ev => ev.squadra === 'Squadra B').length;
-
-  // 5. Aggiornamento DOM
-  const elA = document.getElementById("team-fouls-A");
-  const elB = document.getElementById("team-fouls-B");
-  
-  if (teamA === "Polismile A") {
-    if (elA) elA.textContent = totalFoulsA;
-    if (elB) elB.textContent = totalFoulsB;
-  }
-  else {
     if (elA) elA.textContent = totalFoulsB;
     if (elB) elB.textContent = totalFoulsA;
   }
@@ -2334,7 +2363,7 @@ function IncrPuntiSquadraB(points) {
   // chiamato dall'html
   gestisciPuntiAvversari(points, null);
   modifyHistory();
-  renderPlayerListLive(); // ATTENZIONE serve solo per "rinfrescare" i punti nel tempo
+  renderPlayerListLive(); 
   updateScoreboard(matchIsLive || isReviewMode); 
   saveToFirebaseAll();
 }
@@ -2433,6 +2462,11 @@ window.screen.orientation.addEventListener("change", function () {
     } else if (elem.webkitRequestFullscreen) {
       elem.webkitRequestFullscreen();
     }
+  }
+  
+  // Se l'utente ruota lo schermo mentre il tutorial è attivo, chiudilo subito 
+  if (window.innerWidth > window.innerHeight) {
+     chiudiTutorialRotazione();
   }
 }, { passive: true });
 
@@ -2718,45 +2752,6 @@ function salvaStatoLive(dati) {
   saveToServerMatchData();
 }
 
-function OLDsalvaStatoLive(dati) {
-  console.log("Dati inviati a salvaStatoLive:", dati);
-  isLive = (dati.goLive === true);
-
-
-  // Gestione logica quarto e variabile globale
-  if (dati.terminata === true) {
-    statoPartita = "Terminata";
-    quartoAttuale = "Terminata";
-  } else {
-    statoPartita = dati.quarto || "1° Quarto";
-    // Estraiamo solo il numero o "Extra Time" (es: "1" invece di "1° Quarto")
-    quartoAttuale = statoPartita.replace("° Quarto", "").trim();
-  }
-  localStorage.setItem("statoPartita", statoPartita);
-  localStorage.setItem("isLive", isLive);
-
-  dettagliGara.statoPartita = statoPartita;
-  dettagliGara.isLive = isLive;
-  matchIsLive = isLive;
-
-//--------------------------------------
-  // ATTENZIONE: TEST
-  const nuovaConfig = {
-        "stats": dettagliGara.note['stats'] || false,
-        "highlights": dettagliGara.note['highlights'] || false,
-        "hud-score": hudPositionIndex,
-        "hud-clock": timePositionIndex
-  };
-  // 2. Trasformiamo l'oggetto in una stringa JSON
-  const note = JSON.stringify(nuovaConfig);
-  dettagliGara.note = note;
-//--------------------------------------
-
-  saveToFirebaseHistory('partite/', dettagliGara); 
-
-  saveToServerMatchData();
-}
-
 //#endregion
 
 function inizializzaGiocatoriConvocati() {
@@ -2818,6 +2813,29 @@ function updateSystemClock() {
     const clockElement = document.getElementById('systemClock');
     const now = new Date();
     clockElement.textContent = now.toLocaleTimeString('it-IT', { hour12: false });
+}
+
+function mostraTutorialRotazione() {
+  const overlay = document.getElementById('rotation-tutorial-overlay');
+  
+  // Controllo di sicurezza: se siamo già in orizzontale, non mostrare nulla
+  if (window.innerWidth > window.innerHeight) {
+    return;
+  }
+
+  // Aggiunge la classe che fa apparire l'overlay (con transizione CSS)
+  overlay.classList.add('show');
+
+  // Nasconde automaticamente l'overlay dopo 4 secondi (4000 millisecondi)
+  setTimeout(() => {
+    chiudiTutorialRotazione();
+  }, 4000); 
+}
+
+// Funzione per chiudere il tutorial (usata dal timeout o manualmente)
+function chiudiTutorialRotazione() {
+  const overlay = document.getElementById('rotation-tutorial-overlay');
+  overlay.classList.remove('show');
 }
 
 // ---------------------------------------------------------------------------------------------------- //
@@ -2922,9 +2940,10 @@ async function init() {
   const hudLiveStatus = document.getElementById("hud-live-status");
   if (hudLiveStatus) {
     hudLiveStatus.addEventListener('click', () => {
-      const durataTotale = player.getDuration();
-      player.seekTo(durataTotale - 1, true);
-      player.playVideo();
+      syncToLive();
+      // const durataTotale = player.getDuration();
+      // player.seekTo(durataTotale - 1, true);
+      // player.playVideo();
     }, { passive: true });
   }
 

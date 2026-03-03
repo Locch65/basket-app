@@ -142,23 +142,6 @@ async function registerUserId() {
   return { userId, getDeviceData }; // Opzionale: ritorna i dati per usarli altrove
 }
 
-function OLDregisterUserId()
-{
-  getDeviceData = {
-    os: navigator.platform,
-    userAgent: navigator.userAgent,
-    isMobile: /Mobi|Android/i.test(navigator.userAgent),
-    screenResolution: `${window.screen.width}x${window.screen.height}`,
-    language: navigator.language
-  };
-
-
-  userId = localStorage.getItem('webapp_user_id') || crypto.randomUUID();
-  if (!localStorage.getItem('webapp_user_id')) localStorage.setItem('webapp_user_id', userId);
-
-  collectDeviceStats().then(stats => { getDeviceData =stats;});
-}
-
 async function collectDeviceStats() {
     let info = {
         os: "Unknown",
@@ -814,65 +797,6 @@ function saveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, te
   .catch(error => {
     console.error("Errore nell'invio o nella lettura della risposta:", error);
   });
-}
-
-function OLDsaveToServerEventoLive(idGiocatore, puntiRealizzati, timestampReale, team, action) {
-  // 
-  // Invia un evento di punteggio live al backend utilizzando FormData.
-  // @param {string} idGiocatore - L'ID del giocatore (es. "Cognome_Nome").
-  // @param {number} puntiRealizzati - I punti segnati (1, 2 o 3).
-  // 
-
-
-  if (!matchId) {
-    console.error("Errore: matchId non trovato.");
-    return;
-  }
-
-  // ATTENZIONE: riempire campo note correttamente. nel caso di In/Out deve essere la lista dei giocatori In, nel caso di Fallo dovrebbe essere il numero di falli totali del giocatore
-  if ((action !== "undo") && (puntiRealizzati === "In" || puntiRealizzati === "Out") && !isQuintettoCompleto()) return;
-  const note = getNumeriGiocatoriIn(); //QUI
-
-  // 1. Creazione dell'oggetto FormData
-  const formData = new FormData();
-
-  // 2. Aggiunta dei parametri (il backend leggerà questi tramite e.parameter)
-  formData.append("live", "1"); // Attiva il blocco live nel doPost
-  formData.append("matchId", matchId);
-  formData.append("idGiocatore", idGiocatore);
-  formData.append("puntiRealizzati", puntiRealizzati);
-  formData.append("action", action);
-  formData.append("squadra", team);
-  let AoB = "";
-  if (teamA === "Polismile A") {
-     AoB = (team === teamA) ? "A" : "B"
-  }
-  else {
-     AoB = (team === teamB) ? "B" : "A"
-  }
-  formData.append("AoB", AoB);
-
-  // Timestamp reale
-  formData.append("timestampReale", timestampReale);
-
-  formData.append("note", note);
-
-  fetch(url, {
-    method: "POST",
-    body: formData
-  })
-  .then(response => {
-    if (!response.ok) throw new Error('Errore di rete');
-    return response.json(); // Legge il JSON inviato dal doPost
-  })
-  .then(data => {
-    console.log(`[SERVER RESPONSE] Status: ${data.status}, Message: ${data.message}`);
-    console.log(`[LIVE] Elaborato: ${idGiocatore} -> ${puntiRealizzati}`);
-  })
-  .catch(error => {
-    console.error("Errore nell'invio o nella lettura della risposta:", error);
-  });
-
 }
 
 // Funzione che crea l'HTML del popup al caricamento della pagina
