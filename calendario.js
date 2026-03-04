@@ -305,149 +305,109 @@ function startRefreshAutomatico(attiva, filtro) {
     }
 }
 
-function init() {
-    registerUserId().then((data) => {});
+async function init() {
+    // 1. REGISTRAZIONE UTENTE E DATI INIZIALI
+    try {
+        await registerUserId();
+    } catch (e) { console.error("Errore registrazione:", e); }
 
+    // Recupero stati dal localStorage
     isAdmin = localStorage.getItem("isAdmin") === "true";
+    const savedTheme = localStorage.getItem("theme");
+    const campionatoSalvato = localStorage.getItem("campionatoSelezionato") || "Tutti";
+    const excludePast = localStorage.getItem("excludePast") === "true";
+    ordineCalendario = localStorage.getItem("ordineCalendario") || "asc";
 
-    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    // Riferimenti DOM
     const menu = document.getElementById("menu");
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
     const toggleTheme1 = document.getElementById("toggleTheme1");
     const togglePast = document.getElementById("togglePast");
-    const titolo = document.querySelector("h1");
-    const adminBtn = document.getElementById("adminBtn");
-    const campRadios = document.querySelectorAll('.camp-radio');
     const selectOrdine = document.getElementById("selectOrdine");
+    const campRadios = document.querySelectorAll('.camp-radio');
+    const titolo = document.querySelector("h1");
 
+    // 2. IMPOSTAZIONE STATO INIZIALE UI
+    // Tema
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+        toggleTheme1.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    }
 
-    // --- 1. GESTIONE MENU PRINCIPALE ---
-    // Apri/chiudi menu principale
-    hamburgerBtn.addEventListener("click", () => {
-        const isAdmin = localStorage.getItem("isAdmin") === "true";
-        adminBtn.innerHTML = isAdmin ? '<i class="fas fa-sign-out-alt"></i> Logout' : '<i class="fas fa-user-shield"></i> Admin';
+    // Filtri e Ordine
+    if (togglePast) togglePast.checked = excludePast;
+    if (selectOrdine) selectOrdine.value = ordineCalendario;
+    
+    campRadios.forEach(radio => {
+        if (radio.value === campionatoSalvato) radio.checked = true;
+    });
 
+    // 3. GESTIONE EVENTI (LISTENERS)
+
+    // Hamburger Menu
+    hamburgerBtn?.addEventListener("click", () => {
         menu.classList.toggle("hidden");
     });
 
-    // Chiudi menu cliccando fuori (opzionale ma utile)
     document.addEventListener("click", (e) => {
         if (!menu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
             menu.classList.add("hidden");
         }
     });
 
-    // --- 2. FILTRO CAMPIONATO (RADIO BUTTONS) ---
-    // Ripristina selezione salvata o default "Tutti"
-    const campionatoSalvato = localStorage.getItem("campionatoSelezionato") || "Tutti";
-
+    // Radio Campionato
     campRadios.forEach(radio => {
-        // Imposta lo stato iniziale del radio button
-        if (radio.value === campionatoSalvato) {
-            radio.checked = true;
-        }
-
-        // Evento al cambio selezione
         radio.addEventListener("change", (e) => {
             const selezione = e.target.value;
             filtraPartite(selezione, titolo);
-
-            // Chiudi il menu dopo la scelta per migliorare la UX
             setTimeout(() => menu.classList.add("hidden"), 200);
         });
     });
 
-    // Gestione del cambio ordine di visualizzazione
-    if (selectOrdine) {
-        // Ripristina stato salvato
-        ordineCalendario = localStorage.getItem("ordineCalendario") || "asc";
+    // Select Ordine
+    selectOrdine?.addEventListener("change", (e) => {
+        ordineCalendario = e.target.value;
+        localStorage.setItem("ordineCalendario", ordineCalendario);
+        
+        const filtroAttuale = document.querySelector('input[name="camp"]:checked')?.value || "Tutti";
+        caricaListaPartite(filtroAttuale);
+        menu.classList.add("hidden");
+    });
 
-        // Imposta il valore iniziale basandosi sulla variabile globale già esistente
-        selectOrdine.value = ordineCalendario;
-
-        selectOrdine.addEventListener("change", (e) => {
-            ordineCalendario = e.target.value;
-
-            // Recupera il filtro campionato attuale per ri-renderizzare correttamente
-            const filtroAttuale = document.querySelector('input[name="camp"]:checked')?.value || "Tutti";
-
-            // 👉 Memorizza il campionato selezionato
-            localStorage.setItem("ordineCalendario", ordineCalendario);
-
-            // Carica la lista (userà la cache se disponibile, ma con il nuovo ordine)
-            caricaListaPartite(filtroAttuale);
-            menu.classList.add("hidden");
-        });
-    }
-
-    // --- 3. FILTRO PARTITE PASSATE ---
-    // Ripristina stato salvato
-    if (localStorage.getItem("excludePast") === "true") {
-        togglePast.checked = true;
-    }
-
-    togglePast.addEventListener("change", () => {
-        localStorage.setItem("excludePast", togglePast.checked ? "true" : "false");
+    // Toggle Passate
+    togglePast?.addEventListener("change", () => {
+        localStorage.setItem("excludePast", togglePast.checked);
         const attuale = localStorage.getItem("campionatoSelezionato") || "Tutti";
         caricaListaPartite(attuale !== "Tutti" ? attuale : null);
         menu.classList.add("hidden");
     });
 
-    // --- 4. TEMA (DARK/LIGHT MODE) ---
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-        document.body.classList.add("dark-mode");
-        toggleTheme1.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
-    }
-
-    toggleTheme1.addEventListener("click", () => {
+    // Tema (Dark/Light)
+    toggleTheme1?.addEventListener("click", () => {
         const isDark = document.body.classList.toggle("dark-mode");
         localStorage.setItem("theme", isDark ? "dark" : "light");
-        toggleTheme1.innerHTML = isDark ? '<i class="fas fa-sun"></i> Light Mode' : '<i class="fas fa-moon"></i> Dark Mode';
+        toggleTheme1.innerHTML = isDark ? 
+            '<i class="fas fa-sun"></i> Light Mode' : 
+            '<i class="fas fa-moon"></i> Dark Mode';
         menu.classList.add("hidden");
     });
 
-    if (isAdmin && adminBtn) {
-        adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-    }
-
-    if (adminBtn) {
-        adminBtn.addEventListener("click", () => {
-            menu.classList.add("hidden");
-            if (localStorage.getItem("isAdmin") === "true") {
-                if (confirm("Vuoi uscire dalla modalità Admin?")) {
-                    localStorage.setItem("isAdmin", "false");
-                    localStorage.setItem("AdminPassword", "");
-                    location.reload(); // Ricarica per aggiornare i permessi
-                }
-            } else {
-                Login();
-            }
-        });
-    }
-    // Gestione del bottone Aggiorna
-    document.getElementById("updateBtn").addEventListener("click", () => {
+    // Bottone Aggiorna (Forza Fetch)
+    document.getElementById("updateBtn")?.addEventListener("click", () => {
         const container = document.getElementById("listaPartite");
-
-        // 1. Svuota la cache locale
         localStorage.removeItem("cache_partite");
-
-        // 2. Ripristina il testo di caricamento e la classe "loading"
-        container.innerHTML = "Caricamento Calendario...";
-        container.classList.add("loading");
-
-        // 3. Recupera il valore del filtro attuale e forza il fetch dal server
-        const filtroAttuale = document.querySelector('input[name="camp"]:checked').value;
+        if (container) {
+            container.innerHTML = "Caricamento Calendario...";
+            container.classList.add("loading");
+        }
+        const filtroAttuale = document.querySelector('input[name="camp"]:checked')?.value || "Tutti";
         fetchPartiteDalServer(filtroAttuale);
     });
 
-    // --- 6. CARICAMENTO INIZIALE DATI ---
-    // Applica il filtro iniziale in base al salvataggio o al parametro URL
+    // 4. ESECUZIONE CARICAMENTO INIZIALE
     filtraPartite(campionatoSalvato, titolo);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    init();
-});
-
-// Esegui l'iniezione automatica all'avvio di ogni pagina
+// Avvio unico
+document.addEventListener("DOMContentLoaded", init);
 window.addEventListener('DOMContentLoaded', injectUniversalPopup);

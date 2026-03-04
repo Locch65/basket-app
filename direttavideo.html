@@ -29,10 +29,23 @@
         <li><button id="goLiveBtn" onclick="gestisciGoLive()"><i class="fas fa-broadcast-tower"></i> Go Live</button>
         </li>
         <div class="admin-only-menu-item">
-          <li class="menu-divider">Sort:</li>
+            <li class="menu-divider">Sort:</li>
             <li class="menu-sort-item"><button onclick="setSortMode('numero')"><i class="fas fa-sort-numeric-down"></i> Number</button></li>
             <li class="menu-sort-item"><button onclick="setSortMode('cognome')"><i class="fas fa-sort-alpha-down"></i> Name</button></li>
-            <li class="menu-sort-item"><button onclick="setSortMode('punti')"><i class="fas fa-star"></i> Score</button></li>        </div>
+            <li class="menu-sort-item"><button onclick="setSortMode('punti')"><i class="fas fa-star"></i> Score</button></li>
+
+            <!-- <li>
+              <button id="menuHighlightsBtn" onclick="toggleHighlights();">
+                <i class="fas fa-star"></i> Highlights
+              </button>
+            </li> -->
+            <li>
+            <button id="menuGraficoBtn" onclick="mostraGraficoPunteggio();">
+              <i class="fas fa-chart-line"></i> Grafico
+            </button>
+          </li>
+
+        </div>
         <li>
           <button id="adminBtn">
             <i class="fas fa-user-shield"></i> Admin
@@ -170,11 +183,11 @@
   <!-- ------------------------------------------------------------------------- -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-  <script src="common.js?v=1.0.119"></script>
+  <script src="common.js?v=1.0.120"></script>
   <script src="menus.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>  
-  <script src="direttavideo.js?v=1.0.119"></script>
+  <script src="direttavideo.js?v=1.0.120"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 

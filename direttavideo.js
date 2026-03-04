@@ -3121,88 +3121,70 @@ function chiudiGraficoEvoluzione() {
 
 // ---------------------------------------------------------------------------------------------------- //
 async function init() {
-// ---------------------------------------------------------------------------------------------------- //
-
+  // 1. REGISTRAZIONE E CARICAMENTO DATI DA LOCALSTORAGE
   await registerUserId();
 
   isAdmin = localStorage.getItem("isAdmin") === "true";
-
   teamA = localStorage.getItem("teamA");
   teamB = localStorage.getItem("teamB");
-  squadraAvversaria = (teamA === "Polismile A") ? teamB : teamA
+  squadraAvversaria = (teamA === "Polismile A") ? teamB : teamA;
 
   convocazioni = localStorage.getItem("convocazioni");
   videoURL = localStorage.getItem("videoURL");
   videoId = localStorage.getItem("videoId");
-  matchStartTime = localStorage.getItem("matchStartTime");
+  // Leggiamo subito i valori numerici correttamente
+  matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
   oraInizioDiretta = localStorage.getItem("oraInizioDiretta");
   isLive = localStorage.getItem("isLive");
   statoPartita = localStorage.getItem("statoPartita");
-  googleApiKey = localStorage.getItem("googleApiKey") || ""; // Recupera il valore salvato  
+  googleApiKey = localStorage.getItem("googleApiKey") || "";
 
   puntiSquadraA = parseInt(localStorage.getItem("puntiSquadraA") || 0);
   puntiSquadraB = parseInt(localStorage.getItem("puntiSquadraB") || 0);
 
   initTeamNames();
 
+  // 2. GESTIONE CLASSI UI (Admin vs User)
+  document.body.classList.toggle("admin-mode", isAdmin);
+  document.body.classList.toggle("user-mode", !isAdmin);
+
+  // 3. CARICAMENTO DATI PARTITA (Firebase / API)
   const urlParams = new URLSearchParams(window.location.search);
   const currentMatchId = urlParams.get("matchId");
 
   if (currentMatchId) {
-
-    // Carichiamo i dati freschi della partita
-    caricaAnagraficaSingolaPartita(matchId).then(() => {
-      
-      // --- INTEGRAZIONE AGGIORNAMENTO ROSTER E STATS ---
-      // Chiamiamo la funzione asincrona con what="all" (o null)
+    caricaAnagraficaSingolaPartita(currentMatchId).then(() => {
       return aggiornaDatiRosterEStats("roster");
-      
     }).then(dati => {
-      // Se i dati sono stati scaricati con successo, aggiorniamo le variabili globali
       if (dati && dati.roster) {
-        popolaGiocatoriA(dati.roster) 
-        if (isAdmin) saveToFirebaseRoster('roster/', dati.roster); 
-
+        popolaGiocatoriA(dati.roster);
+        if (isAdmin) saveToFirebaseRoster('roster/', dati.roster);
         console.log("Roster e Statistiche aggiornati globalmente.");
       }
 
-      // Ora procediamo con l'inizializzazione della UI della partita
       inizializzaGiocatoriConvocati();
 
-      videoId = localStorage.getItem("videoId");
-      matchStartTime = parseInt(localStorage.getItem("matchStartTime") || "0", 10);
-
+      // Gestione Player Video o Placeholder
       if (videoId && videoId !== "null" && videoId !== "") {
-          creaIlPlayer(videoId);
+        creaIlPlayer(videoId);
       } else {
-          // 1. Nascondi lo spinner di caricamento
-          const videoSpinner = document.getElementById("video-loading");
-          if (videoSpinner) videoSpinner.classList.add("hidden");
-
-          // 2. Mostra l'immagine statica di avviso
-          const placeholder = document.getElementById("video-placeholder");
-          if (placeholder) {
-              placeholder.style.display = "block";
-          }
-
-          // 3. Log e avvio statistiche
-          console.log("Nessun video trovato, mostro placeholder e avvio tickTimeline.");
-          avviaTickSenzaVideo();
+        document.getElementById("video-loading")?.classList.add("hidden");
+        const placeholder = document.getElementById("video-placeholder");
+        if (placeholder) placeholder.style.display = "block";
+        console.log("Nessun video trovato, avvio tickTimeline.");
+        avviaTickSenzaVideo();
       }
-
-      console.log("Timeline avviata per il match:", matchId);
+      console.log("Timeline avviata per il match:", currentMatchId);
     }).catch(err => {
       console.error("Errore durante il caricamento dei dati iniziali:", err);
     });
   }
 
-  oraInizioDiretta = localStorage.getItem("oraInizioDiretta");
-
+  // 4. LOGICA SINCRONIZZAZIONE (SYNCTIME)
   const hudClockElement = document.getElementById('hud-video-time');
   if (isAdmin && hudClockElement) {
-    hudClockElement.style.pointerEvents = 'auto'; // Abilita i click
-    hudClockElement.style.cursor = 'pointer';      // Mostra la manina al passaggio del mouse
-
+    hudClockElement.style.pointerEvents = 'auto';
+    hudClockElement.style.cursor = 'pointer';
     hudClockElement.addEventListener('click', () => {
       sendSyncTime();
       showSyncTime();
@@ -3212,7 +3194,7 @@ async function init() {
   const basketToast = document.getElementById('basket-toast');
   if (isAdmin && basketToast) {
     basketToast.addEventListener('click', () => {
-      if (isSyncPending) {
+      if (typeof isSyncPending !== 'undefined' && isSyncPending) {
         checkSyncTime();
       }
     }, { passive: true });
@@ -3222,122 +3204,66 @@ async function init() {
   if (hudLiveStatus) {
     hudLiveStatus.addEventListener('click', () => {
       syncToLive();
-      // const durataTotale = player.getDuration();
-      // player.seekTo(durataTotale - 1, true);
-      // player.playVideo();
     }, { passive: true });
   }
 
-  // gestione Hamburger Menu
-
+  // 5. GESTIONE MENU E FUNZIONALITÀ ADMIN
   if (isAdmin) {
-    document.body.classList.add("admin-mode");
-    document.body.classList.remove("user-mode");
-  } else {
-    document.body.classList.add("user-mode");
-    document.body.classList.remove("admin-mode");
-  }
-
-
-  if (isAdmin) {
-    document.body.classList.add("admin-mode");
+    // Menu Hamburger
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const menu = document.getElementById("menu");
-
     if (hamburgerBtn && menu) {
       hamburgerBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         menu.classList.toggle("hidden");
       });
-
-      // Chiude il menu se si clicca fuori
-      document.addEventListener("click", () => {
-        menu.classList.add("hidden");
-      }, { passive: true });
+      document.addEventListener("click", () => menu.classList.add("hidden"), { passive: true });
     }
 
+    // Bottone Logout
     const adminBtn = document.getElementById("adminBtn");
-
-    if (isAdmin) {
-      document.body.classList.add("admin-mode");
-      document.body.classList.remove("user-mode");
-    } else {
-      document.body.classList.add("user-mode");
-      document.body.classList.remove("admin-mode");
-    }
-
-    if (isAdmin && adminBtn) {
+    if (adminBtn) {
       adminBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-
       adminBtn.addEventListener("click", () => {
-        const menu = document.getElementById("sideMenu");
-        if (menu) menu.classList.remove("open");
-        if (localStorage.getItem("isAdmin") === "true") {
-          if (confirm("Vuoi uscire dalla modalità Admin?")) {
-            localStorage.setItem("isAdmin", "false");
-            localStorage.setItem("AdminPassword", "");
-           setTimeout(() => location.reload(), 1000);
-          }
+        if (confirm("Vuoi uscire dalla modalità Admin?")) {
+          localStorage.setItem("isAdmin", "false");
+          localStorage.setItem("AdminPassword", "");
+          setTimeout(() => location.reload(), 500);
         }
       }, { passive: true });
-
     }
 
-  }
-
-  if (isAdmin) {
+    // Contatore utenti online (Firebase Presence)
     const counterDiv = document.getElementById('adminCounter');
-    if (counterDiv) {
-       counterDiv.style.setProperty('display', 'flex', 'important');
-    }
-
-    // Mostra l'orologio
     const clockDiv = document.getElementById('systemClock');
-    if (counterDiv) {
-      clockDiv.classList.remove('hidden');
-    }
+    if (counterDiv) counterDiv.style.setProperty('display', 'flex', 'important');
+    if (clockDiv) clockDiv.classList.remove('hidden');
 
     const presenceRef = db.ref("presence/online_users");
-    
-    // Usiamo il metodo snap.exists() per gestire anche lo 0
     presenceRef.on("value", (snap) => {
-        let count = 0;
-        if (snap.exists()) {
-            count = snap.numChildren();
-        }
-        // Aggiorna l'interfaccia
-        const countSpan = document.getElementById('onlineCount');
-        if (countSpan) {
-            countSpan.innerText = count;
-        }
-
-        // Opzionale: aggiorna il valore globale sul database
-        db.ref("presence/user_count").set(count);
+      let count = snap.exists() ? snap.numChildren() : 0;
+      const countSpan = document.getElementById('onlineCount');
+      if (countSpan) countSpan.innerText = count;
+      db.ref("presence/user_count").set(count);
     });
+
+    // Avvia l'orologio di sistema per Admin
+    setInterval(updateSystemClock, 1000);
+  } else {
+    // Logica per utenti normali
+    registerToFirebaseEvents();
+    mostraTutorialRotazione();
   }
 
-  document.addEventListener('contextmenu', function(e) {
-    // Elimina il context menu dappertutto tranne se l'elemento cliccato è un input
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-      return;
+  // 6. UTILITY FINALI (Debug, Context Menu, Resize)
+  document.addEventListener('contextmenu', (e) => {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
     }
-    e.preventDefault();
   }, false);
 
-  // Aggiorna i dati al caricamento e ad ogni ridimensionamento della finestra
   window.addEventListener('resize', () => updateDebugFooter());
   updateDebugFooter();
-
-  if (!isAdmin) {
-    registerToFirebaseEvents();
-    
-    mostraTutorialRotazione();   
-
-  }
-  else {
-    // Avvia il timer per aggiornare il system cloc
-    setInterval(updateSystemClock, 1000);    
-  }
 }
 
 document.addEventListener("DOMContentLoaded", init, { passive: true });

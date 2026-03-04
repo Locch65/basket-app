@@ -234,6 +234,32 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    /* --- Messaggio di caricamento migliorato --- */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 50vh; /* Centra verticalmente nella metà superiore */
+      font-size: 2rem; /* Scritta molto grande */
+      font-weight: bold;
+      color: #0056b3;
+      text-align: center;
+      animation: blink-animation 1s steps(5, start) infinite;
+      -webkit-animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }
+
+    @-webkit-keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }    
   </style>
   
 </head>
@@ -291,7 +317,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
 
-  <script src="common.js?v=1.0.119"></script>
+  <script src="common.js?v=1.0.120"></script>
   <script>
     let datiOriginali = [];
     let datiFinali = [];

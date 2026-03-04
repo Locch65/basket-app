@@ -7,7 +7,7 @@
     <title>Polismile Basket App</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.119"></script>
+    <script src="common.js?v=1.0.120"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html {
@@ -263,8 +263,8 @@
 
     <header>
         <h1>Polismile Basket U14</h1>
-        <div class="app-version">Versione 1.0.119</div>
-        <img src="icon-192.png" alt="Logo Polismile" class="header-logo" onclick="Login()" style="cursor: pointer;">
+        <div class="app-version">Versione 1.0.120</div>
+        <img src="icon-192.png" alt="Logo Polismile" class="header-logo" id="logo-admin" style="cursor: pointer;">
     </header>
     <div class="menu-grid">
         <a href="roster.html" class="menu-button">
@@ -634,13 +634,6 @@ fetch(`${url}?${params.toString()}`)
             });        
         }
 
-
-        // registerUserId().then((data) => {});
-
-        // // Avvia il controllo subito e poi ogni 5 secondi
-        // checkLiveStatus();
-        // setInterval(checkLiveStatus, 10000);
-
         // Funzioni Popup
         function mostraPopup() { document.getElementById('customPopup').style.display = 'flex'; }
         function chiudiPopup() { document.getElementById('customPopup').style.display = 'none'; }
@@ -649,14 +642,30 @@ fetch(`${url}?${params.toString()}`)
 
         async function initApp() {
             try {
-                // 1. Aspettiamo che l'identificazione utente e device sia completata
                 await registerUserId(); 
                 
-                // 2. Ora che userId e getDeviceData sono pronti, eseguiamo i controlli
+                // --- GESTIONE LOGIN SEGRETO ---
+                const logo = document.getElementById("logo-admin");
+                if (logo) {
+                    let lastTap = 0;
+                    
+                    // Usiamo 'click' perché funziona ovunque, ma ne misuriamo la velocità
+                    logo.addEventListener('click', function (e) {
+                        const now = new Date().getTime();
+                        const timesince = now - lastTap;
+                        
+                        // Se il tempo tra due click è meno di 300ms, lo consideriamo doppio click
+                        if (timesince < 300 && timesince > 0) {
+                            Login(); 
+                        }
+                        
+                        lastTap = now;
+                    });
+                }
+
                 checkLiveStatus();
                 verificaNovitaAllenamenti();
 
-                // 3. Avviamo i timer per gli aggiornamenti periodici
                 setInterval(checkLiveStatus, 10000);
                 
             } catch (error) {
