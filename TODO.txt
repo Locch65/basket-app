@@ -13,7 +13,8 @@
 //
 //  Index.html
 //    - aggiungere bottone "Prossima partita" e badge "Convocazioni" rosso lampeggiante
-//
+//    - Allenamenti: costruire la stringa html nel codice partendo da righe dello sheet Allenementi. Si può evidenziare l'allenamento odierno.
+//     
 //  Roster.html
 //    - Visualizzare tiri liberi sbagliati
 //
@@ -35,7 +36,6 @@
 //      - cambiare lo sfondo della title bar per evidenziare quando si è connessi come Admin
 //      - Inserire il toast per In/Out giocatori
 //      - se admin=false, implementare lo slider per vedere le partite (come per l'anagrafica)
-//      - grafico partita con avanzamento punti
 //      - su tablet aggiungere un sound al posto del vibrate
 //      - marcare i componenti del quintetto iniziale con un "*"
 //
@@ -54,6 +54,7 @@
 //      - Storicizzare il cambio di quarto
 //      - rendere cliccabile il bottone del quarto e attivare il popup
 //      - Memorizzare punteggi alla fine ciascun quarto. 
+//      - nel campo note vengono salvati solo Q1, Q2, Q3, Q4. non extraTime. Salvare solo "HH:MM"
 //   *  - se cambio quarto durante la partita, poi faccio back verso il calendario e poi riclicco sulla partita la variabile statoPartita assume il 
 //           valore del precedente quarto (non rilegge da localStorate). 
 //
@@ -61,15 +62,19 @@
 //      - NICE TO HAVE: Highlight anche in orizzontale
 //      - aggiungere per admin un bottone "fix" che cambia l'ora del canestro con quello visualizzato.
 //   *  - BUG: quando esco dagli highlight riportare il punteggio al risultato finale se la partita è "Terminata", altrimenti compare 0-0
+//   *  - durante gli highlights il quarto mostrato deve essere quello relativo a quel momento della partita (adesso è sempre "Terminata")
+//   *  - anche il quintetto in campo deve essere quello del momento
 //   *  - su iphone, quando clico sui bottoni, zooma l'intera pagina
 //      - VERIFICARE: Highlights perchè non funziona quando c'e' un orainiziopartita > 1. 
-//   *  - FATTO: disabilitare il bottone Highlights se non ci sono gli eventi registrati, oppure soono inaffidabili
-//        aggiornare il campo Note del DB mettendo a true le partite per cui esistono highligths
+//   *  - FATTO: disabilitare il bottone Highlights se non ci sono gli eventi registrati, oppure sono inaffidabili
+//   *  - aggiornare il campo Note del DB mettendo a true le partite per cui esistono highligths
 //
+//   *  - perchè come spettatore carica due volte i dati partita? basterebbe solo da Firebase se fosse sempre allineato
 //
-//    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagin.
+//    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagine. provare a risolvere con un settimer
 //    - VERIFICARE Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante
 //    - BUG: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo
+//    - BUG: se la partita è "Terminata" il numero dei falli visualizzati per le squadre è 0 
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 // 
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
@@ -162,7 +167,7 @@
 //    - FATTO: spostare Autosync da match.html. rendere più chiara l'attivazione della funzione con un tasto dedicato
 //    - FATTO: ingrandire toast su display grandi. 
 //    - FATTO: se metto la partita live, quando lo stato è Terminata, quando riapro il popoup il checkbox isLive non è spuntato, ma solo il checkbox Terminata. FOrse serve anche uno stato "non ancora iniziata"
-//    - FATTO:inserire la possibilità di ordinamento dei giocatori per Admin
+//    - FATTO: inserire la possibilità di ordinamento dei giocatori per Admin
 //    - FATTO: creare funzione di refresh della pagina senza dover chiamare caricaDatiPartita, questo facilita l'implementazione del sort
 //    - FATTO: da spettatore mostrare una label con i dettagli anche per la squadra avversaria e per la Polismile (ma cumulativa)
 //    - FATTO: gli highlihts non funzionano bene se non è definito lo start time della partita. Pezza: metto sempre a 1 secondo lo startTime
@@ -185,5 +190,6 @@
 //    - FATTO: (VERIFICARE) Resettare i falli di squadra alla fine del quarto
 //    - FATTO: se la partita è "nuova", quando dopo il SYNC setto l'ora di inizio streaming, in HUD viene fuori NaN, NaN, NaN
 //    - FATTO: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
+//    - FATTO: grafico partita con avanzamento punti
 //
 // -----------------------------------------------------------------------------------

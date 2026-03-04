@@ -689,6 +689,76 @@ body.user-mode .video-container {
     white-space: nowrap;
 }
 
+
+/* Container del Popup */
+.modal-graph {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Sfondo scuro semi-trasparente */
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px); /* Effetto sfocatura moderno */
+}
+
+/* Finestra Bianca */
+.modal-content {
+  background: white;
+  width: 92%;
+  max-width: 800px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header-title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #0056b3;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Area del Grafico */
+.chart-container-wrapper {
+  position: relative;
+  height: 300px; /* Altezza fissa per il grafico */
+  width: 100%;
+}
+
+/* Bottone Chiudi */
+.close-graph {
+  background: #444;
+  color: white;
+  border: none;
+  padding: 1.2rem;
+  border-radius: 10px;
+  font-weight: bold;
+  margin-top: 20px;
+  width: 100%;
+  cursor: pointer;
+  font-size: 1.3rem;
+  transition: background 0.3s;
+  text-transform: uppercase;
+}
+
+.close-graph:hover {
+  background: #222;
+}
+
+.close-graph:active {
+  transform: scale(0.98);
+}
+
 /* Gestione visibilità sezioni in base all'orientamento */
 
 /* Quando lo schermo è in LANDSCAPE (Orizzontale) */
@@ -1986,7 +2056,8 @@ body.user-mode .video-container {
   }
 
   /* Ingrandisce il bottone Highlights (Stella) */
-  #toggle-highlights {
+  #toggle-highlights, 
+  #btn-apri-grafico {
     padding: 1.2rem 1.8rem;
     font-size: 1.6rem;
   }

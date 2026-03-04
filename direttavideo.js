@@ -60,6 +60,7 @@ let googleApiKey = "";
 
 let refreshTimer = null; // variabile globale per l'ID del timer
 
+let chartEvoluzione = null; // serve per la gestione del grafico
 
 const hudLabel = document.getElementById("hud-label");
 const urlParams = new URLSearchParams(window.location.search);
@@ -210,7 +211,7 @@ function onPlayerReady() {
     maxCurrentTime = player.getCurrentTime();
   }, 1000); 
 
-  if (!isAdmin) mostraTutorialRotazione();   
+//  if (!isAdmin) mostraTutorialRotazione();   
 }
 
 function OLD_OK_onPlayerReady() {
@@ -660,7 +661,6 @@ function generaHistory(liveDataDalBackend) {
     });
 
   //highlightsAvailable = true; // ATTENZIONE: test
-  //highlightsAvailable = dettagliGara?.note?.highlights?.toLowerCase() === "true";
   // 1. Trasformiamo la stringa in oggetto (se note è null, usa '{}')
   const config = JSON.parse(dettagliGara?.note || '{}');
 
@@ -1221,16 +1221,6 @@ function controllaDisponibilitaHighlights() {
   }
 }
 
-function BADcontrollaDisponibilitaHighlights() {
-  // Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
-  const section = document.getElementById('highlights-section');
-  if (highlightsAvailable) {
-    section.style.display = "flex";
-  } else {
-    section.style.display = "none";
-  }
-}
-
 function OLDcontrollaDisponibilitaHighlights() {
   // Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
   if (highlightsAvailable == false) return;
@@ -1249,6 +1239,7 @@ function toggleHighlights() {
   const btnToggle = document.getElementById('toggle-highlights');
   const controls = document.getElementById('highlights-controls');
   const label = document.getElementById('highlight-label');
+  const btnGrafico = document.getElementById('btn-apri-grafico')
   
   // Recuperiamo lo span che contiene il testo dentro il bottone
   const btnText = btnToggle.querySelector('.text-label');
@@ -1260,6 +1251,7 @@ function toggleHighlights() {
     // --- APERTURA ---
     btnToggle.classList.replace('btn-toggle-off', 'btn-toggle-on');
     
+    if (btnGrafico) btnGrafico.style.display = 'none';
     // RIMUOVI IL TESTO DAL BOTTONE
     if (btnText) btnText.textContent = ""; 
 
@@ -1274,6 +1266,7 @@ function toggleHighlights() {
     // --- CHIUSURA ---
     btnToggle.classList.replace('btn-toggle-on', 'btn-toggle-off');
     
+    if (btnGrafico) btnGrafico.style.display = 'flex';
     // RIPRISTINA IL TESTO NEL BOTTONE
     if (btnText) btnText.textContent = "Highlights";
 
@@ -2838,6 +2831,294 @@ function chiudiTutorialRotazione() {
   overlay.classList.remove('show');
 }
 
+function mostraGraficoPunteggio() {
+    const modal = document.getElementById('modalGraficoEvoluzione');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+        const canvas = document.getElementById('canvasEvoluzione');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let datiGrafico = fullMatchHistory
+            // 1. Filtriamo: teniamo solo gli eventi che sono "punto"
+            .filter(ev => ev.eventType === "punto")
+            // 2. Mappiamo i dati per il grafico
+            .map(ev => ({
+                tempo: ev.timestampReale.replace("*", ""), 
+                puntiA: ev.punteggioA,
+                puntiB: ev.punteggioB
+            }));
+
+            // Calcoliamo l'orario di inizio reale nel formato HH:MM
+        // Assumendo che matchStartTime sia il punto zero (0 secondi)
+        const orarioInizioHHMM = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime).substring(0, 5);
+
+        // Inseriamo il punto di partenza 0-0 con l'orario calcolato
+        datiGrafico.unshift({ 
+            tempo: orarioInizioHHMM, 
+            puntiA: 0, 
+            puntiB: 0 
+        });
+        const finaleA = datiGrafico[datiGrafico.length - 1].puntiA;
+        const finaleB = datiGrafico[datiGrafico.length - 1].puntiB;
+        const labelA = `Polismile A (${finaleA})`;
+        const labelB = (teamA === "Polismile A") ? `${teamB} (${finaleB})` : `${teamA} (${finaleB})`;        
+        
+        // Fissiamo il tetto esattamente al punteggio massimo tondo (es. 60)
+        const maxPunti = Math.max(finaleA, finaleB);
+        // Arrotondiamo per eccesso alla decina se vuoi che l'asse sia sempre pulito
+        const tettoAsseY = Math.ceil(maxPunti / 10) * 10; 
+
+        let tempiQuarti = {};
+        try { tempiQuarti = JSON.parse(dettagliGara.note || '{}'); } catch(e) {}
+
+        const trovaIndice = (t) => {
+            const i = datiGrafico.findIndex(d => d.tempo >= t);
+            return i !== -1 ? i : null;
+        };
+
+        const iQ2 = trovaIndice(tempiQuarti.Q2) || Math.floor(datiGrafico.length * 0.25);
+        const iQ3 = trovaIndice(tempiQuarti.Q3) || Math.floor(datiGrafico.length * 0.5);
+        const iQ4 = trovaIndice(tempiQuarti.Q4) || Math.floor(datiGrafico.length * 0.75);
+        const iFine = datiGrafico.length - 1;
+
+        const m1 = iQ2 / 2;
+        const m2 = iQ2 + (iQ3 - iQ2) / 2;
+        const m3 = iQ3 + (iQ4 - iQ3) / 2;
+        const m4 = iQ4 + (iFine - iQ4) / 2;
+
+        if (chartEvoluzione) chartEvoluzione.destroy();
+
+        const etichettaInArea = (id, x, testo) => ({
+            [id]: {
+                type: 'line',
+                xMin: x, xMax: x,
+                borderWidth: 0,
+                label: {
+                    display: true,
+                    content: testo,
+                    position: 'center',
+                    yValue: tettoAsseY,
+                    // Regola questo valore se con padding 0 le scritte spariscono
+                    yAdjust: -70, 
+                    backgroundColor: 'transparent',
+                    color: '#666',
+                    font: { size: 10, weight: 'bold' },
+                    z: 100
+                }
+            }
+        });
+
+        const separatore = (id, x) => ({
+            [id]: {
+                type: 'line',
+                xMin: x, xMax: x,
+                borderColor: '#999',
+                borderDash: [6, 4],
+                borderWidth: 2,
+                z: 1
+            }
+        });
+
+        chartEvoluzione = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datiGrafico.map(d => d.tempo),
+                datasets: [
+                    { label: labelA, data: datiGrafico.map(d => d.puntiA), borderColor: '#dc3545', borderWidth: 2, fill: false, pointRadius: 1 },
+                    { label: labelB, data: datiGrafico.map(d => d.puntiB), borderColor: '#0056b3', borderWidth: 2, fill: false, pointRadius: 1 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',      // Mostra entrambi i valori nel tooltip quando passi il mouse
+                    intersect: false
+                },
+                // Teniamo un minimo di padding top (es. 25) altrimenti 1Q, 2Q finiscono fuori dal canvas
+                layout: { padding: { top: 0, right: 30, left: 20, bottom: 10 } },
+                scales: {
+                    x: { 
+                      type: 'category', 
+                      clip: false,
+                      ticks: {
+                          autoSkip: true,
+                          maxTicksLimit: 10,
+                          callback: function(val, index) {
+                              // Prende l'etichetta originale (es. "12:34") 
+                              // e restituisce solo i primi 5 caratteri ("12:30")
+                              const label = this.getLabelForValue(val);
+                              return label.substring(0, 5); 
+                          }
+                      } 
+                    },
+                    y: { 
+                        beginAtZero: true, 
+                        max: tettoAsseY,
+                        ticks: {
+                            stepSize: 10 // Forza i tick a 0, 10, 20, 30, 40, 50, 60
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { weight: 'bold' },
+                            generateLabels: (chart) => chart.data.datasets.map((ds, i) => ({
+                                text: ds.label, fillStyle: ds.borderColor, strokeStyle: ds.borderColor, fontColor: ds.borderColor, index: i
+                            }))
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            ...separatore('s2', iQ2),
+                            ...separatore('s3', iQ3),
+                            ...separatore('s4', iQ4),
+                            ...separatore('sFine', iFine),
+                            ...etichettaInArea('l1', m1, '1Q'),
+                            ...etichettaInArea('l2', m2, '2Q'),
+                            ...etichettaInArea('l3', m3, '3Q'),
+                            ...etichettaInArea('l4', m4, '4Q')
+                        }
+                    }
+                }
+            }
+        });
+    }, 150);
+}
+
+function OKmostraGraficoPunteggio() {
+    const modal = document.getElementById('modalGraficoEvoluzione');
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+        const canvas = document.getElementById('canvasEvoluzione');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        // Estrazione dati: mappiamo entrambi i punteggi basandoci sul tempo
+        let datiGrafico = fullMatchHistory.map(ev => ({
+            tempo: ev.timestampReale.replace("*", ""), 
+            puntiA: ev.punteggioA,
+            puntiB: ev.punteggioB
+        }));
+
+        // Punto di partenza 0-0
+        datiGrafico.unshift({ tempo: "00:00", puntiA: 0, puntiB: 0 });
+
+        // RECUPERO PUNTEGGIO FINALE  
+        const punteggioA = datiGrafico[datiGrafico.length - 1].puntiA;
+        const punteggioB = datiGrafico[datiGrafico.length - 1].puntiB;        
+        if (chartEvoluzione) chartEvoluzione.destroy();
+
+        const labelA = `Polismile A (${punteggioA})`;
+        const labelB = (teamA === "Polismile A") ? `${teamB} (${punteggioB})` : `${teamA} (${punteggioB})`;        
+        chartEvoluzione = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datiGrafico.map(d => d.tempo),
+                datasets: [
+                    {
+                        label: labelA, // 'Polismile A',
+                        data: datiGrafico.map(d => d.puntiA),
+                        borderColor: '#dc3545',       // Rosso
+                        backgroundColor: 'transparent',
+                        borderWidth: 1.5,
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#dc3545',
+                        pointBorderWidth: 1,
+                        // Questa proprietà può essere usata dai plugin per il colore del testo
+                        color: '#dc3545'                        
+                    },
+                    {
+                        label: labelB, // 'Avversaria',
+                        data: datiGrafico.map(d => d.puntiB),
+                        borderColor: '#0056b3',       // Blu
+                        backgroundColor: 'transparent',
+                        borderWidth: 1.5,
+                        fill: false,
+                        tension: 0.2,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#0056b3',
+                        pointBorderWidth: 1,
+                        color: '#0056b3'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',      // Mostra entrambi i valori nel tooltip quando passi il mouse
+                    intersect: false
+                },
+                plugins: {
+                    legend: { 
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 4,      // Pallino piccolissimo
+                            boxHeight: 4,     // Altezza del pallino
+                            font: { 
+                                size: 13, 
+                                weight: 'bold' // Grassetto per nome e punteggio
+                            },
+                            // CORREZIONE: Usiamo una funzione che mappa l'array dei colori
+                            generateLabels: (chart) => {
+                                const datasets = chart.data.datasets;
+                                return datasets.map((dataset, i) => ({
+                                    text: dataset.label,
+                                    fillStyle: dataset.borderColor, // Colore del pallino
+                                    strokeStyle: dataset.borderColor,
+                                    pointStyle: 'circle',
+                                    lineWidth: 0,
+                                    hidden: !chart.isDatasetVisible(i),
+                                    index: i,
+                                    // QUI IMPOSTIAMO IL COLORE DEL TESTO SPECIFICO
+                                    fontColor: dataset.borderColor 
+                                }));
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding: 10
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: '#f0f0f0' },
+                        ticks: { font: { size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 8,
+                            font: { size: 10 }
+                        }
+                    }
+                }
+            }
+        });
+    }, 150);
+}
+
+
+function chiudiGraficoEvoluzione() {
+    document.getElementById('modalGraficoEvoluzione').style.display = 'none';
+}
+
 // ---------------------------------------------------------------------------------------------------- //
 async function init() {
 // ---------------------------------------------------------------------------------------------------- //
@@ -3049,6 +3330,9 @@ async function init() {
 
   if (!isAdmin) {
     registerToFirebaseEvents();
+    
+    mostraTutorialRotazione();   
+
   }
   else {
     // Avvia il timer per aggiornare il system cloc

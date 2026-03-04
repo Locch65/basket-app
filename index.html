@@ -7,7 +7,7 @@
     <title>Polismile Basket App</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.118"></script>
+    <script src="common.js?v=1.0.119"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html {
@@ -263,7 +263,7 @@
 
     <header>
         <h1>Polismile Basket U14</h1>
-        <div class="app-version">Versione 1.0.118</div>
+        <div class="app-version">Versione 1.0.119</div>
         <img src="icon-192.png" alt="Logo Polismile" class="header-logo" onclick="Login()" style="cursor: pointer;">
     </header>
     <div class="menu-grid">
@@ -278,23 +278,23 @@
                 <span style="font-weight:bold; font-size: 1.5rem;">Calendario</span>
             </a>
 
-<div class="menu-button" onclick="ShowAllenamenti()" style="position: relative;">
-    <i class="fas fa-dumbbell"></i>
-    <span style="font-weight:bold; font-size: 1.5rem;">Allenamenti</span>
-    <span id="badge-allenamenti" style="
-        display: none; 
-        position: absolute; 
-        top: 5px; 
-        right: 5px; 
-        background-color: red; 
-        color: white; 
-        font-size: 1.2rem; 
-        font-weight: bold; 
-        padding: 2px 6px; 
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    ">NEW</span>
-</div>
+        <div class="menu-button" onclick="ShowAllenamenti()" style="position: relative;">
+            <i class="fas fa-dumbbell"></i>
+            <span style="font-weight:bold; font-size: 1.5rem;">Allenamenti</span>
+            <span id="badge-allenamenti" style="
+                display: none; 
+                position: absolute; 
+                top: 5px; 
+                right: 5px; 
+                background-color: red; 
+                color: white; 
+                font-size: 1.2rem; 
+                font-weight: bold; 
+                padding: 2px 6px; 
+                border-radius: 50%;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            ">NEW</span>
+        </div>
         </div>
 
         <div id="btn-live" class="menu-button live-off" onclick="GotoLive()">
@@ -347,7 +347,8 @@
                 const result = await response.json();
 
                 if (result.status === "success" && result.data) {
-                    const nuovoTesto = result.data.trim();
+                    const nuovoTesto = generaCalendario(result.data).trim();
+                    
                     
                     // Se il testo è diverso dalla cache, mostra il badge
                     if (nuovoTesto !== testoPrecedente.trim()) {
@@ -357,6 +358,85 @@
             } catch (e) {
                 console.error("Errore nel controllo news allenamenti:", e);
             }
+        }
+
+        function generaCalendario(rows) {
+            if (!rows || rows.length === 0) return "";
+
+            const oggi = new Date();
+            oggi.setHours(0, 0, 0, 0);
+
+            const mesi = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
+                            "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+            const giorniSettimana = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+
+            const parseData = (str) => {
+                const [g, m, a] = str.split('/').map(Number);
+                return new Date(a, m - 1, g);
+            };
+
+            const getWeekNumber = (d) => {
+                const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+                const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+                return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+            };
+
+            let html = "";
+            let ultimaSettimanaIdentificata = null;
+
+            rows.forEach((row, index) => {
+                const dataEvento = parseData(row[0]);
+                const descrizione = row[1];
+                const numSettimana = getWeekNumber(dataEvento);
+
+                // --- LOGICA SEZIONI SETTIMANA ---
+                if (numSettimana !== ultimaSettimanaIdentificata) {
+                const righeSettimana = rows.filter(r => getWeekNumber(parseData(r[0])) === numSettimana);
+                const dInizio = parseData(righeSettimana[0][0]);
+                const dFine = parseData(righeSettimana[righeSettimana.length - 1][0]);
+
+                let titoloSettimana = "";
+
+                if (dInizio.getFullYear() !== dFine.getFullYear()) {
+                    // Caso: Cambio Anno (es. 28 Dic 2025 - 3 Gen 2026)
+                    titoloSettimana = `${dInizio.getDate()} ${mesi[dInizio.getMonth()]} ${dInizio.getFullYear()} - ${dFine.getDate()} ${mesi[dFine.getMonth()]} ${dFine.getFullYear()}`;
+                } else if (dInizio.getMonth() !== dFine.getMonth()) {
+                    // Caso: Cambio Mese (es. 30 Marzo - 5 Aprile 2026)
+                    titoloSettimana = `${dInizio.getDate()} ${mesi[dInizio.getMonth()]} - ${dFine.getDate()} ${mesi[dFine.getMonth()]} ${dFine.getFullYear()}`;
+                } else {
+                    // Caso standard: Stesso mese (es. 2-7 Marzo 2026)
+                    titoloSettimana = `${dInizio.getDate()}-${dFine.getDate()} ${mesi[dInizio.getMonth()]} ${dInizio.getFullYear()}`;
+                }
+
+                if (ultimaSettimanaIdentificata !== null) html += "<br><br>";
+                html += `<u><b>SETTIMANA ${titoloSettimana}</b></u><br><br>`;
+                ultimaSettimanaIdentificata = numSettimana;
+                }
+
+                // --- FORMATTAZIONE RIGA ---
+                const giornoNome = giorniSettimana[dataEvento.getDay()];
+                const giornoNumero = dataEvento.getDate();
+                
+                let contenutoRiga = `<b>${giornoNome} ${giornoNumero}</b> - ${descrizione}`;
+
+                if (dataEvento.getTime() === oggi.getTime()) {
+                contenutoRiga = `<mark>${contenutoRiga}</mark>`;
+                } else if (dataEvento < oggi) {
+                contenutoRiga = `<s>${contenutoRiga}</s>`;
+                }
+
+                html += contenutoRiga;
+
+                if (index < rows.length - 1) {
+                const prossimaData = parseData(rows[index+1][0]);
+                if (getWeekNumber(prossimaData) === numSettimana) {
+                    html += "<br><br>";
+                }
+                }
+            });
+
+            return html;
         }
 
         function ShowAllenamenti() {
@@ -389,20 +469,53 @@
                 details: JSON.stringify(getDeviceData) 
             });
 
-            fetch(`${url}?${params.toString()}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.data) {
-                        const nuovoTesto = data.data;
-                        content.innerHTML = nuovoTesto.replace(/\n/g, "<br>");
-                        // Salviamo i nuovi dati
-                        localStorage.setItem(storageKey, nuovoTesto);
-                    }
-                })
-                .catch(err => {
-                    console.error("Errore refresh:", err);
-                    if (!cache) content.innerHTML = "Errore di connessione.";
-                })
+//             fetch(`${url}?${params.toString()}`)
+//                 .then(res => res.json())
+//                 .then(data => {
+//                     if (data && data.data) {
+// // ESEMPIO DI UTILIZZO:
+// // const datiSheet = [
+// //   ["02/03/2026", "Partita Moncalieri @Sociale"],
+// //   ["04/03/2026", "18.00 / 19.30 @Modigliani"],
+// //   ["06/03/2026", "17.00 / 18.30 @Modigliani"],
+// //   ["07/03/2026", "Partita vs Nole @Nole"],
+
+// //   ["09/03/2026", "18.30 / 20.00 @Balla"],
+// //   ["11/03/2026", "17.00 / 18.30 @Modigliani"],
+// //   ["12/03/2026", "18.30 / 20.00 @Balla"]
+
+// // ];                        
+// // const nuovoTesto = generaCalendario(datiSheet)
+
+// // //                        const nuovoTesto = data.data;
+// //                         content.innerHTML = nuovoTesto.replace(/\n/g, "<br>");
+
+fetch(`${url}?${params.toString()}`)
+    .then(res => res.json())
+    .then(resObj => {
+        // Controlliamo 'status' e se 'data' è un array non vuoto
+        if (resObj.status === "success" && Array.isArray(resObj.data) && resObj.data.length > 0) {
+            const nuovoTesto = generaCalendario(resObj.data);
+            content.innerHTML = nuovoTesto;
+        } else {
+            content.innerHTML = "<i>Nessun allenamento programmato per ora.</i>";
+        }
+        // Salviamo i nuovi dati
+        localStorage.setItem(storageKey, content.innerHTML);
+    })
+    .catch(err => {
+        console.error("Errore nel recupero dati:", err);
+        if (!cache) content.innerHTML = "Si è verificato un errore nel caricamento.";
+    })
+
+                    //     // Salviamo i nuovi dati
+                    //     localStorage.setItem(storageKey, nuovoTesto);
+                    // }
+                // })
+                // .catch(err => {
+                //     console.error("Errore refresh:", err);
+                //     if (!cache) content.innerHTML = "Errore di connessione.";
+                // })
                 .finally(() => {
                     // 3. FERMIAMO la rotazione
                     if (icon) icon.classList.remove('spinning');

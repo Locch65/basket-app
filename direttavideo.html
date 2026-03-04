@@ -81,11 +81,6 @@
           <span id="team-details-B" class="team-cumulative-details">[TL:0/0, T2:0, T3:0]</span>
           
       </div>      
-      <!-- <div class="score-container">
-          <span id="team-details-A" class="team-cumulative-details">[TL:0/0, T2:0, T3:0]</span>
-          <div id="game-score">0 - 0</div>
-          <span id="team-details-B" class="team-cumulative-details">[TL:0/0, T2:0, T3:0]</span>
-      </div> -->
     </div>
     <div id="highlights-section" class="highlights-container hidden-section">
       <div id="highlight-label" class="highlight-placeholder"></div>
@@ -93,6 +88,9 @@
         <button id="toggle-highlights" class="btn-toggle-off" onclick="toggleHighlights()">
           <i class="fas fa-star"></i> <span class="text-label">Highlights</span>
         </button>
+        <button id="btn-apri-grafico" class="btn-toggle-off" onclick="mostraGraficoPunteggio()">
+          <i class="fas fa-chart-line"></i> <span class="text-label">Grafico</span>
+        </button>        
 
         <div id="highlights-controls" class="hidden-controls">
           <div class="highlights-buttons">
@@ -148,10 +146,22 @@
       <button class="mybtn-undo" onclick="chiudiPopupHud()">Chiudi</button>
     </div>
   </div>
+  <div id="modalGraficoEvoluzione" class="modal-graph">
+    <div class="modal-content">
+      <div id="titoloGrafico" style="text-align: center; margin-bottom: 15px; font-size: 1.6rem; font-weight: bold; color: #333;">
+        Evoluzione Punteggio Partita
+      </div>
+      <div style="height: 300px; width: 100%;">
+        <canvas id="canvasEvoluzione"></canvas>
+      </div>
+      <button class="close-graph" onclick="chiudiGraficoEvoluzione()">CHIUDI</button>
+    </div>
+  </div>
+
   <div id="rotation-tutorial-overlay">
     <div class="phone-icon-container"></div>
     <div class="rotation-text">
-      Per una visione migliore,<br>ruota il dispositivo
+      Per una visione migliore,<br>abilita la rotazione automatica e<br>ruota il dispositivo
     </div>
   </div>
 
@@ -160,9 +170,11 @@
   <!-- ------------------------------------------------------------------------- -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-  <script src="common.js?v=1.0.118"></script>
+  <script src="common.js?v=1.0.119"></script>
   <script src="menus.js"></script>
-  <script src="direttavideo.js?v=1.0.118"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>  
+  <script src="direttavideo.js?v=1.0.119"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 
