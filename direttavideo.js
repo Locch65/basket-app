@@ -2179,7 +2179,7 @@ function renderPlayerListLive() {
           modifyHistory();
 
           // salva il cambio di stato In/Out sul DB degli eventi live
-          //const oraCorrente = new Date().toLocaleTimeString('it-IT');
+          //?? const oraCorrente = new Date().toLocaleTimeString('it-IT');
           //saveToServerEventoLive(g.numero, nuovoStato, oraCorrente, getTeamName(), "save");
 
           renderPlayerListLive();
@@ -2449,7 +2449,7 @@ function modificaOraInizioDiretta(delta) {
   if (secondiTotali < 0) secondiTotali = 0;
 
   // 4. Riconverti in formato HH:MM:SS
-  const ore = Math.floor(secondiTotali / 3600).toString().padStart(2, '0');
+  const ore = Math.floor((secondiTotali / 3600) % 24).toString().padStart(2, '0');
   const minuti = Math.floor((secondiTotali % 3600) / 60).toString().padStart(2, '0');
   const secondi = (secondiTotali % 60).toString().padStart(2, '0');
 
@@ -2671,7 +2671,7 @@ function salvaStatoLive(dati) {
   }
 
   // 2. Prepariamo la nuova configurazione mantenendo i valori vecchi dei quarti
-  const oraAttuale = new Date().toLocaleTimeString(); // Formato "HH:MM:SS"
+  const oraAttuale = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'});
   
   const nuovaConfig = {
     "stats": configEsistente.stats || false,

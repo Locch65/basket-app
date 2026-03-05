@@ -59,7 +59,7 @@
 //      - Storicizzare il cambio di quarto
 //      - rendere cliccabile il bottone del quarto e attivare il popup
 //      - Memorizzare punteggi alla fine ciascun quarto. 
-//      - nel campo note vengono salvati solo Q1, Q2, Q3, Q4. non extraTime. Salvare solo "HH:MM"
+//      - nel campo note vengono salvati solo Q1, Q2, Q3, Q4. non extraTime.
 //   *  - se cambio quarto durante la partita, poi faccio back verso il calendario e poi riclicco sulla partita la variabile statoPartita assume il 
 //           valore del precedente quarto (non rilegge da localStorate). 
 //
