@@ -216,7 +216,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.120"></script>
+    <script src="common.js?v=1.0.121"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -475,25 +475,60 @@
 
                     let appleBtn = isIOS ? `<a href="${urlApple}" class="map-choice-btn"><i class="fab fa-apple btn-apple"></i> Mappe (iOS)</a>` : "";
 
-                    const popupContent = `
-                        <div style="font-size: 1.1em; min-width: 210px; padding: 5px;">
-                            <strong style="color: ${color}; font-size: 1.2em;">${poi.campionato}</strong>
-                            ${devePulsare ? ' <span style="font-size:0.7em; background:red; color:white; padding:2px 5px; border-radius:4px; vertical-align:middle;">PROSSIMA</span>' : ''}<br>
-                            <div style="color: #666; font-size: 0.9em; margin-bottom: 2px;">${poi.avversario}</div>
-                            <div style="font-weight: bold; font-size: 0.9em;">${poi.luogo}</div>
-                            <button class="copy-btn" onclick="copiaIndirizzo('${indirizzoPerCopia}')">
-                                <i class="fas fa-copy"></i> Copia indirizzo
-                            </button>
-                            <hr style="margin: 12px 0; border: 0; border-top: 1px solid #eee;">
-                            <div class="map-choice-container">
-                                <div style="font-size: 0.75rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 4px;">Naviga con:</div>
-                                <a href="${urlGoogle}" target="_blank" class="map-choice-btn"><i class="fab fa-google btn-google"></i> Google Maps</a>
-                                ${appleBtn}
-                                <a href="${urlWaze}" target="_blank" class="map-choice-btn"><i class="fab fa-waze btn-waze"></i> Waze</a>
-                                <a href="${urlNavigatoreGenerico}" class="map-choice-btn"><i class="fas fa-location-arrow btn-tomtom"></i> Altri Navigatori</a>
-                            </div>
-                        </div>
-                    `;
+// Funzione rapida per ottenere il giorno della settimana abbreviato
+const dataObj = new Date(poi.dataPartita.split('/').reverse().join('-')); // Converte DD/MM/YYYY in YYYY-MM-DD
+const giorni = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+const giornoSettimana = !isNaN(dataObj.getTime()) ? giorni[dataObj.getDay()] : "";
+
+const popupContent = `
+    <div style="font-size: 1.1em; min-width: 210px; padding: 5px;">
+        <strong style="color: ${color}; font-size: 1.2em;">${poi.campionato}</strong>
+        ${devePulsare ? ' <span style="font-size:0.7em; background:red; color:white; padding:2px 5px; border-radius:4px; vertical-align:middle;">PROSSIMA</span>' : ''}<br>
+        
+        <div style="color: #666; font-size: 0.9em; margin-bottom: 2px;">${poi.avversario}</div>
+        
+        <div style="color: #333; font-size: 0.9em; margin-bottom: 2px;">
+            <i class="far fa-calendar-alt" style="color: #0056b3;"></i> 
+            <span style="font-weight: bold;">${giornoSettimana}</span> ${poi.dataPartita} 
+            <i class="far fa-clock" style="color: #0056b3; margin-left: 8px;"></i> ${poi.orario}
+        </div>
+        
+        <div style="font-weight: bold; font-size: 0.9em;">${poi.luogo}</div>
+        
+        <button class="copy-btn" onclick="copiaIndirizzo('${indirizzoPerCopia}')">
+            <i class="fas fa-copy"></i> Copia indirizzo
+        </button>
+        
+        <hr style="margin: 12px 0; border: 0; border-top: 1px solid #eee;">
+        
+        <div class="map-choice-container">
+            <div style="font-size: 0.75rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 4px;">Naviga con:</div>
+            <a href="${urlGoogle}" target="_blank" class="map-choice-btn"><i class="fab fa-google btn-google"></i> Google Maps</a>
+            ${appleBtn}
+            <a href="${urlWaze}" target="_blank" class="map-choice-btn"><i class="fab fa-waze btn-waze"></i> Waze</a>
+            <a href="${urlNavigatoreGenerico}" class="map-choice-btn"><i class="fas fa-location-arrow btn-tomtom"></i> Altri Navigatori</a>
+        </div>
+    </div>
+`;                    
+                    // const popupContent = `
+                    //     <div style="font-size: 1.1em; min-width: 210px; padding: 5px;">
+                    //         <strong style="color: ${color}; font-size: 1.2em;">${poi.campionato}</strong>
+                    //         ${devePulsare ? ' <span style="font-size:0.7em; background:red; color:white; padding:2px 5px; border-radius:4px; vertical-align:middle;">PROSSIMA</span>' : ''}<br>
+                    //         <div style="color: #666; font-size: 0.9em; margin-bottom: 2px;">${poi.avversario}</div>
+                    //         <div style="font-weight: bold; font-size: 0.9em;">${poi.luogo}</div>
+                    //         <button class="copy-btn" onclick="copiaIndirizzo('${indirizzoPerCopia}')">
+                    //             <i class="fas fa-copy"></i> Copia indirizzo
+                    //         </button>
+                    //         <hr style="margin: 12px 0; border: 0; border-top: 1px solid #eee;">
+                    //         <div class="map-choice-container">
+                    //             <div style="font-size: 0.75rem; font-weight: bold; color: #999; text-transform: uppercase; margin-bottom: 4px;">Naviga con:</div>
+                    //             <a href="${urlGoogle}" target="_blank" class="map-choice-btn"><i class="fab fa-google btn-google"></i> Google Maps</a>
+                    //             ${appleBtn}
+                    //             <a href="${urlWaze}" target="_blank" class="map-choice-btn"><i class="fab fa-waze btn-waze"></i> Waze</a>
+                    //             <a href="${urlNavigatoreGenerico}" class="map-choice-btn"><i class="fas fa-location-arrow btn-tomtom"></i> Altri Navigatori</a>
+                    //         </div>
+                    //     </div>
+                    // `;
 
                     marker.bindPopup(popupContent);
                     marker.on('click', function() { this.openPopup(); });

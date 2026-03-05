@@ -28,7 +28,6 @@
 //  Calendario.html
 //    - NICE TO HAVE: visualizzare il calendario delle partite in forma di calendario vero e proprio (Tipo Google Calendar con vista mensile)
 //    - NICE TO HAVE: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
-//    - quando faccio login o logout deve fare "Aggiorna" in automatico
 //    - ingrandire i font su tablet
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------

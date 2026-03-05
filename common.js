@@ -732,6 +732,7 @@ function salvaDatiMappa(partite) {
                 datiLocali.push({
                     campionato: campionatoMatch,
                     dataPartita: p.data,
+                    orario: p.orario,
                     luogo: p.luogo.trim(),
                     coordinate: p.coordinate.trim(),
                     avversario: avversario

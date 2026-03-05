@@ -214,26 +214,6 @@ function onPlayerReady() {
 //  if (!isAdmin) mostraTutorialRotazione();   
 }
 
-function OLD_OK_onPlayerReady() {
-  console.log("Player pronto");
-
-  // NASCONDI LO SPINNER DEL VIDEO
-  const videoSpinner = document.getElementById("video-loading");
-  if (videoSpinner) {
-    videoSpinner.classList.add("hidden");
-  }
-
-  player.mute(); // se il video non è muto, su iphone non va l'autoplay
-  player.seekTo(matchStartTime, true);
-  player.playVideo();
-  tickTimeline();
-  if (timelineInterval) clearInterval(timelineInterval); // Sicurezza anti-doppioni
-  timelineInterval = setInterval(tickTimeline, REFRESH_TIME);
-
-  // per gli spettatori Mostra il tutorial appena il video è caricato e pronto
-  if (!isAdmin) mostraTutorialRotazione();  
-}
-
 function creaIlPlayer(vId) {
   if (!vId) return;
 
@@ -283,10 +263,6 @@ function isLiveStream() {
   // Un video normale ha sempre una durata > 0 appena pronto.
   return data.isLive === true || duration === 0;
 }
-function OLDOKisLiveStream() {
-  const data = player.getVideoData();
-  return data.isLive === true;
-}
 
 function updateLiveEdge() {
   const current = player.getCurrentTime();
@@ -307,11 +283,6 @@ function isBehindLiveEdge(threshold = 7) {
   }
   
   // Per i video registrati (finti live), manteniamo la tua logica originale
-  const current = player.getCurrentTime();
-  return (maxCurrentTime - current) > threshold;
-}
-
-function OLD_OK_isBehindLiveEdge(threshold = 3) {
   const current = player.getCurrentTime();
   return (maxCurrentTime - current) > threshold;
 }
@@ -1218,20 +1189,6 @@ function controllaDisponibilitaHighlights() {
     if (highlightsContainer) {
       highlightsContainer.classList.add('hidden');
     }
-  }
-}
-
-function OLDcontrollaDisponibilitaHighlights() {
-  // Questa funzione serve a mostrare/nascondere l'INTERA sezione in base alla variabile globale
-  if (highlightsAvailable == false) return;
-
-  if (fullMatchHistory.length === 0) return;
-
-  const section = document.getElementById('highlights-section');
-  if (highlightsAvailable) {
-    section.style.display = "flex";
-  } else {
-    section.style.display = "none";
   }
 }
 

@@ -7,7 +7,7 @@
     <title>Polismile Basket App</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
-    <script src="common.js?v=1.0.120"></script>
+    <script src="common.js?v=1.0.121"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         html {
@@ -32,6 +32,16 @@
             flex-direction: column;
             height: 97vh;
             overflow: auto;
+            /** Proprietà standard per disabilitare la selezione del testo */
+            user-select: none;
+
+            /* Prefissi per la massima compatibilità cross-browser */
+            -webkit-user-select: none;
+            /* Per Chrome, Safari, iOS */
+            -moz-user-select: none;
+            /* Per Firefox */
+            -ms-user-select: none;
+            /* Per Edge, IE */            
         }
 
         header {
@@ -80,25 +90,26 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             cursor: pointer;
         } */
-.menu-button {
-    background-color: var(--card-color);
-    border: 1px solid #333;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 1.0rem;
-    text-decoration: none;
-    color: white;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    /* AGGIUNGI QUESTE DUE RIGHE: */
-    min-height: 12rem; 
-    overflow: hidden;
-}         
+
+        .menu-button {
+            background-color: var(--card-color);
+            border: 1px solid #333;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1.0rem;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            /* AGGIUNGI QUESTE DUE RIGHE: */
+            min-height: 12rem; 
+            overflow: hidden;
+        }         
 
         .menu-button i {
             font-size: 3.8rem;
@@ -106,21 +117,14 @@
             color: var(--primary);
         }
 
-#live-text {
-    font-weight: bold;
-    font-size: 1.3rem; /* Leggermente più piccolo per sicurezza */
-    line-height: 1.1;
-    display: block;
-    width: 100%; /* Occupa tutto lo spazio */
-    word-wrap: break-word; /* Evita che i nomi lunghi escano dai bordi */
-}        
-        /* Stile per il testo su più righe */
-        /* #live-text {
+        #live-text {
             font-weight: bold;
-            font-size: 1.4rem;
-            line-height: 1.2;
+            font-size: 1.3rem; /* Leggermente più piccolo per sicurezza */
+            line-height: 1.1;
             display: block;
-        } */
+            width: 100%; /* Occupa tutto lo spazio */
+            word-wrap: break-word; /* Evita che i nomi lunghi escano dai bordi */
+        }        
 
         .menu-button span {
             font-weight: bold;
@@ -263,8 +267,8 @@
 
     <header>
         <h1>Polismile Basket U14</h1>
-        <div class="app-version">Versione 1.0.120</div>
-        <img src="icon-192.png" alt="Logo Polismile" class="header-logo" id="logo-admin" style="cursor: pointer;">
+        <div class="app-version">Versione 1.0.121</div>
+        <img src="icon-192.png" alt="Logo Polismile" class="header-logo" id="logo-admin" >
     </header>
     <div class="menu-grid">
         <a href="roster.html" class="menu-button">
@@ -469,53 +473,23 @@
                 details: JSON.stringify(getDeviceData) 
             });
 
-//             fetch(`${url}?${params.toString()}`)
-//                 .then(res => res.json())
-//                 .then(data => {
-//                     if (data && data.data) {
-// // ESEMPIO DI UTILIZZO:
-// // const datiSheet = [
-// //   ["02/03/2026", "Partita Moncalieri @Sociale"],
-// //   ["04/03/2026", "18.00 / 19.30 @Modigliani"],
-// //   ["06/03/2026", "17.00 / 18.30 @Modigliani"],
-// //   ["07/03/2026", "Partita vs Nole @Nole"],
-
-// //   ["09/03/2026", "18.30 / 20.00 @Balla"],
-// //   ["11/03/2026", "17.00 / 18.30 @Modigliani"],
-// //   ["12/03/2026", "18.30 / 20.00 @Balla"]
-
-// // ];                        
-// // const nuovoTesto = generaCalendario(datiSheet)
-
-// // //                        const nuovoTesto = data.data;
-// //                         content.innerHTML = nuovoTesto.replace(/\n/g, "<br>");
-
-fetch(`${url}?${params.toString()}`)
-    .then(res => res.json())
-    .then(resObj => {
-        // Controlliamo 'status' e se 'data' è un array non vuoto
-        if (resObj.status === "success" && Array.isArray(resObj.data) && resObj.data.length > 0) {
-            const nuovoTesto = generaCalendario(resObj.data);
-            content.innerHTML = nuovoTesto;
-        } else {
-            content.innerHTML = "<i>Nessun allenamento programmato per ora.</i>";
-        }
-        // Salviamo i nuovi dati
-        localStorage.setItem(storageKey, content.innerHTML);
-    })
-    .catch(err => {
-        console.error("Errore nel recupero dati:", err);
-        if (!cache) content.innerHTML = "Si è verificato un errore nel caricamento.";
-    })
-
-                    //     // Salviamo i nuovi dati
-                    //     localStorage.setItem(storageKey, nuovoTesto);
-                    // }
-                // })
-                // .catch(err => {
-                //     console.error("Errore refresh:", err);
-                //     if (!cache) content.innerHTML = "Errore di connessione.";
-                // })
+            fetch(`${url}?${params.toString()}`)
+                .then(res => res.json())
+                .then(resObj => {
+                    // Controlliamo 'status' e se 'data' è un array non vuoto
+                    if (resObj.status === "success" && Array.isArray(resObj.data) && resObj.data.length > 0) {
+                        const nuovoTesto = generaCalendario(resObj.data);
+                        content.innerHTML = nuovoTesto;
+                    } else {
+                        content.innerHTML = "<i>Nessun allenamento programmato per ora.</i>";
+                    }
+                    // Salviamo i nuovi dati
+                    localStorage.setItem(storageKey, content.innerHTML);
+                })
+                .catch(err => {
+                    console.error("Errore nel recupero dati:", err);
+                    if (!cache) content.innerHTML = "Si è verificato un errore nel caricamento.";
+                })
                 .finally(() => {
                     // 3. FERMIAMO la rotazione
                     if (icon) icon.classList.remove('spinning');

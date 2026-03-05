@@ -1576,23 +1576,6 @@ body.user-mode .video-container {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
-#OLDrotation-tutorial-overlay {
-  display: none; /* Inizialmente nascosto */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.85); /* Sfondo scuro semitrasparente */
-  z-index: 10000; /* Assicura che sia sopra a tutto, anche al player */
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  color: white;
-  font-family: Arial, sans-serif;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out; /* Transizione fluida per apparire/scomparire */
-}
 
 #rotation-tutorial-overlay.show {
   display: flex;
