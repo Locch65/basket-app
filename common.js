@@ -262,6 +262,24 @@ function vibrate(milliseconds) {
 
 function hmsToSeconds(hms) {
   if (!hms || typeof hms !== 'string') return 0;
+  
+  const parts = hms.split(':').map(Number);
+  
+  // Se parts ha 3 elementi: h, m, s
+  // Se parts ha 2 elementi: h, m
+  if (parts.length === 3) {
+    const [h, m, s] = parts;
+    return (h * 3600) + (m * 60) + s;
+  } else if (parts.length === 2) {
+    const [h, m] = parts;
+    return (h * 3600) + (m * 60);
+  }
+  
+  return 0; // Caso di stringa non valida o formato diverso
+}
+
+function OLDhmsToSeconds(hms) {
+  if (!hms || typeof hms !== 'string') return 0;
   const [h, m, s] = hms.split(':').map(Number);
   return (h * 3600) + (m * 60) + s;
 }

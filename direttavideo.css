@@ -1256,6 +1256,16 @@ body.user-mode .video-container {
   min-width: fit-content; /* Si stringe attorno al testo (es. "1Q") */
 }
 
+@keyframes lampeggio {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+.lampeggiante {
+  animation: lampeggio 1.5s infinite;
+}
+
 /* Stile per il box del quarto */
 
 .period-badge {

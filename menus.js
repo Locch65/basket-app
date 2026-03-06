@@ -1,4 +1,166 @@
 function gestisciGoLive() {
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
+    // 1. CARICAMENTO DATI ESISTENTI
+    let tempiGara = {};
+    try { 
+        // Assicuriamoci di leggere correttamente il JSON da dettagliGara.note
+        tempiGara = (typeof dettagliGara.note === 'string') 
+            ? JSON.parse(dettagliGara.note) 
+            : (dettagliGara.note || {});
+    } catch(e) { tempiGara = {}; }
+
+    const fasi = [
+        { id: 'I0', label: 'Intervallo Iniziale (Go Live)', tipo: 'int' },
+        { id: 'Q1', label: 'QUARTO 1', tipo: 'q' },
+        { id: 'I1', label: 'Intervallo 1', tipo: 'int' },
+        { id: 'Q2', label: 'QUARTO 2', tipo: 'q' },
+        { id: 'I2', label: 'Intervallo 2', tipo: 'int' },
+        { id: 'Q3', label: 'QUARTO 3', tipo: 'q' },
+        { id: 'I3', label: 'Intervallo 3', tipo: 'int' },
+        { id: 'Q4', label: 'QUARTO 4', tipo: 'q' },
+        { id: 'I4', label: 'Intervallo 4', tipo: 'int' },
+        { id: 'OT1', label: 'Overtime 1', tipo: 'ot' },
+        { id: 'I5', label: 'Intervallo 5', tipo: 'int' },
+        { id: 'OT2', label: 'Overtime 2', tipo: 'ot' },
+        { id: 'Terminata', label: 'TERMINATA', tipo: 'end' }
+    ];
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.maxWidth = '380px';
+    content.style.maxHeight = '90vh';
+    content.style.overflowY = 'auto';
+
+    let htmlFasi = fasi.map(fase => {
+        const orari = tempiGara[fase.id] || { inizio: '--:--', fine: '--:--' };
+        
+        const isSmall = (fase.tipo === 'int' || fase.tipo === 'ot');
+        const padding = isSmall ? '8px 10px' : '12px'; 
+        const fontSize = isSmall ? '0.9rem' : '1.1rem';
+        
+        // --- LOGICA COLORI STATO NORMALE ---
+        let bgColor = 'white';
+        let borderColor = '#3498db';
+        let textColor = '#3498db';
+
+        if (fase.tipo === 'int') {
+            bgColor = '#f8f9fa';
+            borderColor = '#bdc3c7';
+            textColor = '#7f8c8d';
+        }
+
+        const textTransform = (fase.tipo === 'q' || fase.tipo === 'ot') ? 'uppercase' : 'none';
+
+        return `
+            <div class="fase-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <button class="btn-fase" data-fase="${fase.id}" data-tipo="${fase.tipo}"
+                    style="flex: 1; text-align: center; padding: ${padding}; font-size: ${fontSize}; 
+                           border: 2px solid ${borderColor}; border-radius: 8px; background: ${bgColor}; 
+                           color: ${textColor}; font-weight: bold; cursor: pointer; text-transform: ${textTransform};">
+                    ${fase.label}
+                </button>
+                <div class="fase-times" style="display: flex; flex-direction: column; font-family: monospace; font-size: 0.8rem; min-width: 45px; color: #666; line-height: 1.1; text-align: center;">
+                    <span id="start-${fase.id}">${orari.inizio}</span>
+                    ${fase.tipo !== 'end' ? `<span id="end-${fase.id}" style="font-size: 0.7rem; color: #999;">${orari.fine}</span>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 12px; text-align:center; font-size: 1.4rem;">Cronologia Partita</h2>
+        <div id="fasiContainer" style="margin-bottom: 15px;">
+            ${htmlFasi}
+        </div>
+        <div style="display: flex; justify-content: center; gap: 20px; padding-bottom: 10px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+        <style>
+            /* QUARTI E OT SELEZIONATI (ROSSO) */
+            .btn-fase.active[data-tipo="q"], 
+            .btn-fase.active[data-tipo="ot"] { 
+                background-color: #dc3545 !important; 
+                color: white !important; 
+                border-color: #a71d2a !important; 
+            }
+            /* INTERVALLI SELEZIONATI (GRIGIO) */
+            .btn-fase.active[data-tipo="int"] { 
+                background-color: #6c757d !important; 
+                color: white !important; 
+                border-color: #495057 !important; 
+            }
+            /* TERMINATA SELEZIONATA (BLU) */
+            .btn-fase.active[data-tipo="end"] { 
+                background-color: #0056b3 !important; 
+                color: white !important; 
+                border-color: #004085 !important; 
+            }
+            .btn-fase:active { transform: scale(0.98); }
+        </style>
+    `;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniFase = content.querySelectorAll('.btn-fase');
+    let faseSelezionata = statoPartita || "I0";
+
+    bottoniFase.forEach(btn => {
+        if (btn.dataset.fase === faseSelezionata) btn.classList.add('active');
+    });
+
+    bottoniFase.forEach((btn, index) => {
+        btn.onclick = () => {
+            const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const idFaseAttuale = btn.dataset.fase;
+
+            bottoniFase.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            faseSelezionata = idFaseAttuale;
+
+            document.getElementById(`start-${idFaseAttuale}`).innerText = oraAttuale;
+            if (!tempiGara[idFaseAttuale]) tempiGara[idFaseAttuale] = {};
+            tempiGara[idFaseAttuale].inizio = oraAttuale;
+
+            if (index > 0) {
+                const idFasePrecedente = fasi[index - 1].id;
+                const spanEndPrev = document.getElementById(`end-${idFasePrecedente}`);
+                if (spanEndPrev) {
+                    spanEndPrev.innerText = oraAttuale;
+                    if (!tempiGara[idFasePrecedente]) tempiGara[idFasePrecedente] = {};
+                    tempiGara[idFasePrecedente].fine = oraAttuale;
+                }
+            }
+        };
+    });
+
+    document.getElementById('liveCancelBtn').onclick = () => document.body.removeChild(overlay);
+
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const isTerminata = (faseSelezionata === "Terminata");
+        const isGoLive = !isTerminata && (faseSelezionata !== "");
+
+        const dati = {
+            goLive: isGoLive,
+            quarto: faseSelezionata,
+            terminata: isTerminata,
+            noteTempi: JSON.stringify(tempiGara)
+        };
+
+        if (typeof salvaStatoLive === "function") {
+            salvaStatoLive(dati);
+            if (typeof renderPlayerListLive === "function") renderPlayerListLive();
+            if (typeof updateScoreboard === "function") updateScoreboard(isGoLive);
+        }
+        document.body.removeChild(overlay);
+    };
+}
+
+function OLD_OK_gestisciGoLive() {
   const overlay = document.createElement('div');
   overlay.id = 'goLivePopup';
   overlay.className = 'popup';

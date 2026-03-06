@@ -39,6 +39,11 @@ let convocazioni = "";
 let puntiSquadraA = 0;
 let puntiSquadraB = 0;
 let puntiSquadraA_NelTempo = 0;
+let puntiSquadraA_N0 = 0;
+let puntiSquadraA_N1 = 0;
+let puntiSquadraA_N2 = 0;
+let puntiSquadraA_N3 = 0;
+
 let puntiSquadraB_NelTempo = 0;
 let historyB = [];
 let contatoriB = { 0: 0, 1: 0, 2: 0, 3: 0 }; // Aggiunto 0
@@ -631,7 +636,6 @@ function generaHistory(liveDataDalBackend) {
       };
     });
 
-  //highlightsAvailable = true; // ATTENZIONE: test
   // 1. Trasformiamo la stringa in oggetto (se note è null, usa '{}')
   const config = JSON.parse(dettagliGara?.note || '{}');
 
@@ -642,6 +646,7 @@ function generaHistory(liveDataDalBackend) {
   } else {
       highlightsAvailable = false;
   }
+  if (statoPartita !== "Terminata") highlightsAvailable = true; // ATTENZIONE: test
 }
 
 function modifyHistory() {
@@ -1044,6 +1049,44 @@ function chiudiPopupHud() {
   if (pop) pop.classList.add('hidden');
   document.body.style.overflow = '';
 
+  // 1. Recuperiamo i dati esistenti in modo sicuro
+  let configEsistente = {};
+  try {
+    // Se dettagliGara.note è già un oggetto lo usiamo, altrimenti facciamo il parse
+    configEsistente = (typeof dettagliGara.note === 'string') 
+      ? JSON.parse(dettagliGara.note) 
+      : (dettagliGara.note || {});
+  } catch (e) {
+    console.error("Errore nel parsing di dettagliGara.note:", e);
+    configEsistente = {};
+  }
+
+  // 2. Creiamo il nuovo oggetto unendo i dati esistenti con quelli nuovi
+  // Usiamo lo spread operator (...) per copiare tutto il contenuto precedente
+  const nuovaConfig = {
+    ...configEsistente,
+    "hud-score": hudPositionIndex,
+    "hud-clock": timePositionIndex
+    // Non sovrascriviamo "stats" e "highlights" se non li stiamo cambiando,
+    // o semplicemente li manteniamo come erano nell'oggetto esistente.
+  };
+
+  // 3. Trasformiamo l'oggetto aggiornato in stringa JSON
+  dettagliGara.note = JSON.stringify(nuovaConfig);
+
+  // 4. Salvataggio
+  if (isAdmin) {
+    saveToFirebaseHistory('partite/', dettagliGara); 
+    saveToServerMatchData();
+  }
+}
+
+function OLDchiudiPopupHud() {
+  const pop = document.getElementById('popup-hud-opts');
+  if (pop) pop.classList.add('hidden');
+  document.body.style.overflow = '';
+
+  //?? ATTENZIONE: QUI SI PERDE I DATI PREESISTENTI
   const nuovaConfig = {
         "stats": dettagliGara.note['stats'] || false,
         "highlights": dettagliGara.note['highlights'] || false,
@@ -1503,6 +1546,62 @@ function aggiornaFalliSquadra() {
   // 2. Recuperiamo gli orari di inizio dei quarti dalle note
   let config;
   try {
+    config = (typeof dettagliGara.note === 'string') ? JSON.parse(dettagliGara.note) : dettagliGara.note;
+  } catch (e) {
+    console.error("Errore nel parsing delle note:", e);
+    return;
+  }
+
+  // 3. Determiniamo l'inizio del quarto attuale
+  // Verifichiamo che config esista e che contenga la fase attuale
+  let inizioQuartoStr = "00:00:00";
+  
+  if (quartoAttuale !== "Terminata" && config && config[quartoAttuale]) {
+    // Ora accediamo alla proprietà .inizio dell'oggetto recuperato
+    const faseData = config[quartoAttuale];
+    inizioQuartoStr = faseData.inizio || "00:00:00";
+  }
+
+  // Conversione in secondi
+  const secondiInizioQuarto = hmsToSeconds(inizioQuartoStr);
+
+  // 4. Filtriamo la fullMatchHistory
+  const eventiFinoAdOra = fullMatchHistory.filter(evento => {
+    // Il fallo deve essere:
+    // - Un evento di tipo "Fallo"
+    // - Avvenuto dopo l'inizio del quarto attuale
+    // - Avvenuto prima o uguale al secondo corrente del video
+    return (
+      evento.eventType === "Fallo" && 
+      evento.secondiReali >= secondiInizioQuarto && 
+      (evento.secondiReali <= secondiCorrentiVideo || isAdmin) // se isAdmin deve mostrare il fallo indipendentemente da dove è arrivato il video youtube
+    );
+  });
+
+  // 5. Calcolo Falli Squadra A e B
+  const totalFoulsA = eventiFinoAdOra.filter(ev => ev.squadra === 'Polismile A').length;
+  const totalFoulsB = eventiFinoAdOra.filter(ev => ev.squadra === 'Squadra B').length;
+
+  // 6. Aggiornamento DOM
+  const elA = document.getElementById("team-fouls-A");
+  const elB = document.getElementById("team-fouls-B");
+  
+  if (teamA === "Polismile A") {
+    if (elA) elA.textContent = totalFoulsA;
+    if (elB) elB.textContent = totalFoulsB;
+  } else {
+    if (elA) elA.textContent = totalFoulsB;
+    if (elB) elB.textContent = totalFoulsA;
+  }
+}
+
+function OLDaggiornaFalliSquadra() {
+  // 1. Recuperiamo il tempo corrente del video in secondi
+  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
+
+  // 2. Recuperiamo gli orari di inizio dei quarti dalle note
+  let config;
+  try {
     config = typeof dettagliGara.note === 'string' ? JSON.parse(dettagliGara.note) : dettagliGara.note;
   } catch (e) {
     console.error("Errore nel parsing delle note:", e);
@@ -1510,7 +1609,7 @@ function aggiornaFalliSquadra() {
   }
 
   // 3. Determiniamo l'inizio del quarto attuale (es: Q1, Q2...)
-  const inizioQuartoStr = quartoAttuale !== "Terminata" ? config[quartoAttuale] : "00:00:00";
+  const inizioQuartoStr = quartoAttuale !== "Terminata" ? config[quartoAttuale].inizio : "00:00:00";
   if (!inizioQuartoStr) {
     console.warn(`Orario di inizio per Q${quartoAttuale} non trovato.`);
     // Se non c'è l'orario, potresti voler azzerare i contatori o uscire
@@ -1565,7 +1664,16 @@ function updateScoreboard(matchIsLive) {
     totalA[3] += (g.contatori[3] || 0);
   });
   
-  let statsTLavailable = totalA[0] !== 0;
+  let statsTLavailable; 
+  if (!isAdmin) {
+    // per gli spettatori il dettaglio dei punti deve essere funzione del tempo.
+    totalA[0] = puntiSquadraA_N0;
+    totalA[1] = puntiSquadraA_N1;
+    totalA[2] = puntiSquadraA_N2;
+    totalA[3] = puntiSquadraA_N3;
+  }
+  statsTLavailable = totalA[0] !== 0;
+
   const tentativiA = totalA[0] + totalA[1];
   let strA = "";
   let strB = "";
@@ -1650,10 +1758,33 @@ function updateScoreboard(matchIsLive) {
   const hudPeriodEl = document.getElementById("hud-period");
   const gamePeriodEl = document.getElementById("game-period");
 
+  // [hudPeriodEl, gamePeriodEl].forEach(function (el) {
+  //   if (el && quartoAttuale) {
+  //     el.textContent = quartoAttuale.includes("I") ? "Intervallo" : quartoAttuale;
+  //     el.classList.remove("hidden");
+  //     if (quartoAttuale.toLowerCase().includes("terminata")) {
+  //       el.style.backgroundColor = "#666";
+  //       el.style.borderColor = "#999";
+  //     } else {
+  //       el.style.backgroundColor = "#ff0000";
+  //       el.style.borderColor = "#ff4d4d";
+  //     }
+  //   }
+  // });
   [hudPeriodEl, gamePeriodEl].forEach(function (el) {
     if (el && quartoAttuale) {
-      el.textContent = quartoAttuale;
+      const isIntervallo = quartoAttuale.includes("I");
+      
+      el.textContent = isIntervallo ? "Intervallo" : quartoAttuale;
       el.classList.remove("hidden");
+      
+      // Gestione lampeggio per intervalli
+      if (isIntervallo) {
+        el.classList.add("lampeggiante");
+      } else {
+        el.classList.remove("lampeggiante");
+      }
+
       if (quartoAttuale.toLowerCase().includes("terminata")) {
         el.style.backgroundColor = "#666";
         el.style.borderColor = "#999";
@@ -2090,6 +2221,11 @@ function renderPlayerListLive() {
   });
 
   // --- CALCOLO PUNTEGGI TOTALI ---
+  puntiSquadraA_N0 = visualizzazioneGiocatori.reduce((sum, g) => sum + g.count0, 0);
+  puntiSquadraA_N1 = visualizzazioneGiocatori.reduce((sum, g) => sum + g.count1, 0);
+  puntiSquadraA_N2 = visualizzazioneGiocatori.reduce((sum, g) => sum + g.count2, 0);
+  puntiSquadraA_N3 = visualizzazioneGiocatori.reduce((sum, g) => sum + g.count3, 0);
+
   puntiSquadraA_NelTempo = visualizzazioneGiocatori.reduce((acc, g) => acc + g.puntiNelTempo, 0);
 
   const eventiSquadraB = fullMatchHistory.filter(evento => {
@@ -2642,6 +2778,65 @@ function salvaStatoLive(dati) {
   console.log("Dati inviati a salvaStatoLive:", dati);
   isLive = (dati.goLive === true);
 
+  // Gestione stato partita
+  if (dati.terminata === true) {
+    statoPartita = "Terminata";
+  } else {
+    statoPartita = dati.quarto;
+  }
+  
+  localStorage.setItem("statoPartita", statoPartita);
+  localStorage.setItem("isLive", isLive);
+
+  dettagliGara.isLive = isLive;
+  dettagliGara.statoPartita = statoPartita;
+  quartoAttuale = statoPartita;
+  matchIsLive = isLive;
+
+  // --- LOGICA AGGIORNAMENTO CONFIGURAZIONE CON TUTTI I DETTAGLI ---
+  
+  // 1. Recuperiamo la configurazione esistente
+  let configEsistente = {};
+  try {
+    configEsistente = (typeof dettagliGara.note === 'string') 
+      ? JSON.parse(dettagliGara.note) 
+      : (dettagliGara.note || {});
+  } catch (e) { configEsistente = {}; }
+
+  // 2. Parse della cronologia tempi che arriva dal popup (oggetto completo {inizio, fine})
+  let tempiPopup = {};
+  try {
+    tempiPopup = dati.noteTempi ? JSON.parse(dati.noteTempi) : {};
+  } catch (e) { tempiPopup = {}; }
+
+  // 3. Costruiamo la nuova configurazione
+  // Manteniamo i valori preesistenti (HUD, impostazioni) e aggiorniamo le fasi
+  const nuovaConfig = {
+    ...configEsistente,
+    "hud-score": hudPositionIndex,
+    "hud-clock": timePositionIndex
+  };
+
+  // 4. Salviamo ogni fase ricevuta dal popup (I0, Q1, I1, Q2, I2, Q3, I3, Q4, I4, OT1, I5, OT2)
+  // Salviamo l'intero oggetto contenente inizio e fine
+  Object.keys(tempiPopup).forEach(fase => {
+    if (tempiPopup[fase]) {
+      nuovaConfig[fase] = tempiPopup[fase];
+    }
+  });
+
+  // 5. Trasformiamo in JSON e salviamo
+  dettagliGara.note = JSON.stringify(nuovaConfig);
+  // ------------------------------------------------------------
+
+  saveToFirebaseHistory('partite/', dettagliGara); 
+  saveToServerMatchData();
+}
+
+function OLD_OK_salvaStatoLive(dati) {
+  console.log("Dati inviati a salvaStatoLive:", dati);
+  isLive = (dati.goLive === true);
+
   // Gestione logica quarto e variabile globale
   if (dati.terminata === true) {
     statoPartita = "Terminata";
@@ -2818,6 +3013,169 @@ function mostraGraficoPunteggio() {
             puntiA: 0, 
             puntiB: 0 
         });
+
+        const finaleA = datiGrafico[datiGrafico.length - 1].puntiA;
+        const finaleB = datiGrafico[datiGrafico.length - 1].puntiB;
+        const labelA = `Polismile A (${finaleA})`;
+        const labelB = (teamA === "Polismile A") ? `${teamB} (${finaleB})` : `${teamA} (${finaleB})`;        
+        
+        // Fissiamo il tetto esattamente al punteggio massimo tondo (es. 60)
+        const maxPunti = Math.max(finaleA, finaleB);
+        // Arrotondiamo per eccesso alla decina se vuoi che l'asse sia sempre pulito
+        const tettoAsseY = Math.ceil(maxPunti / 10) * 10; 
+
+        // --- CORREZIONE LOGICA TEMPI ---
+        let tempiQuarti = {};
+        try { 
+            tempiQuarti = (typeof dettagliGara.note === 'string') 
+                ? JSON.parse(dettagliGara.note) 
+                : (dettagliGara.note || {}); 
+        } catch(e) { console.error("Errore parsing note:", e); }
+
+        // Funzione per trovare indice basandosi sulla proprietà .inizio
+        const trovaIndice = (t) => {
+            if (!t) return null;
+            const i = datiGrafico.findIndex(d => d.tempo >= t);
+            return i !== -1 ? i : null;
+        };
+
+        // Uso di optional chaining (?.) per sicurezza, puntando a .inizio
+        const iQ2 = trovaIndice(tempiQuarti.Q2?.inizio) || Math.floor(datiGrafico.length * 0.25);
+        const iQ3 = trovaIndice(tempiQuarti.Q3?.inizio) || Math.floor(datiGrafico.length * 0.5);
+        const iQ4 = trovaIndice(tempiQuarti.Q4?.inizio) || Math.floor(datiGrafico.length * 0.75);
+        const iFine = datiGrafico.length - 1;
+
+        // Calcolo midpoint per le label
+        const m1 = iQ2 / 2;
+        const m2 = iQ2 + (iQ3 - iQ2) / 2;
+        const m3 = iQ3 + (iQ4 - iQ3) / 2;
+        const m4 = iQ4 + (iFine - iQ4) / 2;
+
+        if (chartEvoluzione) chartEvoluzione.destroy();
+
+        const etichettaInArea = (id, x, testo) => ({
+            [id]: {
+                type: 'line',
+                xMin: x, xMax: x,
+                borderWidth: 0,
+                label: {
+                    display: true,
+                    content: testo,
+                    position: 'center',
+                    yValue: tettoAsseY,
+                    yAdjust: -70, 
+                    backgroundColor: 'transparent',
+                    color: '#666',
+                    font: { size: 10, weight: 'bold' },
+                    z: 100
+                }
+            }
+        });
+
+        const separatore = (id, x) => ({
+            [id]: {
+                type: 'line',
+                xMin: x, xMax: x,
+                borderColor: '#999',
+                borderDash: [6, 4],
+                borderWidth: 2,
+                z: 1
+            }
+        });
+
+        chartEvoluzione = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datiGrafico.map(d => d.tempo),
+                datasets: [
+                    { label: labelA, data: datiGrafico.map(d => d.puntiA), borderColor: '#dc3545', borderWidth: 2, fill: false, pointRadius: 1 },
+                    { label: labelB, data: datiGrafico.map(d => d.puntiB), borderColor: '#0056b3', borderWidth: 2, fill: false, pointRadius: 1 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                layout: { padding: { top: 0, right: 30, left: 20, bottom: 10 } },
+                scales: {
+                    x: { 
+                        type: 'category', 
+                        clip: false,
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 10,
+                          callback: function(val, index) {
+                              // Prende l'etichetta originale (es. "12:34") 
+                              // e restituisce solo i primi 5 caratteri ("12:30")
+                              const label = this.getLabelForValue(val);
+                              return label.substring(0, 5); 
+                          }
+                        }
+                    },
+                    y: { 
+                        beginAtZero: true, 
+                        max: tettoAsseY,
+                        ticks: { stepSize: 10 }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: { weight: 'bold' },
+                            generateLabels: (chart) => chart.data.datasets.map((ds, i) => ({
+                                text: ds.label, fillStyle: ds.borderColor, strokeStyle: ds.borderColor, fontColor: ds.borderColor, index: i
+                            }))
+                        }
+                    },
+                    annotation: {
+                        annotations: {
+                            ...separatore('s2', iQ2),
+                            ...separatore('s3', iQ3),
+                            ...separatore('s4', iQ4),
+                            ...separatore('sFine', iFine),
+                            ...etichettaInArea('l1', m1, '1Q'),
+                            ...etichettaInArea('l2', m2, '2Q'),
+                            ...etichettaInArea('l3', m3, '3Q'),
+                            ...etichettaInArea('l4', m4, '4Q')
+                        }
+                    }
+                }
+            }
+        });
+    }, 150);
+}
+
+function OLD2OKmostraGraficoPunteggio() {
+    const modal = document.getElementById('modalGraficoEvoluzione');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+        const canvas = document.getElementById('canvasEvoluzione');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let datiGrafico = fullMatchHistory
+            // 1. Filtriamo: teniamo solo gli eventi che sono "punto"
+            .filter(ev => ev.eventType === "punto")
+            // 2. Mappiamo i dati per il grafico
+            .map(ev => ({
+                tempo: ev.timestampReale.replace("*", ""), 
+                puntiA: ev.punteggioA,
+                puntiB: ev.punteggioB
+            }));
+
+            // Calcoliamo l'orario di inizio reale nel formato HH:MM
+        // Assumendo che matchStartTime sia il punto zero (0 secondi)
+        const orarioInizioHHMM = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime).substring(0, 5);
+
+        // Inseriamo il punto di partenza 0-0 con l'orario calcolato
+        datiGrafico.unshift({ 
+            tempo: orarioInizioHHMM, 
+            puntiA: 0, 
+            puntiB: 0 
+        });
         const finaleA = datiGrafico[datiGrafico.length - 1].puntiA;
         const finaleB = datiGrafico[datiGrafico.length - 1].puntiB;
         const labelA = `Polismile A (${finaleA})`;
@@ -2836,9 +3194,9 @@ function mostraGraficoPunteggio() {
             return i !== -1 ? i : null;
         };
 
-        const iQ2 = trovaIndice(tempiQuarti.Q2) || Math.floor(datiGrafico.length * 0.25);
-        const iQ3 = trovaIndice(tempiQuarti.Q3) || Math.floor(datiGrafico.length * 0.5);
-        const iQ4 = trovaIndice(tempiQuarti.Q4) || Math.floor(datiGrafico.length * 0.75);
+        const iQ2 = trovaIndice(tempiQuarti.Q2.inizio) || Math.floor(datiGrafico.length * 0.25);
+        const iQ3 = trovaIndice(tempiQuarti.Q3.inizio) || Math.floor(datiGrafico.length * 0.5);
+        const iQ4 = trovaIndice(tempiQuarti.Q4.inizio) || Math.floor(datiGrafico.length * 0.75);
         const iFine = datiGrafico.length - 1;
 
         const m1 = iQ2 / 2;
@@ -2948,7 +3306,7 @@ function mostraGraficoPunteggio() {
     }, 150);
 }
 
-function OKmostraGraficoPunteggio() {
+function OLD1OKmostraGraficoPunteggio() {
     const modal = document.getElementById('modalGraficoEvoluzione');
     modal.style.display = 'flex';
 
@@ -3175,6 +3533,13 @@ async function init() {
         menu.classList.toggle("hidden");
       });
       document.addEventListener("click", () => menu.classList.add("hidden"), { passive: true });
+    }
+
+    const gamePeriodEl = document.getElementById("game-period");
+    if (gamePeriodEl) {
+      gamePeriodEl.addEventListener("click", () => {
+        gestisciGoLive();
+      }, { passive: true });
     }
 
     // Bottone Logout

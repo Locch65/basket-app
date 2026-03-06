@@ -53,15 +53,12 @@
 //             (non vengono memorizzati nello sheet Partite. si trovano solo negli eventi)
 //      - aggiungere i falli accanto al punteggio hud (almeno in landscape). 
 //      - flashare la scoreboard quando cambiano i falli per la squadra B
+//      - BUG: se la partita è "Terminata" il numero dei falli visualizzati per le squadre è 0 
 //
 //    -------------------------------------------------------------------------------------
 //    - GESTIONE QUARTO:
-//      - Storicizzare il cambio di quarto
-//      - rendere cliccabile il bottone del quarto e attivare il popup
+//   *  - Storicizzare il cambio di quarto
 //      - Memorizzare punteggi alla fine ciascun quarto. 
-//      - nel campo note vengono salvati solo Q1, Q2, Q3, Q4. non extraTime.
-//   *  - se cambio quarto durante la partita, poi faccio back verso il calendario e poi riclicco sulla partita la variabile statoPartita assume il 
-//           valore del precedente quarto (non rilegge da localStorate). 
 //
 //    -------------------------------------------------------------------------------------
 //    - HIGHLIGHTS:
@@ -72,6 +69,7 @@
 //   *  - anche il quintetto in campo deve essere quello del momento
 //   *  - su iphone, quando clico sui bottoni, zooma l'intera pagina
 //      - VERIFICARE: Highlights perchè non funziona quando c'e' un orainiziopartita > 1. 
+//      - FATTO: VERIFICARE. abilitare gli highlights per la partita Live
 //
 //    -------------------------------------------------------------------------------------
 //    - Hamburgher menu: Per Admin mettere Highlights
@@ -79,8 +77,7 @@
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 //    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagine. provare a risolvere con un settimer
 //    - VERIFICARE Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante
-//    - BUG: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo
-//    - BUG: se la partita è "Terminata" il numero dei falli visualizzati per le squadre è 0 
+//  *  - BUG: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo (OK per squadra A)
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
 //
@@ -202,5 +199,8 @@
 //    - FATTO: quando attivo/disattivo premendo il bottone deve andare all'inizio dello streaming/fine dello streaming (cioe' live)
 //    - FATTO: grafico partita con avanzamento punti
 //    - FATTO: disabilitare il bottone Highlights se non ci sono gli eventi registrati, oppure sono inaffidabili
+//    - FATTO: rendere cliccabile il bottone del quarto e attivare il popup
+//    - FATTO: nel campo note vengono salvati solo Q1, Q2, Q3, Q4. non extraTime.
+//    - FATTO: se cambio quarto durante la partita, poi faccio back verso il calendario e poi riclicco sulla partita la variabile statoPartita assume il valore del precedente quarto (non rilegge da localStorate). 
 //
 // -----------------------------------------------------------------------------------
