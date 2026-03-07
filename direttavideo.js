@@ -1649,6 +1649,119 @@ function OLDaggiornaFalliSquadra() {
 }
 
 function updateScoreboard(matchIsLive) {
+  const scoreEl = document.getElementById("game-score");
+  const scoreTextHUD = document.getElementById("score-text");
+  const detailsAEl = document.getElementById("team-details-A");
+  const detailsBEl = document.getElementById("team-details-B");
+
+  // --- 1. Calcolo Dettagli Squadra A ---
+  let totalA = { 0: 0, 1: 0, 2: 0, 3: 0 };
+  
+  if (isAdmin) {
+    // Admin vede i dati reali dai contatori dei giocatori
+    giocatoriObj.forEach(g => {
+      totalA[0] += (g.contatori[0] || 0);
+      totalA[1] += (g.contatori[1] || 0);
+      totalA[2] += (g.contatori[2] || 0);
+      totalA[3] += (g.contatori[3] || 0);
+    });
+  } else {
+    // Spettatori vedono i dati calcolati nel tempo (puntiSquadraA_N0, ecc.)
+    totalA[0] = puntiSquadraA_N0;
+    totalA[1] = puntiSquadraA_N1;
+    totalA[2] = puntiSquadraA_N2;
+    totalA[3] = puntiSquadraA_N3;
+  }
+
+  // --- 2. Calcolo Dettagli Squadra B (Nel Tempo) ---
+  let totalB = { 0: 0, 1: 0, 2: 0, 3: 0 };
+  
+  if (isAdmin) {
+    // Admin usa i contatori globali B (aggiornati live)
+    totalB[0] = contatoriB[0] || 0;
+    totalB[1] = contatoriB[1] || 0;
+    totalB[2] = contatoriB[2] || 0;
+    totalB[3] = contatoriB[3] || 0;
+  } else {
+    // Spettatori: filtriamo gli eventi della Squadra B fino al secondo corrente
+    const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
+    const eventiB = fullMatchHistory.filter(ev => {
+      const isSquadraB = (ev.idGiocatore === "Squadra B" || ev.idGiocatore === "" || ev.idGiocatore === null || ev.squadra !== "Polismile A");
+      return isSquadraB && ev.eventType === "punto" && ev.secondiReali <= secondiCorrentiVideo;
+    });
+
+    eventiB.forEach(ev => {
+      const p = parseInt(ev.puntiRealizzati) || 0;
+      if (totalB.hasOwnProperty(p)) totalB[p]++;
+    });
+  }
+
+  // --- 3. Generazione Stringhe Dettaglio ---
+  const genDettaglio = (tot) => {
+    const tentativi = tot[0] + tot[1];
+    return (tot[0] !== 0) 
+      ? `[TL:${tot[1]}/${tentativi}, T2:${tot[2]}, T3:${tot[3]}]`
+      : `[TL:${tot[1]}, T2:${tot[2]}, T3:${tot[3]}]`;
+  };
+
+  let strA = genDettaglio(totalA);
+  let strB = genDettaglio(totalB);
+
+  // Swap se Polismile non è Squadra A
+  if (teamA !== "Polismile A") {
+    [strA, strB] = [strB, strA];
+  }
+
+  if (detailsAEl) detailsAEl.textContent = strA;
+  if (detailsBEl) detailsBEl.textContent = strB;
+
+  // --- 4. Gestione Punteggio Principale ---
+  if (!scoreEl) return;
+
+  let currentScore = "";
+  if (matchIsLive) {
+    if (teamA === "Polismile A") {
+      currentScore = `${puntiSquadraA_NelTempo} - ${puntiSquadraB_NelTempo}`;
+    } else {
+      currentScore = `${puntiSquadraB_NelTempo} - ${puntiSquadraA_NelTempo}`;
+    }
+  } else {
+    // Fallback per modalità non-live (es. caricamento pagina)
+    const pA = localStorage.getItem("puntiSquadraA") || 0;
+    const pB = localStorage.getItem("puntiSquadraB") || 0;
+    currentScore = `${pA} - ${pB}`;
+  }
+
+  // Aggiornamento DOM e Animazioni
+  if (currentScore !== lastScoreStr) {
+    vibrate(100);
+    if (scoreTextHUD) scoreTextHUD.textContent = currentScore;
+    scoreEl.textContent = currentScore;
+    scoreEl.classList.remove("pulse-animation");
+    void scoreEl.offsetWidth; // Reflow
+    scoreEl.classList.add("pulse-animation");
+    lastScoreStr = currentScore;
+  }
+
+  // --- 5. Aggiornamento Periodo e Falli ---
+  [document.getElementById("hud-period"), document.getElementById("game-period")].forEach(el => {
+    if (el && quartoAttuale) {
+      const isIntervallo = quartoAttuale.includes("I");
+      el.textContent = isIntervallo ? "Intervallo" : quartoAttuale;
+      el.classList.remove("hidden");
+      
+      isIntervallo ? el.classList.add("lampeggiante") : el.classList.remove("lampeggiante");
+
+      const isTerminata = quartoAttuale.toLowerCase().includes("terminata");
+      el.style.backgroundColor = isTerminata ? "#666" : "#ff0000";
+      el.style.borderColor = isTerminata ? "#999" : "#ff4d4d";
+    }
+  });
+
+  aggiornaFalliSquadra();
+}
+
+function OLDOKupdateScoreboard(matchIsLive) {
   // Chiama questa funzione dentro generaHistory() o dopo ogni aggiornamento del punteggio
   const scoreEl = document.getElementById("game-score");
   const scoreTextHUD = document.getElementById("score-text");
@@ -2983,6 +3096,128 @@ function chiudiTutorialRotazione() {
   overlay.classList.remove('show');
 }
 
+function NEW_BAD_mostraGraficoPunteggio() {
+    const modal = document.getElementById('modalGraficoEvoluzione');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+        const canvas = document.getElementById('canvasEvoluzione');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let datiGrafico = fullMatchHistory
+            .filter(ev => ev.eventType === "punto")
+            .map(ev => ({
+                tempo: ev.timestampReale.replace("*", ""), 
+                puntiA: ev.punteggioA,
+                puntiB: ev.punteggioB
+            }));
+
+        const orarioInizioHHMM = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime).substring(0, 5);
+        datiGrafico.unshift({ tempo: orarioInizioHHMM, puntiA: 0, puntiB: 0 });
+
+        const finaleA = datiGrafico[datiGrafico.length - 1].puntiA;
+        const finaleB = datiGrafico[datiGrafico.length - 1].puntiB;
+        const labelA = `Polismile A (${finaleA})`;
+        const labelB = (teamA === "Polismile A") ? `${teamB} (${finaleB})` : `${teamA} (${finaleB})`;        
+        
+        const maxPunti = Math.max(finaleA, finaleB);
+        const tettoAsseY = Math.ceil(maxPunti / 10) * 10; 
+
+        let tempiQuarti = {};
+        try { 
+            tempiQuarti = (typeof dettagliGara.note === 'string') 
+                ? JSON.parse(dettagliGara.note) 
+                : (dettagliGara.note || {}); 
+        } catch(e) { console.error("Errore parsing note:", e); }
+
+        const trovaIndice = (t) => {
+            if (!t) return null;
+            const i = datiGrafico.findIndex(d => d.tempo >= t);
+            return i !== -1 ? i : null;
+        };
+
+        const iQ2 = trovaIndice(tempiQuarti.Q2?.inizio);
+        const iQ3 = trovaIndice(tempiQuarti.Q3?.inizio);
+        const iQ4 = trovaIndice(tempiQuarti.Q4?.inizio);
+        const iFine = datiGrafico.length - 1;
+
+        // --- LOGICA DI VISIBILITÀ ANNOTAZIONI ---
+        // Determiniamo quali quarti mostrare in base a 'quartoAttuale'
+        // Se non è live (es. visualizzazione storica), mostriamo tutto
+        const mostraQ2 = !matchIsLive || ["Q2", "Q3", "Q4", "Terminata"].some(s => quartoAttuale.includes(s));
+        const mostraQ3 = !matchIsLive || ["Q3", "Q4", "Terminata"].some(s => quartoAttuale.includes(s));
+        const mostraQ4 = !matchIsLive || ["Q4", "Terminata"].some(s => quartoAttuale.includes(s));
+        const mostraFine = !matchIsLive || quartoAttuale.toLowerCase().includes("terminata");
+
+        const m1 = (iQ2 || iFine) / 2;
+        const m2 = iQ2 ? iQ2 + ((iQ3 || iFine) - iQ2) / 2 : null;
+        const m3 = iQ3 ? iQ3 + ((iQ4 || iFine) - iQ3) / 2 : null;
+        const m4 = iQ4 ? iQ4 + (iFine - iQ4) / 2 : null;
+
+        if (chartEvoluzione) chartEvoluzione.destroy();
+
+        const etichettaInArea = (id, x, testo) => ({
+            [id]: {
+                type: 'line', xMin: x, xMax: x, borderWidth: 0,
+                label: {
+                    display: true, content: testo, position: 'center',
+                    yValue: tettoAsseY, yAdjust: -70, backgroundColor: 'transparent',
+                    color: '#666', font: { size: 10, weight: 'bold' }, z: 100
+                }
+            }
+        });
+
+        const separatore = (id, x) => ({
+            [id]: {
+                type: 'line', xMin: x, xMax: x, borderColor: '#999',
+                borderDash: [6, 4], borderWidth: 2, z: 1
+            }
+        });
+
+        // Componiamo l'oggetto annotations dinamicamente
+        const finalAnnotations = {
+            ...etichettaInArea('l1', m1, '1Q'),
+            ...(mostraQ2 && iQ2 ? { ...separatore('s2', iQ2), ...etichettaInArea('l2', m2, '2Q') } : {}),
+            ...(mostraQ3 && iQ3 ? { ...separatore('s3', iQ3), ...etichettaInArea('l3', m3, '3Q') } : {}),
+            ...(mostraQ4 && iQ4 ? { ...separatore('s4', iQ4), ...etichettaInArea('l4', m4, '4Q') } : {}),
+            ...(mostraFine ? separatore('sFine', iFine) : {})
+        };
+
+        chartEvoluzione = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datiGrafico.map(d => d.tempo),
+                datasets: [
+                    { label: labelA, data: datiGrafico.map(d => d.puntiA), borderColor: '#dc3545', borderWidth: 2, fill: false, pointRadius: 1 },
+                    { label: labelB, data: datiGrafico.map(d => d.puntiB), borderColor: '#0056b3', borderWidth: 2, fill: false, pointRadius: 1 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                layout: { padding: { top: 0, right: 30, left: 20, bottom: 10 } },
+                scales: {
+                    x: { 
+                        type: 'category', clip: false,
+                        ticks: {
+                            autoSkip: true, maxTicksLimit: 10,
+                            callback: function(val) { return this.getLabelForValue(val).substring(0, 5); }
+                        }
+                    },
+                    y: { beginAtZero: true, max: tettoAsseY, ticks: { stepSize: 10 } }
+                },
+                plugins: {
+                    legend: { display: true, labels: { font: { weight: 'bold' } } },
+                    annotation: { annotations: finalAnnotations }
+                }
+            }
+        });
+    }, 150);
+}
+
 function mostraGraficoPunteggio() {
     const modal = document.getElementById('modalGraficoEvoluzione');
     if (!modal) return;
@@ -3145,290 +3380,6 @@ function mostraGraficoPunteggio() {
         });
     }, 150);
 }
-
-function OLD2OKmostraGraficoPunteggio() {
-    const modal = document.getElementById('modalGraficoEvoluzione');
-    if (!modal) return;
-    modal.style.display = 'flex';
-
-    setTimeout(() => {
-        const canvas = document.getElementById('canvasEvoluzione');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-
-        let datiGrafico = fullMatchHistory
-            // 1. Filtriamo: teniamo solo gli eventi che sono "punto"
-            .filter(ev => ev.eventType === "punto")
-            // 2. Mappiamo i dati per il grafico
-            .map(ev => ({
-                tempo: ev.timestampReale.replace("*", ""), 
-                puntiA: ev.punteggioA,
-                puntiB: ev.punteggioB
-            }));
-
-            // Calcoliamo l'orario di inizio reale nel formato HH:MM
-        // Assumendo che matchStartTime sia il punto zero (0 secondi)
-        const orarioInizioHHMM = aggiungiSecondiAOrario(oraInizioDiretta, matchStartTime).substring(0, 5);
-
-        // Inseriamo il punto di partenza 0-0 con l'orario calcolato
-        datiGrafico.unshift({ 
-            tempo: orarioInizioHHMM, 
-            puntiA: 0, 
-            puntiB: 0 
-        });
-        const finaleA = datiGrafico[datiGrafico.length - 1].puntiA;
-        const finaleB = datiGrafico[datiGrafico.length - 1].puntiB;
-        const labelA = `Polismile A (${finaleA})`;
-        const labelB = (teamA === "Polismile A") ? `${teamB} (${finaleB})` : `${teamA} (${finaleB})`;        
-        
-        // Fissiamo il tetto esattamente al punteggio massimo tondo (es. 60)
-        const maxPunti = Math.max(finaleA, finaleB);
-        // Arrotondiamo per eccesso alla decina se vuoi che l'asse sia sempre pulito
-        const tettoAsseY = Math.ceil(maxPunti / 10) * 10; 
-
-        let tempiQuarti = {};
-        try { tempiQuarti = JSON.parse(dettagliGara.note || '{}'); } catch(e) {}
-
-        const trovaIndice = (t) => {
-            const i = datiGrafico.findIndex(d => d.tempo >= t);
-            return i !== -1 ? i : null;
-        };
-
-        const iQ2 = trovaIndice(tempiQuarti.Q2.inizio) || Math.floor(datiGrafico.length * 0.25);
-        const iQ3 = trovaIndice(tempiQuarti.Q3.inizio) || Math.floor(datiGrafico.length * 0.5);
-        const iQ4 = trovaIndice(tempiQuarti.Q4.inizio) || Math.floor(datiGrafico.length * 0.75);
-        const iFine = datiGrafico.length - 1;
-
-        const m1 = iQ2 / 2;
-        const m2 = iQ2 + (iQ3 - iQ2) / 2;
-        const m3 = iQ3 + (iQ4 - iQ3) / 2;
-        const m4 = iQ4 + (iFine - iQ4) / 2;
-
-        if (chartEvoluzione) chartEvoluzione.destroy();
-
-        const etichettaInArea = (id, x, testo) => ({
-            [id]: {
-                type: 'line',
-                xMin: x, xMax: x,
-                borderWidth: 0,
-                label: {
-                    display: true,
-                    content: testo,
-                    position: 'center',
-                    yValue: tettoAsseY,
-                    // Regola questo valore se con padding 0 le scritte spariscono
-                    yAdjust: -70, 
-                    backgroundColor: 'transparent',
-                    color: '#666',
-                    font: { size: 10, weight: 'bold' },
-                    z: 100
-                }
-            }
-        });
-
-        const separatore = (id, x) => ({
-            [id]: {
-                type: 'line',
-                xMin: x, xMax: x,
-                borderColor: '#999',
-                borderDash: [6, 4],
-                borderWidth: 2,
-                z: 1
-            }
-        });
-
-        chartEvoluzione = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: datiGrafico.map(d => d.tempo),
-                datasets: [
-                    { label: labelA, data: datiGrafico.map(d => d.puntiA), borderColor: '#dc3545', borderWidth: 2, fill: false, pointRadius: 1 },
-                    { label: labelB, data: datiGrafico.map(d => d.puntiB), borderColor: '#0056b3', borderWidth: 2, fill: false, pointRadius: 1 }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',      // Mostra entrambi i valori nel tooltip quando passi il mouse
-                    intersect: false
-                },
-                // Teniamo un minimo di padding top (es. 25) altrimenti 1Q, 2Q finiscono fuori dal canvas
-                layout: { padding: { top: 0, right: 30, left: 20, bottom: 10 } },
-                scales: {
-                    x: { 
-                      type: 'category', 
-                      clip: false,
-                      ticks: {
-                          autoSkip: true,
-                          maxTicksLimit: 10,
-                          callback: function(val, index) {
-                              // Prende l'etichetta originale (es. "12:34") 
-                              // e restituisce solo i primi 5 caratteri ("12:30")
-                              const label = this.getLabelForValue(val);
-                              return label.substring(0, 5); 
-                          }
-                      } 
-                    },
-                    y: { 
-                        beginAtZero: true, 
-                        max: tettoAsseY,
-                        ticks: {
-                            stepSize: 10 // Forza i tick a 0, 10, 20, 30, 40, 50, 60
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            font: { weight: 'bold' },
-                            generateLabels: (chart) => chart.data.datasets.map((ds, i) => ({
-                                text: ds.label, fillStyle: ds.borderColor, strokeStyle: ds.borderColor, fontColor: ds.borderColor, index: i
-                            }))
-                        }
-                    },
-                    annotation: {
-                        annotations: {
-                            ...separatore('s2', iQ2),
-                            ...separatore('s3', iQ3),
-                            ...separatore('s4', iQ4),
-                            ...separatore('sFine', iFine),
-                            ...etichettaInArea('l1', m1, '1Q'),
-                            ...etichettaInArea('l2', m2, '2Q'),
-                            ...etichettaInArea('l3', m3, '3Q'),
-                            ...etichettaInArea('l4', m4, '4Q')
-                        }
-                    }
-                }
-            }
-        });
-    }, 150);
-}
-
-function OLD1OKmostraGraficoPunteggio() {
-    const modal = document.getElementById('modalGraficoEvoluzione');
-    modal.style.display = 'flex';
-
-    setTimeout(() => {
-        const canvas = document.getElementById('canvasEvoluzione');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-
-        // Estrazione dati: mappiamo entrambi i punteggi basandoci sul tempo
-        let datiGrafico = fullMatchHistory.map(ev => ({
-            tempo: ev.timestampReale.replace("*", ""), 
-            puntiA: ev.punteggioA,
-            puntiB: ev.punteggioB
-        }));
-
-        // Punto di partenza 0-0
-        datiGrafico.unshift({ tempo: "00:00", puntiA: 0, puntiB: 0 });
-
-        // RECUPERO PUNTEGGIO FINALE  
-        const punteggioA = datiGrafico[datiGrafico.length - 1].puntiA;
-        const punteggioB = datiGrafico[datiGrafico.length - 1].puntiB;        
-        if (chartEvoluzione) chartEvoluzione.destroy();
-
-        const labelA = `Polismile A (${punteggioA})`;
-        const labelB = (teamA === "Polismile A") ? `${teamB} (${punteggioB})` : `${teamA} (${punteggioB})`;        
-        chartEvoluzione = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: datiGrafico.map(d => d.tempo),
-                datasets: [
-                    {
-                        label: labelA, // 'Polismile A',
-                        data: datiGrafico.map(d => d.puntiA),
-                        borderColor: '#dc3545',       // Rosso
-                        backgroundColor: 'transparent',
-                        borderWidth: 1.5,
-                        fill: false,
-                        tension: 0.2,
-                        pointRadius: 2,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#dc3545',
-                        pointBorderWidth: 1,
-                        // Questa proprietà può essere usata dai plugin per il colore del testo
-                        color: '#dc3545'                        
-                    },
-                    {
-                        label: labelB, // 'Avversaria',
-                        data: datiGrafico.map(d => d.puntiB),
-                        borderColor: '#0056b3',       // Blu
-                        backgroundColor: 'transparent',
-                        borderWidth: 1.5,
-                        fill: false,
-                        tension: 0.2,
-                        pointRadius: 2,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#0056b3',
-                        pointBorderWidth: 1,
-                        color: '#0056b3'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',      // Mostra entrambi i valori nel tooltip quando passi il mouse
-                    intersect: false
-                },
-                plugins: {
-                    legend: { 
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            boxWidth: 4,      // Pallino piccolissimo
-                            boxHeight: 4,     // Altezza del pallino
-                            font: { 
-                                size: 13, 
-                                weight: 'bold' // Grassetto per nome e punteggio
-                            },
-                            // CORREZIONE: Usiamo una funzione che mappa l'array dei colori
-                            generateLabels: (chart) => {
-                                const datasets = chart.data.datasets;
-                                return datasets.map((dataset, i) => ({
-                                    text: dataset.label,
-                                    fillStyle: dataset.borderColor, // Colore del pallino
-                                    strokeStyle: dataset.borderColor,
-                                    pointStyle: 'circle',
-                                    lineWidth: 0,
-                                    hidden: !chart.isDatasetVisible(i),
-                                    index: i,
-                                    // QUI IMPOSTIAMO IL COLORE DEL TESTO SPECIFICO
-                                    fontColor: dataset.borderColor 
-                                }));
-                            }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        padding: 10
-                    }
-                },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        grid: { color: '#f0f0f0' },
-                        ticks: { font: { size: 11 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 8,
-                            font: { size: 10 }
-                        }
-                    }
-                }
-            }
-        });
-    }, 150);
-}
-
 
 function chiudiGraficoEvoluzione() {
     document.getElementById('modalGraficoEvoluzione').style.display = 'none';
