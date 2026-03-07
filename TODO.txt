@@ -29,6 +29,7 @@
 //    - NICE TO HAVE: visualizzare il calendario delle partite in forma di calendario vero e proprio (Tipo Google Calendar con vista mensile)
 //    - NICE TO HAVE: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - ingrandire i font su tablet
+//    - aggiungere delle statistiche: partite Perse/Vinte, Punti Fatti/Subiti, Partite giocate/ancora da giocare.
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  DirettaVideo.html
@@ -67,7 +68,7 @@
 //   *  - BUG: quando esco dagli highlight riportare il punteggio al risultato finale se la partita è "Terminata", altrimenti compare 0-0
 //   *  - durante gli highlights il quarto mostrato deve essere quello relativo a quel momento della partita (adesso è sempre "Terminata")
 //   *  - anche il quintetto in campo deve essere quello del momento
-//   *  - su iphone, quando clico sui bottoni, zooma l'intera pagina
+//   *  - su iphone, quando clicco sui bottoni, zooma l'intera pagina
 //      - VERIFICARE: Highlights perchè non funziona quando c'e' un orainiziopartita > 1. 
 //      - FATTO: VERIFICARE. abilitare gli highlights per la partita Live
 //
@@ -77,9 +78,9 @@
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 //    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagine. provare a risolvere con un settimer
 //    - VERIFICARE Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante
-//  *  - BUG: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo (OK per squadra A)
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
+// *  - BUG: mostraGrafico va aggiustata nel caso di partita ancora Live perchè vengono visualizzati male i separatori dei quarti (non ancora giocati)
 //
 //    - SOSTITUIRE tutti i localStorage di singole variabili con localStorage di dettagliGara (che contiene tutto) 
 //
@@ -202,5 +203,6 @@
 //    - FATTO: rendere cliccabile il bottone del quarto e attivare il popup
 //    - FATTO: nel campo note vengono salvati solo Q1, Q2, Q3, Q4. non extraTime.
 //    - FATTO: se cambio quarto durante la partita, poi faccio back verso il calendario e poi riclicco sulla partita la variabile statoPartita assume il valore del precedente quarto (non rilegge da localStorate). 
+//    - FATTO: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo
 //
 // -----------------------------------------------------------------------------------
