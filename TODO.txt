@@ -14,6 +14,7 @@
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  Index.html
 //    - aggiungere bottone "Prossima partita" e badge "Convocazioni" rosso lampeggiante
+//    - cambiare il colore verde dell'interfaccia con un rosso Polismile ?
 //     
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  Roster.html
@@ -25,11 +26,22 @@
 //    - BUG: a volte nel google sheet "Statistiche" nella colonna Squadra viene scritto 'undefined' al posto di "Polismile A" e questo sballa le statistich
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
+//  Allenamenti:
+//    - mettere un pallone da basket che ruota al posto del manubrio che ruota
+//
+//  ------------------------------------------------------------------------------------------------------------------------------------------------
+//  maps.html
+//    -
+//
+//  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  Calendario.html
 //    - NICE TO HAVE: visualizzare il calendario delle partite in forma di calendario vero e proprio (Tipo Google Calendar con vista mensile)
 //    - NICE TO HAVE: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - ingrandire i font su tablet
-//    - aggiungere delle statistiche: partite Perse/Vinte, Punti Fatti/Subiti, Partite giocate/ancora da giocare.
+//    - "escludi terminate" mostra le partite anche se terminate, fino a mezzanotte di oggi
+//    - mettere un campo in più sul DB per indicare che la data potrebbe essere provvisoria e in attesa di conferma. (magari mettendo in rosso o lampeggiante la data sul badge)
+//    - FATTO: aggiornare subito il calendario prendendolo da Firebase se accessibile, altrimenti usare quello nella cache. se Admin il tasto "Aggiorna" legge tutte le partite dal google sheet e salva in Firebase cosi' sono già pronte per gli spettatori non Admin
+//    - fetchPartiteDalServer, aggiustare il remove("loading") se isadmin se c'è connessione lo rimuove subito e non dovrebbe.
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  DirettaVideo.html
@@ -50,16 +62,14 @@
 //      
 //    -------------------------------------------------------------------------------------
 //    - GESTIONE FALLI:
-//      - FATTO: VERIFICARE Falli su scoreboard per admin devono essere istantanei, per gli spettatori in funzione del tempo 
-//             (non vengono memorizzati nello sheet Partite. si trovano solo negli eventi)
 //      - aggiungere i falli accanto al punteggio hud (almeno in landscape). 
-//      - flashare la scoreboard quando cambiano i falli per la squadra B
 //      - BUG: se la partita è "Terminata" il numero dei falli visualizzati per le squadre è 0 
 //
 //    -------------------------------------------------------------------------------------
 //    - GESTIONE QUARTO:
 //   *  - Storicizzare il cambio di quarto
 //      - Memorizzare punteggi alla fine ciascun quarto. 
+//      - INVESTIGARE ALLA PROSSIMA LIVE: quando salva il popup forse non preserva i primi due campi del json
 //
 //    -------------------------------------------------------------------------------------
 //    - HIGHLIGHTS:
@@ -70,10 +80,10 @@
 //   *  - anche il quintetto in campo deve essere quello del momento
 //   *  - su iphone, quando clicco sui bottoni, zooma l'intera pagina
 //      - VERIFICARE: Highlights perchè non funziona quando c'e' un orainiziopartita > 1. 
-//      - FATTO: VERIFICARE. abilitare gli highlights per la partita Live
 //
 //    -------------------------------------------------------------------------------------
 //    - Hamburgher menu: Per Admin mettere Highlights
+//    - nel grafico della progressione punti inserire il punteggio alla fine di ciascun quarto
 // *  - perchè come spettatore carica due volte i dati partita? basterebbe solo da Firebase se fosse sempre allineato
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 //    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagine. provare a risolvere con un settimer
@@ -91,9 +101,6 @@
 //
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
-//  maps.html
-//    - nel popup associato al POI inserire l'ora di inizio partita (almeno per la prossima partita)
-//
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  Classifiche (nuova pagina):
 //    - NICE TO HAVE: nuova pagina con le classifiche del campionato con i punti di ciascuna squadra preso da ItaliaCanestro
@@ -117,6 +124,7 @@
 //    - 
 //  Maps.html
 //    - FATTO: far lampeggiare il POI della prossima partita
+//    - FATTO: nel popup associato al POI inserire l'ora di inizio partita (almeno per la prossima partita)
 //
 //  Roster.html
 //    - FATTO: mostrare tabella con "#, Nome, Punti Totali, Punti da 1, da 2, da 3, Media per Partita, #Partite"
@@ -204,5 +212,9 @@
 //    - FATTO: nel campo note vengono salvati solo Q1, Q2, Q3, Q4. non extraTime.
 //    - FATTO: se cambio quarto durante la partita, poi faccio back verso il calendario e poi riclicco sulla partita la variabile statoPartita assume il valore del precedente quarto (non rilegge da localStorate). 
 //    - FATTO: punteggi di dettaglio per lo spettatore si aggiorna istantaneamente e non in funzione del tempo
+//    - FATTO: ultima partita Nole, ha memorizzato male l'ora di Q4 Terminata sono uguali
+//    - FATTO:aggiungere delle statistiche: partite Perse/Vinte, Punti Fatti/Subiti, Partite giocate/ancora da giocare.
+//    - FATTO: VERIFICARE Falli su scoreboard per admin devono essere istantanei, per gli spettatori in funzione del tempo 
+//    - FATTO: VERIFICARE. abilitare gli highlights per la partita Live
 //
 // -----------------------------------------------------------------------------------

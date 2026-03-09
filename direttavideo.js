@@ -123,7 +123,7 @@ function registerToFirebaseEvents() {
     updateDatiPartita("match", struct)
 
     // se è cambiato il videoURL (ad es. perchè prima era vuoto e adesso è definito), fai il reload dell'interfaccia
-    if (videoURLChanged)
+    if (videoURLChanged && matchIsLive)
     {
       location.reload();
     }
@@ -724,6 +724,18 @@ function modifyHistory() {
   punteggioA = runningScoreA;
   punteggioB = runningScoreB;
 
+  if (matchIsLive) {
+    // aggiorna anche i dettagliGara cosi' su Firebase finisce il risultato in realtime (e lo possiamo usare nel Calendario)
+    if (teamA === "Polismile A") {
+      dettagliGara.punteggioA = punteggioA;
+      dettagliGara.punteggioB = punteggioB;
+    }
+    else {
+      dettagliGara.punteggioA = punteggioB;
+      dettagliGara.punteggioB = punteggioA;
+    }
+  }
+
   console.log("History rigenerata. Eventi totali:", fullMatchHistory.length);
   highlightsAvailable = fullMatchHistory.length > 0;
 }
@@ -906,6 +918,9 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
         throw new Error("Partita non trovata");
       }
 
+      // allinea il db Firebase cosi' gli spettatori ce l'hanno sempre aggiornato
+      saveToFirebaseHistory('partite/' + partita.matchId, partita); 
+
       // --- ESTRAZIONE E SALVATAGGIO DATI ---
       // Ripetiamo la logica di pulizia e salvataggio che avevi nel click
 
@@ -1076,7 +1091,7 @@ function chiudiPopupHud() {
 
   // 4. Salvataggio
   if (isAdmin) {
-    saveToFirebaseHistory('partite/', dettagliGara); 
+    saveToFirebaseHistory('partite/' + matchId, dettagliGara); 
     saveToServerMatchData();
   }
 }
@@ -1098,7 +1113,7 @@ function OLDchiudiPopupHud() {
   dettagliGara.note = note;
 
   if (isAdmin) {
-    saveToFirebaseHistory('partite/', dettagliGara); 
+    saveToFirebaseHistory('partite/' + matchId, dettagliGara); 
 
     saveToServerMatchData(); // La tua funzione esistente per salvare su Google Sheets
   }
@@ -1545,11 +1560,16 @@ function aggiornaFalliSquadra() {
 
   // 2. Recuperiamo gli orari di inizio dei quarti dalle note
   let config;
-  try {
-    config = (typeof dettagliGara.note === 'string') ? JSON.parse(dettagliGara.note) : dettagliGara.note;
-  } catch (e) {
-    console.error("Errore nel parsing delle note:", e);
-    return;
+  // Verifichiamo che note esista e non sia una stringa vuota prima di procedere
+  if (!dettagliGara.note || dettagliGara.note === "") {
+      config = {}; // O un valore di default appropriato
+  } else {
+      try {
+          config = (typeof dettagliGara.note === 'string') ? JSON.parse(dettagliGara.note) : dettagliGara.note;
+      } catch (e) {
+          console.error("Errore nel parsing delle note:", e);
+          return;
+      }
   }
 
   // 3. Determiniamo l'inizio del quarto attuale
@@ -1586,12 +1606,14 @@ function aggiornaFalliSquadra() {
   const elA = document.getElementById("team-fouls-A");
   const elB = document.getElementById("team-fouls-B");
   
-  if (teamA === "Polismile A") {
-    if (elA) elA.textContent = totalFoulsA;
-    if (elB) elB.textContent = totalFoulsB;
-  } else {
-    if (elA) elA.textContent = totalFoulsB;
-    if (elB) elB.textContent = totalFoulsA;
+  if (quartoAttuale !== "") {
+    if (teamA === "Polismile A") {
+      if (elA) elA.textContent = totalFoulsA;
+      if (elB) elB.textContent = totalFoulsB;
+    } else {
+      if (elA) elA.textContent = totalFoulsB;
+      if (elB) elB.textContent = totalFoulsA;
+    }
   }
 }
 
@@ -1653,6 +1675,7 @@ function updateScoreboard(matchIsLive) {
   const scoreTextHUD = document.getElementById("score-text");
   const detailsAEl = document.getElementById("team-details-A");
   const detailsBEl = document.getElementById("team-details-B");
+  const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
 
   // --- 1. Calcolo Dettagli Squadra A ---
   let totalA = { 0: 0, 1: 0, 2: 0, 3: 0 };
@@ -1667,10 +1690,25 @@ function updateScoreboard(matchIsLive) {
     });
   } else {
     // Spettatori vedono i dati calcolati nel tempo (puntiSquadraA_N0, ecc.)
-    totalA[0] = puntiSquadraA_N0;
-    totalA[1] = puntiSquadraA_N1;
-    totalA[2] = puntiSquadraA_N2;
-    totalA[3] = puntiSquadraA_N3;
+    if (matchIsLive) {
+      totalA[0] = puntiSquadraA_N0;
+      totalA[1] = puntiSquadraA_N1;
+      totalA[2] = puntiSquadraA_N2;
+      totalA[3] = puntiSquadraA_N3;
+    }
+    else
+    {
+      // se la partita è terminata ricostruiamo i dettagli a partire da fullMatchHistory
+      const eventiA = fullMatchHistory.filter(ev => {
+        const isMyTeam = ev.squadra === "Polismile A";
+        return isMyTeam && ev.eventType === "punto" && (ev.secondiReali <= secondiCorrentiVideo || !matchIsLive); // l'ultimo && è inutile
+      });
+      eventiA.forEach(ev => {
+        const p = parseInt(ev.puntiRealizzati) || 0;
+        if (totalA.hasOwnProperty(p)) totalA[p]++;
+      });
+
+    }
   }
 
   // --- 2. Calcolo Dettagli Squadra B (Nel Tempo) ---
@@ -1684,10 +1722,9 @@ function updateScoreboard(matchIsLive) {
     totalB[3] = contatoriB[3] || 0;
   } else {
     // Spettatori: filtriamo gli eventi della Squadra B fino al secondo corrente
-    const secondiCorrentiVideo = hmsToSeconds(orarioVisualizzatoFormattato);
     const eventiB = fullMatchHistory.filter(ev => {
       const isSquadraB = (ev.idGiocatore === "Squadra B" || ev.idGiocatore === "" || ev.idGiocatore === null || ev.squadra !== "Polismile A");
-      return isSquadraB && ev.eventType === "punto" && ev.secondiReali <= secondiCorrentiVideo;
+      return isSquadraB && ev.eventType === "punto" && (ev.secondiReali <= secondiCorrentiVideo || !matchIsLive);
     });
 
     eventiB.forEach(ev => {
@@ -2713,7 +2750,7 @@ function modificaOraInizioDiretta(delta) {
 
   // Se sei Admin, potresti voler inviare questo aggiornamento al server/DB
   if (isAdmin) {
-    saveToFirebaseHistory('partite/', dettagliGara); 
+    saveToFirebaseHistory('partite/' + matchId, dettagliGara); 
 
     saveToServerMatchData(); // La tua funzione esistente per salvare su Google Sheets
   }
@@ -2942,7 +2979,7 @@ function salvaStatoLive(dati) {
   dettagliGara.note = JSON.stringify(nuovaConfig);
   // ------------------------------------------------------------
 
-  saveToFirebaseHistory('partite/', dettagliGara); 
+  saveToFirebaseHistory('partite/' + matchId, dettagliGara); 
   saveToServerMatchData();
 }
 
@@ -3006,7 +3043,7 @@ function OLD_OK_salvaStatoLive(dati) {
   dettagliGara.note = JSON.stringify(nuovaConfig);
   // ------------------------------------------------------------
 
-  saveToFirebaseHistory('partite/', dettagliGara); 
+  saveToFirebaseHistory('partite/' + matchId, dettagliGara); 
   saveToServerMatchData();
 }
 

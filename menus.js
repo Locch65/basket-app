@@ -3,6 +3,815 @@ function gestisciGoLive() {
     overlay.id = 'goLivePopup';
     overlay.className = 'popup';
 
+    // 1. CARICAMENTO DATI ESISTENTI (Popola l'oggetto dai dati salvati)
+    let tempiGara = {};
+    try { 
+        tempiGara = (typeof dettagliGara.note === 'string') 
+            ? JSON.parse(dettagliGara.note) 
+            : (dettagliGara.note || {});
+    } catch(e) { tempiGara = {}; }
+
+    const fasi = [
+        { id: 'I0', label: 'Intervallo Iniziale (Go Live)', tipo: 'int' },
+        { id: 'Q1', label: 'QUARTO 1', tipo: 'q' },
+        { id: 'I1', label: 'Intervallo 1', tipo: 'int' },
+        { id: 'Q2', label: 'QUARTO 2', tipo: 'q' },
+        { id: 'I2', label: 'Intervallo 2', tipo: 'int' },
+        { id: 'Q3', label: 'QUARTO 3', tipo: 'q' },
+        { id: 'I3', label: 'Intervallo 3', tipo: 'int' },
+        { id: 'Q4', label: 'QUARTO 4', tipo: 'q' },
+        { id: 'I4', label: 'Intervallo 4', tipo: 'int' },
+        { id: 'OT1', label: 'Overtime 1', tipo: 'ot' },
+        { id: 'I5', label: 'Intervallo 5', tipo: 'int' },
+        { id: 'OT2', label: 'Overtime 2', tipo: 'ot' },
+        { id: 'Terminata', label: 'TERMINATA', tipo: 'end' }
+    ];
+
+    // Funzione per gestire l'abilitazione dei bottoni e del checkbox
+    const aggiornaStatoBottoni = (container) => {
+        const buttons = container.querySelectorAll('.btn-fase');
+        const checkHighlights = container.querySelector('#checkHighlights');
+        const labelHighlights = container.querySelector('#labelHighlights');
+        
+        buttons.forEach((btn, i) => {
+            const idFase = btn.dataset.fase;
+            
+            // Regole di sblocco:
+            // 1. Il primo tasto è sempre attivo.
+            // 2. Un tasto è attivo se quello precedente è stato "iniziato" (ha un orario).
+            // 3. "Terminata" è sempre cliccabile se almeno il Quarto 4 è stato iniziato.
+            
+            const fasePrecedenteId = i > 0 ? fasi[i-1].id : null;
+            
+            // Un tasto è cliccabile se quello precedente è stato iniziato
+            const fasePrecedenteIniziata = fasePrecedenteId 
+                ? (tempiGara[fasePrecedenteId]?.inizio && tempiGara[fasePrecedenteId]?.inizio !== "--:--") 
+                : true;
+
+            if (i === 0 || fasePrecedenteIniziata) {
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            } else {
+                // Sblocca TERMINATA se Q4 è iniziato
+                const q4Iniziato = tempiGara['Q4']?.inizio && tempiGara['Q4']?.inizio !== "--:--";
+                if (idFase === "Terminata" && q4Iniziato) {
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.4";
+                }
+            }
+        });
+
+        // Abilita highlights solo se siamo in stato "Terminata"
+        const btnTerminata = container.querySelector('.btn-fase[data-fase="Terminata"]');
+        if (btnTerminata && btnTerminata.classList.contains('active')) {
+            checkHighlights.disabled = false;
+            labelHighlights.style.opacity = "1";
+        } else {
+            checkHighlights.disabled = true;
+            labelHighlights.style.opacity = "0.4";
+        }
+    };
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.cssText = 'max-width: 380px; max-height: 90vh; overflow-y: auto; padding: 20px;';
+
+    // Generazione HTML con popolamento dinamico dai dati esistenti
+    let htmlFasi = fasi.map(fase => {
+        // Legge i valori esistenti da tempiGara, altrimenti mette i trattini
+        const orari = tempiGara[fase.id] || { inizio: '--:--', fine: '--:--' };
+        
+        const isSmall = (fase.tipo === 'int' || fase.tipo === 'ot');
+        const padding = isSmall ? '8px 10px' : '12px'; 
+        const fontSize = isSmall ? '0.9rem' : '1.1rem';
+        
+        let bgColor = (fase.tipo === 'int') ? '#f8f9fa' : 'white';
+        let borderColor = (fase.tipo === 'int') ? '#bdc3c7' : '#3498db';
+        let textColor = (fase.tipo === 'int') ? '#7f8c8d' : '#3498db';
+
+        return `
+            <div class="fase-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <button class="btn-fase" data-fase="${fase.id}" data-tipo="${fase.tipo}"
+                    style="flex: 1; text-align: center; padding: ${padding}; font-size: ${fontSize}; 
+                           border: 2px solid ${borderColor}; border-radius: 8px; background: ${bgColor}; 
+                           color: ${textColor}; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+                    ${fase.label}
+                </button>
+                <div class="fase-times" style="display: flex; flex-direction: column; font-family: monospace; font-size: 1rem; min-width: 45px; color: #666; line-height: 1.1; text-align: center;">
+                    <span id="start-${fase.id}">${orari.inizio}</span>
+                    ${fase.tipo !== 'end' ? `<span id="end-${fase.id}" style="font-size: 0.9rem; color: #999;">${orari.fine}</span>` : ''}
+                </div>
+            </div>`;
+    }).join('');
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 12px; text-align:center; font-size: 1.4rem;">Cronologia Partita</h2>
+        <div id="fasiContainer" style="margin-bottom: 10px;">${htmlFasi}</div>
+        
+        <div id="labelHighlights" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; opacity: 0.4; transition: opacity 0.3s;">
+            <input type="checkbox" id="checkHighlights" disabled style="transform: scale(1.3); cursor: pointer;">
+            <label for="checkHighlights" style="font-weight: bold; color: #333; cursor: pointer;">Abilita highlights</label>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 20px; padding-bottom: 10px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+        <style>
+            .btn-fase.active[data-tipo="q"], .btn-fase.active[data-tipo="ot"] { background-color: #dc3545 !important; color: white !important; border-color: #a71d2a !important; }
+            .btn-fase.active[data-tipo="int"] { background-color: #6c757d !important; color: white !important; border-color: #495057 !important; }
+            .btn-fase.active[data-tipo="end"] { background-color: #0056b3 !important; color: white !important; border-color: #004085 !important; }
+            .btn-fase:disabled { filter: grayscale(1); cursor: not-allowed; }
+        </style>`;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniFase = content.querySelectorAll('.btn-fase');
+    const checkHighlights = content.querySelector('#checkHighlights');
+    let faseSelezionata = statoPartita || "I0";
+    
+    // Ripristina lo stato salvato del checkbox
+    if (tempiGara.highlights === true) checkHighlights.checked = true;
+
+    // Evidenzia il bottone corrispondente allo stato attuale
+    bottoniFase.forEach(btn => { if (btn.dataset.fase === faseSelezionata) btn.classList.add('active'); });
+    
+    // Applica le disabilitazioni iniziali basate sui tempi caricati
+    aggiornaStatoBottoni(content);
+
+    bottoniFase.forEach((btn, index) => {
+        btn.onclick = () => {
+            if (btn.disabled) return;
+            const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const idFaseAttuale = btn.dataset.fase;
+
+            bottoniFase.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            faseSelezionata = idFaseAttuale;
+
+            document.getElementById(`start-${idFaseAttuale}`).innerText = oraAttuale;
+            if (!tempiGara[idFaseAttuale]) tempiGara[idFaseAttuale] = {};
+            tempiGara[idFaseAttuale].inizio = oraAttuale;
+
+            if (idFaseAttuale === "Terminata") {
+                let ultimaFaseValidaId = null;
+                for (let i = index - 1; i >= 0; i--) {
+                    const f = fasi[i];
+                    if (tempiGara[f.id]?.inizio && tempiGara[f.id]?.inizio !== "--:--") {
+                        ultimaFaseValidaId = f.id;
+                        break; 
+                    }
+                }
+                if (ultimaFaseValidaId) {
+                    const spanEndUltimo = document.getElementById(`end-${ultimaFaseValidaId}`);
+                    if (spanEndUltimo) spanEndUltimo.innerText = oraAttuale;
+                    tempiGara[ultimaFaseValidaId].fine = oraAttuale;
+
+                    let iniziaPulizia = false;
+                    fasi.forEach(f => {
+                        if (iniziaPulizia && f.id !== "Terminata") {
+                            const sEl = document.getElementById(`start-${f.id}`);
+                            const eEl = document.getElementById(`end-${f.id}`);
+                            if (sEl) sEl.innerText = "--:--";
+                            if (eEl) eEl.innerText = "--:--";
+                            tempiGara[f.id] = { inizio: "--:--", fine: "--:--" };
+                        }
+                        if (f.id === ultimaFaseValidaId) iniziaPulizia = true;
+                    });
+                }
+            } else {
+                if (index > 0) {
+                    const idPrev = fasi[index - 1].id;
+                    const spanEndPrev = document.getElementById(`end-${idPrev}`);
+                    if (spanEndPrev && (!tempiGara[idPrev].fine || tempiGara[idPrev].fine === "--:--")) {
+                        spanEndPrev.innerText = oraAttuale;
+                        tempiGara[idPrev].fine = oraAttuale;
+                    }
+                }
+            }
+            aggiornaStatoBottoni(content);
+        };
+    });
+
+    document.getElementById('liveCancelBtn').onclick = () => document.body.removeChild(overlay);
+
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const isTerminata = (faseSelezionata === "Terminata");
+        tempiGara.highlights = checkHighlights.checked;
+
+        const dati = {
+            goLive: !isTerminata,
+            quarto: faseSelezionata,
+            terminata: isTerminata,
+            noteTempi: JSON.stringify(tempiGara)
+        };
+
+        if (typeof salvaStatoLive === "function") {
+            salvaStatoLive(dati);
+            if (typeof renderPlayerListLive === "function") renderPlayerListLive();
+            if (typeof updateScoreboard === "function") updateScoreboard(!isTerminata);
+        }
+        document.body.removeChild(overlay);
+    };
+}
+
+function OLD_OK5gestisciGoLive() {
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
+    // 1. CARICAMENTO DATI ESISTENTI
+    let tempiGara = {};
+    try { 
+        tempiGara = (typeof dettagliGara.note === 'string') 
+            ? JSON.parse(dettagliGara.note) 
+            : (dettagliGara.note || {});
+    } catch(e) { tempiGara = {}; }
+
+    const fasi = [
+        { id: 'I0', label: 'Intervallo Iniziale (Go Live)', tipo: 'int' },
+        { id: 'Q1', label: 'QUARTO 1', tipo: 'q' },
+        { id: 'I1', label: 'Intervallo 1', tipo: 'int' },
+        { id: 'Q2', label: 'QUARTO 2', tipo: 'q' },
+        { id: 'I2', label: 'Intervallo 2', tipo: 'int' },
+        { id: 'Q3', label: 'QUARTO 3', tipo: 'q' },
+        { id: 'I3', label: 'Intervallo 3', tipo: 'int' },
+        { id: 'Q4', label: 'QUARTO 4', tipo: 'q' },
+        { id: 'I4', label: 'Intervallo 4', tipo: 'int' },
+        { id: 'OT1', label: 'Overtime 1', tipo: 'ot' },
+        { id: 'I5', label: 'Intervallo 5', tipo: 'int' },
+        { id: 'OT2', label: 'Overtime 2', tipo: 'ot' },
+        { id: 'Terminata', label: 'TERMINATA', tipo: 'end' }
+    ];
+
+    // Funzione interna per gestire l'abilitazione dei bottoni in sequenza
+    const aggiornaStatoBottoni = (container) => {
+        const buttons = container.querySelectorAll('.btn-fase');
+        const checkHighlights = container.querySelector('#checkHighlights');
+        const labelHighlights = container.querySelector('#labelHighlights');
+        
+        buttons.forEach((btn, i) => {
+            const idFase = btn.dataset.fase;
+            
+            // Regole di sblocco:
+            // 1. Il primo tasto è sempre attivo.
+            // 2. Un tasto è attivo se quello precedente è stato "iniziato" (ha un orario).
+            // 3. "Terminata" è sempre cliccabile se almeno il Quarto 4 è stato iniziato.
+            
+            const fasePrecedenteId = i > 0 ? fasi[i-1].id : null;
+            const fasePrecedenteIniziata = fasePrecedenteId ? (tempiGara[fasePrecedenteId]?.inizio && tempiGara[fasePrecedenteId]?.inizio !== "--:--") : true;
+
+            if (i === 0 || fasePrecedenteIniziata) {
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.style.cursor = "pointer";
+            } else {
+                // Eccezione per il tasto TERMINATA: sbloccabile dal Q4 in poi
+                const q4Iniziato = tempiGara['Q4']?.inizio && tempiGara['Q4']?.inizio !== "--:--";
+                if (idFase === "Terminata" && q4Iniziato) {
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.4";
+                    btn.style.cursor = "not-allowed";
+                }
+            }
+        });
+
+        const isTerminataActive = container.querySelector('.btn-fase[data-fase="Terminata"]').classList.contains('active');
+        if (isTerminataActive) {
+            checkHighlights.disabled = false;
+            labelHighlights.style.opacity = "1";
+        } else {
+            checkHighlights.disabled = true;
+            labelHighlights.style.opacity = "0.4";
+        }
+    };
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.cssText = 'max-width: 380px; max-height: 90vh; overflow-y: auto; padding: 20px;';
+
+    let htmlFasi = fasi.map(fase => {
+        const orari = tempiGara[fase.id] || { inizio: '--:--', fine: '--:--' };
+        const isSmall = (fase.tipo === 'int' || fase.tipo === 'ot');
+        const padding = isSmall ? '8px 10px' : '12px'; 
+        const fontSize = isSmall ? '0.9rem' : '1.1rem';
+        
+        let bgColor = (fase.tipo === 'int') ? '#f8f9fa' : 'white';
+        let borderColor = (fase.tipo === 'int') ? '#bdc3c7' : '#3498db';
+        let textColor = (fase.tipo === 'int') ? '#7f8c8d' : '#3498db';
+
+        return `
+            <div class="fase-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <button class="btn-fase" data-fase="${fase.id}" data-tipo="${fase.tipo}"
+                    style="flex: 1; text-align: center; padding: ${padding}; font-size: ${fontSize}; 
+                           border: 2px solid ${borderColor}; border-radius: 8px; background: ${bgColor}; 
+                           color: ${textColor}; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+                    ${fase.label}
+                </button>
+                <div class="fase-times" style="display: flex; flex-direction: column; font-family: monospace; font-size: 0.8rem; min-width: 45px; color: #666; line-height: 1.1; text-align: center;">
+                    <span id="start-${fase.id}">${orari.inizio}</span>
+                    ${fase.tipo !== 'end' ? `<span id="end-${fase.id}" style="font-size: 0.7rem; color: #999;">${orari.fine}</span>` : ''}
+                </div>
+            </div>`;
+    }).join('');
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 12px; text-align:center; font-size: 1.4rem;">Cronologia Partita</h2>
+        <div id="fasiContainer" style="margin-bottom: 10px;">${htmlFasi}</div>
+        
+        <div id="labelHighlights" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; opacity: 0.4; transition: opacity 0.3s;">
+            <input type="checkbox" id="checkHighlights" disabled style="transform: scale(1.3); cursor: pointer;">
+            <label for="checkHighlights" style="font-weight: bold; color: #333; cursor: pointer;">Abilita highlights</label>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 20px; padding-bottom: 10px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+        <style>
+            .btn-fase.active[data-tipo="q"], .btn-fase.active[data-tipo="ot"] { background-color: #dc3545 !important; color: white !important; border-color: #a71d2a !important; }
+            .btn-fase.active[data-tipo="int"] { background-color: #6c757d !important; color: white !important; border-color: #495057 !important; }
+            .btn-fase.active[data-tipo="end"] { background-color: #0056b3 !important; color: white !important; border-color: #004085 !important; }
+            .btn-fase:disabled { filter: grayscale(1); }
+        </style>`;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniFase = content.querySelectorAll('.btn-fase');
+    const checkHighlights = content.querySelector('#checkHighlights');
+    let faseSelezionata = statoPartita || "I0";
+    
+    // Pre-seleziona il checkbox se era già salvato come true
+    if (tempiGara.highlights === true) checkHighlights.checked = true;
+
+    bottoniFase.forEach(btn => { if (btn.dataset.fase === faseSelezionata) btn.classList.add('active'); });
+    aggiornaStatoBottoni(content);
+
+    bottoniFase.forEach((btn, index) => {
+        btn.onclick = () => {
+            if (btn.disabled) return;
+            const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const idFaseAttuale = btn.dataset.fase;
+
+            bottoniFase.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            faseSelezionata = idFaseAttuale;
+
+            // 1. Imposta inizio fase cliccata
+            document.getElementById(`start-${idFaseAttuale}`).innerText = oraAttuale;
+            if (!tempiGara[idFaseAttuale]) tempiGara[idFaseAttuale] = {};
+            tempiGara[idFaseAttuale].inizio = oraAttuale;
+
+            // 2. LOGICA SPECIALE: TERMINATA
+            if (idFaseAttuale === "Terminata") {
+                let ultimaFaseValidaId = null;
+                // Trova l'ultimo Quarto/OT effettivamente iniziato
+                for (let i = index - 1; i >= 0; i--) {
+                    const f = fasi[i];
+                    if (tempiGara[f.id]?.inizio && tempiGara[f.id]?.inizio !== "--:--") {
+                        ultimaFaseValidaId = f.id;
+                        break; 
+                    }
+                }
+                if (ultimaFaseValidaId) {
+                    // Chiudi l'ultimo quarto giocato
+                    const spanEndUltimo = document.getElementById(`end-${ultimaFaseValidaId}`);
+                    if (spanEndUltimo) spanEndUltimo.innerText = oraAttuale;
+                    tempiGara[ultimaFaseValidaId].fine = oraAttuale;
+
+                    // Pulizia automatica delle fasi saltate tra l'ultimo quarto e la fine
+                    let iniziaPulizia = false;
+                    fasi.forEach(f => {
+                        if (iniziaPulizia && f.id !== "Terminata") {
+                            const sEl = document.getElementById(`start-${f.id}`);
+                            const eEl = document.getElementById(`end-${f.id}`);
+                            if (sEl) sEl.innerText = "--:--";
+                            if (eEl) eEl.innerText = "--:--";
+                            tempiGara[f.id] = { inizio: "--:--", fine: "--:--" };
+                        }
+                        if (f.id === ultimaFaseValidaId) iniziaPulizia = true;
+                    });
+                }
+            } else {
+                // 3. LOGICA STANDARD: Chiudi la fase precedente
+                if (index > 0) {
+                    const idPrev = fasi[index - 1].id;
+                    const spanEndPrev = document.getElementById(`end-${idPrev}`);
+                    // Chiudi solo se non era già stata chiusa
+                    if (spanEndPrev && (!tempiGara[idPrev].fine || tempiGara[idPrev].fine === "--:--")) {
+                        spanEndPrev.innerText = oraAttuale;
+                        tempiGara[idPrev].fine = oraAttuale;
+                    }
+                }
+            }
+            
+            // Aggiorna la disponibilità dei tasti dopo ogni interazione
+            aggiornaStatoBottoni(content);
+        };
+    });
+
+    document.getElementById('liveCancelBtn').onclick = () => document.body.removeChild(overlay);
+
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const isTerminata = (faseSelezionata === "Terminata");
+        
+        // Salvataggio booleano esplicito true/false
+        tempiGara.highlights = checkHighlights.checked;
+
+        const dati = {
+            goLive: !isTerminata,
+            quarto: faseSelezionata,
+            terminata: isTerminata,
+            noteTempi: JSON.stringify(tempiGara)
+        };
+
+        if (typeof salvaStatoLive === "function") {
+            salvaStatoLive(dati);
+            if (typeof renderPlayerListLive === "function") renderPlayerListLive();
+            if (typeof updateScoreboard === "function") updateScoreboard(!isTerminata);
+        }
+        document.body.removeChild(overlay);
+    };
+}
+
+function OLD_OK4gestisciGoLive() {
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
+    // 1. CARICAMENTO DATI ESISTENTI
+    let tempiGara = {};
+    try { 
+        tempiGara = (typeof dettagliGara.note === 'string') 
+            ? JSON.parse(dettagliGara.note) 
+            : (dettagliGara.note || {});
+    } catch(e) { tempiGara = {}; }
+
+    const fasi = [
+        { id: 'I0', label: 'Intervallo Iniziale (Go Live)', tipo: 'int' },
+        { id: 'Q1', label: 'QUARTO 1', tipo: 'q' },
+        { id: 'I1', label: 'Intervallo 1', tipo: 'int' },
+        { id: 'Q2', label: 'QUARTO 2', tipo: 'q' },
+        { id: 'I2', label: 'Intervallo 2', tipo: 'int' },
+        { id: 'Q3', label: 'QUARTO 3', tipo: 'q' },
+        { id: 'I3', label: 'Intervallo 3', tipo: 'int' },
+        { id: 'Q4', label: 'QUARTO 4', tipo: 'q' },
+        { id: 'I4', label: 'Intervallo 4', tipo: 'int' },
+        { id: 'OT1', label: 'Overtime 1', tipo: 'ot' },
+        { id: 'I5', label: 'Intervallo 5', tipo: 'int' },
+        { id: 'OT2', label: 'Overtime 2', tipo: 'ot' },
+        { id: 'Terminata', label: 'TERMINATA', tipo: 'end' }
+    ];
+
+    // Funzione interna per gestire l'abilitazione dei bottoni in sequenza
+    const aggiornaStatoBottoni = (container) => {
+        const buttons = container.querySelectorAll('.btn-fase');
+        buttons.forEach((btn, i) => {
+            const idFase = btn.dataset.fase;
+            
+            // Regole di sblocco:
+            // 1. Il primo tasto è sempre attivo.
+            // 2. Un tasto è attivo se quello precedente è stato "iniziato" (ha un orario).
+            // 3. "Terminata" è sempre cliccabile se almeno il Quarto 4 è stato iniziato.
+            
+            const fasePrecedenteId = i > 0 ? fasi[i-1].id : null;
+            const fasePrecedenteIniziata = fasePrecedenteId ? (tempiGara[fasePrecedenteId]?.inizio && tempiGara[fasePrecedenteId]?.inizio !== "--:--") : true;
+
+            if (i === 0 || fasePrecedenteIniziata) {
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.style.cursor = "pointer";
+            } else {
+                // Eccezione per il tasto TERMINATA: sbloccabile dal Q4 in poi
+                const q4Iniziato = tempiGara['Q4']?.inizio && tempiGara['Q4']?.inizio !== "--:--";
+                if (idFase === "Terminata" && q4Iniziato) {
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.cursor = "pointer";
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.4";
+                    btn.style.cursor = "not-allowed";
+                }
+            }
+        });
+    };
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.cssText = 'max-width: 380px; max-height: 90vh; overflow-y: auto;';
+
+    let htmlFasi = fasi.map(fase => {
+        const orari = tempiGara[fase.id] || { inizio: '--:--', fine: '--:--' };
+        const isSmall = (fase.tipo === 'int' || fase.tipo === 'ot');
+        const padding = isSmall ? '8px 10px' : '12px'; 
+        const fontSize = isSmall ? '0.9rem' : '1.1rem';
+        
+        let bgColor = (fase.tipo === 'int') ? '#f8f9fa' : 'white';
+        let borderColor = (fase.tipo === 'int') ? '#bdc3c7' : '#3498db';
+        let textColor = (fase.tipo === 'int') ? '#7f8c8d' : '#3498db';
+
+        return `
+            <div class="fase-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <button class="btn-fase" data-fase="${fase.id}" data-tipo="${fase.tipo}"
+                    style="flex: 1; text-align: center; padding: ${padding}; font-size: ${fontSize}; 
+                           border: 2px solid ${borderColor}; border-radius: 8px; background: ${bgColor}; 
+                           color: ${textColor}; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+                    ${fase.label}
+                </button>
+                <div class="fase-times" style="display: flex; flex-direction: column; font-family: monospace; font-size: 0.8rem; min-width: 45px; color: #666; line-height: 1.1; text-align: center;">
+                    <span id="start-${fase.id}">${orari.inizio}</span>
+                    ${fase.tipo !== 'end' ? `<span id="end-${fase.id}" style="font-size: 0.7rem; color: #999;">${orari.fine}</span>` : ''}
+                </div>
+            </div>`;
+    }).join('');
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 12px; text-align:center; font-size: 1.4rem;">Cronologia Partita</h2>
+        <div id="fasiContainer" style="margin-bottom: 15px;">${htmlFasi}</div>
+        <div style="display: flex; justify-content: center; gap: 20px; padding-bottom: 10px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+        <style>
+            .btn-fase.active[data-tipo="q"], .btn-fase.active[data-tipo="ot"] { background-color: #dc3545 !important; color: white !important; border-color: #a71d2a !important; }
+            .btn-fase.active[data-tipo="int"] { background-color: #6c757d !important; color: white !important; border-color: #495057 !important; }
+            .btn-fase.active[data-tipo="end"] { background-color: #0056b3 !important; color: white !important; border-color: #004085 !important; }
+            .btn-fase:disabled { filter: grayscale(1); }
+        </style>`;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniFase = content.querySelectorAll('.btn-fase');
+    let faseSelezionata = statoPartita || "I0";
+    
+    // Inizializzazione: evidenzia fase attuale e applica blocchi sequenza
+    bottoniFase.forEach(btn => { if (btn.dataset.fase === faseSelezionata) btn.classList.add('active'); });
+    aggiornaStatoBottoni(content);
+
+    bottoniFase.forEach((btn, index) => {
+        btn.onclick = () => {
+            if (btn.disabled) return;
+
+            const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const idFaseAttuale = btn.dataset.fase;
+
+            bottoniFase.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            faseSelezionata = idFaseAttuale;
+
+            // 1. Imposta inizio fase cliccata
+            document.getElementById(`start-${idFaseAttuale}`).innerText = oraAttuale;
+            if (!tempiGara[idFaseAttuale]) tempiGara[idFaseAttuale] = {};
+            tempiGara[idFaseAttuale].inizio = oraAttuale;
+
+            // 2. LOGICA SPECIALE: TERMINATA
+            if (idFaseAttuale === "Terminata") {
+                let ultimaFaseValidaId = null;
+                // Trova l'ultimo Quarto/OT effettivamente iniziato
+                for (let i = index - 1; i >= 0; i--) {
+                    const f = fasi[i];
+                    if (tempiGara[f.id]?.inizio && tempiGara[f.id]?.inizio !== "--:--") {
+                        ultimaFaseValidaId = f.id;
+                        break; 
+                    }
+                }
+
+                if (ultimaFaseValidaId) {
+                    // Chiudi l'ultimo quarto giocato
+                    const spanEndUltimo = document.getElementById(`end-${ultimaFaseValidaId}`);
+                    if (spanEndUltimo) spanEndUltimo.innerText = oraAttuale;
+                    tempiGara[ultimaFaseValidaId].fine = oraAttuale;
+
+                    // Pulizia automatica delle fasi saltate tra l'ultimo quarto e la fine
+                    let iniziaPulizia = false;
+                    fasi.forEach(f => {
+                        if (iniziaPulizia && f.id !== "Terminata") {
+                            const sEl = document.getElementById(`start-${f.id}`);
+                            const eEl = document.getElementById(`end-${f.id}`);
+                            if (sEl) sEl.innerText = "--:--";
+                            if (eEl) eEl.innerText = "--:--";
+                            tempiGara[f.id] = { inizio: "--:--", fine: "--:--" };
+                        }
+                        if (f.id === ultimaFaseValidaId) iniziaPulizia = true;
+                    });
+                }
+            } else {
+                // 3. LOGICA STANDARD: Chiudi la fase precedente
+                if (index > 0) {
+                    const idPrev = fasi[index - 1].id;
+                    const spanEndPrev = document.getElementById(`end-${idPrev}`);
+                    // Chiudi solo se non era già stata chiusa
+                    if (spanEndPrev && (!tempiGara[idPrev].fine || tempiGara[idPrev].fine === "--:--")) {
+                        spanEndPrev.innerText = oraAttuale;
+                        if (!tempiGara[idPrev]) tempiGara[idPrev] = {};
+                        tempiGara[idPrev].fine = oraAttuale;
+                    }
+                }
+            }
+            
+            // Aggiorna la disponibilità dei tasti dopo ogni interazione
+            aggiornaStatoBottoni(content);
+        };
+    });
+
+    document.getElementById('liveCancelBtn').onclick = () => document.body.removeChild(overlay);
+
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const isTerminata = (faseSelezionata === "Terminata");
+        const dati = {
+            goLive: !isTerminata,
+            quarto: faseSelezionata,
+            terminata: isTerminata,
+            noteTempi: JSON.stringify(tempiGara)
+        };
+
+        if (typeof salvaStatoLive === "function") {
+            salvaStatoLive(dati);
+            if (typeof renderPlayerListLive === "function") renderPlayerListLive();
+            if (typeof updateScoreboard === "function") updateScoreboard(!isTerminata);
+        }
+        document.body.removeChild(overlay);
+    };
+}
+
+function OLD_OK3gestisciGoLive() {
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
+    let tempiGara = {};
+    try { 
+        tempiGara = (typeof dettagliGara.note === 'string') 
+            ? JSON.parse(dettagliGara.note) 
+            : (dettagliGara.note || {});
+    } catch(e) { tempiGara = {}; }
+
+    const fasi = [
+        { id: 'I0', label: 'Intervallo Iniziale (Go Live)', tipo: 'int' },
+        { id: 'Q1', label: 'QUARTO 1', tipo: 'q' },
+        { id: 'I1', label: 'Intervallo 1', tipo: 'int' },
+        { id: 'Q2', label: 'QUARTO 2', tipo: 'q' },
+        { id: 'I2', label: 'Intervallo 2', tipo: 'int' },
+        { id: 'Q3', label: 'QUARTO 3', tipo: 'q' },
+        { id: 'I3', label: 'Intervallo 3', tipo: 'int' },
+        { id: 'Q4', label: 'QUARTO 4', tipo: 'q' },
+        { id: 'I4', label: 'Intervallo 4', tipo: 'int' },
+        { id: 'OT1', label: 'Overtime 1', tipo: 'ot' },
+        { id: 'I5', label: 'Intervallo 5', tipo: 'int' },
+        { id: 'OT2', label: 'Overtime 2', tipo: 'ot' },
+        { id: 'Terminata', label: 'TERMINATA', tipo: 'end' }
+    ];
+
+    const content = document.createElement('div');
+    content.className = 'popup-content';
+    content.style.cssText = 'max-width: 380px; max-height: 90vh; overflow-y: auto;';
+
+    let htmlFasi = fasi.map(fase => {
+        const orari = tempiGara[fase.id] || { inizio: '--:--', fine: '--:--' };
+        const isSmall = (fase.tipo === 'int' || fase.tipo === 'ot');
+        const padding = isSmall ? '8px 10px' : '12px'; 
+        const fontSize = isSmall ? '0.9rem' : '1.1rem';
+        
+        let bgColor = (fase.tipo === 'int') ? '#f8f9fa' : 'white';
+        let borderColor = (fase.tipo === 'int') ? '#bdc3c7' : '#3498db';
+        let textColor = (fase.tipo === 'int') ? '#7f8c8d' : '#3498db';
+
+        return `
+            <div class="fase-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <button class="btn-fase" data-fase="${fase.id}" data-tipo="${fase.tipo}"
+                    style="flex: 1; text-align: center; padding: ${padding}; font-size: ${fontSize}; 
+                           border: 2px solid ${borderColor}; border-radius: 8px; background: ${bgColor}; 
+                           color: ${textColor}; font-weight: bold; cursor: pointer; text-transform: uppercase;">
+                    ${fase.label}
+                </button>
+                <div class="fase-times" style="display: flex; flex-direction: column; font-family: monospace; font-size: 0.8rem; min-width: 45px; color: #666; line-height: 1.1; text-align: center;">
+                    <span id="start-${fase.id}">${orari.inizio}</span>
+                    ${fase.tipo !== 'end' ? `<span id="end-${fase.id}" style="font-size: 0.7rem; color: #999;">${orari.fine}</span>` : ''}
+                </div>
+            </div>`;
+    }).join('');
+
+    content.innerHTML = `
+        <h2 style="margin-bottom: 12px; text-align:center; font-size: 1.4rem;">Cronologia Partita</h2>
+        <div id="fasiContainer" style="margin-bottom: 15px;">${htmlFasi}</div>
+        <div style="display: flex; justify-content: center; gap: 20px; padding-bottom: 10px;">
+            <button id="liveSaveBtn" class="convocazioniPopup-confirmBtn">Salva</button>
+            <button id="liveCancelBtn" class="convocazioniPopup-closeBtn">Annulla</button>
+        </div>
+        <style>
+            .btn-fase.active[data-tipo="q"], .btn-fase.active[data-tipo="ot"] { background-color: #dc3545 !important; color: white !important; border-color: #a71d2a !important; }
+            .btn-fase.active[data-tipo="int"] { background-color: #6c757d !important; color: white !important; border-color: #495057 !important; }
+            .btn-fase.active[data-tipo="end"] { background-color: #0056b3 !important; color: white !important; border-color: #004085 !important; }
+        </style>`;
+
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+
+    const bottoniFase = content.querySelectorAll('.btn-fase');
+    let faseSelezionata = statoPartita || "I0";
+    bottoniFase.forEach(btn => { if (btn.dataset.fase === faseSelezionata) btn.classList.add('active'); });
+
+    bottoniFase.forEach((btn, index) => {
+        btn.onclick = () => {
+            const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const idFaseAttuale = btn.dataset.fase;
+
+            bottoniFase.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            faseSelezionata = idFaseAttuale;
+
+            // Imposta ora inizio fase attuale
+            document.getElementById(`start-${idFaseAttuale}`).innerText = oraAttuale;
+            if (!tempiGara[idFaseAttuale]) tempiGara[idFaseAttuale] = {};
+            tempiGara[idFaseAttuale].inizio = oraAttuale;
+
+            // --- LOGICA SPECIALE TERMINATA ---
+            if (idFaseAttuale === "Terminata") {
+                let ultimaFaseValidaId = null;
+
+                // Cerchiamo a ritroso l'ultima fase che è stata INIZIATA (diversa da --:--)
+                // Saltiamo la fase "Terminata" stessa (che è l'indice attuale)
+                for (let i = index - 1; i >= 0; i--) {
+                    const f = fasi[i];
+                    const orarioInizioCorrente = tempiGara[f.id]?.inizio;
+                    
+                    if (orarioInizioCorrente && orarioInizioCorrente !== "--:--") {
+                        ultimaFaseValidaId = f.id;
+                        break; 
+                    }
+                }
+
+                if (ultimaFaseValidaId) {
+                    // 1. Chiudiamo la fase valida trovata (es. Q4 o OT1)
+                    const spanEndUltimo = document.getElementById(`end-${ultimaFaseValidaId}`);
+                    if (spanEndUltimo) spanEndUltimo.innerText = oraAttuale;
+                    if (!tempiGara[ultimaFaseValidaId]) tempiGara[ultimaFaseValidaId] = {};
+                    tempiGara[ultimaFaseValidaId].fine = oraAttuale;
+
+                    // 2. Pulizia di TUTTO ciò che sta tra la fase valida e il tasto Terminata
+                    let iniziaPulizia = false;
+                    fasi.forEach(f => {
+                        // Se siamo oltre la fase che abbiamo appena chiuso e non siamo ancora a "Terminata"
+                        if (iniziaPulizia && f.id !== "Terminata") {
+                            const s = document.getElementById(`start-${f.id}`);
+                            const e = document.getElementById(`end-${f.id}`);
+                            if (s) s.innerText = "--:--";
+                            if (e) e.innerText = "--:--";
+                            tempiGara[f.id] = { inizio: "--:--", fine: "--:--" };
+                        }
+                        if (f.id === ultimaFaseValidaId) iniziaPulizia = true;
+                    });
+                }
+            } else {
+                // Logica standard: chiudi la fase immediatamente precedente (se esisteva)
+                if (index > 0) {
+                    const idFasePrecedente = fasi[index - 1].id;
+                    const spanEndPrev = document.getElementById(`end-${idFasePrecedente}`);
+                    if (spanEndPrev) {
+                        spanEndPrev.innerText = oraAttuale;
+                        if (!tempiGara[idFasePrecedente]) tempiGara[idFasePrecedente] = {};
+                        tempiGara[idFasePrecedente].fine = oraAttuale;
+                    }
+                }
+            }
+        };
+    });
+
+    document.getElementById('liveCancelBtn').onclick = () => document.body.removeChild(overlay);
+    document.getElementById('liveSaveBtn').onclick = () => {
+        const isTerminata = (faseSelezionata === "Terminata");
+        const dati = {
+            goLive: !isTerminata,
+            quarto: faseSelezionata,
+            terminata: isTerminata,
+            noteTempi: JSON.stringify(tempiGara)
+        };
+        if (typeof salvaStatoLive === "function") {
+            salvaStatoLive(dati);
+            if (typeof renderPlayerListLive === "function") renderPlayerListLive();
+            if (typeof updateScoreboard === "function") updateScoreboard(!isTerminata);
+        }
+        document.body.removeChild(overlay);
+    };
+}
+
+
+function OLD_OK2gestisciGoLive() {
+    const overlay = document.createElement('div');
+    overlay.id = 'goLivePopup';
+    overlay.className = 'popup';
+
     // 1. CARICAMENTO DATI ESISTENTI
     let tempiGara = {};
     try { 
@@ -410,8 +1219,8 @@ function gestisciDirettaYoutube() {
     dettagliGara.oraInizioDiretta = oraInizioDiretta;
     dettagliGara.videoURL = finalUrl;
     
-    if (typeof saveToFirebaseHistory === 'function') saveToFirebaseHistory('partite/', dettagliGara);
-    if (typeof saveToServerMatchData === 'function') saveToServerMatchData();
+    saveToFirebaseHistory('partite/' + matchId, dettagliGara);
+    saveToServerMatchData();
 
     document.body.removeChild(overlay);
   };
@@ -619,7 +1428,7 @@ function gestisciConvocazioni() {
     localStorage.setItem("convocazioni", convocazioni);
 
     dettagliGara.convocazioni = convocazioni;
-    saveToFirebaseHistory('partite/', dettagliGara); 
+    saveToFirebaseHistory('partite/' + matchId, dettagliGara); 
 
     saveToServerMatchData();
     popup.remove();

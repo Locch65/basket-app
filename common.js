@@ -74,9 +74,13 @@ connectedRef.on("value", (snap) => {
 
 function saveToFirebaseAll() {
   if (isAdmin) {
-    saveToFirebaseHistory('partite/', dettagliGara); 
-    saveToFirebaseHistory('statistiche/', giocatoriObj);
-    saveToFirebaseHistory('events/', fullMatchHistory);
+    // saveToFirebaseHistory('partite/', dettagliGara); 
+    // saveToFirebaseHistory('statistiche/', giocatoriObj);
+    // saveToFirebaseHistory('events/', fullMatchHistory);
+
+    saveToFirebaseHistory('partite/' + matchId, dettagliGara); 
+    saveToFirebaseHistory('statistiche/' + matchId, giocatoriObj);
+    saveToFirebaseHistory('events/' + matchId, fullMatchHistory);
   }
 }
 
@@ -84,7 +88,8 @@ function saveToFirebaseAll() {
 function saveToFirebaseHistory(path, data) {
 // ---------------------------------------------------------------------------------------------
   // Scrittura su Firebase
-  db.ref(path + matchId).set(data)
+//  db.ref(path + matchId).set(data)
+  db.ref(path).set(data)
     .then(() => {
       console.log("Firebase aggiornato:  " + path);
     })
@@ -104,6 +109,27 @@ function saveToFirebaseRoster(path, data) {
     .catch((error) => {
       console.error("Errore Firebase: ", error);
     });
+}
+
+// ---------------------------------------------------------------------------------------------
+async function readFromFirebaseHistory(path) {
+// ---------------------------------------------------------------------------------------------
+  try {
+    // Utilizziamo .once('value') per una lettura singola dei dati
+    const snapshot = await db.ref(path).once('value');
+    
+    // Verifichiamo se il dato esiste effettivamente nel database
+    if (snapshot.exists()) {
+      return snapshot.val(); // Restituisce la struttura con i dati della tabella
+    } else {
+      console.warn("Nessun dato trovato al percorso specificato.");
+      return null;
+    }
+  } catch (error) {
+    // Gestione errori di connessione o permessi
+    console.error("Errore di connessione o accesso a Firebase: ", error);
+    return null;
+  }
 }
 
 function getTeamName() {

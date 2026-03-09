@@ -7,8 +7,21 @@ function parseItalianDate(dateStr, timeStr) {
     return new Date(anno, mese - 1, giorno, ore, minuti);
 }
 
-// Funzione aggiornata per gestire la cache e l'ottimizzazione rete
 function caricaListaPartite(filtroCampionato = null) {
+    const container = document.getElementById("listaPartite");
+    const cacheDati = localStorage.getItem("cache_partite");
+
+    // Mostra subito la cache se esiste (UX reattiva)
+    if (cacheDati) {
+        renderizzaPartite(JSON.parse(cacheDati), filtroCampionato, ordineCalendario);
+    }
+
+    // Forza comunque il fetch per aggiornare la vista
+    fetchPartiteDalServer(filtroCampionato);
+}
+
+// Funzione aggiornata per gestire la cache e l'ottimizzazione rete
+function OLDOKcaricaListaPartite(filtroCampionato = null) {
     const container = document.getElementById("listaPartite");
     const cacheDati = localStorage.getItem("cache_partite");
 
@@ -30,13 +43,18 @@ function caricaListaPartite(filtroCampionato = null) {
     }
 }
 
-function fetchPartiteDalServer(filtroCampionato) {
+
+
+
+function fetchPartiteDalServer(filtroCampionato, forceFetchfromGoogle = false) {
     const container = document.getElementById("listaPartite");
     container.classList.add("loading");
 
     // 1. Facciamo partire il cronometro
     const startTime = performance.now();
 
+//    if (!USE_FIREBASE || true) { // ATTENZIONE: scommentare
+    if (!USE_FIREBASE || forceFetchfromGoogle) { // ATTENZIONE: scommentare
         const params = new URLSearchParams({
             sheet: "Partite",
             userId: userId,
@@ -58,6 +76,12 @@ function fetchPartiteDalServer(filtroCampionato) {
             // Aggiorna la cache con i nuovi dati freschi
             localStorage.setItem("cache_partite", JSON.stringify(partite));
             container.classList.remove("loading");
+
+            partite.forEach(p => {
+                console.log("Salvo la partita su Firebase: " + p.matchId);
+                saveToFirebaseHistory('partite/' + p.matchId, p); 
+            });
+
             renderizzaPartite(partite, filtroCampionato, ordineCalendario);
         })
         .catch(err => {
@@ -76,6 +100,48 @@ function fetchPartiteDalServer(filtroCampionato) {
                 container.classList.remove("loading");
             }
         });
+    }
+    else {
+        // 2. Chiamata a Firebase tramite la funzione asincrona creata in precedenza
+        readFromFirebaseHistory("partite/")
+        .then(data => {
+            // Calcoliamo la durata della richiesta
+            const endTime = performance.now();
+            const duration = (endTime - startTime).toFixed(2);
+            console.log("readFromFirebaseHistory() " + duration + " ms");
+
+            if (data) {
+                // Se i dati esistono, aggiorniamo la mappa, la cache e renderizziamo
+                const partite = Array.isArray(data) ? data : Object.values(data);
+                salvaDatiMappa(partite);
+                
+                localStorage.setItem("cache_partite", JSON.stringify(partite));
+                container.classList.remove("loading");
+                renderizzaPartite(partite, filtroCampionato, ordineCalendario);
+            } else {
+                // Se Firebase restituisce null (percorso vuoto o errore connessione), 
+                // lanciamo un errore per finire nel blocco catch e usare la cache
+                throw new Error("Nessun dato da Firebase o problema di connessione");
+            }
+        })
+        .catch(err => {
+            console.error("Errore Firebase, provo a usare la cache:", err);
+
+            // Tenta di recuperare i dati dalla cache se Firebase fallisce
+            const cacheDati = localStorage.getItem("cache_partite");
+            if (cacheDati) {
+                const datiLocali = JSON.parse(cacheDati);
+                container.classList.remove("loading");
+                renderizzaPartite(datiLocali, filtroCampionato, ordineCalendario);
+                console.warn("Visualizzazione dati in modalità offline (cache)");
+                container.classList.remove("loading");
+            } else {
+                container.innerHTML = "Errore: Firebase non raggiungibile e nessuna cache disponibile.";
+                container.classList.remove("loading");
+            }
+        });
+    }
+    container.classList.remove("loading");
 }
 
 function isInTheFuture(newDate) {
@@ -355,7 +421,7 @@ function mostraStatisticheCampionato() {
                 }
                 input:checked + .slider { background-color: #dc3545; }
                 input:checked + .slider:before { transform: translateX(22px); }
-                .label-toggle { font-size: 0.85rem; font-weight: bold; color: #555; }
+                .label-toggle { font-size: 0.85rem; font-weight: bold; color: #ffffff; }
             </style>
 
             <div class="popup-content" style="max-width: 95%; width: 600px; max-height: 90vh; overflow-y: auto; padding: 20px;">
@@ -889,16 +955,22 @@ async function init() {
     });
 
     // Bottone Aggiorna (Forza Fetch)
-    document.getElementById("updateBtn")?.addEventListener("click", () => {
-        const container = document.getElementById("listaPartite");
-        localStorage.removeItem("cache_partite");
-        if (container) {
-            container.innerHTML = "Caricamento Calendario...";
-            container.classList.add("loading");
+    if (isAdmin) {
+        const btn = document.getElementById("updateBtn");
+        if (btn) {
+            btn.style.display = "inline-block";
+            btn.addEventListener("click", () => {
+                const container = document.getElementById("listaPartite");
+                localStorage.removeItem("cache_partite");
+                if (container) {
+                    container.innerHTML = "Caricamento Calendario...";
+                    container.classList.add("loading");
+                }
+                const filtroAttuale = document.querySelector('input[name="camp"]:checked')?.value || "Tutti";
+                fetchPartiteDalServer(filtroAttuale, true);
+            });
         }
-        const filtroAttuale = document.querySelector('input[name="camp"]:checked')?.value || "Tutti";
-        fetchPartiteDalServer(filtroAttuale);
-    });
+    }
 
     // 4. ESECUZIONE CARICAMENTO INIZIALE
     filtraPartite(campionatoSalvato, titolo);
