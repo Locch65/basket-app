@@ -189,7 +189,7 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
         const oggiMezzanotte = new Date();
         oggiMezzanotte.setHours(0, 0, 0, 0);
         partiteFiltrate = partiteFiltrate.filter(p => {
-            const dataP = parseItalianDate(p.data, p.orario);
+            const dataP = parseItalianDate(String(p.data).replace("*", ""), p.orario);
             dataP.setHours(0, 0, 0, 0);
             return dataP >= oggiMezzanotte;
         });
@@ -197,8 +197,8 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
 
     // --- NUOVO ORDINAMENTO DINAMICO ---
     partiteFiltrate.sort((a, b) => {
-        const dataA = parseItalianDate(a.data, a.orario);
-        const dataB = parseItalianDate(b.data, b.orario);
+        const dataA = parseItalianDate(String(a.data).replace("*", ""), a.orario);
+        const dataB = parseItalianDate(String(b.data).replace("*", ""), b.orario);
 
         return ordine === 'desc' ? dataB - dataA : dataA - dataB;
     });
@@ -215,7 +215,8 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
 
         if (p.isLive === "true" || p.isLive === true) card.classList.add("live-border");
 
-        const dataPartita = parseItalianDate(p.data, p.orario);
+        const dataPartita = parseItalianDate(String(p.data).replace("*",""), p.orario);
+//        const dataPartita = parseItalianDate(p.data, p.orario);
         if (dataPartita < oggi) card.classList.add("past");
 
         const giorni = ["Dom.", "Lun.", "Mar.", "Mer.", "Gio.", "Ven.", "Sab."];
@@ -227,12 +228,21 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
         const hasStats = note.stats || false;
         const hasHighlights = note.highlights || false; 
 
+        // Controlla se la data contiene l'asterisco
+        const daConfermare = p.data.includes("*");
+        const dataOraHtml = daConfermare 
+            ? `<span class="data-ora-blink">
+                    <span class="text-main">${giornoSett} ${String(p.data).replace("*","")} ${p.orario}</span>
+                    <span class="text-alt">Data da confermare</span>
+            </span>`
+            : `<span class="data">${giornoSett} ${String(p.data).replace("*","")}</span>
+            <span class="orario">${p.orario}</span>`;
+
         card.innerHTML = `
             <div class="match-top">
                 <span class="campionato ${cat}">${cat}</span>
                 <span class="match-id">${mIdPulito}</span>
-                <span class="data">${giornoSett} ${p.data}</span>
-                <span class="orario">${p.orario}</span>
+                ${dataOraHtml}
                 
                 <div class="match-icons">
                     <i class="fas fa-video icon-video ${hasVideo ? '' : 'hidden'}" title="Video Integrale"></i>
@@ -247,11 +257,31 @@ function renderizzaPartite(partite, filtroCampionato, ordine = 'asc') {
                 <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
             </div>`;
 
+        // card.innerHTML = `
+        //     <div class="match-top">
+        //         <span class="campionato ${cat}">${cat}</span>
+        //         <span class="match-id">${mIdPulito}</span>
+        //         <span class="data">${giornoSett} ${p.data}</span>
+        //         <span class="orario">${p.orario}</span>
+                
+        //         <div class="match-icons">
+        //             <i class="fas fa-video icon-video ${hasVideo ? '' : 'hidden'}" title="Video Integrale"></i>
+        //             <i class="fas fa-chart-bar icon-stats ${hasStats ? '' : 'hidden'}" title="Statistiche"></i>
+        //             <i class="fas fa-star icon-highlights ${hasHighlights ? '' : 'hidden'}" title="Highlights"></i>
+        //         </div>
+        //     </div>
+        //     <div class="match-middle"><span class="luogo">${p.luogo}</span></div>
+        //     <div class="match-bottom">
+        //         <span class="teamA"><span class="team-name">${p.squadraA}</span> <strong>${p.punteggioA ?? "-"}</strong></span>
+        //         <span class="vs">vs</span>
+        //         <span class="teamB"><strong>${p.punteggioB ?? "-"}</strong> <span class="team-name">${p.squadraB}</span></span>
+        //     </div>`;
+
         if (p.casaTrasferta === "Casa") card.querySelector(".teamA .team-name").classList.add("highlight");
         else if (p.casaTrasferta === "Trasferta") card.querySelector(".teamB .team-name").classList.add("highlight");
 
         card.onclick = () => {
-            const inTheFuture = isInTheFuture(p.data);
+            const inTheFuture = isInTheFuture(String(p.data).replace("*", ""));
             const isAdmin = localStorage.getItem("isAdmin") === "true";
 
             if (!isAdmin && inTheFuture) {
@@ -518,7 +548,7 @@ function elaboraDatiStats(filtro) {
         filtrate = filtrate.filter(p => String(p.matchId).includes(filtro));
     }
 
-    filtrate.sort((a, b) => parseItalianDate(a.data, a.orario) - parseItalianDate(b.data, b.orario));
+    filtrate.sort((a, b) => parseItalianDate(String(a.data).replace("*", ""), a.orario) - parseItalianDate(String(b.data).replace("*", ""), b.orario));
 
     let stats = { vinte: 0, perse: 0, fatti: 0, subiti: 0 };
     const datiGrafico = [];
@@ -544,7 +574,7 @@ function elaboraDatiStats(filtro) {
         accumuloLoro += puntiLoro;
         
         datiGrafico.push({ 
-            data: p.data, 
+            data: String(p.data).replace("*", ""), 
             puntiGaraNoi: puntiNoi, 
             puntiGaraLoro: puntiLoro,
             progNoi: accumuloNoi,
@@ -580,13 +610,13 @@ function OKelaboraDatiStats(filtro) {
     if (!cache) return;
     const partite = JSON.parse(cache);
 
-    let filtrate = partite.filter(p => p.punteggioA !== null && p.punteggioB !== null && p.statoPartita.toLowerCase().includes("terminata") && !isInTheFuture(p.data));
+    let filtrate = partite.filter(p => p.punteggioA !== null && p.punteggioB !== null && p.statoPartita.toLowerCase().includes("terminata") && !isInTheFuture(String(p.data).replace("*", "")));
 
     if (filtro !== "Tutti") {
         filtrate = filtrate.filter(p => String(p.matchId).includes(filtro));
     }
 
-    filtrate.sort((a, b) => parseItalianDate(a.data, a.orario) - parseItalianDate(b.data, b.orario));
+    filtrate.sort((a, b) => parseItalianDate(String(a.data).replace("*", ""), a.orario) - parseItalianDate(String(b.data).replace("*", ""), b.orario));
 
     let stats = { vinte: 0, perse: 0, fatti: 0, subiti: 0 };
     const progressione = [];
@@ -613,7 +643,7 @@ function OKelaboraDatiStats(filtro) {
         accumuloNoi += puntiNoi;
         accumuloLoro += puntiLoro;
         
-        progressione.push({ data: p.data, noi: accumuloNoi, loro: accumuloLoro });
+        progressione.push({ data: String(p.data).replace("*", ""), noi: accumuloNoi, loro: accumuloLoro });
     });
 
     // 2. Rendering Tabella
@@ -748,14 +778,14 @@ function OLDelaboraDatiStats(filtro) {
     const partite = JSON.parse(cache);
 
     // Filtriamo solo le partite TERMINATE (dove ci sono punteggi definiti e passate)
-    let filtrate = partite.filter(p => p.punteggioA !== null && p.punteggioB !== null && p.statoPartita.toLowerCase().includes("terminata") && !isInTheFuture(p.data));
+    let filtrate = partite.filter(p => p.punteggioA !== null && p.punteggioB !== null && p.statoPartita.toLowerCase().includes("terminata") && !isInTheFuture(String(p.data).replace("*", "")));
 
     if (filtro !== "Tutti") {
         filtrate = filtrate.filter(p => String(p.matchId).includes(filtro));
     }
 
     // Ordiniamo per data per il grafico
-    filtrate.sort((a, b) => parseItalianDate(a.data, a.orario) - parseItalianDate(b.data, b.orario));
+    filtrate.sort((a, b) => parseItalianDate(String(a.data).replace("*", ""), a.orario) - parseItalianDate(String(b.data).replace("*", ""), b.orario));
 
     let stats = {
         vinte: 0, perse: 0,
@@ -787,7 +817,7 @@ function OLDelaboraDatiStats(filtro) {
         // Esempio di recupero canestri se salvati nelle note (da adattare ai tuoi nomi campi)
         // Se i dati non sono disponibili, questa parte rimarrà a 0 o calcolata via history
         
-        progressione.push({ data: p.data, noi: puntiNoi, loro: puntiLoro });
+        progressione.push({ data: String(p.data).replace("*", ""), noi: puntiNoi, loro: puntiLoro });
     });
 
     // 2. Rendering Tabella

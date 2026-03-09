@@ -768,14 +768,14 @@ function salvaDatiMappa(partite) {
             const campionatoMatch = p.matchId?.toString().includes("14") ? "U14" : "U15";
             
             // Chiave per evitare duplicati nello stesso luogo e data
-            const chiaveUnica = (p.luogo.trim() + p.data).toLowerCase();
+            const chiaveUnica = (p.luogo.trim() + String(p.data).replace("*", "")).toLowerCase();
 
             if (!setLuoghiUnici.has(chiaveUnica)) {
                 setLuoghiUnici.add(chiaveUnica);
                 
                 datiLocali.push({
                     campionato: campionatoMatch,
-                    dataPartita: p.data,
+                    dataPartita: String(p.data).replace("*", ""),
                     orario: p.orario,
                     luogo: p.luogo.trim(),
                     coordinate: p.coordinate.trim(),

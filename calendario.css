@@ -210,6 +210,43 @@ body.dark-mode #selectOrdine {
   /* più grande rispetto al 14px di default */
 }
 
+/* Container della data lampeggiante */
+.data-ora-blink {
+    position: relative;
+    display: inline-block;
+    color: #e74c3c;
+    min-width: 160px;
+    vertical-align: middle;
+}
+
+/* Ciclo totale di 6 secondi: 4s Data + 2s Avviso */
+.data-ora-blink .text-main {
+    animation: flash-data-6s 6s infinite linear;
+}
+
+.data-ora-blink .text-alt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    white-space: nowrap;
+    animation: flash-avviso-6s 6s infinite linear;
+}
+
+/* La data è visibile per i primi 4 secondi (circa 66%) */
+@keyframes flash-data-6s {
+    0%, 66% { opacity: 1; }
+    68%, 98% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* L'avviso è visibile per gli ultimi 2 secondi (circa 33%) */
+@keyframes flash-avviso-6s {
+    0%, 66% { opacity: 0; }
+    68%, 98% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
 .match-top .casa {
   text-align: center;
   font-size: 1.8rem;

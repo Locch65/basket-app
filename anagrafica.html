@@ -572,7 +572,7 @@
             const isCasa = infoGara.squadraA.toUpperCase().includes("POLISMILE A");
             loc = isCasa ? "🏠" : "🚌";
             nomeGara = isCasa ? infoGara.squadraB : infoGara.squadraA;
-            dataGara = infoGara.data || "--/--";
+            dataGara = String(infoGara.data).replace("*", "") || "--/--";
           }
           return {
             matchIdFull: idStr,
