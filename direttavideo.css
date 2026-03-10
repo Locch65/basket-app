@@ -1568,10 +1568,10 @@ body.user-mode .video-container {
 #rotation-tutorial-overlay {
   display: none;
   position: fixed;
-  top: 0;
+  top: 0px;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 29%; /* era 100% */
   /* Sfondo più trasparente (0.6 invece di 0.85) */
   background-color: rgba(0, 0, 0, 0.4); 
   /* Effetto sfocatura opzionale per un look moderno */

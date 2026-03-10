@@ -28,6 +28,7 @@
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  Allenamenti:
 //    - mettere un pallone da basket che ruota al posto del manubrio che ruota
+//    - memorizzare e caricare i dati su Firebase per un accesso più veloce
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  maps.html
@@ -39,8 +40,6 @@
 //    - NICE TO HAVE: quando una partita è live, mostrare il quarto attuale, e fare vibrare il cellulare
 //    - ingrandire i font su tablet
 //    - "escludi terminate" mostra le partite anche se terminate, fino a mezzanotte di oggi
-//    - mettere un campo in più sul DB per indicare che la data potrebbe essere provvisoria e in attesa di conferma. (magari mettendo in rosso o lampeggiante la data sul badge)
-//    - FATTO: aggiornare subito il calendario prendendolo da Firebase se accessibile, altrimenti usare quello nella cache. se Admin il tasto "Aggiorna" legge tutte le partite dal google sheet e salva in Firebase cosi' sono già pronte per gli spettatori non Admin
 //    - fetchPartiteDalServer, aggiustare il remove("loading") se isadmin se c'è connessione lo rimuove subito e non dovrebbe.
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -82,12 +81,15 @@
 //      - VERIFICARE: Highlights perchè non funziona quando c'e' un orainiziopartita > 1. 
 //
 //    -------------------------------------------------------------------------------------
-//    - Hamburgher menu: Per Admin mettere Highlights
+//    - GESTIONE MENU:
+//      - Hamburgher menu: Per Admin mettere Highlights
+//
+//    - se isAdmin=true e partita TERMINATA, il menu Sort non ha effetto.
 //    - nel grafico della progressione punti inserire il punteggio alla fine di ciascun quarto
 // *  - perchè come spettatore carica due volte i dati partita? basterebbe solo da Firebase se fosse sempre allineato
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 //    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagine. provare a risolvere con un settimer
-//    - VERIFICARE Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante
+//    - VERIFICARE Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante. mettere 10 secondi
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
 // *  - BUG: mostraGrafico va aggiustata nel caso di partita ancora Live perchè vengono visualizzati male i separatori dei quarti (non ancora giocati)
@@ -103,7 +105,7 @@
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  Classifiche (nuova pagina):
-//    - NICE TO HAVE: nuova pagina con le classifiche del campionato con i punti di ciascuna squadra preso da ItaliaCanestro
+//    - NICE TO HAVE: nuova pagina con le classifiche del campionato con i punti di ciascuna squadra preso da www.FIP.it
 //
 //  NUOVE FEATURES (NICE TO HAVE):
 //    - password Admin da crittografare
@@ -145,6 +147,8 @@
 //    - FATTO; inserire la possibilita di ordinare il calendario in ordine ascendente/discendente per data
 //    - FATTO: inserire nel badge di ciascuna partita un flag per indicare "Video Presente", "Statistiche Presenti"
 //    - FATTO: forse è meglio togliere la voce Admin per evitare "curiosi". lasciare solo il bottone nella home page
+//    - FATTO: mettere un campo in più sul DB per indicare che la data potrebbe essere provvisoria e in attesa di conferma. (magari mettendo in rosso o lampeggiante la data sul badge)
+//    - FATTO: aggiornare subito il calendario prendendolo da Firebase se accessibile, altrimenti usare quello nella cache. se Admin il tasto "Aggiorna" legge tutte le partite dal google sheet e salva in Firebase cosi' sono già pronte per gli spettatori non Admin
 //
 //  Match.html
 //    - FATTO: bottone "Video" cambia colore e testo (in "Live") se c'e' una live attiva. 

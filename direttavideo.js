@@ -111,7 +111,7 @@ function registerToFirebaseEvents() {
       console.log("Dati ricevuti:", data);
     } else {
       dettagliGara = null;
-      console.warn("Nessun dato trovato per questa partita.");
+      console.warn("Nessun dettaglio trovato per questa partita.");
     }
 
     const struct = {
@@ -140,7 +140,7 @@ function registerToFirebaseEvents() {
       console.log("Dati ricevuti:", data);
     } else {
       giocatoriObj = [];
-      console.warn("Nessun dato trovato per questa partita.");
+      console.warn("Nessuna statistica trovata per questa partita.");
     }
 
     const struct = {
@@ -163,7 +163,7 @@ function registerToFirebaseEvents() {
       console.log("Dati ricevuti:", data);
     } else {
       fullMatchHistory = [];
-      console.warn("Nessun dato trovato per questa partita.");
+      console.warn("Nessun evento live trovato per questa partita.");
     }
 
     const struct = {
@@ -824,6 +824,10 @@ function updateDatiPartita(what, data) {
           punteggioB = parseInt(r.punti, 10) || 0;
         }
       });
+
+      // allinea il db Firebase cosi' gli spettatori ce l'hanno sempre aggiornato
+      if (isAdmin) saveToFirebaseHistory('statistiche/' + matchId, giocatoriObj);
+
   }
 
   if (matchIsLive || isReviewMode) {
@@ -833,7 +837,8 @@ function updateDatiPartita(what, data) {
       saveToFirebaseAll();
     }
   } else {
-    renderPlayerList();
+    if (what === "all" || what === "stats")
+      renderPlayerList();
   }
 
   updateScoreboard(matchIsLive || isReviewMode);
@@ -919,7 +924,7 @@ function caricaAnagraficaSingolaPartita(targetMatchId) {
       }
 
       // allinea il db Firebase cosi' gli spettatori ce l'hanno sempre aggiornato
-      saveToFirebaseHistory('partite/' + partita.matchId, partita); 
+      if (isAdmin) saveToFirebaseHistory('partite/' + partita.matchId, partita); 
 
       // --- ESTRAZIONE E SALVATAGGIO DATI ---
       // Ripetiamo la logica di pulizia e salvataggio che avevi nel click
