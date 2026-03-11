@@ -542,6 +542,85 @@ function elaboraDatiStats(filtro) {
     if (!cache) return;
     const partite = JSON.parse(cache);
 
+    let filtrate = partite.filter(p => 
+        p.punteggioA !== null && 
+        p.punteggioB !== null && 
+        String(p.statoPartita).toLowerCase().includes("terminata") && 
+        !isInTheFuture(p.data)
+    );
+
+    if (filtro !== "Tutti") {
+        filtrate = filtrate.filter(p => String(p.matchId).includes(filtro));
+    }
+
+    filtrate.sort((a, b) => 
+        parseItalianDate(String(a.data).replace("*", ""), a.orario) - 
+        parseItalianDate(String(b.data).replace("*", ""), b.orario)
+    );
+
+    let stats = { vinte: 0, perse: 0, fatti: 0, subiti: 0 };
+    const datiGrafico = [];
+    let accumuloNoi = 0;
+    let accumuloLoro = 0;
+
+    filtrate.forEach(p => {
+        const pA = parseInt(p.punteggioA) || 0;
+        const pB = parseInt(p.punteggioB) || 0;
+        const isPolismileA = (p.squadraA === "Polismile A" || p.casaTrasferta === "Casa");
+        
+        const puntiNoi = isPolismileA ? pA : pB;
+        const puntiLoro = isPolismileA ? pB : pA;
+
+        if (puntiNoi > puntiLoro) stats.vinte++;
+        else if (puntiNoi < puntiLoro) stats.perse++;
+        
+        stats.fatti += puntiNoi;
+        stats.subiti += puntiLoro;
+        accumuloNoi += puntiNoi;
+        accumuloLoro += puntiLoro;
+        
+        datiGrafico.push({ 
+            data: String(p.data).replace("*", ""), 
+            puntiGaraNoi: puntiNoi, 
+            puntiGaraLoro: puntiLoro,
+            progNoi: accumuloNoi,
+            progLoro: accumuloLoro
+        });
+    });
+
+    const numPartite = filtrate.length || 1;
+    const mediaFatti = (stats.fatti / numPartite).toFixed(1);
+    const mediaSubiti = (stats.subiti / numPartite).toFixed(1);
+
+    const containerTab = document.getElementById("containerTabellaStats");
+    containerTab.innerHTML = `
+        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 1.1rem; margin-bottom: 20px;">
+            <tr style="background: #27ae60; color: white;">
+                <th style="padding:10px; border:1px solid #ddd;">Vinte</th>
+                <th style="padding:10px; border:1px solid #ddd;">Perse</th>
+                <th style="padding:10px; border:1px solid #ddd;">Punti Fatti</th>
+                <th style="padding:10px; border:1px solid #ddd;">Punti Subiti</th>
+            </tr>
+            <tr>
+                <td style="padding:12px; border:1px solid #ddd; color:green; font-weight:bold;">${stats.vinte}</td>
+                <td style="padding:12px; border:1px solid #ddd; color:red; font-weight:bold;">${stats.perse}</td>
+                <td style="padding:12px; border:1px solid #ddd; font-weight:bold;">${stats.fatti}</td>
+                <td style="padding:12px; border:1px solid #ddd; font-weight:bold;">${stats.subiti}</td>
+            </tr>
+        </table>
+    `;
+
+    const isProgressivo = document.getElementById('toggleTipoGrafico').checked;
+    // Passiamo anche le medie alla funzione del grafico
+    renderGraficoProgressione(datiGrafico, isProgressivo, mediaFatti, mediaSubiti);
+}
+
+
+function OKelaboraDatiStats(filtro) {
+    const cache = localStorage.getItem("cache_partite");
+    if (!cache) return;
+    const partite = JSON.parse(cache);
+
     let filtrate = partite.filter(p => p.punteggioA !== null && p.punteggioB !== null && p.statoPartita.toLowerCase().includes("terminata") && !isInTheFuture(p.data));
 
     if (filtro !== "Tutti") {
@@ -584,7 +663,7 @@ function elaboraDatiStats(filtro) {
 
     const containerTab = document.getElementById("containerTabellaStats");
     containerTab.innerHTML = `
-        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; margin-bottom: 10px;">
+        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 1.2rem; margin-bottom: 10px;">
             <tr style="background: #eee; color: #333;">
                 <th style="padding:8px; border:1px solid #ddd;">Vinte</th>
                 <th style="padding:8px; border:1px solid #ddd;">Perse</th>
@@ -604,76 +683,95 @@ function elaboraDatiStats(filtro) {
     renderGraficoProgressione(datiGrafico, isProgressivo);
 }
 
+function renderGraficoProgressione(dati, isProgressivo, mediaNoi, mediaLoro) {
+    const ctx = document.getElementById('canvasStatsCampionato').getContext('2d');
+    if (chartStatsCampionato) chartStatsCampionato.destroy();
 
-function OKelaboraDatiStats(filtro) {
-    const cache = localStorage.getItem("cache_partite");
-    if (!cache) return;
-    const partite = JSON.parse(cache);
-
-    let filtrate = partite.filter(p => p.punteggioA !== null && p.punteggioB !== null && p.statoPartita.toLowerCase().includes("terminata") && !isInTheFuture(String(p.data).replace("*", "")));
-
-    if (filtro !== "Tutti") {
-        filtrate = filtrate.filter(p => String(p.matchId).includes(filtro));
-    }
-
-    filtrate.sort((a, b) => parseItalianDate(String(a.data).replace("*", ""), a.orario) - parseItalianDate(String(b.data).replace("*", ""), b.orario));
-
-    let stats = { vinte: 0, perse: 0, fatti: 0, subiti: 0 };
-    const progressione = [];
+    // Etichette aggiornate
+    const labelNoi = isProgressivo ? 'Progressivo Polismile A' : 'Punti Polismile A';
+    const labelLoro = isProgressivo ? 'Progressivo Avversari' : 'Punti Avversari';
     
-    // Variabili per l'accumulo progressivo
-    let accumuloNoi = 0;
-    let accumuloLoro = 0;
+    const dataNoi = dati.map(d => isProgressivo ? d.progNoi : d.puntiGaraNoi);
+    const dataLoro = dati.map(d => isProgressivo ? d.progLoro : d.puntiGaraLoro);
 
-    filtrate.forEach(p => {
-        const pA = parseInt(p.punteggioA) || 0;
-        const pB = parseInt(p.punteggioB) || 0;
-        const isPolismileA = (p.squadraA === "Polismile A");
-        
-        const puntiNoi = isPolismileA ? pA : pB;
-        const puntiLoro = isPolismileA ? pB : pA;
+    // Costruiamo i dataset base
+    const datasets = [
+        {
+            label: labelNoi,
+            data: dataNoi,
+            borderColor: '#dc3545', // Rosso
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            fill: isProgressivo,
+            tension: 0.3,
+            pointRadius: 2,
+            pointHoverRadius: 4
+        },
+        {
+            label: labelLoro,
+            data: dataLoro,
+            borderColor: '#0056b3', // Blu
+            backgroundColor: 'rgba(0, 86, 179, 0.1)',
+            fill: isProgressivo,
+            tension: 0.3,
+            pointRadius: 2,
+            pointHoverRadius: 4
+        }
+    ];
 
-        // Statistiche semplici
-        if (puntiNoi > puntiLoro) stats.vinte++;
-        else if (puntiNoi < puntiLoro) stats.perse++;
-        stats.fatti += puntiNoi;
-        stats.subiti += puntiLoro;
+    // Aggiungiamo le linee medie solo se NON siamo in modalità progressiva
+    if (!isProgressivo && mediaNoi && mediaLoro) {
+        datasets.push({
+                label: 'Media Polismile',
+                data: Array(dati.length).fill(mediaNoi),
+                borderColor: '#dc3545',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+                pointStyle: 'line' // <--- Cambia l'icona in legenda in una linea
+            });
+            datasets.push({
+                label: 'Media Avversari',
+                data: Array(dati.length).fill(mediaLoro),
+                borderColor: '#0056b3',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+                pointStyle: 'line' // <--- Cambia l'icona in legenda in una linea
+            });
+        }
 
-        // Accumulo per il grafico
-        accumuloNoi += puntiNoi;
-        accumuloLoro += puntiLoro;
-        
-        progressione.push({ data: String(p.data).replace("*", ""), noi: accumuloNoi, loro: accumuloLoro });
+    chartStatsCampionato = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dati.map(d => d.data),
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: { 
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: { 
+                    position: 'bottom',
+                    labels: {
+                        // Filtriamo la legenda per non mostrare doppioni se preferisci, 
+                        // o lasciamo tutto per chiarezza
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
     });
-
-    // 2. Rendering Tabella
-    const containerTab = document.getElementById("containerTabellaStats");
-    containerTab.innerHTML = `
-        <table style="width:100%; border-collapse: collapse; text-align: center; font-size: 0.9rem;">
-            <thead>
-                <tr style="background: #eee; color: #333;">
-                    <th style="padding:8px; border:1px solid #ddd;">Vinte</th>
-                    <th style="padding:8px; border:1px solid #ddd;">Perse</th>
-                    <th style="padding:8px; border:1px solid #ddd;">Punti Fatti</th>
-                    <th style="padding:8px; border:1px solid #ddd;">Punti Subiti</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="padding:10px; border:1px solid #ddd; font-weight:bold; color:green;">${stats.vinte}</td>
-                    <td style="padding:10px; border:1px solid #ddd; font-weight:bold; color:red;">${stats.perse}</td>
-                    <td style="padding:10px; border:1px solid #ddd;">${stats.fatti.totale}</td>
-                    <td style="padding:10px; border:1px solid #ddd;">${stats.subiti.totale}</td>
-                </tr>
-            </tbody>
-        </table>
-    `;
-
-    // 3. Rendering Grafico
-    renderGraficoProgressione(progressione);
 }
 
-function renderGraficoProgressione(dati, isProgressivo) {
+function OKrenderGraficoProgressione(dati, isProgressivo) {
     const ctx = document.getElementById('canvasStatsCampionato').getContext('2d');
     if (chartStatsCampionato) chartStatsCampionato.destroy();
 
@@ -722,51 +820,6 @@ function renderGraficoProgressione(dati, isProgressivo) {
             },
             plugins: {
                 legend: { position: 'bottom' }
-            }
-        }
-    });
-}
-
-function OKrenderGraficoProgressione(dati) {
-    const ctx = document.getElementById('canvasStatsCampionato').getContext('2d');
-    
-    if (chartStatsCampionato) chartStatsCampionato.destroy();
-
-    chartStatsCampionato = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: dati.map(d => d.data),
-            datasets: [
-                {
-                    label: 'Totale Punti Nostri',
-                    data: dati.map(d => d.noi),
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220, 53, 69, 0.2)',
-                    fill: true,
-                    tension: 0.2
-                },
-                {
-                    label: 'Totale Punti Avversari',
-                    data: dati.map(d => d.loro),
-                    borderColor: '#0056b3',
-                    backgroundColor: 'rgba(0, 86, 179, 0.2)',
-                    fill: true,
-                    tension: 0.2
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { 
-                    beginAtZero: true,
-                    title: { display: true, text: 'Punti Progressivi' }
-                }
-            },
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: { mode: 'index', intersect: false }
             }
         }
     });
