@@ -24,11 +24,12 @@
 //  Anagrafica.html
 //    - Visualizzare tiri liberi sbagliati
 //    - BUG: a volte nel google sheet "Statistiche" nella colonna Squadra viene scritto 'undefined' al posto di "Polismile A" e questo sballa le statistich
+//    - modificare il grafico per aggiungere la progressione dei punti segnati
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  Allenamenti:
 //    - mettere un pallone da basket che ruota al posto del manubrio che ruota
-//    - memorizzare e caricare i dati su Firebase per un accesso più veloce
+// *  - memorizzare e caricare i dati su Firebase per un accesso più veloce
 //
 //  ------------------------------------------------------------------------------------------------------------------------------------------------
 //  maps.html
@@ -73,6 +74,7 @@
 //    -------------------------------------------------------------------------------------
 //    - HIGHLIGHTS:
 //      - NICE TO HAVE: Highlight anche in orizzontale
+//      - NICE TO HAVE: funzione di editing avanzata per admin con ytplayer di dettaglio puntato sul tabellone
 //      - aggiungere per admin un bottone "fix" che cambia l'ora del canestro con quello visualizzato.
 //   *  - BUG: quando esco dagli highlight riportare il punteggio al risultato finale se la partita è "Terminata", altrimenti compare 0-0
 //   *  - durante gli highlights il quarto mostrato deve essere quello relativo a quel momento della partita (adesso è sempre "Terminata")
@@ -85,14 +87,16 @@
 //      - Hamburgher menu: Per Admin mettere Highlights
 //
 //    - se isAdmin=true e partita TERMINATA, il menu Sort non ha effetto.
-//    - nel grafico della progressione punti inserire il punteggio alla fine di ciascun quarto
-// *  - perchè come spettatore carica due volte i dati partita? basterebbe solo da Firebase se fosse sempre allineato
+//  * - se admin=false e partita TERMINATA e non ci sono eventi Live, i dettagli delle statistiche di squadra B sono vuoti. in Firebase non sono neanche memorizzati. Forse si possono memorizzare in giocatoryObj (con nome giocatorei=Squadra B)
+//    - nel grafico della progressione punti inserire il punteggio alla fine di ciascun quarto, inserire anche il valore medio ei punti per partita
 //    - Su tablet aumentare dimensione font, toast e tutto hamburger menu
 //    - se l'inizio della partita è distante dall'inizio dello streaming, ci mette troppo tempo per fare apparire la prima immagine. provare a risolvere con un settimer
 //    - VERIFICARE Il pallino rosso del live non funziona. Anche se è molto indietro, continua a essere rosso pulsante. mettere 10 secondi
 //    - BUG: migliorare: se cambio le Convocazioni devo fare refresh della lista e non dell'intera pagina direttavideo
 //    - BUG: perchè nei log scrive "ozilla/5.0" senza la M
 // *  - BUG: mostraGrafico va aggiustata nel caso di partita ancora Live perchè vengono visualizzati male i separatori dei quarti (non ancora giocati)
+//
+// *  - BUG: partita Moncalieri 58-32, se admin=false, non sono corrette le statistiche di squadra
 //
 //    - SOSTITUIRE tutti i localStorage di singole variabili con localStorage di dettagliGara (che contiene tutto) 
 //
@@ -220,5 +224,6 @@
 //    - FATTO:aggiungere delle statistiche: partite Perse/Vinte, Punti Fatti/Subiti, Partite giocate/ancora da giocare.
 //    - FATTO: VERIFICARE Falli su scoreboard per admin devono essere istantanei, per gli spettatori in funzione del tempo 
 //    - FATTO: VERIFICARE. abilitare gli highlights per la partita Live
+//    - FATTO: perchè come spettatore carica due volte i dati partita? basterebbe solo da Firebase se fosse sempre allineato
 //
 // -----------------------------------------------------------------------------------

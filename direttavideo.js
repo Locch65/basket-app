@@ -822,6 +822,7 @@ function updateDatiPartita(what, data) {
 
         } else if (r.giocatore === "Squadra B" && !matchIsLive && !isReviewMode) { // in ReviewMode il punteggio e' calcolato in base al tempo visualizzato
           punteggioB = parseInt(r.punti, 10) || 0;
+          contatoriB = JSON.parse(r.contatori || '{"0":0,"1":0,"2":0,"3":0}');
         }
       });
 
@@ -1704,14 +1705,25 @@ function updateScoreboard(matchIsLive) {
     else
     {
       // se la partita è terminata ricostruiamo i dettagli a partire da fullMatchHistory
-      const eventiA = fullMatchHistory.filter(ev => {
-        const isMyTeam = ev.squadra === "Polismile A";
-        return isMyTeam && ev.eventType === "punto" && (ev.secondiReali <= secondiCorrentiVideo || !matchIsLive); // l'ultimo && è inutile
-      });
-      eventiA.forEach(ev => {
-        const p = parseInt(ev.puntiRealizzati) || 0;
-        if (totalA.hasOwnProperty(p)) totalA[p]++;
-      });
+      if (highlightsAvailable) {
+        const eventiA = fullMatchHistory.filter(ev => {
+          const isMyTeam = ev.squadra === "Polismile A";
+          return isMyTeam && ev.eventType === "punto" && (ev.secondiReali <= secondiCorrentiVideo || !matchIsLive); // l'ultimo && è inutile
+        });
+        eventiA.forEach(ev => {
+          const p = parseInt(ev.puntiRealizzati) || 0;
+          if (totalA.hasOwnProperty(p)) totalA[p]++;
+        });
+      }
+      else{
+        // se non sono disponibili gli eventi live, prendilo dalle statistiche
+        giocatoriObj.forEach(g => {
+          totalA[0] += (g.contatori[0] || 0);
+          totalA[1] += (g.contatori[1] || 0);
+          totalA[2] += (g.contatori[2] || 0);
+          totalA[3] += (g.contatori[3] || 0);
+        });
+      }
 
     }
   }
