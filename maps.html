@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mappa Trasferte U14/U15</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-BGNtWrdi.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/common-CwRuEGaa.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-DLeYI77y.js"></script>
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/maps-CimtoRRX.css">
+</head>
+<body>
+
+    <div class="header-container">
+        <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+            <a href="index.html" class="home-btn" aria-label="Home">
+                <i class="fas fa-home"></i>
+            </a>
+            <h2 style="flex-grow: 1;">Mappa Trasferte</h2>
+            <button onclick="window.forzaAggiornamento()" class="refresh-btn" title="Aggiorna dati dal server">
+                <i id="refresh-icon" class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+
+        <div class="filter-container">
+            <label><input type="radio" name="filtroPartite" value="passate" onclick="applicaFiltro()"> Passate</label>
+            <label><input type="radio" name="filtroPartite" value="prossima" onclick="applicaFiltro()"> Prossima</label>
+            <label><input type="radio" name="filtroPartite" value="future" onclick="applicaFiltro()"> Future</label>
+            <label><input type="radio" name="filtroPartite" value="tutte" checked onclick="applicaFiltro()"> Tutte</label>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+
+</body>
+</html>

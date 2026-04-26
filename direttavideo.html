@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Live Stats</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-BGNtWrdi.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/common-CwRuEGaa.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-DLeYI77y.js"></script>
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/direttavideo-BJD_R03n.css">
+</head>
+
+<body>
+  <div id="hamburgerMenu">
+    <button id="hamburgerBtn">☰</button>
+    <button id="backBtn" onclick="history.back()" >
+      <i class="fas fa-arrow-left"></i>   Back
+    </button>
+    <nav id="menu" class="hidden">
+      <ul>
+        <li>
+          <a href="index.html" class="menu-link-home">
+            <i class="fas fa-home"></i> Home
+          </a>
+        </li>
+        <li><button id="menuConvocazioniBtn" onclick="window.gestisciConvocazioni()"><i class="fas fa-list-ul"></i>
+            Convocazioni</button></li>
+        <li><button id="youtubeBtn" onclick="window.gestisciDirettaYoutube()"><i class="fab fa-youtube"></i> Diretta Youtube</button></li>
+        <li><button id="hudCtrlBtn" onclick="window.gestisciHud()"><i class="fas fa-layer-group"></i> HUD Control</button></li>
+        <li><button id="goLiveBtn" onclick="window.gestisciGoLive()"><i class="fas fa-broadcast-tower"></i> Go Live</button>
+        <li><button id="menuFixEventsBtn" onclick="window.ShowFullHistoryPopup(giocatoriObj);"><i class="fas fa-history"></i> Fix Eventi Live</button></li>
+        </li>
+        <div class="admin-only-menu-item">
+            <li class="menu-divider">Sort:</li>
+            <li class="menu-sort-item"><button onclick="window.setSortMode('numero')"><i class="fas fa-sort-numeric-down"></i> Number</button></li>
+            <li class="menu-sort-item"><button onclick="window.setSortMode('cognome')"><i class="fas fa-sort-alpha-down"></i> Name</button></li>
+            <li class="menu-sort-item"><button onclick="window.setSortMode('punti')"><i class="fas fa-star"></i> Score</button></li>
+
+            <li>
+              <button id="menuGraficoBtn" onclick="mostraGraficoPunteggio();">
+                <i class="fas fa-chart-line"></i> Grafico
+              </button>
+            </li>
+            <li>
+              <button id="menuTop5Btn" onclick="mostraPopupQuintetti();">
+                <i class="fas fa-users"></i> Top5
+              </button>
+            </li>
+        </div>
+        <li>
+          <button id="adminBtn">
+            <i class="fas fa-user-shield"></i> Admin
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <div class="video-container" id="player-wrapper">
+    <img id="video-placeholder" 
+          src="VideoNonDisponibile.png" 
+          alt="Video non disponibile" 
+          style="display: none; width: 100%; height: auto; border-radius: 8px;">
+       
+    <div id="video-loading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Inizializzazione video...</p>
+    </div>
+    <div id="ytplayer"></div>
+    <div id="pip-container">
+        <div id="pip-player-wrapper">
+            <div id="ytplayer-pip"></div>
+        </div>
+    </div>
+
+    <div id="hud-overlay">
+      <div id="hud-score" class="badge">
+        <span id="score-text">0 - 0</span>
+        <div id="hud-period" class="badge period-badge hidden">-</div>
+      </div>
+      <div id="hud-time" class="time-container">
+        <div id="hud-video-time" class="badge clock-badge">00:00:00</div>
+        <div id="hud-live-status" class="badge live-badge">●</div>
+      </div>
+      <div id="basket-toast" class="toast hidden"></div>
+    </div>
+  </div>
+
+  <div id="stats-section" class="players-list-container">
+    <div class="scoreboard">
+      <div class="team-labels">
+        <span id="label-team-A">SQUADRA A</span>
+        <span id="team-fouls-A" class="team-fouls-badge"></span>
+        <span id="game-period" class="period-box-mini hidden">-</span>
+        <span id="team-fouls-B" class="team-fouls-badge"></span>
+        <span id="label-team-B">SQUADRA B</span>
+      </div>
+      <div class="score-container">
+          
+          <span id="team-details-A" class="team-cumulative-details">[TL:0/0, T2:0, T3:0]</span>
+          <div id="game-score">0 - 0</div>
+          <span id="team-details-B" class="team-cumulative-details">[TL:0/0, T2:0, T3:0]</span>
+          
+      </div>      
+    </div>
+    <div id="highlights-section" class="highlights-container hidden-section">
+      <div id="highlight-label" class="highlight-placeholder"></div>
+      <div class="highlights-top-row">
+        <button id="toggle-highlights" class="btn-toggle-off" onclick="toggleHighlights()">
+          <i class="fas fa-star"></i> <span class="text-label">Highlights</span>
+        </button>
+        <button id="btn-apri-grafico" class="btn-toggle-off" onclick="mostraGraficoPunteggio()">
+          <i class="fas fa-chart-line"></i> <span class="text-label">Grafico</span>
+        </button>        
+        <button id="btn-apri-Top5" class="btn-toggle-off" onclick="mostraPopupQuintetti();">
+          <i class="fas fa-users"></i> <span class="text-label">Top5</span>
+        </button>
+
+        <div id="highlights-controls" class="hidden-controls">
+          <div class="highlights-buttons">
+            <button onclick="gestisciHighlight('start')"><i class="fas fa-fast-backward"></i></button>
+            <button onclick="gestisciHighlight('prev')"><i class="fas fa-step-backward"></i></button>
+            <button onclick="gestisciHighlight('next')"><i class="fas fa-step-forward"></i></button>
+            <button onclick="gestisciHighlight('end')"><i class="fas fa-fast-forward"></i></button>
+            <div class="highlight-duration-container">
+              <input type="number" id="highlight-duration" value="10" min="1" max="60">
+              <span>s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="opponent-score-section" class="highlights-container">
+      <div class="highlights-top-row">
+      <div id="opponent" class="opponent-label">PUNTI SQUADRA B</div>
+        <div class="highlights-buttons">
+          <button id="btn-details" class="btn-details" onclick="window.ShowPlayerPopup()">Details</button>
+          <button id="btn-opp-1" class="btn-score" onclick="window.IncrPuntiSquadraB(1)">+1</button>
+          <button id="btn-opp-2" class="btn-score" onclick="window.IncrPuntiSquadraB(2)">+2</button>
+          <button id="btn-opp-3" class="btn-score" onclick="window.IncrPuntiSquadraB(3)">+3</button>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="players-grid">
+      <div class="loading-container">
+        <img src="icon-192.png" class="spinner-icon" alt="Caricamento...">
+        <p>Caricamento statistiche...</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="debug-info" class="debug-footer">
+    <div>Tempo risposta server: <span id="fetch-time">0</span> ms</div>
+    <div>Risoluzione: <span id="display-size">0x0</span> (DPR: <span id="display-dpr">1</span>)</div>
+  </div>
+  <div id="systemClock" class="system-clock hidden">00:00:00</div>
+  <div id="adminCounter" class="admin-live-counter hidden">
+    <i class="fas fa-users"></i> <span id="onlineCount">0</span>
+  </div>  
+
+  <div id="popup-hud-opts" class="popup-transparent-overlay hidden" onclick="window.chiudiPopupHud()">
+    <div class="popup-box" onclick="event.stopPropagation()">
+      <div class="popup-row">
+        <button class="btn-score" onclick="window.changeHUDLayout('hud-time')">Clock</button>
+        <button class="btn-score" onclick="window.changeHUDLayout('hud-score')">Score</button>
+      </div>
+      <button class="mybtn-undo" onclick="window.chiudiPopupHud()">Chiudi</button>
+    </div>
+  </div>
+  <div id="modalGraficoEvoluzione" class="modal-graph">
+    <div class="modal-content">
+      <div id="titoloGrafico" style="text-align: center; margin-bottom: 15px; font-size: 1.6rem; font-weight: bold; color: #333;">
+        Evoluzione Punteggio Partita
+      </div>
+      <div style="height: 300px; width: 100%;">
+        <canvas id="canvasEvoluzione"></canvas>
+      </div>
+      <button class="close-graph" style="justify-content: center" onclick="chiudiGraficoEvoluzione()">CHIUDI</button>
+    </div>
+  </div>
+
+  <div id="rotation-tutorial-overlay">
+    <div class="phone-icon-container"></div>
+    <div class="rotation-text">
+      Per una visione migliore,<br>abilita la rotazione automatica e<br>ruota il dispositivo
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1"></script>  
+  <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+
+</html>

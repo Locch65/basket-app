@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Anagrafica Roster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+   
+
+    <script type="module" crossorigin src="/basket-app/assets/anagrafica-Cc6lcbm6.js"></script>
+    <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-BGNtWrdi.js">
+    <link rel="modulepreload" crossorigin href="/basket-app/assets/common-CwRuEGaa.js">
+    <link rel="stylesheet" crossorigin href="/basket-app/assets/anagrafica-CNkTnzc3.css">
+  </head>
+
+<body>
+
+  <div class="swiper">
+    <div class="swiper-wrapper" id="roster-container"></div>
+    <div class="swiper-pagination"></div>
+  </div>
+
+  <div id="modalGraph" class="modal-graph">
+    <div class="modal-content">
+      <div id="modal-filters" style="margin-bottom: 15px; text-align: center; font-size: 1.4rem;"></div>
+      <div style="height: 300px; width: 100%;">
+        <canvas id="canvasGrafico"></canvas>
+      </div>
+      <button class="close-graph" onclick="window.chiudiGrafico()">CHIUDI</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Classifica FIP - Polismile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+  <script type="module" crossorigin src="/basket-app/assets/classifica-gANeH6ip.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-BGNtWrdi.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/common-CwRuEGaa.js">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/classifica-Cku3VdB0.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="header-container">
+        <div class="brand-section">
+            <a href="index.html" class="home-btn" aria-label="Home">
+                <i class="fas fa-home"></i>
+            </a>
+            <h2>Classifiche FIP</h2>
+        </div>
+<div id="admin-actions" class="hidden" style="display: flex; justify-content: center; gap: 8px; margin: 10px auto 20px auto; max-width: 320px;">
+    <button id="btn-refresh-fip" class="fip-btn" style="background-color: #27ae60; border-radius: 10px; padding: 4px 4px; font-size: 1rem; flex: 1;">
+        <i class="fas fa-sync-alt" style="font-size: 1.2rem;"></i> Refresh FIP
+    </button>
+    
+    <button id="btn-sync-firebase" class="fip-btn" style="background-color: #e67e22; border-radius: 10px; padding: 4px 4px; font-size: 1rem; flex: 1;">
+        <i class="fas fa-cloud-upload-alt" style="font-size: 1.2rem;"></i> Sync Firebase
+    </button>
+</div>
+    </div>
+
+    <div class="filter-container">
+        <label class="filter-option">
+            <input type="radio" name="categoria" value="U14" checked onchange="updateCategory()"> U14 - Titolo
+        </label>
+        <label class="filter-option">
+            <input type="radio" name="categoria" value="U15" onchange="updateCategory()"> U15 - Coppa
+        </label>
+    </div>
+    <div id="hint-classifica" style="text-align: center; color: #64748b; font-size: 1.2rem; margin-bottom: 10px; font-style: italic;">
+        <i class="fas fa-info-circle" style="margin-right: 5px;"></i> Clicca su una squadra per vedere le sue partite...
+    </div>
+
+    <div id="table-container">
+        <div class="loading">Sincronizzazione dati FIP...</div>
+    </div>
+
+    <div id="details-container" class="hidden">
+        <div class="header-details">
+            <button onclick="showClassifica()" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <h3 id="selected-team-name">Nome Squadra</h3>
+        </div>
+        <div id="team-matches-list">
+            </div>
+    </div>
+
+    <div id="nota-classifica" class="hidden" style="color: #ef4444; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; text-align: center;">
+        * classifica provvisoria
+    </div>
+
+    <div class="nav-button-container">
+        <a id="fip-external-link" href="#" target="_blank" class="fip-btn">
+            Vai al sito ufficiale FIP <i class="fas fa-external-link-alt" style="font-size: 1.6rem; margin-left: 5px;"></i>
+        </a>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+
+</body>
+</html>

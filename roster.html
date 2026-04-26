@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Statistiche Avanzate Roster</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"> 
+
+  
+  <script type="module" crossorigin src="/basket-app/assets/roster-DA47SM2U.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-BGNtWrdi.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/common-CwRuEGaa.js">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/roster-ChcRjpNQ.css">
+</head>
+
+<body>
+
+  <div class="header-container">
+    <div class="brand-section">
+      <a href="index.html" class="home-btn" aria-label="Home">
+        <i class="fas fa-home"></i>
+      </a>
+      <h2>Polismile A - U14</h2>
+    </div>
+    <button id="updateBtn" class="update-btn" onclick="window.forzaAggiornamentoRoster()">
+      <i class="fas fa-sync-alt"></i> Aggiorna
+    </button>
+  </div>
+
+  <div class="filters-container">
+    <div class="filter-group">
+      <strong>Campionato:</strong>
+      <label><input type="radio" name="catFilter" value="U14" onclick="applicaFiltriECalcoli()"> U14</label>
+      <label><input type="radio" name="catFilter" value="U15" onclick="applicaFiltriECalcoli()"> U15</label>
+      <label><input type="radio" name="catFilter" value="Tutti" checked onclick="applicaFiltriECalcoli()"> Tutti</label>
+    </div>
+
+    <div class="filter-group">
+      <strong>Punti:</strong>
+      <label><input type="radio" name="calcType" value="Totale" checked onclick="applicaFiltriECalcoli()"> Somma</label>
+      <label><input type="radio" name="calcType" value="Media" onclick="applicaFiltriECalcoli()"> Media</label>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Calcolo statistiche in corso...</div>
+
+  <div class="table-container">
+    <table id="roster-table" style="display:none;">
+      <thead>
+        <tr>
+          <th onclick="window.gestisciClickOrdinamento('Numero Maglia')">#</th>
+          <th class="col-nome" onclick="window.gestisciClickOrdinamento('Cognome')">Giocatore</th>
+          <th onclick="window.gestisciClickOrdinamento('partite')">PG</th>
+          <th onclick="window.gestisciClickOrdinamento('punti')">PTS</th>
+          <th onclick="window.gestisciClickOrdinamento('tl')">TL</th>
+          <th onclick="window.gestisciClickOrdinamento('t2')">T2</th>
+          <th onclick="window.gestisciClickOrdinamento('t3')">T3</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+      <tfoot id="table-foot"></tfoot>
+    </table>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+
+</body>
+
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Calendario Partite</title>
+  <!-- <link rel="stylesheet" href="style-variables.css"> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-BGNtWrdi.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/common-CwRuEGaa.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-DLeYI77y.js"></script>
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/calendario-CeZxvsvS.css">
+</head>
+
+<body>
+  <header class="header-fissa">
+    <div id="hamburgerMenu">
+      <button id="hamburgerBtn">☰</button>
+      <nav id="menu" class="hidden">
+        <ul>
+          <li>
+            <a href="index.html" class="menu-link-home">
+              <i class="fas fa-home icon-home"></i> Home
+            </a>
+          </li>
+
+          <li>
+            <span class="menu-section-title">
+              <i class="fas fa-trophy"></i> Campionato
+            </span>
+            <div class="filter-group-vertical">
+              <label class="radio-container">
+                <input type="radio" name="camp" value="U14" class="camp-radio"> U14
+              </label>
+              <label class="radio-container">
+                <input type="radio" name="camp" value="U15" class="camp-radio"> U15
+              </label>
+              <label class="radio-container">
+                <input type="radio" name="camp" value="Tutti" class="camp-radio"> Tutti
+              </label>
+            </div>
+          </li>
+
+          <li>
+            <label class="menu-label-flex">
+              <i class="fas fa-sort"></i>
+              <span>Ordine:</span>
+              <select id="selectOrdine" class="select-dark">
+                <option value="desc">Più recenti</option>
+                <option value="asc">Cronologico</option>
+              </select>
+            </label>
+          </li>
+
+          <li>
+            <label class="menu-label-flex">
+              <i class="fas fa-filter"></i>
+              <span>Mostra:</span>
+              <select id="selectStatoPartite" class="select-dark">
+                <option value="tutte">Tutte</option>
+                <option value="terminate">Terminate</option>
+                <option value="future">Future</option>
+              </select>
+            </label>
+          </li>
+
+          <li>
+            <button id="toggleTheme1" class="btn-menu-flat">
+              <i class="fas fa-moon"></i> Dark Mode
+            </button>
+          </li>
+          <li id="liSyncAdmin" class="hidden">
+              <button id="syncToFirebase" class="btn-menu-flat btn-orange">
+                  <i class="fas fa-sync-alt"></i> Read from Server
+              </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="header-toolbar">
+        <button id="btnCicloCamp" class="btn-tool">
+          <i class="fas fa-trophy"></i> <span id="labelCamp">Tutti</span>
+        </button>
+
+        <button id="btnCicloStato" class="btn-tool">
+          <i class="fas fa-filter"></i> <span id="labelStato">Tutte</span>
+        </button>
+
+        <button id="btnToggleOrdine" class="btn-tool">
+          <i class="fas fa-sort"></i>
+        </button>
+
+        <button id="btnSearchToggle" class="btn-tool">
+          <i class="fas fa-search"></i>
+        </button>
+        <span id="matchCounter" class="match-counter">0/0</span>
+    </div>
+  </header>
+  <div id="searchContainer" class="search-bar-container hidden">
+    <div class="search-input-wrapper">
+        <input type="text" id="inputSearch" placeholder="Cerca Squadra, match Id o Luogo..." autocomplete="off">
+        <button id="btnClearSearch" class="search-action-btn">
+            <i class="fas fa-times"></i>
+        </button>
+        <button id="btnSubmitSearch" class="search-action-btn">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+  </div>
+
+  <div id="listaPartite" class="loading"> </div>
+  <div id="loadingPopup" class="loading-popup hidden">
+    <div class="loading-content">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Caricamento Calendario<br>(sync database)...</span>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+
+</html>
