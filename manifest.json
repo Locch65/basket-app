@@ -1,21 +1,14 @@
 {
   "name": "Polismile Basket App",
   "short_name": "Basket",
-  "start_url": "index.html",
+  "start_url": "/basket-app/index.html",
+  "scope": "/basket-app/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#2c3e50",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
