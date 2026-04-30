@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Assistant Polismile</title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-DwuGXRdX.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/common-CuaDRQgJ.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-MQIkPhFH.js"></script>
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/ai_interface-B1ucncuo.css">
+</head>
+<body>
+
+    <div id="ai-container" class="ai-card">
+        <a href="index.html" class="home-btn" aria-label="Home">
+            <i class="fas fa-home"></i>
+        </a>
+        <h2 style="color: #ff6600;">Polismile Voice AI</h2>
+        <div id="status">Tocca per parlare</div>
+        <button id="micBtn" class="mic-btn"><i class="fas fa-microphone"></i></button>
+        
+        <div class="input-container">
+            <textarea id="textInput" placeholder="Scrivi qui..." rows="2"></textarea>
+            <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+
+        <div id="loading-spinner" style="display: none; margin: 10px 0;">
+            <i class="fas fa-circle-notch fa-spin" style="color: #ff6600; font-size: 24px;"></i>
+            <span style="color: #aaa; margin-left: 10px; font-style: italic;">L'IA sta pensando...</span>
+        </div>
+
+        <div id="response-text"></div>
+        <button id="stopVoiceBtn" class="stop-voice-btn" disabled>
+            <i class="fas fa-volume-up"></i>
+        </button>
+
+    </div>
+
+    <div id="debug" class="debug-box">Log: Pronto</div>
+
+</body>
+</html>
