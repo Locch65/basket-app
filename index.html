@@ -19,12 +19,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
     </style>
-  <script type="module" crossorigin src="/basket-app/assets/main-CUTuDGpN.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-DwuGXRdX.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/common-CuaDRQgJ.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-MQIkPhFH.js">
+  <script type="module" crossorigin src="/basket-app/assets/main-hHcHwnhs.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-DHM9HP9U.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/common-D9MWB2lw.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-Be2aQXKI.js">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-BJkGFZO3.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-tCOyTUGo.css">
 </head>
 
 <body>
@@ -32,7 +32,7 @@
     <header>
         <div style="display: flex; flex-direction: column;">
             <h1>Polismile A - U14</h1>
-            <div class="app-version">Versione 1.1.7</div>
+            <div class="app-version">Versione 1.1.8</div>
         </div>
         <div style="display: flex; align-items: center; gap: 1rem;">
             <i class="fas fa-cog" id="btn-settings" style="font-size: 2.5rem; cursor: pointer; color: var(--primary);" onclick="window.apriPopupSettings()"></i>
@@ -84,48 +84,94 @@
     </div>
     
     <div id="settingsPopup" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 1500; justify-content: center; align-items: center;">
-        <div class="popup-content" style="max-width: 85%;">
-            <h3 style="color: var(--primary); font-size: 2.2rem; margin-bottom: 1.5rem;">Impostazioni Colore</h3>
-            
-            <div id="custom-picker-container" style="display: flex; flex-direction: column; gap: 1.5rem; margin: 2rem 0;">
-                
-                <div id="color-preview" style="width: 100%; height: 60px; border-radius: 10px; border: 2px solid #555; background: var(--primary);"></div>
+    <div class="popup-content" style="max-width: 85%; width: 400px;">
+        <h3 style="color: var(--primary); font-size: 2.2rem; margin-bottom: 1.5rem;">Personalizza Tema</h3>
+        
+        <div id="preview-container" style="padding: 2rem; background-color: var(--bg-color); border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid #444;">
+            <div id="btn-preview" class="menu-button" style="pointer-events: none; margin: 0; min-height: 80px;">
+                <i class="fas fa-paint-brush"></i>
+                <span>Testo Esempio</span>
+            </div>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-size: 1.2rem; color: #aaa;">Temi Predefiniti:</label>
+            <select id="preset-selector" onchange="window.applyPreset()" style="width: 100%; padding: 1rem; border-radius: 8px; background: #222; color: white; font-size: 1.4rem; border: 1px solid #444;">
+                <option value="">-- Scegli un tema --</option>
+                <option value="default">Default Polismile</option>
+                <option value="foresta">Foresta</option>
+                <option value="deserto">Deserto</option>
+                <option value="oceano">Oceano</option>
+                <option value="vintage">Vintage</option>
+                <option value="bosco">Bosco</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="artica">Notte Artica</option>
+                <option value="eclissi">Eclissi</option>
+                <option value="lavanda">Lavanda</option>
+                <option value="terra">Terra</option>
+                <option value="tramonto">Tramonto</option>
+                <option value="matrix">Matrix</option>
+                <option value="vino">Vino</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <select id="element-selector" onchange="window.onElementChange()" style="width: 100%; padding: 1rem; border-radius: 8px; background: #333; color: white; font-size: 1.4rem; border: 1px solid var(--primary);">
+                <option value="--bg-color">Colore Sfondo Pagina</option>
+                <option value="--card-color">Colore Sfondo Bottoni</option>
+                <option value="--primary">Colore Icone</option>
+                <option value="--text-color">Colore Testo</option>
+            </select>
+        </div>
 
+        <div id="custom-picker-container" style="display: flex; flex-direction: column; gap: 1.2rem;">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.2rem; color: #aaa;">HSL</span>
+                <label class="switch" style="width: 40px; height: 20px; position: relative; display: inline-block;">
+                    <input type="checkbox" id="color-mode-toggle" onchange="window.toggleColorMode()" style="opacity: 0; width: 0; height: 0;">
+                    <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); transition: .4s; border-radius: 20px;"></span>
+                </label>
+                <span style="font-size: 1.2rem; color: #aaa;">RGB</span>
+            </div>
+
+            <div id="group-hsl">
                 <div class="slider-group">
                     <label>Tonalità: <span id="val-h">0</span>°</label>
-                    <input type="range" id="range-h" min="0" max="360" value="145" class="hsv-slider hue-gradient">
+                    <input type="range" id="range-h" min="0" max="360" value="0" class="hsv-slider hue-gradient">
                 </div>
-
                 <div class="slider-group">
                     <label>Saturazione: <span id="val-s">100</span>%</label>
                     <input type="range" id="range-s" min="0" max="100" value="100" class="hsv-slider">
                 </div>
-
                 <div class="slider-group">
                     <label>Luminosità: <span id="val-v">100</span>%</label>
                     <input type="range" id="range-v" min="0" max="100" value="100" class="hsv-slider">
                 </div>
-
-                <p id="hexLabel" style="font-family: monospace; font-size: 1.8rem; text-align: center; color: var(--text-color);">#27AE60</p>
             </div>
 
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
-                <button class="popup-btn" onclick="window.saveTheme()" style="background-color: var(--primary); flex: 1;">
-                    Salva
-                </button>
-                
-                <button class="popup-btn" onclick="window.resetTheme()" style="background-color: #666; flex: 1;">
-                    Reset
-                </button>
-                
-                <button class="popup-btn" onclick="window.chiudiPopupSettings()" style="background-color: #444; flex: 1;">
-                    Annulla
-                </button>
+            <div id="group-rgb" class="hidden">
+                <div class="slider-group">
+                    <label>Rosso (R): <span id="val-r">0</span></label>
+                    <input type="range" id="range-r" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #f00);">
+                </div>
+                <div class="slider-group">
+                    <label>Verde (G): <span id="val-g">0</span></label>
+                    <input type="range" id="range-g" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #0f0);">
+                </div>
+                <div class="slider-group">
+                    <label>Blu (B): <span id="val-b">0</span></label>
+                    <input type="range" id="range-b" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #00f);">
+                </div>
             </div>
 
+            <p id="hexLabel" style="font-family: monospace; font-size: 1.6rem; text-align: center; color: #fff; margin: 0;">#000000</p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+            <button class="popup-btn" onclick="window.saveTheme()" style="background-color: var(--primary); flex: 1; margin-top:0;">Salva</button>
+            <button class="popup-btn" onclick="window.resetTheme()" style="background-color: #666; flex: 1; margin-top:0;">Reset</button>
+            <button class="popup-btn" onclick="window.chiudiPopupSettings()" style="background-color: #444; flex: 1; margin-top:0;">Annulla</button>
         </div>
     </div>
-
+</div>
 
     <div id="customPopup">
         <div class="popup-content">
@@ -144,7 +190,7 @@
 
             <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">Programma Allenamenti</h3>
 
-            <div id="training-content" style="font-size: 1.6rem; line-height: 1.5; white-space: pre-wrap; text-align: left; margin: 1.5rem 0; max-height: 50vh; overflow-y: auto; padding: 10px; background: #2a2a2a; border-radius: 10px;">
+            <div id="training-content" style="font-size: 1.6rem; line-height: 1.5; color: white; white-space: pre-wrap; text-align: left; margin: 1.5rem 0; max-height: 50vh; overflow-y: auto; padding: 10px; border-radius: 10px;">
                 Caricamento...
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
