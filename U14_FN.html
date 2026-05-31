@@ -16,6 +16,35 @@
             user-select: none;
         }
 
+        /* SCHERMATA POSTER INIZIALE A TUTTO SCHERMO */
+        #poster-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        #poster-overlay img {
+            width: 100%;
+            height: 100%;
+            /* MODIFICATO: contain assicura che l'immagine non venga mai tagliata e resti interamente visibile e centrata */
+            object-fit: contain; 
+        }
+
+        #poster-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
         /* NUOVA BARRA DI CONTROLLO SUPERIORE */
         .top-bar {
             position: fixed;
@@ -151,6 +180,18 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* Sotto-elemento stilistico per la data all'interno del titolo fase */
+        .fase-date {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #94a3b8;
+            text-transform: none;
+            letter-spacing: 0.5px;
         }
 
         .bracket-column {
@@ -291,6 +332,10 @@
 </head>
 <body>
 
+    <div id="poster-overlay">
+        <img src="U14_FN_Poster.jpeg" alt="Poster Torneo U14 FN">
+    </div>
+
     <div class="top-bar">
         <div class="top-left-controls">
             <label for="display-mode">Visualizza</label>
@@ -324,14 +369,17 @@
         const SHEET_ID = '1Pa_oN5DpWO0t-e2iPKgFhAwqn728X0g3r330xJg8jsU'; 
         const TAB_NAME = 'TABELLONE';
         const SQUADRE_TAB_NAME = 'SQUADRE';
+        const DATE_TAB_NAME = 'DATE';
 
         const URL_TABELLONE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${TAB_NAME}`;
         const URL_SQUADRE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SQUADRE_TAB_NAME}`;
+        const URL_DATE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${DATE_TAB_NAME}`;
 
         const container = document.getElementById('panzoom-container');
         const wrapper = document.getElementById('panzoom-wrapper');
         const bracket = document.getElementById('tournament-bracket');
         const selectMode = document.getElementById('display-mode');
+        const posterOverlay = document.getElementById('poster-overlay');
 
         let scale = window.innerWidth < 768 ? 0.35 : 0.65;
         let pointX = 15;
@@ -343,6 +391,23 @@
 
         let globalMatches = [];
         let globalSquadreDatabase = [];
+        let globalDateDatabase = {}; // Mappa chiave-valore per lookup istantaneo della data fase
+
+        // FUNZIONE PER CHIUDERE IMMEDIATAMENTE IL POSTER OVERLAY
+        function hidePoster() {
+            if (posterOverlay && !posterOverlay.classList.contains('hidden')) {
+                posterOverlay.classList.add('hidden');
+            }
+        }
+
+        // Timer di 3 secondi per la chiusura automatica del poster
+        const posterTimeout = setTimeout(hidePoster, 3000);
+
+        // Chiusura istantanea al clic o touch su qualsiasi punto dello schermo
+        posterOverlay.addEventListener('click', () => {
+            clearTimeout(posterTimeout);
+            hidePoster();
+        });
 
         function updateTransform() {
             if (scale < 0.05) scale = 0.05;
@@ -430,16 +495,20 @@
 
         async function fetchBracketData() {
             try {
-                const [responseTabellone, responseSquadre] = await Promise.all([
+                // Esecuzione parallela immediata in background
+                const [responseTabellone, responseSquadre, responseDate] = await Promise.all([
                     fetch(URL_TABELLONE),
-                    fetch(URL_SQUADRE)
+                    fetch(URL_SQUADRE),
+                    fetch(URL_DATE)
                 ]);
 
                 const textTabellone = await responseTabellone.text();
                 const textSquadre = await responseSquadre.text();
+                const textDate = await responseDate.text();
 
                 const jsonData = JSON.parse(textTabellone.substr(47).slice(0, -2));
                 const jsonSquadre = JSON.parse(textSquadre.substr(47).slice(0, -2));
+                const jsonDate = JSON.parse(textDate.substr(47).slice(0, -2));
 
                 const rows = jsonData.table.rows;
                 const dataRows = (rows[0]?.c[0]?.v === 'ID' || rows[0]?.c[0]?.v === 'id') ? rows.slice(1) : rows;
@@ -458,24 +527,21 @@
                     });
                 }
 
-                // globalMatches = dataRows.map(row => {
-                //     return {
-                //         id: row.c[0]?.v ? row.c[0].v.toString().trim() : '',
-                //         fase: row.c[1]?.v || '',
-                //         turno: row.c[2]?.v || '',
-                //         squadraA: (row.c[3]?.v !== undefined && row.c[3]?.v !== null) ? row.c[3].v.toString().trim() : 'Da definire',
-                //         squadraB: (row.c[4]?.v !== undefined && row.c[4]?.v !== null) ? row.c[4].v.toString().trim() : 'Da definire',
-                //         puntiA: (row.c[5]?.v !== undefined && row.c[5]?.v !== null) ? row.c[5].v : '',
-                //         puntiB: (row.c[6]?.v !== undefined && row.c[6]?.v !== null) ? row.c[6].v : '',
-                //         prossimaPartitaId: row.c[7]?.v ? row.c[7].v.toString().trim() : '',
-                //         posizioneProssima: row.c[8]?.v ? row.c[8].v.toString().trim().toUpperCase() : '',
-                //         prossimaPartitaIdPerdente: row.c[9]?.v ? row.c[9].v.toString().trim() : '',
-                //         posizioneProssimaPerdente: row.c[10]?.v ? row.c[10].v.toString().trim().toUpperCase() : ''
-                //     };
-                // });
+                // 2. Lettura Foglio DATE (Mappatura in Oggetto Chiave/Valore)
+                const rowsDate = jsonDate.table.rows;
+                globalDateDatabase = {};
+                if (rowsDate && rowsDate.length > 0) {
+                    const startIdxDate = (rowsDate[0]?.c[0]?.v?.toString().toUpperCase() === 'FASE') ? 1 : 0;
+                    rowsDate.slice(startIdxDate).forEach(row => {
+                        if (row.c[0] && row.c[0].v !== null) {
+                            const faseNome = row.c[0].v.toString().trim().toUpperCase();
+                            const faseDataStringa = row.c[1] && row.c[1].v !== null ? row.c[1].v.toString().trim() : '';
+                            globalDateDatabase[faseNome] = faseDataStringa;
+                        }
+                    });
+                }
 
                 globalMatches = dataRows.map(row => {
-                    // Helper per estrarre in modo sicuro il valore testuale convertendolo in stringa
                     const getCellValue = (cell) => {
                         if (!cell || cell.v === undefined || cell.v === null) return '';
                         return cell.v.toString().trim();
@@ -581,7 +647,13 @@
 
                 const faseTitle = document.createElement('div');
                 faseTitle.className = 'fase-title';
-                faseTitle.innerText = faseKey.replace('_', ' ');
+                
+                const dataFaseTrovata = globalDateDatabase[faseKey] || '';
+                
+                faseTitle.innerHTML = `
+                    <span>${faseKey.replace('_', ' ')}</span>
+                    ${dataFaseTrovata ? `<span class="fase-date">${dataFaseTrovata}</span>` : ''}
+                `;
                 faseContainer.appendChild(faseTitle);
 
                 dataStructure[faseKey].orderOfTurns.forEach(turno => {
@@ -695,6 +767,7 @@
             if(document.querySelector('.match-box')) drawConnectorLines();
         });
 
+        // Avvio immediato del download asincrono dei fogli Google in background
         fetchBracketData();
     </script>
 </body>
