@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tabellone Torneo Basket</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            width: 100vw;
+            height: 100vh;
+            user-select: none;
+        }
+
+        /* NUOVA BARRA DI CONTROLLO SUPERIORE */
+        .top-bar {
+            position: fixed;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Spinge i controlli a sinistra e l'hint al centro/destra */
+            pointer-events: none; /* Permette il click sotto la barra se vuota */
+        }
+
+        /* CONTROLLI IN ALTO A SINISTRA (MENU A TENDINA) */
+        .top-left-controls {
+            display: flex;
+            align-items: center; /* Allinea label e select sulla stessa linea */
+            gap: 10px;
+            pointer-events: auto; /* Ripristina i click sui controlli */
+        }
+
+        .top-left-controls label {
+            font-size: 0.6rem;
+            font-weight: bold;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(240, 242, 245, 0.8);
+            /* padding: 6px 10px; */
+            border-radius: 4px;
+            width: max-content;
+        }
+
+        .top-left-controls select {
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .top-left-controls select:focus {
+            border-color: #ff6b00;
+        }
+
+        /* MODIFICATO: Rimossa la posizione fissa, ora gestito dalla top-bar */
+        .mobile-hint {
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            pointer-events: none;
+            display: none;
+            margin-left: auto; /* Spinge l'hint verso il centro/destra */
+            margin-right: auto; /* In combinazione con il flex della barra, lo centra nello spazio rimanente */
+        }
+
+        @media screen and (max-width: 768px) {
+            .mobile-hint {
+                display: block;
+            }
+        }
+
+        /* RESTO DELLO STILE INVARIATO */
+        #panzoom-container {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #panzoom-container:active {
+            cursor: grabbing;
+        }
+
+        .panzoom-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+        #tournament-bracket {
+            display: flex;
+            gap: 160px; 
+            padding: 60px; 
+            align-items: center; 
+            width: max-content;
+            position: relative;
+            min-height: calc(100vh - 120px); 
+        }
+
+        #bracket-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .fase-container {
+            display: flex;
+            flex-direction: column; 
+            gap: 50px; 
+            background: rgba(255, 255, 255, 0.6);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            min-width: 210px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .fase-title {
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white;
+            background-color: #1e293b; 
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .bracket-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; 
+        }
+
+        .column-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #475569;
+            text-transform: uppercase;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .match-box {
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            width: 210px; 
+            overflow: hidden;
+            transition: border-color 0.3s;
+            position: relative; 
+        }
+
+        .match-box.gold-match {
+            background-color: #fef08a; 
+            border-color: #facc15;
+        }
+
+        .match-box.silver-match {
+            background-color: #e2e8f0; 
+            border-color: #94a3b8;
+        }
+
+        .match-box.active {
+            border-color: #ff6b00; 
+        }
+        
+        .match-box.gold-match.active,
+        .match-box.silver-match.active {
+            border-color: #ff6b00;
+        }
+
+        .match-id {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #64748b;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-bottom-left-radius: 4px;
+            pointer-events: none; 
+            z-index: 10;
+        }
+        
+        .match-box.active .match-id {
+            background: #ff6b00; 
+        }
+
+        .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: rgba(0, 0, 0, 0.05) 1px solid;
+            font-size: 0.85rem;
+        }
+
+        .team-row:last-child {
+            border-bottom: none;
+        }
+
+        .team-name {
+            color: #1e293b;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 140px;
+        }
+
+        .team-name.empty {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .team-score {
+            font-weight: bold;
+            color: #0f172a;
+            background: rgba(15, 23, 42, 0.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+            min-width: 18px;
+            text-align: center;
+            margin-right: 18px; 
+            z-index: 5; 
+        }
+
+        .winner {
+            background-color: #e2f0d9 !important;
+            color: #385d25;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000; 
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls button {
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #ff6b00;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .controls button:hover {
+            background-color: #e05e00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-left-controls">
+            <label for="display-mode">Visualizza</label>
+            <select id="display-mode">
+                <option value="REGIONE">Regione</option>
+                <option value="CITTA">Città</option>
+                <option value="SQUADRA">Squadra</option>
+                <option value="NICKNAME" selected>Nickname</option>
+            </select>
+        </div>
+
+        <div class="mobile-hint">📱 Trascina e pizzica per zoomare</div>
+    </div>
+
+    <div class="controls">
+        <button id="zoom-in">➕ Ingrandisci</button>
+        <button id="zoom-out">➖ Rimpicciolisci</button>
+        <button id="zoom-reset">🔄 Reset</button>
+    </div>
+
+    <div id="panzoom-container">
+        <div class="panzoom-wrapper" id="panzoom-wrapper">
+            <div id="tournament-bracket">
+                <svg id="bracket-lines"></svg>
+                Caricamento dati...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_ID = '1Pa_oN5DpWO0t-e2iPKgFhAwqn728X0g3r330xJg8jsU'; 
+        const TAB_NAME = 'TABELLONE';
+        const SQUADRE_TAB_NAME = 'SQUADRE';
+
+        const URL_TABELLONE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${TAB_NAME}`;
+        const URL_SQUADRE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SQUADRE_TAB_NAME}`;
+
+        const container = document.getElementById('panzoom-container');
+        const wrapper = document.getElementById('panzoom-wrapper');
+        const bracket = document.getElementById('tournament-bracket');
+        const selectMode = document.getElementById('display-mode');
+
+        let scale = window.innerWidth < 768 ? 0.35 : 0.65;
+        let pointX = 15;
+        let pointY = 15;
+        let start = { x: 0, y: 0 };
+        let isDragging = false;
+        let touchStartDist = 0;
+        let touchStartScale = 0;
+
+        let globalMatches = [];
+        let globalSquadreDatabase = [];
+
+        function updateTransform() {
+            if (scale < 0.05) scale = 0.05;
+            if (scale > 3) scale = 3;
+            wrapper.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+        }
+
+        container.addEventListener('mousedown', (e) => {
+            if(e.target.closest('button') || e.target.closest('select')) return;
+            isDragging = true;
+            start = { x: e.clientX - pointX, y: e.clientY - pointY };
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            pointX = e.clientX - start.x;
+            pointY = e.clientY - start.y;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const xs = (e.clientX - pointX) / scale;
+            const ys = (e.clientY - pointY) / scale;
+            if (e.deltaY < 0) scale += 0.05;
+            else scale -= 0.05;
+            pointX = e.clientX - xs * scale;
+            pointY = e.clientY - ys * scale;
+            updateTransform();
+        }, { passive: false });
+
+        container.addEventListener('touchstart', (e) => {
+            if(e.target.closest('button') || e.target.closest('select')) return;
+            if (e.touches.length === 1) {
+                isDragging = true;
+                start = { x: e.touches[0].clientX - pointX, y: e.touches[0].clientY - pointY };
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                touchStartDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                touchStartScale = scale;
+            }
+        });
+
+        container.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDragging) {
+                pointX = e.touches[0].clientX - start.x;
+                pointY = e.touches[0].clientY - start.y;
+                updateTransform();
+            } else if (e.touches.length === 2) {
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                const xs = (midX - pointX) / scale;
+                const ys = (midY - pointY) / scale;
+                scale = touchStartScale * (dist / touchStartDist);
+                pointX = midX - xs * scale;
+                pointY = midY - ys * scale;
+                updateTransform();
+            }
+        });
+
+        container.addEventListener('touchend', (e) => {
+            if (e.touches.length === 0) isDragging = false;
+            else if (e.touches.length === 1) {
+                isDragging = true;
+                start = { x: e.touches[0].clientX - pointX, y: e.touches[0].clientY - pointY };
+            }
+        });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { scale += 0.1; updateTransform(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { scale -= 0.1; updateTransform(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => {
+            scale = window.innerWidth < 768 ? 0.35 : 0.65;
+            pointX = 15; pointY = 15;
+            updateTransform();
+        });
+
+        selectMode.addEventListener('change', () => {
+            if (globalMatches.length > 0) {
+                renderBracket(globalMatches);
+            }
+        });
+
+        async function fetchBracketData() {
+            try {
+                const [responseTabellone, responseSquadre] = await Promise.all([
+                    fetch(URL_TABELLONE),
+                    fetch(URL_SQUADRE)
+                ]);
+
+                const textTabellone = await responseTabellone.text();
+                const textSquadre = await responseSquadre.text();
+
+                const jsonData = JSON.parse(textTabellone.substr(47).slice(0, -2));
+                const jsonSquadre = JSON.parse(textSquadre.substr(47).slice(0, -2));
+
+                const rows = jsonData.table.rows;
+                const dataRows = (rows[0]?.c[0]?.v === 'ID' || rows[0]?.c[0]?.v === 'id') ? rows.slice(1) : rows;
+
+                const rowsSquadre = jsonSquadre.table.rows;
+                globalSquadreDatabase = [];
+                if (rowsSquadre && rowsSquadre.length > 0) {
+                    const startIdx = (rowsSquadre[0]?.c[0]?.v === 'REGIONE' || rowsSquadre[0]?.c[0]?.v === 'regione') ? 1 : 0;
+                    rowsSquadre.slice(startIdx).forEach(row => {
+                        globalSquadreDatabase.push({
+                            regione: row.c[0]?.v ? row.c[0].v.toString().trim() : '',
+                            citta: row.c[1]?.v ? row.c[1].v.toString().trim() : '',
+                            squadra: row.c[2]?.v ? row.c[2].v.toString().trim() : '',
+                            nickname: row.c[3]?.v ? row.c[3].v.toString().trim() : ''
+                        });
+                    });
+                }
+
+                // globalMatches = dataRows.map(row => {
+                //     return {
+                //         id: row.c[0]?.v ? row.c[0].v.toString().trim() : '',
+                //         fase: row.c[1]?.v || '',
+                //         turno: row.c[2]?.v || '',
+                //         squadraA: (row.c[3]?.v !== undefined && row.c[3]?.v !== null) ? row.c[3].v.toString().trim() : 'Da definire',
+                //         squadraB: (row.c[4]?.v !== undefined && row.c[4]?.v !== null) ? row.c[4].v.toString().trim() : 'Da definire',
+                //         puntiA: (row.c[5]?.v !== undefined && row.c[5]?.v !== null) ? row.c[5].v : '',
+                //         puntiB: (row.c[6]?.v !== undefined && row.c[6]?.v !== null) ? row.c[6].v : '',
+                //         prossimaPartitaId: row.c[7]?.v ? row.c[7].v.toString().trim() : '',
+                //         posizioneProssima: row.c[8]?.v ? row.c[8].v.toString().trim().toUpperCase() : '',
+                //         prossimaPartitaIdPerdente: row.c[9]?.v ? row.c[9].v.toString().trim() : '',
+                //         posizioneProssimaPerdente: row.c[10]?.v ? row.c[10].v.toString().trim().toUpperCase() : ''
+                //     };
+                // });
+
+                globalMatches = dataRows.map(row => {
+                    // Helper per estrarre in modo sicuro il valore testuale convertendolo in stringa
+                    const getCellValue = (cell) => {
+                        if (!cell || cell.v === undefined || cell.v === null) return '';
+                        return cell.v.toString().trim();
+                    };
+
+                    const puntiA_raw = row.c[5] ? getCellValue(row.c[5]) : '';
+                    const puntiB_raw = row.c[6] ? getCellValue(row.c[6]) : '';
+
+                    return {
+                        id: row.c[0] ? getCellValue(row.c[0]) : '',
+                        fase: row.c[1] ? getCellValue(row.c[1]) : '',
+                        turno: row.c[2] ? getCellValue(row.c[2]) : '',
+                        squadraA: row.c[3] && row.c[3].v !== null ? getCellValue(row.c[3]) : 'Da definire',
+                        squadraB: row.c[4] && row.c[4].v !== null ? getCellValue(row.c[4]) : 'Da definire',
+                        puntiA: puntiA_raw,
+                        puntiB: puntiB_raw,
+                        prossimaPartitaId: row.c[7] ? getCellValue(row.c[7]) : '',
+                        posizioneProssima: row.c[8] ? getCellValue(row.c[8]).toUpperCase() : '',
+                        prossimaPartitaIdPerdente: row.c[9] ? getCellValue(row.c[9]) : '',
+                        posizioneProssimaPerdente: row.c[10] ? getCellValue(row.c[10]).toUpperCase() : ''
+                    };
+                });
+
+                globalMatches.forEach(match => {
+                    const haPunti = match.puntiA !== '' && match.puntiB !== '';
+                    if (!haPunti) return;
+
+                    const isA_Winner = Number(match.puntiA) > Number(match.puntiB);
+                    const vincente = isA_Winner ? match.squadraA : match.squadraB;
+                    const perdente = isA_Winner ? match.squadraB : match.squadraA;
+                    
+                    if (match.prossimaPartitaId) {
+                        const targetMatchWin = globalMatches.find(m => m.id === match.prossimaPartitaId);
+                        if (targetMatchWin) {
+                            const posWin = match.posizioneProssima;
+                            if (posWin === 'A' || posWin === 'SQUADRA_A') targetMatchWin.squadraA = vincente;
+                            else if (posWin === 'B' || posWin === 'SQUADRA_B') targetMatchWin.squadraB = vincente;
+                        }
+                    }
+
+                    if (match.prossimaPartitaIdPerdente) {
+                        const targetMatchLoss = globalMatches.find(m => m.id === match.prossimaPartitaIdPerdente);
+                        if (targetMatchLoss) {
+                            const posLoss = match.posizioneProssimaPerdente;
+                            if (posLoss === 'A' || posLoss === 'SQUADRA_A') targetMatchLoss.squadraA = perdente;
+                            else if (posLoss === 'B' || posLoss === 'SQUADRA_B') targetMatchLoss.squadraB = perdente;
+                        }
+                    }
+                });
+
+                renderBracket(globalMatches);
+
+            } catch (error) {
+                console.error("Errore dati:", error);
+                bracket.innerHTML = "<p style='padding:20px;'>Errore nel caricamento dei dati dal foglio Google.</p>";
+            }
+        }
+
+        function getTeamDisplayName(squadraNomeOriginale, colonnaTarget) {
+            if (squadraNomeOriginale === 'Da definire' || !squadraNomeOriginale) return squadraNomeOriginale;
+
+            const trovato = globalSquadreDatabase.find(s => s.regione.toUpperCase() === squadraNomeOriginale.toUpperCase());
+            
+            if (trovato) {
+                let valoreSelezionato = '';
+                if (colonnaTarget === 'REGIONE') valoreSelezionato = trovato.regione;
+                else if (colonnaTarget === 'CITTA') valoreSelezionato = trovato.citta;
+                else if (colonnaTarget === 'SQUADRA') valoreSelezionato = trovato.squadra;
+                else if (colonnaTarget === 'NICKNAME') valoreSelezionato = trovato.nickname;
+
+                return valoreSelezionato ? valoreSelezionato : squadraNomeOriginale;
+            }
+
+            return squadraNomeOriginale;
+        }
+
+        function renderBracket(matches) {
+            bracket.innerHTML = '<svg id="bracket-lines"></svg>';
+
+            const orderOfFases = ['SEMIFINALI GOLD-SILVER', 'FINALI GOLD-SILVER', 'SEDICESIMI', 'OTTAVI', 'QUARTI', 'SEMIFINALI', 'FINALI'];
+            const dataStructure = {};
+
+            matches.forEach(match => {
+                if (!match.fase || !match.turno) return; 
+                const faseKey = match.fase.toString().trim().toUpperCase();
+                if (!dataStructure[faseKey]) {
+                    dataStructure[faseKey] = { orderOfTurns: [], turns: {} };
+                }
+                if (!dataStructure[faseKey].turns[match.turno]) {
+                    dataStructure[faseKey].turns[match.turno] = [];
+                    dataStructure[faseKey].orderOfTurns.push(match.turno);
+                }
+                dataStructure[faseKey].turns[match.turno].push(match);
+            });
+
+            const currentTargetColumn = selectMode.value;
+
+            orderOfFases.forEach(faseKey => {
+                if (!dataStructure[faseKey]) return;
+
+                const faseContainer = document.createElement('div');
+                faseContainer.className = 'fase-container';
+
+                const faseTitle = document.createElement('div');
+                faseTitle.className = 'fase-title';
+                faseTitle.innerText = faseKey.replace('_', ' ');
+                faseContainer.appendChild(faseTitle);
+
+                dataStructure[faseKey].orderOfTurns.forEach(turno => {
+                    const column = document.createElement('div');
+                    column.className = 'bracket-column';
+
+                    const title = document.createElement('div');
+                    title.className = 'column-title';
+                    title.innerText = turno;
+                    column.appendChild(title);
+
+                    dataStructure[faseKey].turns[turno].forEach(match => {
+                        const matchBox = document.createElement('div');
+                        matchBox.className = 'match-box';
+                        matchBox.setAttribute('data-id', match.id); 
+                        
+                        if (match.prossimaPartitaId) matchBox.setAttribute('data-next-win', match.prossimaPartitaId);
+                        if (match.prossimaPartitaIdPerdente) matchBox.setAttribute('data-next-loss', match.prossimaPartitaIdPerdente);
+
+                        if (String(turno).toUpperCase().includes("GOLD")) matchBox.classList.add('gold-match');
+                        else if (String(turno).toUpperCase().includes("SILVER")) matchBox.classList.add('silver-match');
+
+                        if (match.puntiA !== '' || match.puntiB !== '') matchBox.classList.add('active');
+
+                        const isAFinale = match.puntiA !== '' && match.puntiB !== '';
+                        const winA = isAFinale && Number(match.puntiA) > Number(match.puntiB);
+                        const winB = isAFinale && Number(match.puntiB) > Number(match.puntiA);
+
+                        const displayNameA = getTeamDisplayName(match.squadraA, currentTargetColumn);
+                        const displayNameB = getTeamDisplayName(match.squadraB, currentTargetColumn);
+
+                        matchBox.innerHTML = `
+                            <div class="match-id">${match.id}</div>
+                            <div class="team-row ${winA ? 'winner' : ''}">
+                                <span class="team-name ${match.squadraA === 'Da definire' ? 'empty' : ''}">${displayNameA}</span>
+                                <span class="team-score">${match.puntiA}</span>
+                            </div>
+                            <div class="team-row ${winB ? 'winner' : ''}">
+                                <span class="team-name ${match.squadraB === 'Da definire' ? 'empty' : ''}">${displayNameB}</span>
+                                <span class="team-score">${match.puntiB}</span>
+                            </div>
+                        `;
+                        column.appendChild(matchBox);
+                    });
+                    faseContainer.appendChild(column);
+                });
+                bracket.appendChild(faseContainer);
+            });
+
+            updateTransform();
+            setTimeout(drawConnectorLines, 200);
+        }
+
+        function drawConnectorLines() {
+            const svg = document.getElementById('bracket-lines');
+            if (!svg) return;
+            svg.innerHTML = ''; 
+
+            const matchBoxes = document.querySelectorAll('.match-box');
+            const bracketRect = bracket.getBoundingClientRect();
+
+            matchBoxes.forEach(box => {
+                const boxId = box.getAttribute('data-id');
+                const nextWinId = box.getAttribute('data-next-win');
+                const nextLossId = box.getAttribute('data-next-loss');
+
+                const boxRect = box.getBoundingClientRect();
+                const startX = (boxRect.right - bracketRect.left) / scale;
+                const startY = (boxRect.top + boxRect.height / 2 - bracketRect.top) / scale;
+
+                const isConcluded = box.classList.contains('active');
+
+                if (nextWinId) {
+                    const targetBox = document.querySelector(`.match-box[data-id="${nextWinId}"]`);
+                    if (targetBox) {
+                        const targetRect = targetBox.getBoundingClientRect();
+                        const endX = (targetRect.left - bracketRect.left) / scale;
+                        const endY = (targetRect.top + targetRect.height / 2 - bracketRect.top) / scale;
+                        const lineColor = isConcluded ? '#2e7d32' : '#a7f3d0'; 
+                        createSvgPath(svg, startX, startY, endX, endY, lineColor, '0', "Vincente");
+                    }
+                }
+
+                if (nextLossId) {
+                    const targetBox = document.querySelector(`.match-box[data-id="${nextLossId}"]`);
+                    if (targetBox) {
+                        const targetRect = targetBox.getBoundingClientRect();
+                        const endX = (targetRect.left - bracketRect.left) / scale;
+                        const endY = (targetRect.top + targetRect.height / 2 - bracketRect.top) / scale;
+                        const lineColor = isConcluded ? '#c62828' : '#fecaca'; 
+                        createSvgPath(svg, startX, startY, endX, endY, lineColor, '0', "Perdente");
+                    }
+                }
+            });
+        }
+
+        function createSvgPath(svg, sx, sy, ex, ey, color, dashArray, tipo) {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const dStr = `M ${sx} ${sy} L ${ex} ${ey}`;
+            path.setAttribute("d", dStr);
+            path.setAttribute("stroke", color);
+            path.setAttribute("stroke-width", "2.5");
+            path.setAttribute("fill", "none");
+            if (dashArray !== '0') {
+                path.setAttribute("stroke-dasharray", dashArray);
+            }
+            svg.appendChild(path);
+        }
+
+        window.addEventListener('resize', () => {
+            if(document.querySelector('.match-box')) drawConnectorLines();
+        });
+
+        fetchBracketData();
+    </script>
+</body>
+</html>
