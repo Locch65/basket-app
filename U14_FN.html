@@ -35,7 +35,6 @@
         #poster-overlay img {
             width: 100%;
             height: 100%;
-            /* MODIFICATO: contain assicura che l'immagine non venga mai tagliata e resti interamente visibile e centrata */
             object-fit: contain; 
         }
 
@@ -45,7 +44,7 @@
             pointer-events: none;
         }
 
-        /* NUOVA BARRA DI CONTROLLO SUPERIORE */
+        /* BARRA DI CONTROLLO SUPERIORE */
         .top-bar {
             position: fixed;
             top: 15px;
@@ -54,16 +53,16 @@
             z-index: 1000;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Spinge i controlli a sinistra e l'hint al centro/destra */
-            pointer-events: none; /* Permette il click sotto la barra se vuota */
+            justify-content: space-between;
+            pointer-events: none;
         }
 
-        /* CONTROLLI IN ALTO A SINISTRA (MENU A TENDINA) */
+        /* CONTROLLI IN ALTO A SINISTRA */
         .top-left-controls {
             display: flex;
-            align-items: center; /* Allinea label e select sulla stessa linea */
+            align-items: center;
             gap: 10px;
-            pointer-events: auto; /* Ripristina i click sui controlli */
+            pointer-events: auto;
         }
 
         .top-left-controls label {
@@ -73,7 +72,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             background: rgba(240, 242, 245, 0.8);
-            /* padding: 6px 10px; */
             border-radius: 4px;
             width: max-content;
         }
@@ -96,7 +94,6 @@
             border-color: #ff6b00;
         }
 
-        /* MODIFICATO: Rimossa la posizione fissa, ora gestito dalla top-bar */
         .mobile-hint {
             background: rgba(15, 23, 42, 0.8);
             color: white;
@@ -105,8 +102,8 @@
             font-size: 0.75rem;
             pointer-events: none;
             display: none;
-            margin-left: auto; /* Spinge l'hint verso il centro/destra */
-            margin-right: auto; /* In combinazione con il flex della barra, lo centra nello spazio rimanente */
+            margin-left: auto;
+            margin-right: auto;
         }
 
         @media screen and (max-width: 768px) {
@@ -115,7 +112,6 @@
             }
         }
 
-        /* RESTO DELLO STILE INVARIATO */
         #panzoom-container {
             width: 100%;
             height: 100%;
@@ -185,7 +181,6 @@
             gap: 4px;
         }
 
-        /* Sotto-elemento stilistico per la data all'interno del titolo fase */
         .fase-date {
             font-size: 0.75rem;
             font-weight: 400;
@@ -234,12 +229,7 @@
         }
 
         .match-box.active {
-            border-color: #ff6b00; 
-        }
-        
-        .match-box.gold-match.active,
-        .match-box.silver-match.active {
-            border-color: #ff6b00;
+            border-color: #cbd5e1; 
         }
 
         .match-id {
@@ -254,10 +244,6 @@
             border-bottom-left-radius: 4px;
             pointer-events: none; 
             z-index: 10;
-        }
-        
-        .match-box.active .match-id {
-            background: #ff6b00; 
         }
 
         .team-row {
@@ -328,6 +314,61 @@
         .controls button:hover {
             background-color: #e05e00;
         }
+
+        /* PANNELLO DI RICERCA INCROCI SQUADRE */
+        .search-panel {
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            border: 2px solid #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 320px;
+        }
+
+        .search-panel-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #1e293b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-selects {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .search-selects select {
+            padding: 6px 10px;
+            font-size: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: white;
+            outline: none;
+            max-width: 130px;
+        }
+
+        /* ANIMAZIONE FLASH DI EVIDENZIAZIONE SCONTRO */
+        .match-box.highlight-match {
+            border-color: #ff6b00 !important;
+            box-shadow: 0 0 20px #ff6b00 !important;
+            animation: pulse-highlight 1.5s infinite ease-in-out;
+            z-index: 100;
+        }
+
+        @keyframes pulse-highlight {
+            0% { transform: scale(1); box-shadow: 0 0 10px #ff6b00; }
+            50% { transform: scale(1.04); box-shadow: 0 0 25px #ff6b00; }
+            100% { transform: scale(1); box-shadow: 0 0 10px #ff6b00; }
+        }
     </style>
 </head>
 <body>
@@ -350,9 +391,22 @@
         <div class="mobile-hint">📱 Trascina e pizzica per zoomare</div>
     </div>
 
+    <div class="search-panel">
+        <div class="search-panel-title">Trova Incrocio Scontro</div>
+        <div class="search-selects">
+            <select id="search-team-1">
+                <option value="">Squadra 1...</option>
+            </select>
+            <span style="font-size:12px; font-weight:bold; color:#64748b;">VS</span>
+            <select id="search-team-2">
+                <option value="">Squadra 2...</option>
+            </select>
+        </div>
+    </div>
+
     <div class="controls">
-        <button id="zoom-in">➕ Ingrandisci</button>
-        <button id="zoom-out">➖ Rimpicciolisci</button>
+        <button id="zoom-in">➕ Zoom</button>
+        <button id="zoom-out">➖ Zoom</button>
         <button id="zoom-reset">🔄 Reset</button>
     </div>
 
@@ -375,12 +429,6 @@
         const URL_SQUADRE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SQUADRE_TAB_NAME}`;
         const URL_DATE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${DATE_TAB_NAME}`;
 
-        const container = document.getElementById('panzoom-container');
-        const wrapper = document.getElementById('panzoom-wrapper');
-        const bracket = document.getElementById('tournament-bracket');
-        const selectMode = document.getElementById('display-mode');
-        const posterOverlay = document.getElementById('poster-overlay');
-
         let scale = window.innerWidth < 768 ? 0.35 : 0.65;
         let pointX = 15;
         let pointY = 15;
@@ -391,19 +439,25 @@
 
         let globalMatches = [];
         let globalSquadreDatabase = [];
-        let globalDateDatabase = {}; // Mappa chiave-valore per lookup istantaneo della data fase
+        let globalDateDatabase = {};
 
-        // FUNZIONE PER CHIUDERE IMMEDIATAMENTE IL POSTER OVERLAY
+        const container = document.getElementById('panzoom-container');
+        const wrapper = document.getElementById('panzoom-wrapper');
+        const bracket = document.getElementById('tournament-bracket');
+        const selectMode = document.getElementById('display-mode');
+        const posterOverlay = document.getElementById('poster-overlay');
+
+        const searchTeam1 = document.getElementById('search-team-1');
+        const searchTeam2 = document.getElementById('search-team-2');
+
         function hidePoster() {
             if (posterOverlay && !posterOverlay.classList.contains('hidden')) {
                 posterOverlay.classList.add('hidden');
             }
         }
 
-        // Timer di 3 secondi per la chiusura automatica del poster
         const posterTimeout = setTimeout(hidePoster, 3000);
 
-        // Chiusura istantanea al clic o touch su qualsiasi punto dello schermo
         posterOverlay.addEventListener('click', () => {
             clearTimeout(posterTimeout);
             hidePoster();
@@ -416,7 +470,7 @@
         }
 
         container.addEventListener('mousedown', (e) => {
-            if(e.target.closest('button') || e.target.closest('select')) return;
+            if(e.target.closest('button') || e.target.closest('select') || e.target.closest('.search-panel')) return;
             isDragging = true;
             start = { x: e.clientX - pointX, y: e.clientY - pointY };
         });
@@ -442,7 +496,7 @@
         }, { passive: false });
 
         container.addEventListener('touchstart', (e) => {
-            if(e.target.closest('button') || e.target.closest('select')) return;
+            if(e.target.closest('button') || e.target.closest('select') || e.target.closest('.search-panel')) return;
             if (e.touches.length === 1) {
                 isDragging = true;
                 start = { x: e.touches[0].clientX - pointX, y: e.touches[0].clientY - pointY };
@@ -482,6 +536,13 @@
         document.getElementById('zoom-in').addEventListener('click', () => { scale += 0.1; updateTransform(); });
         document.getElementById('zoom-out').addEventListener('click', () => { scale -= 0.1; updateTransform(); });
         document.getElementById('zoom-reset').addEventListener('click', () => {
+
+            searchTeam1.value = "";
+            searchTeam2.value = "";
+            document.querySelectorAll('.match-box').forEach(box => {
+                    box.classList.remove('highlight-match');
+                });
+
             scale = window.innerWidth < 768 ? 0.35 : 0.65;
             pointX = 15; pointY = 15;
             updateTransform();
@@ -490,12 +551,15 @@
         selectMode.addEventListener('change', () => {
             if (globalMatches.length > 0) {
                 renderBracket(globalMatches);
+                findAndHighlightIntersection();
             }
         });
 
+        searchTeam1.addEventListener('change', findAndHighlightIntersection);
+        searchTeam2.addEventListener('change', findAndHighlightIntersection);
+
         async function fetchBracketData() {
             try {
-                // Esecuzione parallela immediata in background
                 const [responseTabellone, responseSquadre, responseDate] = await Promise.all([
                     fetch(URL_TABELLONE),
                     fetch(URL_SQUADRE),
@@ -527,7 +591,8 @@
                     });
                 }
 
-                // 2. Lettura Foglio DATE (Mappatura in Oggetto Chiave/Valore)
+                populateSearchDropdowns();
+
                 const rowsDate = jsonDate.table.rows;
                 globalDateDatabase = {};
                 if (rowsDate && rowsDate.length > 0) {
@@ -597,6 +662,381 @@
             } catch (error) {
                 console.error("Errore dati:", error);
                 bracket.innerHTML = "<p style='padding:20px;'>Errore nel caricamento dei dati dal foglio Google.</p>";
+            }
+        }
+
+        function populateSearchDropdowns() {
+            const nicknamesUnici = [...new Set(globalSquadreDatabase.map(s => s.nickname))].filter(Boolean).sort();
+            
+            nicknamesUnici.forEach(nick => {
+                const opt1 = document.createElement('option');
+                opt1.value = nick; 
+                opt1.textContent = nick;
+                searchTeam1.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = nick;
+                opt2.textContent = nick;
+                searchTeam2.appendChild(opt2);
+            });
+        }
+
+        function findAndHighlightIntersection() {
+    // 1. Spegni tutti i box evidenziati in precedenza
+    document.querySelectorAll('.match-box').forEach(b => b.classList.remove('highlight-match'));
+
+    const t1 = searchTeam1.value.toUpperCase();
+    const t2 = searchTeam2.value.toUpperCase();
+
+    if (!t1 || !t2 || t1 === t2) return;
+
+    // Funzione che calcola l'albero delle dipendenze future tagliando i rami impossibili
+    function calcolaAlberoDipendenzeID(teamNickname) {
+        let matchToccati = new Set();
+
+        // Trova i codici di partenza dal database squadre (es: COSTA -> LOMBARDIA 1)
+        const squadraDoc = globalSquadreDatabase.find(s => 
+            s.nickname.toUpperCase() === teamNickname || 
+            s.regione.toUpperCase() === teamNickname || 
+            s.squadra.toUpperCase() === teamNickname
+        );
+        const regioneCodice = squadraDoc && squadraDoc.regione ? squadraDoc.regione.toUpperCase() : "";
+        const nomeSquadraEsteso = squadraDoc && squadraDoc.squadra ? squadraDoc.squadra.toUpperCase() : "";
+
+        // PASSO 1: Trova l'ID della primissima partita (il Ground Zero della squadra)
+        let idPartitaIniziale = null;
+        let latoIniziale = ""; // "A" o "B" per capire se parte come squadraA o squadraB
+
+        for (let i = 0; i < globalMatches.length; i++) {
+            const m = globalMatches[i];
+            const matchA = m.squadraA ? m.squadraA.toUpperCase() : "";
+            const matchB = m.squadraB ? m.squadraB.toUpperCase() : "";
+
+            if (matchA === teamNickname || matchA === regioneCodice || matchA === nomeSquadraEsteso) {
+                idPartitaIniziale = m.id;
+                latoIniziale = "A";
+                break;
+            }
+            if (matchB === teamNickname || matchB === regioneCodice || matchB === nomeSquadraEsteso) {
+                idPartitaIniziale = m.id;
+                latoIniziale = "B";
+                break;
+            }
+        }
+
+        if (!idPartitaIniziale) return matchToccati;
+
+        // PASSO 2: Funzione ricorsiva con controllo dello stato del match giocato
+        // 'provenienzaEsito' può essere: "A" (se era squadraA alla prima partita), "B" (se era squadraB), 
+        // "VINCENTE" (se arriva come vincente dal turno prima), "PERDENTE" (se arriva come perdente)
+        function navigaAlbero(currentId, provenienzaEsito) {
+            if (!currentId || matchToccati.has(currentId)) return;
+
+            const matchObj = globalMatches.find(m => m.id === currentId);
+            if (!matchObj) return;
+
+            // Aggiungiamo l'ID corrente all'albero delle possibilità reali della squadra
+            matchToccati.add(currentId);
+
+            // Verifichiamo se il match corrente è già stato concluso (presenza di punteggi)
+            const haPunteggio = matchObj.puntiA !== '' && matchObj.puntiB !== '';
+            
+            if (haPunteggio) {
+                // Determina chi ha vinto matematicamente questa partita specifica
+                const isA_Winner = Number(matchObj.puntiA) > Number(matchObj.puntiB);
+                
+                // Capiamo se la nostra squadra (in base a come è arrivata qui) ha vinto o perso questo match
+                let esitoSquadraInQuestoMatch = "";
+                
+                if (provenienzaEsito === "A") {
+                    esitoSquadraInQuestoMatch = isA_Winner ? "VINCENTE" : "PERDENTE";
+                } else if (provenienzaEsito === "B") {
+                    esitoSquadraInQuestoMatch = !isA_Winner ? "VINCENTE" : "PERDENTE";
+                } else {
+                    // Se la riga del foglio Excel indica la posizione di provenienza
+                    // Controlliamo i parametri associati al box per determinare se l'esito combacia
+                    // Ma per essere indipendenti dalle stringhe dei nomi, usiamo la logica pura:
+                    // Se la partita è giocata, l'esito reale decide quale strada forzare.
+                    // Visto che la partita è già conclusa ed ha squadre fisiche scritte dentro (es: COSTA vs NOLE),
+                    // possiamo eccezionalmente fare il check sul nome solo se la partita è conclusa!
+                    const matchA_Concluso = matchObj.squadraA ? matchObj.squadraA.toUpperCase() : "";
+                    const matchB_Concluso = matchObj.squadraB ? matchObj.squadraB.toUpperCase() : "";
+                    
+                    const isQuiComeA = (matchA_Concluso === teamNickname || matchA_Concluso === regionecodice || matchA_Concluso === nomeSquadraEsteso);
+                    const isQuiComeB = (matchB_Concluso === teamNickname || matchB_Concluso === regionecodice || matchB_Concluso === nomeSquadraEsteso);
+                    
+                    if (isQuiComeA) {
+                        esitoSquadraInQuestoMatch = isA_Winner ? "VINCENTE" : "PERDENTE";
+                    } else if (isQuiComeB) {
+                        esitoSquadraInQuestoMatch = !isA_Winner ? "VINCENTE" : "PERDENTE";
+                    } else {
+                        // Caso limite di sicurezza se le stringhe non combaciassero:
+                        // Esploriamo entrambe le strade per non bloccare l'albero
+                        if (matchObj.prossimaPartitaId) navigaAlbero(matchObj.prossimaPartitaId, "VINCENTE");
+                        if (matchObj.prossimaPartitaIdPerdente) navigaAlbero(matchObj.prossimaIdPartitaPerdente, "PERDENTE");
+                        return;
+                    }
+                }
+
+                // Seguiamo RIGOROSAMENTE solo il cammino decretato dal campo
+                if (esitoSquadraInQuestoMatch === "VINCENTE" && matchObj.id) {
+                    navigaAlbero(matchObj.prossimaPartitaId, "VINCENTE");
+                } else if (esitoSquadraInQuestoMatch === "PERDENTE" && matchObj.prossimaPartitaIdPerdente) {
+                    navigaAlbero(matchObj.prossimaPartitaIdPerdente, "PERDENTE");
+                }
+
+            } else {
+                // Se la partita NON è ancora stata giocata, il futuro è aperto:
+                // La squadra potrebbe sia vincere che perdere, quindi esploriamo entrambi i rami!
+                if (matchObj.prossimaPartitaId) {
+                    navigaAlbero(matchObj.prossimaPartitaId, "VINCENTE");
+                }
+                if (matchObj.prossimaPartitaIdPerdente) {
+                    navigaAlbero(matchObj.prossimaPartitaIdPerdente, "PERDENTE");
+                }
+            }
+        }
+
+        // Avvia la ramificazione partendo dall'ID della prima partita e dal lato corretto
+        navigaAlbero(idPartitaIniziale, latoIniziale);
+
+        return matchToccati;
+    }
+
+    // Calcola l'albero filtrato dei due team
+    const alberoTeam1 = calcolaAlberoDipendenzeID(t1);
+    const alberoTeam2 = calcolaAlberoDipendenzeID(t2);
+
+    // L'intersezione conterrà solo i match futuri realmente possibili
+    let candidateMatches = [];
+    globalMatches.forEach(match => {
+        if (alberoTeam1.has(match.id) && alberoTeam2.has(match.id)) {
+            candidateMatches.push(match);
+        }
+    });
+
+    // 2. Evidenzia i box risultanti
+    if (candidateMatches.length > 0) {
+        candidateMatches.forEach(match => {
+            const box = document.querySelector(`.match-box[data-id="${match.id}"]`);
+            if (box) box.classList.add('highlight-match');
+        });
+
+        const orderOfFases = ['SEMIFINALI GOLD-SILVER', 'FINALI GOLD-SILVER', 'SEDICESIMI', 'OTTAVI', 'QUARTI', 'SEMIFINALI', 'FINALI'];
+        candidateMatches.sort((mA, mB) => {
+            return orderOfFases.indexOf(mA.fase.toUpperCase()) - orderOfFases.indexOf(mB.fase.toUpperCase());
+        });
+
+        const targetBox = document.querySelector(`.match-box[data-id="${candidateMatches[0].id}"]`);
+        if (targetBox) {
+            const bracketRect = bracket.getBoundingClientRect();
+            const boxRect = targetBox.getBoundingClientRect();
+            pointX = (window.innerWidth / 2) - ((boxRect.left - bracketRect.left + boxRect.width / 2) * scale);
+            pointY = (window.innerHeight / 2) - ((boxRect.top - bracketRect.top + boxRect.height / 2) * scale);
+            updateTransform();
+        }
+    }
+}
+
+function OLD_OKfindAndHighlightIntersection() {
+    // 1. Spegni tutti i box evidenziati in precedenza
+    document.querySelectorAll('.match-box').forEach(b => b.classList.remove('highlight-match'));
+
+    const t1 = searchTeam1.value.toUpperCase();
+    const t2 = searchTeam2.value.toUpperCase();
+
+    if (!t1 || !t2 || t1 === t2) return;
+
+    // Funzione che calcola l'albero delle dipendenze future basandosi SOLO sulle colonne ID
+    function calcolaAlberoDipendenzeID(teamNickname) {
+        let matchToccati = new Set();
+
+        // Trova i codici di partenza dal database squadre (es: COSTA -> LOMBARDIA 1)
+        const squadraDoc = globalSquadreDatabase.find(s => 
+            s.nickname.toUpperCase() === teamNickname || 
+            s.regione.toUpperCase() === teamNickname || 
+            s.squadra.toUpperCase() === teamNickname
+        );
+        const regioneCodice = squadraDoc && squadraDoc.regione ? squadraDoc.regione.toUpperCase() : "";
+        const nomeSquadraEsteso = squadraDoc && squadraDoc.squadra ? squadraDoc.squadra.toUpperCase() : "";
+
+        // PASSO 1: Trova l'ID della primissima partita (il Ground Zero della squadra)
+        let idPartitaIniziale = null;
+        for (let i = 0; i < globalMatches.length; i++) {
+            const m = globalMatches[i];
+            const matchA = m.squadraA ? m.squadraA.toUpperCase() : "";
+            const matchB = m.squadraB ? m.squadraB.toUpperCase() : "";
+
+            if (matchA === teamNickname || matchA === regioneCodice || matchA === nomeSquadraEsteso ||
+                matchB === teamNickname || matchB === regioneCodice || matchB === nomeSquadraEsteso) {
+                idPartitaIniziale = m.id;
+                break; // Trovata la partita di partenza originaria
+            }
+        }
+
+        if (!idPartitaIniziale) return matchToccati;
+
+        // PASSO 2: Funzione ricorsiva che naviga in avanti usando SOLO i puntatori ID delle colonne
+        function navigaAlbero(currentId) {
+            if (!currentId || matchToccati.has(currentId)) return;
+
+            // Aggiungiamo l'ID corrente all'albero delle dipendenze della squadra
+            matchToccati.add(currentId);
+
+            const matchObj = globalMatches.find(m => m.id === currentId);
+            if (!matchObj) return;
+
+            // Legge l'ID della prossima partita se vince
+            if (matchObj.prossimaPartitaId) {
+                navigaAlbero(matchObj.prossimaPartitaId);
+            }
+            // Legge l'ID della prossima partita se perde
+            if (matchObj.prossimaPartitaIdPerdente) {
+                navigaAlbero(matchObj.prossimaPartitaIdPerdente);
+            }
+        }
+
+        // Avvia la ramificazione partendo dall'ID della prima partita
+        navigaAlbero(idPartitaIniziale);
+
+        return matchToccati;
+    }
+
+    // Calcola l'albero puro degli ID per le due squadre selezionate
+    const alberoTeam1 = calcolaAlberoDipendenzeID(t1);
+    const alberoTeam2 = calcolaAlberoDipendenzeID(t2);
+
+    // L'intersezione contiene gli ID dei match che compaiono in ENTRAMBI gli alberi delle dipendenze
+    let candidateMatches = [];
+    globalMatches.forEach(match => {
+        if (alberoTeam1.has(match.id) && alberoTeam2.has(match.id)) {
+            candidateMatches.push(match);
+        }
+    });
+
+    // 2. Evidenzia i box dei match che rappresentano l'intersezione reale
+    if (candidateMatches.length > 0) {
+        candidateMatches.forEach(match => {
+            const box = document.querySelector(`.match-box[data-id="${match.id}"]`);
+            if (box) box.classList.add('highlight-match');
+        });
+
+        // Ordinamento per centrare lo schermo sul primo scontro cronologico rilevato
+        const orderOfFases = ['SEMIFINALI GOLD-SILVER', 'FINALI GOLD-SILVER', 'SEDICESIMI', 'OTTAVI', 'QUARTI', 'SEMIFINALI', 'FINALI'];
+        candidateMatches.sort((mA, mB) => {
+            return orderOfFases.indexOf(mA.fase.toUpperCase()) - orderOfFases.indexOf(mB.fase.toUpperCase());
+        });
+
+        const targetBox = document.querySelector(`.match-box[data-id="${candidateMatches[0].id}"]`);
+        if (targetBox) {
+            const bracketRect = bracket.getBoundingClientRect();
+            const boxRect = targetBox.getBoundingClientRect();
+            pointX = (window.innerWidth / 2) - ((boxRect.left - bracketRect.left + boxRect.width / 2) * scale);
+            pointY = (window.innerHeight / 2) - ((boxRect.top - bracketRect.top + boxRect.height / 2) * scale);
+            updateTransform();
+        }
+    }
+}
+
+        // ALGORITMO DI RICERCA MULTIPLO AGGIORNATO PER ACCENDERE TUTTI I SCONTRI CONTEMPORANEAMENTE
+        function OLDfindAndHighlightIntersection() {
+            // Rimuove l'evidenziazione da tutti i box prima di iniziare
+            document.querySelectorAll('.match-box').forEach(b => b.classList.remove('highlight-match'));
+
+            const t1 = searchTeam1.value.toUpperCase();
+            const t2 = searchTeam2.value.toUpperCase();
+
+            if (!t1 || !t2 || t1 === t2) return;
+
+            const orderOfFases = ['SEMIFINALI GOLD-SILVER', 'FINALI GOLD-SILVER', 'SEDICESIMI', 'OTTAVI', 'QUARTI', 'SEMIFINALI', 'FINALI'];
+
+            function getPossibleNicknamesForSlot(slotText, visitedMatches = new Set()) {
+                if (!slotText) return [];
+                const cleanText = slotText.trim().toUpperCase();
+
+                if (cleanText.includes("° G") || cleanText.includes("° S")) {
+                    return []; 
+                }
+
+                const matchIdMatch = cleanText.match(/(VINC|PERD)\.?\s*(G\d+)/);
+                if (matchIdMatch) {
+                    const type = matchIdMatch[1]; 
+                    const parentId = matchIdMatch[2]; 
+                    
+                    if (visitedMatches.has(parentId)) return [];
+                    visitedMatches.add(parentId);
+
+                    const parentMatch = globalMatches.find(m => m.id === parentId);
+                    if (!parentMatch) return [];
+
+                    const haPunteggio = parentMatch.puntiA !== '' && parentMatch.puntiB !== '';
+                    
+                    if (haPunteggio) {
+                        const isA_Winner = Number(parentMatch.puntiA) > Number(parentMatch.puntiB);
+                        const vincitoreReale = isA_Winner ? parentMatch.squadraA : parentMatch.squadraB;
+                        const perdenteReale = isA_Winner ? parentMatch.squadraB : parentMatch.squadraA;
+                        
+                        const targetSquadraGrezza = (type === 'VINC') ? vincitoreReale : perdenteReale;
+                        return getPossibleNicknamesForSlot(targetSquadraGrezza, new Set(visitedMatches));
+                    } else {
+                        const nicksA = getPossibleNicknamesForSlot(parentMatch.squadraA, new Set(visitedMatches));
+                        const nicksB = getPossibleNicknamesForSlot(parentMatch.squadraB, new Set(visitedMatches));
+                        return [...new Set([...nicksA, ...nicksB])];
+                    }
+                }
+
+                const trovato = globalSquadreDatabase.find(s => 
+                    s.regione.toUpperCase() === cleanText || 
+                    s.nickname.toUpperCase() === cleanText || 
+                    s.squadra.toUpperCase() === cleanText
+                );
+
+                if (trovato && trovato.nickname) {
+                    return [trovato.nickname.toUpperCase()];
+                }
+
+                return [cleanText];
+            }
+
+            let candidateMatches = [];
+
+            globalMatches.forEach(match => {
+                const possibleA = getPossibleNicknamesForSlot(match.squadraA);
+                const possibleB = getPossibleNicknamesForSlot(match.squadraB);
+
+                const scontroDiretto = (possibleA.includes(t1) && possibleB.includes(t2)) || 
+                                       (possibleA.includes(t2) && possibleB.includes(t1));
+
+                if (scontroDiretto) {
+                    candidateMatches.push(match);
+                }
+            });
+
+            // Se ci sono match candidati, li accendiamo TUTTI
+            if (candidateMatches.length > 0) {
+                candidateMatches.forEach(match => {
+                    const box = document.querySelector(`.match-box[data-id="${match.id}"]`);
+                    if (box) {
+                        box.classList.add('highlight-match');
+                    }
+                });
+
+                // Ordina per centrare lo schermo sul primo scontro in ordine cronologico delle fasi
+                candidateMatches.sort((mA, mB) => {
+                    return orderOfFases.indexOf(mA.fase.toUpperCase()) - orderOfFases.indexOf(mB.fase.toUpperCase());
+                });
+
+                const targetMatch = candidateMatches[0];
+                const targetBox = document.querySelector(`.match-box[data-id="${targetMatch.id}"]`);
+
+                if (targetBox) {
+                    const bracketRect = bracket.getBoundingClientRect();
+                    const boxRect = targetBox.getBoundingClientRect();
+
+                    pointX = (window.innerWidth / 2) - ((boxRect.left - bracketRect.left + boxRect.width / 2) * scale);
+                    pointY = (window.innerHeight / 2) - ((boxRect.top - bracketRect.top + boxRect.height / 2) * scale);
+                    updateTransform();
+                }
             }
         }
 
@@ -767,7 +1207,6 @@
             if(document.querySelector('.match-box')) drawConnectorLines();
         });
 
-        // Avvio immediato del download asincrono dei fogli Google in background
         fetchBracketData();
     </script>
 </body>
