@@ -250,7 +250,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 12px;
+            padding: 14px 12px;
             border-bottom: rgba(0, 0, 0, 0.05) 1px solid;
             font-size: 0.85rem;
         }
@@ -265,7 +265,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 140px;
+            width: 130px;
         }
 
         .team-name.empty {
@@ -626,7 +626,8 @@
                         prossimaPartitaId: row.c[7] ? getCellValue(row.c[7]) : '',
                         posizioneProssima: row.c[8] ? getCellValue(row.c[8]).toUpperCase() : '',
                         prossimaPartitaIdPerdente: row.c[9] ? getCellValue(row.c[9]) : '',
-                        posizioneProssimaPerdente: row.c[10] ? getCellValue(row.c[10]).toUpperCase() : ''
+                        posizioneProssimaPerdente: row.c[10] ? getCellValue(row.c[10]).toUpperCase() : '',
+                        orario: row.c[11] ? getCellValue(row.c[11]) : ''
                     };
                 });
 
@@ -1135,6 +1136,7 @@ function OLD_OKfindAndHighlightIntersection() {
                                 <span class="team-name ${match.squadraB === 'Da definire' ? 'empty' : ''}">${displayNameB}</span>
                                 <span class="team-score">${match.puntiB}</span>
                             </div>
+                            ${match.orario ? `<div class="match-time" style="position: absolute; bottom: 2px; right: 6px; font-size: 0.65rem; font-weight: bold; color: #64748b; pointer-events: none; z-index: 10;">${match.orario}</div>` : ''}
                         `;
                         column.appendChild(matchBox);
                     });
