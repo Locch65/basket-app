@@ -291,6 +291,17 @@
             color: #385d25;
         }
 
+        /* Nuove classi per lo sfondo dei punteggi */
+        .score-won {
+            background-color: #2e7d32 !important;
+            color: white !important;
+        }
+
+        .score-lost {
+            background-color: #c62828 !important;
+            color: white !important;
+        }
+        
         .controls {
             position: fixed;
             bottom: 20px;
@@ -1029,17 +1040,21 @@
                         const displayNameA = getTeamDisplayName(match.squadraA, currentTargetColumn);
                         const displayNameB = getTeamDisplayName(match.squadraB, currentTargetColumn);
 
+                        // Determina le classi per lo sfondo dei punteggi se la partita è conclusa
+                        const scoreClassA = isAFinale ? (winA ? 'score-won' : 'score-lost') : '';
+                        const scoreClassB = isAFinale ? (winB ? 'score-won' : 'score-lost') : '';
+
                         matchBox.innerHTML = `
                             <div class="match-id">${match.id}</div>
                             <div class="team-row ${winA ? 'winner' : ''}">
                                 <span class="team-name ${match.squadraA === 'Da definire' ? 'empty' : ''}" data-team="${match.squadraA}" onclick="highlightTeamPath(this)">${displayNameA}</span>
-                                <span class="team-score">${match.puntiA}</span>
+                                <span class="team-score ${scoreClassA}">${match.puntiA}</span>
                             </div>
                             <div class="team-row ${winB ? 'winner' : ''}">
                                 <span class="team-name ${match.squadraB === 'Da definire' ? 'empty' : ''}" data-team="${match.squadraB}" onclick="highlightTeamPath(this)">${displayNameB}</span>
-                                <span class="team-score">${match.puntiB}</span>
+                                <span class="team-score ${scoreClassB}">${match.puntiB}</span>
                             </div>
-                            ${match.orario ? `<div class="match-time" style="position: absolute; bottom: 2px; right: 6px; font-size: 0.65rem; font-weight: bold; color: #64748b; pointer-events: none; z-index: 10;">🕒 ${match.orario}</div>` : ''}
+                            ${match.orario ? `<div class="match-time" style="position: absolute; bottom: 2px; right: 6px; font-size: 0.65rem; font-weight: bold; color: #64748b; pointer-events: none; z-index: 10;">${match.orario}</div>` : ''}
                         `;
                         column.appendChild(matchBox);
                     });
