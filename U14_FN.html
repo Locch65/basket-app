@@ -265,7 +265,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 130px; /* Ridotto per fare spazio all'orologio */
+            width: 130px; 
             cursor: pointer;
         }
 
@@ -382,6 +382,19 @@
             0% { opacity: 0.4; stroke-width: 4px; }
             50% { opacity: 1; stroke-width: 6px; filter: drop-shadow(0 0 5px currentColor); }
             100% { opacity: 0.4; stroke-width: 4px; }
+        }
+
+        /* ANIMAZIONE SQUADRA SELEZIONATA */
+        .team-name.clicked-blink {
+            animation: text-blink 0.8s infinite ease-in-out;
+            color: #ff6b00 !important;
+            font-weight: 800 !important;
+        }
+
+        @keyframes text-blink {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
         }
     </style>
 </head>
@@ -557,6 +570,9 @@
             document.querySelectorAll('.match-box').forEach(box => {
                 box.classList.remove('highlight-match');
             });
+            document.querySelectorAll('.team-name').forEach(name => {
+                name.classList.remove('clicked-blink');
+            });
 
             scale = window.innerWidth < 768 ? 0.35 : 0.65;
             pointX = 15; pointY = 15;
@@ -700,6 +716,7 @@
 
         function findAndHighlightIntersection() {
             document.querySelectorAll('.match-box').forEach(b => b.classList.remove('highlight-match'));
+            document.querySelectorAll('.team-name').forEach(name => name.classList.remove('clicked-blink'));
 
             const t1 = searchTeam1.value.toUpperCase();
             const t2 = searchTeam2.value.toUpperCase();
@@ -833,6 +850,7 @@
             if (!teamRawName || teamRawName === 'Da definire') return;
 
             document.querySelectorAll('.match-box').forEach(b => b.classList.remove('highlight-match'));
+            document.querySelectorAll('.team-name').forEach(name => name.classList.remove('clicked-blink'));
             
             document.getElementById('search-team-1').value = "";
             document.getElementById('search-team-2').value = "";
@@ -844,6 +862,11 @@
             );
             
             const teamKey = trovato ? trovato.nickname.toUpperCase() : teamRawName.toUpperCase();
+
+            // Evidenzia tutte le istanze dello stesso nome cliccato in giro per il tabellone
+            document.querySelectorAll(`.team-name[data-team="${teamRawName}"]`).forEach(el => {
+                el.classList.add('clicked-blink');
+            });
 
             function calcolaAlbero(teamNickname) {
                 let matchToccati = new Set();
