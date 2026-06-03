@@ -207,17 +207,6 @@
             letter-spacing: 0.5px;
         }
 
-        .match-box {
-            background: white;
-            border: 2px solid #cbd5e1;
-            border-radius: 6px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            width: 210px; 
-            overflow: hidden;
-            transition: border-color 0.3s;
-            position: relative; 
-        }
-
         .match-box.gold-match {
             background-color: #fef08a; 
             border-color: #facc15;
@@ -228,9 +217,6 @@
             border-color: #94a3b8;
         }
 
-        .match-box.active {
-            border-color: #cbd5e1; 
-        }
 
         .match-id {
             position: absolute;
@@ -274,6 +260,61 @@
             font-style: italic;
         }
 
+        .match-box {
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            width: 210px; 
+            overflow: hidden;
+            transition: border-color 0.3s;
+            position: relative; 
+        }
+
+        .match-box.active {
+            border-color: #cbd5e1; 
+        }
+
+/* Colorazione di base della riga in base al tipo di turno */
+        .team-row.gold-match {
+            background-color: #fef08a !important; /* Giallo Gold di base */
+        }
+
+        .team-row.silver-match {
+            background-color: #e2e8f0 !important; /* Grigio Silver di base */
+        }
+
+        /* Se il nome è generico, il background della riga va a Bianco */
+        .team-row.team-generic {
+            background-color: #ffffff !important;
+        }
+
+        /* Se la squadra è reale/qualificata, usa un azzurro soft */
+        .team-row.team-qualified {
+            background-color: #e0f2fe !important; 
+        }
+
+        /* COMPORTAMENTO SFONDO INTERA RIGA PER ESITO INCONTRO */
+        .team-row.score-won {
+            background-color: #e2f0d9 !important; /* Riga Verde */
+            color: #385d25;
+        }
+
+        .team-row.score-lost {
+            background-color: #fecaca !important; /* Riga Rossa */
+        }
+
+        /* QUADRATINI DEI PUNTEGGI (.team-score) CON SFONDO E TESTO BIANCO CORRETTI */
+        .team-score.score-won {
+            background-color: #2e7d32 !important; /* Quadratino Verde Scuro */
+            color: white !important;
+        }
+
+        .team-score.score-lost {
+            background-color: #c62828 !important; /* Quadratino Rosso Scuro */
+            color: white !important;
+        }
+
         .team-score {
             font-weight: bold;
             color: #0f172a;
@@ -291,17 +332,17 @@
             color: #385d25;
         }
 
-        /* Nuove classi per lo sfondo dei punteggi */
+        /* Ripristino stile precedente per i quadratini dei punteggi (.team-score) */
         .score-won {
-            background-color: #2e7d32 !important;
+            background-color: #2e7d32 !important; /* Verde vittoria */
             color: white !important;
         }
 
         .score-lost {
-            background-color: #c62828 !important;
+            background-color: #c62828 !important; /* Rosso sconfitta */
             color: white !important;
         }
-        
+
         .controls {
             position: fixed;
             bottom: 20px;
@@ -1028,9 +1069,6 @@
                         if (match.prossimaPartitaId) matchBox.setAttribute('data-next-win', match.prossimaPartitaId);
                         if (match.prossimaPartitaIdPerdente) matchBox.setAttribute('data-next-loss', match.prossimaPartitaIdPerdente);
 
-                        if (String(turno).toUpperCase().includes("GOLD")) matchBox.classList.add('gold-match');
-                        else if (String(turno).toUpperCase().includes("SILVER")) matchBox.classList.add('silver-match');
-
                         if (match.puntiA !== '' || match.puntiB !== '') matchBox.classList.add('active');
 
                         const isAFinale = match.puntiA !== '' && match.puntiB !== '';
@@ -1040,24 +1078,74 @@
                         const displayNameA = getTeamDisplayName(match.squadraA, currentTargetColumn);
                         const displayNameB = getTeamDisplayName(match.squadraB, currentTargetColumn);
 
-                        // Determina le classi per lo sfondo dei punteggi se la partita è conclusa
-                        const scoreClassA = isAFinale ? (winA ? 'score-won' : 'score-lost') : '';
-                        const scoreClassB = isAFinale ? (winB ? 'score-won' : 'score-lost') : '';
+                        // 1. Controlla se le squadre sono reali (presenti nel database) o nomi generici
+                        const isAReale = globalSquadreDatabase.some(s => 
+                            s.regione.toUpperCase() === match.squadraA.toUpperCase() || 
+                            s.nickname.toUpperCase() === match.squadraA.toUpperCase() || 
+                            s.squadra.toUpperCase() === match.squadraA.toUpperCase()
+                        );
+                        const isBReale = globalSquadreDatabase.some(s => 
+                            s.regione.toUpperCase() === match.squadraB.toUpperCase() || 
+                            s.nickname.toUpperCase() === match.squadraB.toUpperCase() || 
+                            s.squadra.toUpperCase() === match.squadraB.toUpperCase()
+                        );
+
+                        // 2. Determina la classe del turno di base (GOLD o SILVER)
+                        let baseTurnClass = '';
+                        if (String(turno).toUpperCase().includes("GOLD")) baseTurnClass = 'gold-match';
+                        else if (String(turno).toUpperCase().includes("SILVER")) baseTurnClass = 'silver-match';
+
+                        // 3. Costruisci l'elenco delle classi per il background delle righe (team-row)
+                        let classesA = ['team-row', baseTurnClass];
+                        let classesB = ['team-row', baseTurnClass];
+
+                        if (match.squadraA === 'Da definire' || !isAReale) {
+                            classesA.push('team-generic');
+                        } else {
+                            classesA.push('team-qualified');
+                        }
+
+                        if (match.squadraB === 'Da definire' || !isBReale) {
+                            classesB.push('team-generic');
+                        } else {
+                            classesB.push('team-qualified');
+                        }
+
+                        // 4. Se la partita è terminata, assegna le classi esito sia alle righe che ai quadratini score
+                        let scoreClassA = '';
+                        let scoreClassB = '';
+
+                        if (isAFinale) {
+                            if (winA) {
+                                classesA.push('score-won');
+                                classesB.push('score-lost');
+                                scoreClassA = 'score-won';
+                                scoreClassB = 'score-lost';
+                            } else {
+                                classesA.push('score-lost');
+                                classesB.push('score-won');
+                                scoreClassA = 'score-lost';
+                                scoreClassB = 'score-won';
+                            }
+                        }
 
                         matchBox.innerHTML = `
                             <div class="match-id">${match.id}</div>
-                            <div class="team-row ${winA ? 'winner' : ''}">
+                            <div class="${classesA.join(' ')}">
                                 <span class="team-name ${match.squadraA === 'Da definire' ? 'empty' : ''}" data-team="${match.squadraA}" onclick="highlightTeamPath(this)">${displayNameA}</span>
                                 <span class="team-score ${scoreClassA}">${match.puntiA}</span>
                             </div>
-                            <div class="team-row ${winB ? 'winner' : ''}">
+                            <div class="${classesB.join(' ')}">
                                 <span class="team-name ${match.squadraB === 'Da definire' ? 'empty' : ''}" data-team="${match.squadraB}" onclick="highlightTeamPath(this)">${displayNameB}</span>
                                 <span class="team-score ${scoreClassB}">${match.puntiB}</span>
                             </div>
-                            ${match.orario ? `<div class="match-time" style="position: absolute; bottom: 2px; right: 6px; font-size: 0.65rem; font-weight: bold; color: #64748b; pointer-events: none; z-index: 10;">${match.orario}</div>` : ''}
+                            ${match.orario ? `<div class="match-time" style="position: absolute; bottom: 2px; right: 6px; font-size: 0.65rem; font-weight: bold; color: #64748b; pointer-events: none; z-index: 10;">🕒 ${match.orario}</div>` : ''}
                         `;
                         column.appendChild(matchBox);
+                        
+
                     });
+                    
                     faseContainer.appendChild(column);
                 });
                 bracket.appendChild(faseContainer);
