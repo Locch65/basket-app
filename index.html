@@ -19,10 +19,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
     </style>
-  <script type="module" crossorigin src="/basket-app/assets/main-DvJFm7TR.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-BHYlFcvd.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/common-C6VGKDrr.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-DkgP4o0p.js">
+  <script type="module" crossorigin src="/basket-app/assets/main-DI6jRP6r.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-CS1IyMFF.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-ChM1M541.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/common-DbwYumiI.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-DxVb4wax.js">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-tCOyTUGo.css">
 </head>
@@ -32,7 +33,7 @@
     <header>
         <div style="display: flex; flex-direction: column;">
             <h1>Polismile A - U14</h1>
-            <div class="app-version">Versione 1.1.16</div>
+            <div class="app-version">Versione 1.3.1</div>
         </div>
         <div style="display: flex; align-items: center; gap: 1rem;">
             <i class="fas fa-cog" id="btn-settings" style="font-size: 2.5rem; cursor: pointer; color: var(--primary);" onclick="window.apriPopupSettings()"></i>
@@ -59,11 +60,19 @@
                 </div>
             </div>
 
-            <div id="btn-live" class="menu-button live-off" onclick="window.GotoLive()">
-                <i class="fas fa-broadcast-tower"></i>
-                <span id="live-text">Live</span>
+            <div style="display: flex; gap: 0.5rem; flex: 1;">
+                <div id="btn-live" class="menu-button live-off" onclick="window.GotoLive()" style="margin: 0; padding: 0.5rem; flex: 1;">
+                    <i class="fas fa-broadcast-tower" style="font-size: 2.2rem; margin-bottom: 0;"></i>
+                    <span id="live-text" style="font-size: 1.5rem;">Live</span>
+                </div>
+                
+                <a href="U14_FN.html" class="menu-button" style="margin: 0; padding: 0.5rem; flex: 1; text-decoration: none;">
+                    <i class="fas fa-trophy" style="font-size: 2.2rem; margin-bottom: 0;"></i>
+                    <span style="font-size: 1.3rem; line-height: 1.2;">Finali Nazionali</span>
+                </a>
             </div>
         </div>
+        
         <div class="column-flex">
             <a href="calendario.html" class="menu-button">
                 <i class="fas fa-calendar-alt"></i>

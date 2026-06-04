@@ -14,17 +14,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+  <script src="https://embed.twitch.tv/embed/v1.js"></script>
 
-  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-BHYlFcvd.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/common-C6VGKDrr.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/main-DkgP4o0p.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-CS1IyMFF.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-ChM1M541.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/common-DbwYumiI.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-DxVb4wax.js"></script>
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/direttavideo-Ch8cR2Jd.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/direttavideo-21HpIwcH.css">
 </head>
 
 <body>
@@ -32,6 +34,9 @@
     <button id="hamburgerBtn">☰</button>
     <button id="backBtn" onclick="history.back()" >
       <i class="fas fa-arrow-left"></i>   Back
+    </button>
+    <button id="stopVideoBtn" class="hidden">
+      <i class="fas fa-stop"></i> Stop Video
     </button>
     <nav id="menu" class="hidden">
       <ul>
@@ -78,11 +83,12 @@
           alt="Video non disponibile" 
           style="display: none; width: 100%; height: auto; border-radius: 8px;">
        
-    <div id="video-loading" class="loading-container">
+    <div id="video-loading" class="loading-container hidden">
       <div class="spinner"></div>
       <p>Inizializzazione video...</p>
     </div>
     <div id="ytplayer"></div>
+    <div id="twitchplayer" class="hidden"></div>
     <div id="pip-container">
         <div id="pip-player-wrapper">
             <div id="ytplayer-pip"></div>
@@ -142,6 +148,11 @@
               <input type="number" id="highlight-duration" value="10" min="1" max="60">
               <span>s</span>
             </div>
+            <div class="ls-auto-wrapper">
+              <input type="checkbox" id="ls-auto-next-pt">
+              <label for="ls-auto-next-pt">AutoSkip</label>
+            </div>
+
           </div>
         </div>
       </div>
