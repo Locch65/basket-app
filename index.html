@@ -3,43 +3,173 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Polismile Basket App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>My Basket App</title>
 
     <meta name="theme-color" content="#2c3e50">
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
 
-
+    <!-- Firebase SDK (App, Database e Auth) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-    </style>
-  <script type="module" crossorigin src="/basket-app/assets/main-DsEscvKQ.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-C38r3-mi.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-CBOThK7H.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/common-BA2wPQj8.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-BR1AMwy-.js">
+  <script type="module" crossorigin src="/basket-app/assets/main-Des72HBv.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-zMW8T7VW.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-6n2dspS9.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-DrXzqfvE.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-BuycxsON.js">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-tCOyTUGo.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DF-fMWoK.css">
 </head>
 
 <body>
 
-    <header>
-        <div style="display: flex; flex-direction: column;">
-            <h1>Polismile A - U14</h1>
-            <div class="app-version">Versione 1.3.2</div>
+    <header id="main-header" style="display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem;">
+        <!-- Prima riga: Titolo App, Versione e (SuperUser) Utenti Online -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 1.0rem; margin: 0;">
+                <span style="font-size: 1.6rem; font-weight: bold; color: var(--primary);">My Basket App</span>
+                <div id="appVersion" class="app-version" style="margin: 0; color: var(--text-color);">Versione </div>
+
+                <div id="online-users-container" onclick="window.ShowPopupDettaglioUtente()" style="display: none; align-items: center; gap: 0.8rem; font-size: 1.3rem; color: var(--text-color); font-weight: bold; margin-left: 10px;">
+                    <!-- Utenti Online -->
+                    <span style="display: inline-flex; align-items: center; gap: 0.3rem;" title="Utenti online">
+                        <i class="fas fa-users" style="color: var(--primary);"></i>
+                        <span id="onlineCount">0</span>
+                    </span>
+
+                    <!-- Richieste Pendenti -->
+                    <span style="display: inline-flex; align-items: center; gap: 0.3rem;" title="Richieste di registrazione">
+                        <i class="fas fa-user-clock" style="color: var(--primary);"></i>
+                        <span id="pendingRequestsCount">0</span>
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- Visibile solo per SuperUser -->
+            <!-- <div id="online-users-container" onclick="window.ShowPopupDettaglioUtente()" style="display: none; align-items: center; gap: 0.4rem; font-size: 1.3rem; color: var(--text-color); font-weight: bold;">
+                <i class="fas fa-users" style="color: var(--primary);"></i>
+                <span id="onlineCount">0</span>
+            </div> -->
         </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <i class="fas fa-cog" id="btn-settings" style="font-size: 2.5rem; cursor: pointer; color: var(--primary);" onclick="window.apriPopupSettings()"></i>
-            <img src="icon-192.png" alt="Logo Polismile" class="header-logo" id="logo-admin">
+
+        <!-- Seconda riga: Email Utente (Sinistra) + Tasto Esci (Destra) -->
+        <div id="user-email-container" style="display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; color: #ccc; width: 100%;">
+            <div style="display: flex; align-items: center; word-break: break-all;">
+                <span>Utente:&nbsp;</span>
+                <strong id="user-email-display" style="color: var(--text-color);"></strong>
+            </div>
+
+            <button id="btn-logout" onclick="window.signOut()" style="display: none; background-color: #c0392b; color: white; border: none; padding: 0.2rem 0.6rem; border-radius: 5px; font-size: 1.2rem; cursor: pointer; font-weight: bold; margin: 0; white-space: nowrap;">
+                <i class="fas fa-sign-out-alt"></i> Esci
+            </button>
+        </div>
+
+        <!-- Terza riga: Logo, Squadra e Impostazioni -->
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="icon-192.png" alt="Logo Squadra" class="header-logo" id="logo-admin" style="margin: 0;">
+                
+                <div class="team-selector-btn" onclick="window.apriPopupCambioTeam()">
+                    <div id="year" class="year"> </div>
+                    <h1 id="myTeamFullName" style="margin: 0;"> </h1>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center;">
+                <i class="fas fa-cog" id="btn-settings" style="font-size: 2.5rem; cursor: pointer; color: var(--primary); margin: 5px;" onclick="window.apriPopupSettings()"></i>
+            </div>
         </div>
     </header>
+
+    <!-- POPUP: Selezione Cambio Squadra -->
+    <div id="teamSelectorPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 1600; justify-content: center; align-items: center;">
+        <div class="popup-content" style="max-width: 95%; width: 400px; text-align: center;">
+            <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 1.5rem;">Seleziona Squadra</h3>
+            
+            <div id="team-selector-list" style="display: flex; flex-direction: column; gap: 1rem; max-height: 40vh; overflow-y: auto; margin-bottom: 1.5rem; padding: 0.5rem;">
+                <!-- Gli item compariranno qui -->
+            </div>
+
+            <button class="popup-btn" onclick="window.chiudiPopupCambioTeam()" style="background-color: #444; width: 100%; margin-top: 0;">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- Schermata di Autenticazione / Registrazione -->
+    <div id="login-container" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; gap: 0.8rem; padding: 1rem; box-sizing: border-box;">
+        <!-- Logo palla da basket ridimensionato per far rientrare tutto nella pagina -->
+        <img src="icon-512.png" alt="Logo App" style="width: 12rem; height: 12rem; object-fit: contain; animation: bounce 2s infinite;">
+        
+        <h2 id="loginAppVersion" class="app-version" style="margin: 0;">Versione </h2>
+        
+        <!-- Bottone Login Google -->
+        <button id="btn-signin-central" onclick="window.loginWithGoogle()" style="background-color: var(--card-color); color: var(--text-color); border: none; padding: 1rem 2rem; border-radius: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 85%; max-width: 320px; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 10px;">
+            <i class="fab fa-google"></i>
+            <span id="btn-signin-text">Accedi con Google</span>
+        </button>
+
+        <!-- Box Registrazione per Utenti Non Registrati -->
+        <div id="registration-container" style="display: none; width: 100%; max-width: 350px; padding: 1rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; background-color: var(--card-color, #222); box-shadow: 0 4px 15px rgba(0,0,0,0.4); text-align: left; box-sizing: border-box;">
+            <h3 style="color: var(--primary); font-size: 1.5rem; margin-top: 0; margin-bottom: 0.4rem; text-align: center;">Richiesta Registrazione</h3>
+            <p style="font-size: 1rem; color: #ccc; margin-top: 0; margin-bottom: 0.8rem; text-align: center; line-height: 1.2;">Account Google non abilitato. Invia i tuoi dati per richiedere l'abilitazione all'amministratore.</p>
+            
+            <div style="margin-bottom: 0.6rem;">
+                <label style="display: block; font-size: 1rem; margin-bottom: 0.2rem; color: #aaa;">Email autenticata:</label>
+                <input type="email" id="reg-email" readonly style="width: 100%; padding: 0.5rem; box-sizing: border-box; background-color: rgba(255,255,255,0.1); border: 1px solid #555; color: #fff; border-radius: 6px; font-size: 1.1rem;" />
+            </div>
+
+            <div style="margin-bottom: 0.6rem;">
+                <label for="reg-nome" style="display: block; font-size: 1rem; margin-bottom: 0.2rem; color: #aaa;">Nome e Cognome *</label>
+                <input type="text" id="reg-nome" required style="width: 100%; padding: 0.5rem; box-sizing: border-box; border: 1px solid #555; background-color: #333; color: #fff; border-radius: 6px; font-size: 1.1rem;" />
+            </div>
+
+            <!-- Selezione Ruolo tramite Radio Button -->
+            <div style="margin-bottom: 0.6rem;">
+                <label style="display: block; font-size: 1rem; margin-bottom: 0.3rem; color: #aaa;">Ruolo *</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; background-color: #333; padding: 0.5rem; border-radius: 6px; border: 1px solid #555;">
+                    <label style="display: flex; align-items: center; gap: 0.3rem; font-size: 1.1rem; color: #fff; cursor: pointer;">
+                        <input type="radio" name="reg-ruolo" value="Atleta" checked onchange="window.toggleNomeAtletaField()" style="accent-color: var(--primary);"> Atleta
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.3rem; font-size: 1.1rem; color: #fff; cursor: pointer;">
+                        <input type="radio" name="reg-ruolo" value="Genitore" onchange="window.toggleNomeAtletaField()" style="accent-color: var(--primary);"> Genitore
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.3rem; font-size: 1.1rem; color: #fff; cursor: pointer;">
+                        <input type="radio" name="reg-ruolo" value="Supporter" onchange="window.toggleNomeAtletaField()" style="accent-color: var(--primary);"> Supporter
+                    </label>
+                </div>
+            </div>
+
+            <!-- CAMPO CONDIZIONALE: Nome Atleta (Visibile solo per Genitore o Supporter) -->
+            <div id="box-nome-atleta" style="display: none; margin-bottom: 0.6rem;">
+                <label for="reg-nome-atleta" style="display: block; font-size: 1rem; margin-bottom: 0.2rem; color: #aaa;">Nome Atleta *</label>
+                <input type="text" id="reg-nome-atleta" placeholder="Nome e cognome dell'atleta" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border: 1px solid #555; background-color: #333; color: #fff; border-radius: 6px; font-size: 1.1rem;" />
+            </div>
+
+            <!-- Campo Squadra e Campionato -->
+            <div style="margin-bottom: 0.6rem;">
+                <label for="reg-squadra" style="display: block; font-size: 1rem; margin-bottom: 0.2rem; color: #aaa;">Squadra e Campionato</label>
+                <input type="text" id="reg-squadra" placeholder="Es. Polismile campionato U15" style="width: 100%; padding: 0.5rem; box-sizing: border-box; border: 1px solid #555; background-color: #333; color: #fff; border-radius: 6px; font-size: 1.1rem;" />
+            </div>
+
+            <!-- Campo Testo Multilinea Messaggio -->
+            <div style="margin-bottom: 0.8rem;">
+                <label for="reg-messaggio" style="display: block; font-size: 1rem; margin-bottom: 0.2rem; color: #aaa;">Messaggio (opzionale):</label>
+                <textarea id="reg-messaggio" rows="2" placeholder="Note o informazioni aggiuntive..." style="width: 100%; padding: 0.5rem; box-sizing: border-box; border: 1px solid #555; background-color: #333; color: #fff; border-radius: 6px; font-size: 1.1rem; resize: vertical; font-family: inherit;"></textarea>
+            </div>
+
+            <button id="btn-invia-registrazione" onclick="window.inviaRichiestaRegistrazione()" style="width: 100%; padding: 0.8rem; font-size: 1.3rem; font-weight: bold; cursor: pointer; border-radius: 8px; border: none; background-color: #27ae60; color: white; transition: background-color 0.2s;">
+                Invia Richiesta
+            </button>
+        </div>
+
+
+    </div>
 
     <div class="menu-grid">
         <div class="column-flex">
@@ -49,7 +179,7 @@
             </a>
 
             <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
-                <a href="classifica.html" class="menu-button" style="margin: 0; padding: 0.5rem; flex: 1; position: relative;">
+                <a href="classifica.html" id="btn-classifiche-fip" class="menu-button" style="margin: 0; padding: 0.5rem; flex: 1; position: relative;">
                     <i class="fas fa-list-ol" style="font-size: 2.2rem; margin-bottom: 0;"></i>
                     <span style="font-size: 1.5rem;">Classifiche FIP</span>
                     <span id="badge-fip" style="display: none; position: absolute; top: 5px; right: 5px; background-color: red; color: white; font-size: 1.0rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">NEW</span>
@@ -66,7 +196,7 @@
                     <span id="live-text" style="font-size: 1.5rem;">Live</span>
                 </div>
                 
-                <a href="U14_FN.html" class="menu-button" style="margin: 0; padding: 0.5rem; flex: 1; text-decoration: none;">
+                <a id="btn-custom" href="U14_FN.html" class="menu-button" style="margin: 0; padding: 0.5rem; flex: 1; text-decoration: none;">
                     <i class="fas fa-trophy" style="font-size: 2.2rem; margin-bottom: 0;"></i>
                     <span style="font-size: 1.3rem; line-height: 1.2;">Finali Nazionali</span>
                 </a>
@@ -93,95 +223,95 @@
     </div>
     
     <div id="settingsPopup" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 1500; justify-content: center; align-items: center;">
-    <div class="popup-content" style="max-width: 85%; width: 400px;">
-        <h3 style="color: var(--primary); font-size: 2.2rem; margin-bottom: 1.5rem;">Personalizza Tema</h3>
-        
-        <div id="preview-container" style="padding: 2rem; background-color: var(--bg-color); border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid #444;">
-            <div id="btn-preview" class="menu-button" style="pointer-events: none; margin: 0; min-height: 80px;">
-                <i class="fas fa-paint-brush"></i>
-                <span>Testo Esempio</span>
-            </div>
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem; font-size: 1.2rem; color: #aaa;">Temi Predefiniti:</label>
-            <select id="preset-selector" onchange="window.applyPreset()" style="width: 100%; padding: 1rem; border-radius: 8px; background: #222; color: white; font-size: 1.4rem; border: 1px solid #444;">
-                <option value="">-- Scegli un tema --</option>
-                <option value="polismile">Polismile Official</option>
-                <option value="default">Default</option>
-                <option value="foresta">Foresta</option>
-                <option value="deserto">Deserto</option>
-                <option value="oceano">Oceano</option>
-                <option value="vintage">Vintage</option>
-                <option value="bosco">Bosco</option>
-                <option value="cyberpunk">Cyberpunk</option>
-                <option value="artica">Notte Artica</option>
-                <option value="eclissi">Eclissi</option>
-                <option value="lavanda">Lavanda</option>
-                <option value="terra">Terra</option>
-                <option value="tramonto">Tramonto</option>
-                <option value="matrix">Matrix</option>
-                <option value="vino">Vino</option>
-            </select>
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-            <select id="element-selector" onchange="window.onElementChange()" style="width: 100%; padding: 1rem; border-radius: 8px; background: #333; color: white; font-size: 1.4rem; border: 1px solid var(--primary);">
-                <option value="--bg-color">Colore Sfondo Pagina</option>
-                <option value="--card-color">Colore Sfondo Bottoni</option>
-                <option value="--primary">Colore Icone</option>
-                <option value="--text-color">Colore Testo</option>
-            </select>
-        </div>
-
-        <div id="custom-picker-container" style="display: flex; flex-direction: column; gap: 1.2rem;">
-            <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                <span style="font-size: 1.2rem; color: #aaa;">HSL</span>
-                <label class="switch" style="width: 40px; height: 20px; position: relative; display: inline-block;">
-                    <input type="checkbox" id="color-mode-toggle" onchange="window.toggleColorMode()" style="opacity: 0; width: 0; height: 0;">
-                    <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); transition: .4s; border-radius: 20px;"></span>
-                </label>
-                <span style="font-size: 1.2rem; color: #aaa;">RGB</span>
-            </div>
-
-            <div id="group-hsl">
-                <div class="slider-group">
-                    <label>Tonalità: <span id="val-h">0</span>°</label>
-                    <input type="range" id="range-h" min="0" max="360" value="0" class="hsv-slider hue-gradient">
-                </div>
-                <div class="slider-group">
-                    <label>Saturazione: <span id="val-s">100</span>%</label>
-                    <input type="range" id="range-s" min="0" max="100" value="100" class="hsv-slider">
-                </div>
-                <div class="slider-group">
-                    <label>Luminosità: <span id="val-v">100</span>%</label>
-                    <input type="range" id="range-v" min="0" max="100" value="100" class="hsv-slider">
+        <div class="popup-content" style="max-width: 85%; width: 400px;">
+            <h3 style="color: var(--primary); font-size: 2.2rem; margin-bottom: 1.5rem;">Personalizza Tema</h3>
+            
+            <div id="preview-container" style="padding: 2rem; background-color: var(--bg-color); border-radius: 10px; margin-bottom: 1.5rem; border: 1px solid #444;">
+                <div id="btn-preview" class="menu-button" style="pointer-events: none; margin: 0; min-height: 80px;">
+                    <i class="fas fa-paint-brush"></i>
+                    <span>Testo Esempio</span>
                 </div>
             </div>
-
-            <div id="group-rgb" class="hidden">
-                <div class="slider-group">
-                    <label>Rosso (R): <span id="val-r">0</span></label>
-                    <input type="range" id="range-r" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #f00);">
-                </div>
-                <div class="slider-group">
-                    <label>Verde (G): <span id="val-g">0</span></label>
-                    <input type="range" id="range-g" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #0f0);">
-                </div>
-                <div class="slider-group">
-                    <label>Blu (B): <span id="val-b">0</span></label>
-                    <input type="range" id="range-b" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #00f);">
-                </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 1.2rem; color: #aaa;">Temi Predefiniti:</label>
+                <select id="preset-selector" onchange="window.applyPreset()" style="width: 100%; padding: 1rem; border-radius: 8px; background: #222; color: white; font-size: 1.4rem; border: 1px solid #444;">
+                    <option value="">-- Scegli un tema --</option>
+                    <option value="myTeam">My Team Official</option>
+                    <option value="default">Default</option>
+                    <option value="foresta">Foresta</option>
+                    <option value="deserto">Deserto</option>
+                    <option value="oceano">Oceano</option>
+                    <option value="vintage">Vintage</option>
+                    <option value="bosco">Bosco</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="artica">Notte Artica</option>
+                    <option value="eclissi">Eclissi</option>
+                    <option value="lavanda">Lavanda</option>
+                    <option value="terra">Terra</option>
+                    <option value="tramonto">Tramonto</option>
+                    <option value="matrix">Matrix</option>
+                    <option value="vino">Vino</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <select id="element-selector" onchange="window.onElementChange()" style="width: 100%; padding: 1rem; border-radius: 8px; background: #333; color: white; font-size: 1.4rem; border: 1px solid var(--primary);">
+                    <option value="--bg-color">Colore Sfondo Pagina</option>
+                    <option value="--card-color">Colore Sfondo Bottoni</option>
+                    <option value="--primary">Colore Icone</option>
+                    <option value="--text-color">Colore Testo</option>
+                </select>
             </div>
 
-            <p id="hexLabel" style="font-family: monospace; font-size: 1.6rem; text-align: center; color: #fff; margin: 0;">#000000</p>
-        </div>
+            <div id="custom-picker-container" style="display: flex; flex-direction: column; gap: 1.2rem;">
+                <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.2rem; color: #aaa;">HSL</span>
+                    <label class="switch" style="width: 40px; height: 20px; position: relative; display: inline-block;">
+                        <input type="checkbox" id="color-mode-toggle" onchange="window.toggleColorMode()" style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); transition: .4s; border-radius: 20px;"></span>
+                    </label>
+                    <span style="font-size: 1.2rem; color: #aaa;">RGB</span>
+                </div>
 
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
-            <button class="popup-btn" onclick="window.saveTheme()" style="background-color: var(--primary); flex: 1; margin-top:0;">Salva</button>
-            <button class="popup-btn" onclick="window.resetTheme()" style="background-color: #666; flex: 1; margin-top:0;">Reset</button>
-            <button class="popup-btn" onclick="window.chiudiPopupSettings()" style="background-color: #444; flex: 1; margin-top:0;">Annulla</button>
+                <div id="group-hsl">
+                    <div class="slider-group">
+                        <label>Tonalità: <span id="val-h">0</span>°</label>
+                        <input type="range" id="range-h" min="0" max="360" value="0" class="hsv-slider hue-gradient">
+                    </div>
+                    <div class="slider-group">
+                        <label>Saturazione: <span id="val-s">100</span>%</label>
+                        <input type="range" id="range-s" min="0" max="100" value="100" class="hsv-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Luminosità: <span id="val-v">100</span>%</label>
+                        <input type="range" id="range-v" min="0" max="100" value="100" class="hsv-slider">
+                    </div>
+                </div>
+
+                <div id="group-rgb" class="hidden">
+                    <div class="slider-group">
+                        <label>Rosso (R): <span id="val-r">0</span></label>
+                        <input type="range" id="range-r" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #f00);">
+                    </div>
+                    <div class="slider-group">
+                        <label>Verde (G): <span id="val-g">0</span></label>
+                        <input type="range" id="range-g" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #0f0);">
+                    </div>
+                    <div class="slider-group">
+                        <label>Blu (B): <span id="val-b">0</span></label>
+                        <input type="range" id="range-b" min="0" max="255" value="0" class="hsv-slider" style="background: linear-gradient(to right, #000, #00f);">
+                    </div>
+                </div>
+
+                <p id="hexLabel" style="font-family: monospace; font-size: 1.6rem; text-align: center; color: #fff; margin: 0;">#000000</p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+                <button class="popup-btn" onclick="window.saveTheme()" style="background-color: var(--primary); flex: 1; margin-top:0;">Salva</button>
+                <button class="popup-btn" onclick="window.resetTheme()" style="background-color: #666; flex: 1; margin-top:0;">Reset</button>
+                <button class="popup-btn" onclick="window.chiudiPopupSettings()" style="background-color: #444; flex: 1; margin-top:0;">Annulla</button>
+            </div>
         </div>
     </div>
-</div>
 
     <div id="customPopup">
         <div class="popup-content">
@@ -212,7 +342,5 @@
         </div>
     </div>
 
-    <script>
-    </script>
 </body>
 </html>

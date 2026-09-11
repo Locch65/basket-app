@@ -13,16 +13,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 
-  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-C38r3-mi.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/U14_FN-CBOThK7H.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/common-BA2wPQj8.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/main-BR1AMwy-.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-zMW8T7VW.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-6n2dspS9.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-DrXzqfvE.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-BuycxsON.js"></script>
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/calendario-B2UjmlzI.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/calendario-DEM0WzRi.css">
 </head>
 
 <body>
   <header class="header-fissa">
+    <!-- 
     <div id="hamburgerMenu">
       <button id="hamburgerBtn">☰</button>
       <nav id="menu" class="hidden">
@@ -37,17 +38,7 @@
             <span class="menu-section-title">
               <i class="fas fa-trophy"></i> Campionato
             </span>
-            <div class="filter-group-vertical">
-              <label class="radio-container">
-                <input type="radio" name="camp" value="U14" class="camp-radio"> U14
-              </label>
-              <label class="radio-container">
-                <input type="radio" name="camp" value="U15" class="camp-radio"> U15
-              </label>
-              <label class="radio-container">
-                <input type="radio" name="camp" value="Tutti" class="camp-radio"> Tutti
-              </label>
-            </div>
+            <div id="containerCampionatiRadio" class="filter-group-vertical"></div>
           </li>
 
           <li>
@@ -86,6 +77,11 @@
         </ul>
       </nav>
     </div>
+    -->
+
+    <a href="index.html" class="home-btn" aria-label="Home">
+      <i class="fas fa-home"></i>
+    </a>
 
     <div class="header-toolbar">
         <button id="btnCicloCamp" class="btn-tool">
@@ -103,7 +99,11 @@
         <button id="btnSearchToggle" class="btn-tool">
           <i class="fas fa-search"></i>
         </button>
-        <span id="matchCounter" class="match-counter">0/0</span>
+        <!-- <span id="matchCounter" class="match-counter">0/0</span> -->
+        <span id="matchCounter" class="match-counter btn-admin-counter" role="button" style="cursor: pointer;">
+          <i class="fas fa-sync-alt"></i> 12/24
+        </span>
+
     </div>
   </header>
   <div id="searchContainer" class="search-bar-container hidden">

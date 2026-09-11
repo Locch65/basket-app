@@ -12,33 +12,41 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    
 
-  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-C38r3-mi.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/U14_FN-CBOThK7H.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/common-BA2wPQj8.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/main-BR1AMwy-.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-zMW8T7VW.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-6n2dspS9.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-DrXzqfvE.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-BuycxsON.js"></script>
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/maps-CimtoRRX.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/maps-Bz0l8-08.css">
 </head>
 <body>
 
     <div class="header-container">
-        <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+        <div class="header-content">
+            <!-- 1. Bottone Home -->
             <a href="index.html" class="home-btn" aria-label="Home">
                 <i class="fas fa-home"></i>
             </a>
-            <h2 style="flex-grow: 1;">Mappa Trasferte</h2>
+
+            <!-- 2. Label "Mappa Trasferte" -->
+            <h2>Mappa Trasferte</h2>
+
+            <!-- 3. Radio button per i filtri -->
+            <div class="filter-container">
+                <label><input type="radio" name="filtroPartite" value="passate" onclick="applicaFiltro()"> Passate</label>
+                <label><input type="radio" name="filtroPartite" value="prossima" onclick="applicaFiltro()"> Prossima</label>
+                <label><input type="radio" name="filtroPartite" value="future" onclick="applicaFiltro()"> Future</label>
+                <label><input type="radio" name="filtroPartite" value="tutte" checked onclick="applicaFiltro()"> Tutte</label>
+            </div>
+
+            <!-- 4. Bottone Refresh (spinto a destra) -->
             <button onclick="window.forzaAggiornamento()" class="refresh-btn" title="Aggiorna dati dal server">
                 <i id="refresh-icon" class="fas fa-sync-alt"></i>
             </button>
-        </div>
-
-        <div class="filter-container">
-            <label><input type="radio" name="filtroPartite" value="passate" onclick="applicaFiltro()"> Passate</label>
-            <label><input type="radio" name="filtroPartite" value="prossima" onclick="applicaFiltro()"> Prossima</label>
-            <label><input type="radio" name="filtroPartite" value="future" onclick="applicaFiltro()"> Future</label>
-            <label><input type="radio" name="filtroPartite" value="tutte" checked onclick="applicaFiltro()"> Tutte</label>
         </div>
     </div>
 
