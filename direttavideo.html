@@ -23,12 +23,12 @@
 
   <script src="https://embed.twitch.tv/embed/v1.js"></script>
 
-  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-zMW8T7VW.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/U14_FN-6n2dspS9.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-DrXzqfvE.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/main-BuycxsON.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-CtXWaT1n.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-Cnd80lJj.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-Cac-u-KR.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-BDnkNqnw.js"></script>
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/direttavideo-C2huL5o4.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/direttavideo-Dm7X90P_.css">
 </head>
 
 <body>
@@ -72,6 +72,11 @@
             </li>
         </div>
         <li>
+          <button id="reloadBtn" onclick="window.location.reload();">
+            <i class="fas fa-sync-alt"></i> Reload
+          </button>
+        </li>
+        <li>
           <button id="adminBtn">
             <i class="fas fa-user-shield"></i> Admin
           </button>
@@ -111,6 +116,7 @@
             <div id="hud-time" class="time-container">
               <div id="hud-video-time" class="badge clock-badge">00:00:00</div>
               <div id="hud-live-status" class="badge live-badge">●</div>
+              <span id="hud-video-delay" class="delay-badge"></span>
             </div>
             <div id="basket-toast" class="toast hidden"></div>
           </div>
