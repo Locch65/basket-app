@@ -13,72 +13,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 
-  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-DGRYD7ed.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/U14_FN-DkvS8NUd.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-C8nsHBuO.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/main-CY-4iTRb.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-eE5KzrAt.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-DblSpPV7.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-DroBi23H.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-BGz28oPU.js"></script>
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/calendario-DEM0WzRi.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/calendario-XZvYMgxF.css">
 </head>
 
 <body>
   <header class="header-fissa">
-    <!-- 
-    <div id="hamburgerMenu">
-      <button id="hamburgerBtn">☰</button>
-      <nav id="menu" class="hidden">
-        <ul>
-          <li>
-            <a href="index.html" class="menu-link-home">
-              <i class="fas fa-home icon-home"></i> Home
-            </a>
-          </li>
-
-          <li>
-            <span class="menu-section-title">
-              <i class="fas fa-trophy"></i> Campionato
-            </span>
-            <div id="containerCampionatiRadio" class="filter-group-vertical"></div>
-          </li>
-
-          <li>
-            <label class="menu-label-flex">
-              <i class="fas fa-sort"></i>
-              <span>Ordine:</span>
-              <select id="selectOrdine" class="select-dark">
-                <option value="desc">Più recenti</option>
-                <option value="asc">Cronologico</option>
-              </select>
-            </label>
-          </li>
-
-          <li>
-            <label class="menu-label-flex">
-              <i class="fas fa-filter"></i>
-              <span>Mostra:</span>
-              <select id="selectStatoPartite" class="select-dark">
-                <option value="tutte">Tutte</option>
-                <option value="terminate">Terminate</option>
-                <option value="future">Future</option>
-              </select>
-            </label>
-          </li>
-
-          <li>
-            <button id="toggleTheme1" class="btn-menu-flat">
-              <i class="fas fa-moon"></i> Dark Mode
-            </button>
-          </li>
-          <li id="liSyncAdmin" class="hidden">
-              <button id="syncToFirebase" class="btn-menu-flat btn-orange">
-                  <i class="fas fa-sync-alt"></i> Read from Server
-              </button>
-          </li>
-        </ul>
-      </nav>
-    </div>
-    -->
-
     <a href="index.html" class="home-btn" aria-label="Home">
       <i class="fas fa-home"></i>
     </a>
@@ -99,7 +43,7 @@
         <button id="btnSearchToggle" class="btn-tool">
           <i class="fas fa-search"></i>
         </button>
-        <!-- <span id="matchCounter" class="match-counter">0/0</span> -->
+
         <span id="matchCounter" class="match-counter btn-admin-counter" role="button" style="cursor: pointer;">
           <i class="fas fa-sync-alt"></i> 12/24
         </span>
@@ -119,12 +63,42 @@
   </div>
 
   <div id="listaPartite" class="loading"> </div>
+  
+  <!-- Contenitore Google Calendar -->
+  <div id="calendarViewContainer" class="hidden">
+    <!-- Overlay della barra di controllo posizionata sopra l'iframe -->
+    <div class="calendar-controls-overlay">
+      <button type="button" id="btnToday" class="btn-ctrl btn-today" title="Oggi">
+        <i class="fas fa-calendar-day"></i> 
+      </button>
+      <button type="button" class="btn-ctrl btn-view active" data-mode="WEEK">W</button>
+      <button type="button" class="btn-ctrl btn-view" data-mode="MONTH">M</button>
+      <button type="button" class="btn-ctrl btn-view" data-mode="AGENDA">A</button>
+    </div>
+
+    <iframe 
+      id="googleCalendarIframe" 
+      src="" 
+      style="border: 0" 
+      width="100%" 
+      height="100%" 
+      frameborder="0" 
+      scrolling="no"
+      sandbox="allow-scripts allow-same-origin allow-forms">
+    </iframe>
+  </div>
+
   <div id="loadingPopup" class="loading-popup hidden">
     <div class="loading-content">
       <i class="fas fa-spinner fa-spin"></i>
       <span>Caricamento Calendario<br>(sync database)...</span>
     </div>
   </div>
+
+  <!-- Bottone fisso in fondo allo schermo -->
+  <button id="btnToggleCalendarView" class="btn-bottom-fixed">
+    <i class="far fa-calendar-alt"></i> Mostra Google Calendar
+  </button>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
