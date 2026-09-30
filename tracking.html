@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Modulo Atletica</title>
+    
+
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-DfcUoucF.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-CxvKcGWT.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-DSq899ez.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-BWgc2hfI.js"></script>
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/tracking-CWjlSRHm.css">
+</head>
+<body>
+
+    <div class="header-bar">
+        <a href="index.html" class="home-btn" aria-label="Home">
+            <i class="fas fa-home"></i>
+        </a>
+        <h2> Modulo Atletica</h2>
+    </div>
+
+    <div class="main-container">
+        <!-- Pannello Sinistro: Controlli e Tabella Statistiche -->
+        <div class="left-panel">
+            <!-- Barra Controlli -->
+            <div class="controls-bar">
+                <div class="control-item" style="flex: 1 1 100%;">
+                    <span>Sorgente:</span>
+                    <select id="sourceSelect" class="source-select" style="width: 100%;">
+                        <option value="SIM" selected>🧪 Simulazione Locale (Demo)</option>
+                        <option value="WS">⚡ WebSocket Locale (10 Hz)</option>
+                        <option value="FIREBASE">🔥 Firebase Live (Batch 1s)</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <span>Heatmap:</span>
+                    <select id="heatmapSelect">
+                        <option value="NONE">-- Off --</option>
+                        <option value="P01">P1 - Playmaker</option>
+                        <option value="P02">P2 - Guardia</option>
+                        <option value="P03">P3 - Ala Piccola</option>
+                        <option value="P04">P4 - Ala Grande</option>
+                        <option value="P05">P5 - Centro</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <span>Finestra:</span>
+                    <select id="heatTimeSelect">
+                        <option value="50">5 sec</option>
+                        <option value="150" selected>15 sec</option>
+                        <option value="300">30 sec</option>
+                        <option value="600">1 min</option>
+                    </select>
+                </div>
+
+                <label class="control-item" style="font-size: 11px;">
+                    <input type="checkbox" id="toggleRaw"> Grezzi
+                </label>
+
+                <label class="control-item" style="font-size: 11px; color: #00e5ff;">
+                    <input type="checkbox" id="toggleCentroid" checked> Baricentro
+                </label>
+
+                <div style="display: flex; gap: 4px; width: 100%; margin-top: 2px;">
+                    <button id="btnResetHeat" class="btn-action btn-reset">🧹 Reset Heatmap</button>
+                </div>
+            </div>
+
+            <!-- Tabella Giocatori -->
+            <div class="dashboard-section">
+                <div class="dashboard-header">
+                    <h3>📊 Live Performance</h3>
+                    <button id="btnResetStats" class="btn-mini-reset">🔄 Reset Dati</button>
+                </div>
+                <div class="table-container">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Giocatore</th>
+                                <th>Dist (m)</th>
+                                <th>Vel (km/h)</th>
+                                <th>Max</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsBody">
+                            <!-- Inserito dinamicamente da JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Campo Basket -->
+        <div class="court-section">
+            <div class="canvas-wrapper">
+                <canvas id="court" width="840" height="450"></canvas>
+            </div>
+            <!-- Pulsante Pausa sempre visibile in basso -->
+            <button id="btnPause" class="btn-pause">⏸️ Pausa</button>
+        </div>
+    </div>
+
+</body>
+</html>
