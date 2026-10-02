@@ -16,12 +16,12 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-CzV3Md7h.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/U14_FN-fPc3dUy6.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-CLfeCTvt.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/main-CIIYhuNx.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-hLrZPweU.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-EQ4g-ZQP.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-DLUaTV5Y.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-mZ4r9Ukp.js"></script>
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/tracking-CWjlSRHm.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/tracking-Dr-weI22.css">
 </head>
 <body>
 
@@ -50,11 +50,20 @@
                     <span>Heatmap:</span>
                     <select id="heatmapSelect">
                         <option value="NONE">-- Off --</option>
-                        <option value="P01">P1 - Playmaker</option>
-                        <option value="P02">P2 - Guardia</option>
-                        <option value="P03">P3 - Ala Piccola</option>
-                        <option value="P04">P4 - Ala Grande</option>
-                        <option value="P05">P5 - Centro</option>
+                        <optgroup label="Squadra Casa">
+                            <option value="P01">P1 - Playmaker</option>
+                            <option value="P02">P2 - Guardia</option>
+                            <option value="P03">P3 - Ala Piccola</option>
+                            <option value="P04">P4 - Ala Grande</option>
+                            <option value="P05">P5 - Centro</option>
+                        </optgroup>
+                        <optgroup label="Avversari">
+                            <option value="OPP1">OPP1 - Playmaker Opp</option>
+                            <option value="OPP2">OPP2 - Guardia Opp</option>
+                            <option value="OPP3">OPP3 - Ala Piccola Opp</option>
+                            <option value="OPP4">OPP4 - Ala Grande Opp</option>
+                            <option value="OPP5">OPP5 - Centro Opp</option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -68,17 +77,20 @@
                     </select>
                 </div>
 
-                <label class="control-item" style="font-size: 11px;">
+                <div>
+                    <button id="btnResetHeat" class="btn-action btn-reset">🧹 Reset Heatmap</button>
+                </div>
+                <label class="control-item">
                     <input type="checkbox" id="toggleRaw"> Grezzi
                 </label>
 
-                <label class="control-item" style="font-size: 11px; color: #00e5ff;">
-                    <input type="checkbox" id="toggleCentroid" checked> Baricentro
+                <label class="control-item">
+                    <input type="checkbox" id="toggleCentroidHome" checked> Rete Tattica (Casa)
                 </label>
 
-                <div style="display: flex; gap: 4px; width: 100%; margin-top: 2px;">
-                    <button id="btnResetHeat" class="btn-action btn-reset">🧹 Reset Heatmap</button>
-                </div>
+                <label class="control-item">
+                    <input type="checkbox" id="toggleCentroidOpp"> Rete Tattica (Avversari)
+                </label>
             </div>
 
             <!-- Tabella Giocatori -->
@@ -88,19 +100,16 @@
                     <button id="btnResetStats" class="btn-mini-reset">🔄 Reset Dati</button>
                 </div>
                 <div class="table-container">
-                    <table class="stats-table">
-                        <thead>
-                            <tr>
-                                <th>Giocatore</th>
-                                <th>Dist (m)</th>
-                                <th>Vel (km/h)</th>
-                                <th>Max</th>
-                            </tr>
-                        </thead>
-                        <tbody id="statsBody">
-                            <!-- Inserito dinamicamente da JS -->
-                        </tbody>
-                    </table>
+<div class="tab-container">
+    <button id="tabPositional" class="tab-btn active" onclick="switchStatsTab('POSITIONAL')">📍 Dati Posizionali</button>
+    <button id="tabZones" class="tab-btn" onclick="switchStatsTab('SPEED_ZONES')">⚡ Speed Zones</button>
+</div>
+
+<table class="stats-table">
+    <thead id="statsHeader"></thead>
+    <tbody id="statsBody"></tbody>
+</table>
+                    
                 </div>
             </div>
         </div>
