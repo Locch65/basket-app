@@ -18,11 +18,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/basket-app/assets/main-ejblw-5R.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-CXGvKymi.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-DGrTkiYC.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-BATiNeEi.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-DqmPTQJW.js">
+  <script type="module" crossorigin src="/basket-app/assets/main-BC324olB.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-0JzB9bfL.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-CUap-4GQ.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-2sH3hvib.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-Dws57bPB.js">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-UaAK6kXa.css">
 </head>
@@ -30,35 +30,29 @@
 <body>
 
     <header id="main-header" style="display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem;">
-        <!-- Prima riga: Titolo App, Versione e (SuperUser) Utenti Online -->
+        <!-- Prima riga: Titolo App, Versione (Sinistra) e Utenti Online (Destra) -->
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 1.0rem; margin: 0; width: 100%; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 1.0rem;">
-                    <span style="font-size: 1.6rem; font-weight: bold; color: var(--primary);">My Basket App</span>
-                    <div id="appVersion" class="app-version" style="margin: 0; color: var(--text-color);">Versione </div>
+            <div style="display: flex; align-items: center; gap: 1.0rem;">
+                <span style="font-size: 1.6rem; font-weight: bold; color: var(--primary);">My Basket App</span>
+                <div id="appVersion" class="app-version" style="margin: 0; color: var(--text-color);">Versione </div>
+            </div>
 
-                    <!-- Utenti Online e Richieste Pendenti -->
-                    <div id="online-users-container" onclick="window.ShowPopupDettaglioUtente()" style="display: none; align-items: center; gap: 0.8rem; font-size: 1.3rem; color: var(--text-color); font-weight: bold; margin-left: 10px; cursor: pointer;">
-                        <!-- Utenti Online -->
-                        <span style="display: inline-flex; align-items: center; gap: 0.3rem;" title="Utenti online">
-                            <i class="fas fa-users" style="color: var(--primary);"></i>
-                            <span id="onlineCount">0</span>
-                        </span>
+            <!-- Utenti Online / Bottone Gestione Utenti (Allineato a Destra) -->
+            <div id="online-users-container" onclick="window.ManageUsers()" style="display: none; align-items: center; gap: 0.8rem; font-size: 1.1rem; color: var(--text-color); font-weight: bold; cursor: pointer; background: var(--card-color); border: 1px solid rgba(255,255,255,0.2); padding: 0.4rem 0.8rem; border-radius: 8px;">
+                <!-- Utenti Online -->
+                <span style="display: inline-flex; align-items: center; gap: 0.3rem;" title="Utenti online">
+                    <i class="fas fa-users" style="color: var(--primary);"></i>
+                    <span id="onlineCount">0</span>
+                </span>
 
-                        <!-- Richieste Pendenti -->
-                        <span style="display: inline-flex; align-items: center; gap: 0.3rem;" title="Richieste di registrazione">
-                            <i class="fas fa-user-clock" style="color: var(--primary);"></i>
-                            <span id="pendingRequestsCount">0</span>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Tasto Sincronizza Firebase (Nascosto di default, visibile solo per SuperUser) -->
-                <button id="btn-sync-firebase" onclick="window.syncronizeFirebase()" title="Sincronizza Firebase" style="display: none; background: transparent; border: none; color: #f1c40f; font-size: 1.4rem; cursor: pointer; padding: 0 4px; align-items: center; margin-left: auto;">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+                <!-- Richieste Pendenti -->
+                <span style="display: inline-flex; align-items: center; gap: 0.3rem;" title="Richieste di registrazione">
+                    <i class="fas fa-user-clock" style="color: var(--primary);"></i>
+                    <span id="pendingRequestsCount">0</span>
+                </span>
             </div>
         </div>
+        
         <!-- Seconda riga: Email Utente (Sinistra) + Tasto Esci (Destra) -->
         <div id="user-email-container" style="display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; color: #ccc; width: 100%;">
             <div style="display: flex; align-items: center; word-break: break-all;">
@@ -360,5 +354,65 @@
             </button>
         </div>
     </div>
+
+    <!-- POPUP: Gestione Utenti e Sync Firebase -->
+    <div id="usersPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 1600; justify-content: center; align-items: center;">
+        <div class="popup-content" style="max-width: 75%; width: 400px; text-align: center;">
+            <h3 style="color: var(--primary); font-size: 1.8rem; margin-bottom: 1.5rem;">Gestione Utenti</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 1.5rem; text-align: left; font-size: 1.3rem; padding: 0.5rem;">
+                <!-- Riga 1: N. Utenti online con bottone cliccabile -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.6rem;">
+                    <span>N. Utenti online:</span>
+                    <button onclick="window.ShowOnlineUsers()" style="background: var(--primary); color: white; border: none; padding: 0.4rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem;">
+                        <span id="onlineCountPopup">0</span>
+                    </button>
+                </div>
+                <!-- Riga 2: N. Richieste Pendenti con bottone cliccabile -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.6rem;">
+                    <span>N. Richieste Pendenti:</span>
+                    <button onclick="window.ShowPopupDettaglioUtente()" style="background: var(--primary); color: white; border: none; padding: 0.4rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem;">
+                        <span id="pendingRequestsCountPopup">0</span>
+                    </button>
+                </div>
+                <!-- Riga 3: Sync Firebase -->
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Sync Firebase</span>
+                    <button onclick="window.syncronizeFirebase()" style="background: var(--primary); color: white; border: none; padding: 0.4rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem;">
+                        Sync
+                    </button>
+                </div>
+            </div>
+
+            <button class="popup-btn" onclick="window.chiudiPopupManageUsers()" style="background-color: #444; width: 100%; margin-top: 0;">Chiudi</button>
+        </div>
+    </div>    
+
+    <!-- POPUP: Elenco Utenti Online -->
+    <div id="onlineUsersPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 1700; justify-content: center; align-items: center;">
+        <div class="popup-content" style="max-width: 95%; width: 550px; max-height: 85vh; display: flex; flex-direction: column; text-align: center;">
+            <h3 style="color: var(--primary); font-size: 1.8rem; margin-bottom: 1rem;">Utenti Online (Firebase)</h3>
+            
+            <div style="flex: 1; overflow-y: auto; margin-bottom: 1.2rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 0.5rem;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 1.1rem; color: var(--text-color); table-layout: fixed;">
+                    <thead>
+                        <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.2);">
+                            <th style="padding: 8px; text-align: center; width: 10%;">
+                                <i class="fas fa-circle" style="font-size: 0.7rem;"></i>
+                            </th>
+                            <th style="padding: 8px; width: 65%;">Email</th>
+                            <th style="padding: 8px; width: 25%;">Ultimo Accesso</th>
+                        </tr>
+                    </thead>
+                    <tbody id="online-users-table-body">
+                        <!-- I dati verranno inseriti dinamicamente via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="popup-btn" onclick="window.chiudiPopupOnlineUsers()" style="background-color: #444; width: 100%; margin-top: 0;">Chiudi</button>
+        </div>
+    </div>
+
 </body>
 </html>
