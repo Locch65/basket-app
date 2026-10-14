@@ -13,12 +13,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 
-  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-0JzB9bfL.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/U14_FN-CUap-4GQ.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-2sH3hvib.js"></script>
-  <script type="module" crossorigin src="/basket-app/assets/main-Dws57bPB.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/modulepreload-polyfill-C2_R2dGv.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/U14_FN-BcRzuJiZ.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/myTeamConfig-Bv1WQ-TV.js"></script>
+  <script type="module" crossorigin src="/basket-app/assets/main-DgH6F6gQ.js"></script>
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/calendario-JyP_ha4e.css">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/calendario-C1Gn1LWL.css">
 </head>
 
 <body>
@@ -103,14 +103,22 @@
     </div>
   </div>
 
-  <!-- Bottone fisso in fondo allo schermo -->
-  <button id="btnToggleCalendarView" class="btn-bottom-fixed hidden">
-    <i class="far fa-calendar-alt"></i> Google Calendar
-  </button>
+  <!-- Contenitore flessibile per i bottoni fissi in fondo allo schermo -->
+  <div class="bottom-buttons-container hidden" id="bottomButtonsContainer">
+    <button id="btnToggleCalendarView" class="btn-bottom-fixed">
+      <i class="far fa-calendar-alt"></i> Google Calendar
+    </button>
+    <button id="btnPrintCalendar" class="btn-bottom-fixed" onclick="PrintCalendar()">
+      <i class="fas fa-print"></i> Stampa Calendario
+    </button>
+  </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Librerie necessarie per jsPDF.html() -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 
 </html>

@@ -18,11 +18,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/basket-app/assets/main-BC324olB.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-0JzB9bfL.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-CUap-4GQ.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-2sH3hvib.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-Dws57bPB.js">
+  <script type="module" crossorigin src="/basket-app/assets/main-BXtab02R.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-C2_R2dGv.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-BcRzuJiZ.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-Bv1WQ-TV.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-DgH6F6gQ.js">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-UaAK6kXa.css">
 </head>
@@ -323,6 +323,12 @@
             </div>
 
             <h3 style="color: var(--primary); font-size: 2rem; margin-bottom: 1rem;">Programma Appuntamenti</h3>
+
+            <!-- 🔍 Barra di controllo Zoom Testo centrata e ingrandita -->
+            <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 10px;">
+                <button onclick="window.cambiaZoomTraining(-0.15)" style="background: #444; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.5rem;" title="Riduci testo">-</button>
+                <button onclick="window.cambiaZoomTraining(0.15)" style="background: #444; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.5rem;" title="Ingrandisci testo">+</button>
+            </div>
 
             <div id="training-content" style="font-size: 1.6rem; line-height: 1.5; color: white; white-space: pre-wrap; text-align: left; margin: 1.5rem 0; max-height: 50vh; overflow-y: auto; padding: 10px; border-radius: 10px;">
                 Caricamento...
