@@ -5,6 +5,10 @@
 const urlParams = new URLSearchParams(self.location.search);
 const SW_VERSION = urlParams.get('v') || '2.0.0'; // Fallback di sicurezza se manca il parametro
 
+// Recupera la lista delle squadre per cui l'utente è registrato (es. "[T-001, T-002]") dai parametri dell'URL del SW
+const userTeamsParam = urlParams.get('teams') || '';
+const userTeams = userTeamsParam ? userTeamsParam.split(/\s+/) : [];
+
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
 // const FILES_TO_CACHE = [
@@ -120,7 +124,26 @@ self.addEventListener('push', (event) => {
     data = { title: "Basket App", body: event.data ? event.data.text() : "" };
   }
 
-  const title = data.notification?.title || data.title || "Basket App";
+  let rawTitle = data.notification?.title || data.title || "Basket App";
+  let targetTeam = null;
+  let cleanTitle = rawTitle;
+
+  // Verifica se il titolo è nel formato "T-XXX: Nome squadra"
+  const match = rawTitle.match(/^(T-\d+):\s*(.*)$/);
+  if (match) {
+    targetTeam = match[1]; // Es. "T-001"
+    cleanTitle = match[2]; // Es. "Nome squadra"
+  }
+
+  // Se è specificata una squadra nel titolo, controlla se l'utente è registrato per quella squadra
+  if (targetTeam) {
+    // Se l'utente non è registrato per questa squadra, interrompi e non mostrare la notifica
+    if (!userTeams.includes(targetTeam)) {
+      return;
+    }
+  }
+
+  const title = cleanTitle;
   const options = {
     body: data.notification?.body || data.body || "Hai un nuovo aggiornamento.",
     icon: "./icon-192.png",      // Icona principale che compare nel banner della notifica
@@ -165,8 +188,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
-
-
-
-
-
