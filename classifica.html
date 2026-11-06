@@ -10,72 +10,77 @@
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
 
-
-  <script type="module" crossorigin src="/basket-app/assets/classifica-DSxOHpJc.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-DAojSS_j.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-DZXuwrNx.js">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/classifica-CVGbI6N8.css">
+  <script type="module" crossorigin src="/basket-app/assets/classifica-CcJeqmvs.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-CoTT-aVU.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-DC6VMH_Y.js">
+  <link rel="stylesheet" crossorigin href="/basket-app/assets/classifica-D5IVKubs.css">
 </head>
 <body>
 
 <div class="container">
-    <div class="header-container">
+    <!-- SEZIONE IN ALTO: FISSA -->
+    <div class="header-container fixed-section">
         <div class="brand-section">
             <a href="index.html" class="home-btn" aria-label="Home">
                 <i class="fas fa-home"></i>
             </a>
             <h2>Classifiche FIP</h2>
         </div>
-        <div id="admin-actions" class="hidden" style="display: flex; justify-content: center; gap: 8px; margin: 10px auto 20px auto; max-width: 320px;">
-            <button id="btn-refresh-fip" class="fip-btn" style="background-color: #27ae60; border-radius: 10px; padding: 4px 4px; font-size: 1rem; flex: 1;">
-                <i class="fas fa-sync-alt" style="font-size: 1.2rem;"></i> Refresh FIP
+        <div id="admin-actions" class="hidden admin-actions-wrapper">
+            <button id="btn-refresh-fip" class="fip-btn admin-btn admin-btn-refresh">
+                <i class="fas fa-sync-alt"></i> Refresh FIP
             </button>
             
-            <button id="btn-sync-firebase" class="fip-btn" style="background-color: #e67e22; border-radius: 10px; padding: 4px 4px; font-size: 1rem; flex: 1;">
-                <i class="fas fa-cloud-upload-alt" style="font-size: 1.2rem;"></i> Sync Firebase
+            <button id="btn-sync-firebase" class="fip-btn admin-btn admin-btn-sync">
+                <i class="fas fa-cloud-upload-alt"></i> Sync Firebase
             </button>
         </div>
     </div>
 
     <!-- Contenitore del filtro aggiornato con Label + Bottone dinamico/ciclico -->
-    <div class="filter-container" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <span style="font-size: 1.4rem; font-weight: bold; color: var(--fip-blue);">Campionato:</span>
+    <div class="filter-container fixed-section campionato-filter-box">
+        <span class="campionato-label">Campionato:</span>
         <div id="campionato-selector-wrapper">
             <!-- Il bottone ciclico o la stringa fissa verranno generati dinamicamente via JS -->
         </div>
     </div>
 
-    <div id="hint-classifica" style="text-align: center; color: #64748b; font-size: 1.2rem; margin-bottom: 10px; font-style: italic;">
-        <i class="fas fa-info-circle" style="margin-right: 5px;"></i> Clicca su una squadra per vedere le sue partite...
+    <!-- I DUE BOTTONI POSIZIONATI IN ALTO (dopo i filtri e prima dei contenitori) -->
+    <div class="action-buttons-row fixed-section">
+        <button id="btn-calendario-completo" class="unified-bottom-btn" onclick="mostraCalendarioCompleto()">
+            <i class="fas fa-calendar-alt"></i> Calendario
+        </button>
+        
+        <a id="fip-external-link" href="#" target="_blank" class="unified-bottom-btn">
+            Sito FIP <i class="fas fa-external-link-alt external-link-icon"></i>
+        </a>
     </div>
 
-    <div id="table-container">
+    <!-- SUGGERIMENTO: FISSO -->
+    <div id="hint-classifica" class="fixed-section hint-text">
+        <i class="fas fa-info-circle hint-icon"></i> Clicca su una squadra per vedere le sue partite...
+    </div>
+
+    <!-- CONTENITORE TABELLA CLASSIFICA -->
+    <div id="table-container" class="main-table-wrapper">
         <div class="loading">Sincronizzazione dati FIP...</div>
     </div>
 
-    <div id="details-container" class="hidden">
-        <div class="header-details">
+    <!-- CONTENITORE DETTAGLI PARTITE -->
+    <div id="details-container" class="hidden details-wrapper">
+        <div class="header-details fixed-section">
             <button onclick="showClassifica()" class="back-btn">
                 <i class="fas fa-arrow-left"></i> Back
             </button>
             <h3 id="selected-team-name">Nome Squadra</h3>
         </div>
-        <div id="team-matches-list">
+        <div id="team-matches-list" class="team-matches-scroll">
         </div>
     </div>
 
-    <div id="nota-classifica" class="hidden" style="color: #ef4444; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; text-align: center;">
+    <!-- Nota classifica provvisoria in basso -->
+    <div id="nota-classifica" class="hidden fixed-section nota-provvisoria">
         * classifica provvisoria
-    </div>
-
-    <button id="btn-calendario-completo" class="full-calendar-btn" onclick="mostraCalendarioCompleto()">
-        <i class="fas fa-calendar-alt"></i> Visualizza Calendario Completo
-    </button>
-    
-    <div class="nav-button-container">
-        <a id="fip-external-link" href="#" target="_blank" class="fip-btn">
-            Vai al sito ufficiale FIP <i class="fas fa-external-link-alt" style="font-size: 1.6rem; margin-left: 5px;"></i>
-        </a>
     </div>
 </div>
 

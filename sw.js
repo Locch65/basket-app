@@ -9,6 +9,10 @@ const SW_VERSION = urlParams.get('v') || '2.0.0'; // Fallback di sicurezza se ma
 const userTeamsParam = urlParams.get('teams') || '';
 const userTeams = userTeamsParam ? userTeamsParam.split(/\s+/) : [];
 
+// Parametri dinamici per icona e badge (con fallback ai valori predefiniti)
+const customIcon = urlParams.get('icon') || "./icon-192.png";
+const customBadge = urlParams.get('badge') || "./badge-96.png";
+
 const CACHE_NAME = "basket-app-cache-" + SW_VERSION;
 // Usa percorsi RELATIVI per GitHub Pages (niente "/" iniziale)
 // const FILES_TO_CACHE = [
@@ -146,8 +150,8 @@ self.addEventListener('push', (event) => {
   const title = cleanTitle;
   const options = {
     body: data.notification?.body || data.body || "Hai un nuovo aggiornamento.",
-    icon: "./icon-192.png",      // Icona principale che compare nel banner della notifica
-    badge: "./icon-192.png",     // Iconcina piccola che compare nella status bar del telefono
+    icon: customIcon,      // Icona parametrica che compare nel banner della notifica
+    badge: customBadge,    // Iconcina parametrica che compare nella status bar del telefono
     vibrate: [200, 100, 200],    // Pattern di vibrazione (attiva anche il feedback sonoro associato alle notifiche di sistema)
     tag: 'basket-app-notifica',  // Evita che le notifiche si sovrappongano inutilmente raggruppandole
     renotify: true,
