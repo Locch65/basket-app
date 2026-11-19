@@ -19,13 +19,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/basket-app/assets/main-DhRXVYkO.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-Dk6KRVaa.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-C6m3ih5g.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-CkeYGjxZ.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-CjmxF05X.js">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
-  <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DxuSPEh6.css">
+  <script type="module" crossorigin src="/bsk-tst-2026/assets/main-FbKtnH8T.js"></script>
+  <link rel="modulepreload" crossorigin href="/bsk-tst-2026/assets/modulepreload-polyfill-K5l7VbnZ.js">
+  <link rel="modulepreload" crossorigin href="/bsk-tst-2026/assets/U14_FN-BAR7sh7G.js">
+  <link rel="modulepreload" crossorigin href="/bsk-tst-2026/assets/myTeamConfig-8tt6kBVt.js">
+  <link rel="modulepreload" crossorigin href="/bsk-tst-2026/assets/main-CQD8eVx7.js">
+  <link rel="stylesheet" crossorigin href="/bsk-tst-2026/assets/main-DbZ7AZpq.css">
+  <link rel="stylesheet" crossorigin href="/bsk-tst-2026/assets/main-CohXteyI.css">
 </head>
 
 <body>
@@ -166,64 +166,71 @@
 
     </div>
 
+    <!--
+        GRIGLIA 3 × 2
+        Riga 1: Roster                           | Calendario
+        Riga 2: [Classifiche + Statistiche]      | [Convocazioni (opt) + Appuntamenti]
+        Riga 3: [Live + Finali Nazionali]        | Mappa Trasferte
+    -->
     <div class="menu-grid">
-        <div class="column-flex">
-            <a href="roster.html" class="menu-button">
-                <i class="fas fa-users"></i>
-                <span>Roster & Statistiche</span>
+
+        <!-- R1 C1: Roster -->
+        <a href="roster.html" class="menu-button">
+            <i class="fas fa-users"></i>
+            <span>Roster & Statistiche</span>
+        </a>
+
+        <!-- R1 C2: Calendario -->
+        <a href="calendario.html" class="menu-button">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Calendario</span>
+        </a>
+
+        <!-- R2 C1: Classifiche FIP + Statistiche Campionato impilati -->
+        <div class="menu-cell-inner">
+            <a href="classifica.html" id="btn-classifiche-fip" class="menu-button" style="position: relative;">
+                <i class="fas fa-list-ol" style="font-size: 2.2rem; margin-bottom: 0;"></i>
+                <span style="font-size: 1.5rem;">Classifiche FIP</span>
+                <span id="badge-fip" style="display: none; position: absolute; top: 5px; right: 5px; background-color: red; color: white; font-size: 1.0rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">NEW</span>
             </a>
-
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
-                <a href="classifica.html" id="btn-classifiche-fip" class="menu-button" style="margin: 0; padding: 0.5rem; flex: 1; position: relative;">
-                    <i class="fas fa-list-ol" style="font-size: 2.2rem; margin-bottom: 0;"></i>
-                    <span style="font-size: 1.5rem;">Classifiche FIP</span>
-                    <span id="badge-fip" style="display: none; position: absolute; top: 5px; right: 5px; background-color: red; color: white; font-size: 1.0rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">NEW</span>
-                </a>
-                <div class="menu-button" onclick="mostraStatisticheCampionato()" style="margin: 0; padding: 0.5rem; flex: 1;">
-                    <i class="fas fa-chart-bar" style="font-size: 2.2rem; margin-bottom: 0;"></i>
-                    <span style="font-size: 1.5rem;">Statistiche Campionato</span>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 0.5rem; flex: 1;">
-                <div id="btn-live" class="menu-button live-off" onclick="window.GotoLive()" style="margin: 0; padding: 0.5rem; flex: 1;">
-                    <i class="fas fa-broadcast-tower" style="font-size: 2.2rem; margin-bottom: 0;"></i>
-                    <span id="live-text" style="font-size: 1.5rem;">Live</span>
-                </div>
-                
-                <a id="btn-custom" href="U14_FN.html" class="menu-button" style="margin: 0; padding: 0.5rem; flex: 1; text-decoration: none;">
-                    <i class="fas fa-trophy" style="font-size: 2.2rem; margin-bottom: 0;"></i>
-                    <span style="font-size: 1.3rem; line-height: 1.2;">Finali Nazionali</span>
-                </a>
+            <div class="menu-button" onclick="mostraStatisticheCampionato()">
+                <i class="fas fa-chart-bar" style="font-size: 2.2rem; margin-bottom: 0;"></i>
+                <span style="font-size: 1.5rem;">Statistiche Campionato</span>
             </div>
         </div>
-        
-        <div class="column-flex">
-            <a href="calendario.html" class="menu-button">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Calendario</span>
-            </a>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
 
-                <!-- Bottone Convocazioni (inizialmente nascosto) -->
-                <div id="btn-convocazioni" class="menu-button" style="display: none; position: relative;" onclick="window.ShowConvocazioni()">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span>Convocazioni</span>
-                    <span id="badge-convocazioni" style="position: absolute; top: 5px; right: 5px; background-color: red; color: white; font-size: 1.2rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: pulse 1.5s infinite;">NEW</span>
-                </div>
-
-                <div class="menu-button" onclick="ShowAppuntamenti()" style="position: relative;">
-                    <i class="fas fa-dumbbell"></i>
-                    <span>Appuntamenti</span>
-                    <span id="badge-appuntamenti" style="display: none; position: absolute; top: 5px; right: 5px; background-color: red; color: white; font-size: 1.2rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">NEW</span>
-                </div>
+        <!-- R2 C2: Convocazioni (opzionale) + Appuntamenti impilati.
+             Quando Convocazioni è nascosto, Appuntamenti cresce per coprire lo spazio. -->
+        <div class="menu-cell-inner" id="cell-convocazioni-appuntamenti">
+            <div id="btn-convocazioni" class="menu-button" style="display: none; position: relative;" onclick="window.ShowConvocazioni()">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Convocazioni</span>
+                <span id="badge-convocazioni" style="position: absolute; top: 5px; right: 5px; background-color: red; color: white; font-size: 1.2rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: pulse 1.5s infinite;">NEW</span>
             </div>
+            <div class="menu-button" id="btn-appuntamenti" onclick="ShowAppuntamenti()" style="position: relative;">
+                <i class="fas fa-dumbbell"></i>
+                <span>Appuntamenti</span>
+                <span id="badge-appuntamenti" style="display: none; position: absolute; top: 5px; right: 5px; background-color: red; color: white; font-size: 1.2rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">NEW</span>
+            </div>
+        </div>
 
-            <a href="maps.html" class="menu-button">
-                <i class="fas fa-map-location"></i>
-                <span>Mappa Trasferte</span>
+        <!-- R3 C1: Live + Finali Nazionali affiancati -->
+        <div class="menu-cell-inner menu-cell-row">
+            <div id="btn-live" class="menu-button live-off" onclick="window.GotoLive()" style="flex: 1;">
+                <i class="fas fa-broadcast-tower" style="font-size: 2.2rem; margin-bottom: 0;"></i>
+                <span id="live-text" style="font-size: 1.5rem;">Live</span>
+            </div>
+            <a id="btn-custom" href="U14_FN.html" class="menu-button" style="flex: 1; text-decoration: none;">
+                <i class="fas fa-trophy" style="font-size: 2.2rem; margin-bottom: 0;"></i>
+                <span style="font-size: 1.3rem; line-height: 1.2;">Finali Nazionali</span>
             </a>
         </div>
+
+        <!-- R3 C2: Mappa Trasferte -->
+        <a href="maps.html" class="menu-button">
+            <i class="fas fa-map-location"></i>
+            <span>Mappa Trasferte</span>
+        </a>
 
     </div>
     
