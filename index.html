@@ -19,11 +19,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script type="module" crossorigin src="/basket-app/assets/main-B53HYA9L.js"></script>
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-DhPAArOh.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-CcY1dX2w.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-CRghvA6o.js">
-  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-Cuku0aq_.js">
+  <script type="module" crossorigin src="/basket-app/assets/main-Cqdz1bHj.js"></script>
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/modulepreload-polyfill-61aLyzQs.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/U14_FN-DKLuig7F.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/myTeamConfig-BguqfauI.js">
+  <link rel="modulepreload" crossorigin href="/basket-app/assets/main-BpFjhO1s.js">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-DbZ7AZpq.css">
   <link rel="stylesheet" crossorigin href="/basket-app/assets/main-CohXteyI.css">
 </head>
@@ -226,12 +226,17 @@
             </a>
         </div>
 
-        <!-- R3 C2: Mappa Trasferte -->
-        <a href="maps.html" class="menu-button">
-            <i class="fas fa-map-location"></i>
-            <span>Mappa Trasferte</span>
-        </a>
-
+        <!-- R3 C2: Mappa Trasferte + Mia Anagrafica -->
+        <div class="menu-cell-inner menu-cell-row">
+            <div id="btn-mia-anagrafica" class="menu-button" onclick="window.gotoMiaAnagrafica()" style="display: none; flex: 1;">
+                <i class="fas fa-id-card" style="font-size: 2.2rem; margin-bottom: 0;"></i>
+                <span style="font-size: 1.3rem; line-height: 1.2;">My Stats</span>
+            </div>
+            <a href="maps.html" class="menu-button" style="flex: 1;">
+                <i class="fas fa-map-location"></i>
+                <span style="font-size: 1.3rem; line-height: 1.2;">Mappa Trasferte</span>
+            </a>
+        </div>
     </div>
     
     <div id="settingsPopup" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay); z-index: 1500; justify-content: center; align-items: center;">
